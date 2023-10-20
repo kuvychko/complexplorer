@@ -26,22 +26,23 @@ class Phase(Cmap):
         self.r_log_base = r_log_base
 
     def hsv(self, z, V_base: float = 0.5):
-        if V_base < 0 | V_base > 1:
+        if V_base < 0 or V_base > 1:
             raise ValueError("V_base must be within [0, 1) interval")
+        
         phi = phase(z)
-        S = np.ones_like(z)
+        S = np.ones_like(z, dtype=float)
         if self.phi_split is not None:
             V_phi = np.ceil(phi / (np.pi/self.phi_split)) - phi / (np.pi/self.phi_split)
         else:
-            V_phi = np.ones_like(z)
+            V_phi = np.ones_like(z, dtype=float)
         
-        if self.r_scale is not None:
+        if self.r_log_base is not None:
             log_z = np.log(np.abs(z)) / np.log(self.r_log_base) # converting log from natural to r_log_base
             V_r = np.ceil(log_z) - log_z
         else:
-            V_r = np.ones_like(z)
+            V_r = np.ones_like(z, dtype=float)
         V_scaler = 1 - V_base
-        V = (V_phi + V_r) * V_scaler + V_base # scaling sum of V_phi and V_r to [0, 1] interval
+        V = (V_phi + V_r) * V_scaler / 2 + V_base # scaling sum of V_phi and V_r to [0, 1] interval
         H = phi/(2*np.pi)
         HSV = np.dstack((H,S,V))
         return HSV
