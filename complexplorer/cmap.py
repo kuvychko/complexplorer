@@ -58,9 +58,9 @@ class Chessboard(Cmap):
         self.spacing = spacing
 
     def hsv(self, z):
-        S = np.zeros_like(z)
-        H = np.ones_like(z) # fill values do not matter
-        V = np.zeros_like(z) # this defines a white plane
+        S = np.zeros_like(z, dtype=float)
+        H = np.ones_like(z, dtype=float) # fill values do not matter
+        V = np.zeros_like(z, dtype=float) # this defines a white plane
         z = (z - self.center)/self.spacing # adjusting origin and scaling by spacing
         real = np.real(z)
         real_mod = np.mod(real, 2) <= 0
