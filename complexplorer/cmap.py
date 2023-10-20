@@ -63,12 +63,14 @@ class Chessboard(Cmap):
         V = np.zeros_like(z, dtype=float) # this defines a white plane
         z = (z - self.center)/self.spacing # adjusting origin and scaling by spacing
         real = np.real(z)
-        real_mod = np.mod(real, 2) <= 0
+        real_mod = np.mod(real, 2)
         real_bool = np.less_equal(real_mod, 1)
         imag = np.imag(z)
         imag_mod = np.mod(imag, 2)
         imag_bool = np.less_equal(imag_mod, 1)
-        V = np.logical_and(real_bool, imag_bool)
+        V0 = np.logical_and(real_bool, imag_bool)
+        V1 = np.logical_and(~real_bool, ~imag_bool)
+        V = np.logical_or(V0, V1)
         HSV = np.dstack((H,S,V))
         return HSV
     
