@@ -93,7 +93,7 @@ class Rectangle(Domain):
         imag = abs(imag)/2
         real_range = (center.real - real, center.real + real)
         imag_range = (center.imag - imag, center.imag + imag)
-        super.__init__(real_range, imag_range)
+        super().__init__(real_range, imag_range)
 
 class Disk(Domain):
     def __init__(self, radius: float, center: complex = 0+0.0j):
@@ -107,5 +107,5 @@ class Disk(Domain):
         real_range = (center.real - radius, center.real + radius)
         imag_range = (center.imag - radius, center.imag + radius)
         mask_func = lambda x: np.less_equal(np.absolute(x - center), radius)
-        super.__init__(real_range, imag_range, mask_dict={'disk_mask': mask_func})
+        super().__init__(real_range, imag_range, mask_dict={'disk_mask': mask_func})
        
