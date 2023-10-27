@@ -15,3 +15,17 @@ def sawtooth(x, log_base=None):
             x = np.log(x)
             x = x / np.log(log_base) # converting log from natural to log_base
         return np.ceil(x) - x
+
+def stereographic(z, project_from_north=False):
+    """
+    Return a (x,y,z) tuple corresponding to stereographic projection of complex input z.
+    """
+    X = np.real(z)
+    Y = np.imag(z)
+    x = 2*X / (1 + X**2 + Y**2)
+    y = 2*Y / (1 + X**2 + Y**2)
+    z = (-1 + X**2 + Y**2) / (1 + X**2 + Y**2)
+    if project_from_north:
+        return (x, y, z)
+    else:
+        return (x, y, -z)

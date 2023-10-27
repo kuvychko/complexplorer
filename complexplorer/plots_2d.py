@@ -54,6 +54,22 @@ def plot(
         ax.set_title(title)
         return ax
     
+def pair_plot(
+        domain: Optional[Domain],
+        func: Optional[Callable] = None,
+        z=None,
+        f=None,
+        n: int = 400,
+        cmap: Cmap = Phase(6, 0.5),
+        title=None,
+        figsize=(10,5),
+        ):
+    
+    fig, (ax0, ax1) = plt.subplots(nrows=1, ncols=2, figsize=figsize)
+    plot(domain=domain, func=(lambda x: x), z=z, f=f, n=n, cmap=cmap, title='Domain z', ax=ax0)
+    plot(domain=domain, func=func, z=z, f=f, n=n, cmap=cmap, title='Co-domain f(z)', ax=ax1)
+    fig.suptitle(title)
+    
 def riemann_chart(
         func: Callable,
         domain: Optional[Domain] = None,
@@ -119,3 +135,17 @@ def riemann_chart(
         ax.set_xticklabels(tick_labels)
         ax.set_yticklabels(tick_labels)
     return ax
+
+def riemann_hemispheres(func, figsize=(12,4), filename=None):
+
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=figsize)
+    riemann_chart(func, hemisphere='S', ax = axes[0])
+    riemann_chart(func, hemisphere='N', ax = axes[1])
+
+    axes[0].set_title("South (lower) hemisphere")
+    axes[1].set_title("North (upper) hemisphere")
+
+    fig.suptitle('Enhanced phase portraits projected from Riemann sphere', fontsize=14)
+    fig.tight_layout(rect=[0, 0, .8, .8])
+    fig.subplots_adjust(left=0, right=1, bottom=0, top=.85)
+    if filename: plt.savefig(filename)

@@ -37,7 +37,10 @@ class Phase(Cmap):
                  r_log_base: Optional[float] = None, v_base: float = 0.5, out_of_domain_hsv=OUT_OF_DOMAIN_COLOR_HSV):
         if v_base < 0 or v_base > 1:
             raise ValueError("v_base must be within [0, 1) interval")
-        self.phi = np.pi / int(n_phi)
+        if n_phi is not None:
+            self.phi = np.pi / int(n_phi)
+        else:
+            self.phi = None
         self.r_linear_step = r_linear_step
         self.r_log_base = r_log_base
         self.v_base = v_base

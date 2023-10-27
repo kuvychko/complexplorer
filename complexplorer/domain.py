@@ -1,8 +1,42 @@
 from math import ceil
 from functools import reduce
 import numpy as np
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple, List, Callable
 from copy import deepcopy
+
+"""
+This module contains a set of classes for the construction and manipulation of complex domains in the mathematical sense.
+A domain is represented as a rectangular region in the complex plane, defined by a tuple for the real axis range and imaginary axis range.
+
+The key functionality of the module is comprised of the `Domain`, `Rectangle`, `Disk`, and `Annulus` classes.
+`Domain`, being the base class, encapsulates the meshing and masking that occur upon specification of a `Domain` instance.
+Instances of the domain can be rectangular (`Rectangle`), circular (`Disk`), or annular (`Annulus`).
+
+The meshing mechanism of a `Domain` employs a 'deferred' approach, meaning the mesh and mask are not instantly calculated
+upon the creation of a `Domain` instance but are instead calculated as needed based on the number of desired mesh points.
+This allows the user to generate instances of meshes with different interval sizes depending on their needs, without having to
+re-define a domain. The mesh and mask computations are performed when invoking the `*.mesh` and `*.mask` methods of the instance respectively. 
+
+In essence, a mesh refers to a 2-D grid of complex numbers representing the points that populate a domain.
+Conversely, a mask is a 2-D Boolean array of the same size as  points belonging (or not) to the domain.
+The `*.inmask()` method returns a mask where the True values represent points belonging to the domain. for the "inmask" and
+points outside of the domain for '*.outmask` method output.
+
+The main classes provided are:
+
+- `Domain`: This class serves as the base class for defining complex domains. 
+The meshing and masking of the domain are performed dynamically when requested.
+
+- `Rectangle`: A subclass of `Domain`, the `Rectangle` class allows the creation of rectangular domains centered at a given point. 
+It takes the dimensions (real and imaginary) of the rectangle and the center point as input.
+
+- `Disk`: Another subclass of `Domain`, the `Disk` class enables the creation of circular domains (disks) centered at a given point.
+It requires specifying the radius of the disk and the center point.
+
+- `Annulus`: The `Annulus` class, also a subclass of `Domain`, enables the creation of annular domains (rings) centered at a given point.
+It requires specifying the inner and outer radii and the center point.
+"""
+
 
 __all__ = ['Domain', 'Rectangle', 'Disk', 'Annulus']
 
@@ -17,7 +51,7 @@ class Domain():
     that mesh grain likely requires iterations to achieve the best look of a plot, so it makes sense to do it from
     the corresponding plot function.
     """
-    def __init__(self, real:Tuple, imag: Tuple, mask_list: Optional[List] = None):
+    def __init__(self, real: Tuple[float, float], imag: Tuple[float, float], mask_list: Optional[List[Callable]] = None):
         if real[0] == real[1]:
             msg = f"First and second values of real input cannot be equal"
             raise ValueError(msg)
@@ -33,11 +67,7 @@ class Domain():
         # calculating point spacing for real and imaginary axes
         real_length = self.real_range[1] - self.real_range[0]
         imag_length = self.imag_range[1] - self.imag_range[0]
-        if real_length >= imag_length:
-            spacing = real_length / n
-        else:
-            spacing = imag_length / n
-        return spacing
+        return max([real_length, imag_length])/n
 
     def mesh(self, n):
         """
