@@ -51,7 +51,12 @@ class Domain():
     that mesh grain likely requires iterations to achieve the best look of a plot, so it makes sense to do it from
     the corresponding plot function.
     """
-    def __init__(self, real: Tuple[float, float], imag: Tuple[float, float], mask_list: Optional[List[Callable]] = None):
+    def __init__(self,
+                 real: Tuple[float, float],
+                 imag: Tuple[float, float],
+                 mask: Optional[Callable] = lambda x: np.full_like(x, True, dtype=bool),
+                 square: bool = True
+                 ):
         if real[0] == real[1]:
             msg = f"First and second values of real input cannot be equal"
             raise ValueError(msg)
@@ -59,9 +64,21 @@ class Domain():
             msg = f"First and second values of imag input cannot be equal"
             raise ValueError(msg)
         
-        self.real_range = (min(real), max(real))
-        self.imag_range = (min(imag), max(imag))
-        self.mask_list = mask_list
+        self.square = square
+        if square:
+            real_d = abs(real[0] - real[1])
+            imag_d = abs(imag[0] - imag[1])
+            delta = (real_d - imag_d)/2
+            if delta >= 0:
+                self.real_range = (min(real), max(real))
+                self.imag_range = (min(imag) - delta, max(imag) + delta)
+            else:
+                self.real_range = (min(real) - delta, max(real) + delta)
+                self.imag_range = (min(imag), max(imag))
+        else:
+            self.real_range = (min(real), max(real))
+            self.imag_range = (min(imag), max(imag))
+        self.mask = mask
 
     def spacing(self, n):
         # calculating point spacing for real and imaginary axes
@@ -93,17 +110,7 @@ class Domain():
         """
 
         z = self.mesh(n)
-        mask = np.full_like(z, True, dtype=bool)
-        if self.mask_list is None:
-            return mask
-        else:
-            # the loop is needed if mask_dict contains multiple mask functions
-            mask_array_list = []
-            for func in self.mask_list:
-                mask_array_list.append(func(z))
-            # by defining "out" argument in np.logical_and numpy doesn't need to allocate a new array for each output
-            mask = reduce(lambda x,y: np.logical_or(x, y, out=mask), mask_array_list)
-            return mask
+        return self.mask(z)
     
     def outmask(self, n):
         return ~self.inmask(n)
@@ -125,10 +132,23 @@ class Domain():
         right = max(list(self.real_range) + list(a.real_range))
         bottom = min(list(self.imag_range) + list(a.imag_range))
         top = max(list(self.imag_range) + list(a.imag_range))
-        return Domain((left, right), (bottom, top), self.mask_list + a.mask_list)
+        mask = lambda z: np.logical_or(self.mask(z), a.mask(z))
+        return Domain((left, right), (bottom, top), mask=mask, square=self.square)
+    
+    def intersection(self, a):
+        """
+        Create an intersection of Domain with another instance of Domain.
+        """
+
+        left = min(list(self.real_range) + list(a.real_range))
+        right = max(list(self.real_range) + list(a.real_range))
+        bottom = min(list(self.imag_range) + list(a.imag_range))
+        top = max(list(self.imag_range) + list(a.imag_range))
+        mask = lambda z: np.logical_and(self.mask(z), a.mask(z))
+        return Domain((left, right), (bottom, top), mask=mask, square=self.square)
     
 class Rectangle(Domain):
-    def __init__(self, real: float, imag: float, center: complex = 0+0.0j):
+    def __init__(self, real: float, imag: float, center: complex = 0+0.0j, square: bool = True):
         """
         Intialize a Domain intance corresponding to Rectangle centered at center.
         """
@@ -137,7 +157,14 @@ class Rectangle(Domain):
         imag = abs(imag)/2
         real_range = (center.real - real, center.real + real)
         imag_range = (center.imag - imag, center.imag + imag)
-        super().__init__(real_range, imag_range)
+        def mask_func(z):
+            a = np.greater_equal(np.real(z), real_range[0]).astype(int)
+            b = np.greater_equal(real_range[1], np.real(z)).astype(int)
+            c = np.greater_equal(np.imag(z), imag_range[0]).astype(int)
+            d = np.greater_equal(imag_range[1], np.imag(z)).astype(int)
+            return np.equal(a + b + c + d, 4)
+
+        super().__init__(real_range, imag_range, mask=mask_func, square=square)
 
 class Disk(Domain):
     def __init__(self, radius: float, center: complex = 0+0.0j):
@@ -151,7 +178,7 @@ class Disk(Domain):
         real_range = (center.real - radius, center.real + radius)
         imag_range = (center.imag - radius, center.imag + radius)
         mask_func = lambda x: np.less_equal(np.absolute(x - center), radius)
-        super().__init__(real_range, imag_range, mask_list=[mask_func])
+        super().__init__(real_range, imag_range, mask=mask_func)
 
 class Annulus(Domain):
     def __init__(self, radius_inner: float, radius_outer: float, center: complex = 0+0.0j):
@@ -170,4 +197,4 @@ class Annulus(Domain):
             belongs_inside_outer = np.less_equal(np.absolute(x - center), radius_outer)
             belongs_outside_inner = np.greater_equal(np.absolute(x - center), radius_inner)
             return np.logical_and(belongs_inside_outer, belongs_outside_inner)
-        super().__init__(real_range, imag_range, mask_list=[mask_func])
+        super().__init__(real_range, imag_range, mask=mask_func)
