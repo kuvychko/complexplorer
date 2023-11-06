@@ -6,29 +6,27 @@ from copy import deepcopy
 
 """
 This module contains a set of classes for the construction and manipulation of complex domains in the mathematical sense.
-A domain is represented as a rectangular region in the complex plane, defined by a tuple for the real axis range and imaginary axis range.
 
-The key functionality of the module is comprised of the `Domain`, `Rectangle`, `Disk`, and `Annulus` classes.
-`Domain`, being the base class, encapsulates the meshing and masking that occur upon specification of a `Domain` instance.
-Instances of the domain can be rectangular (`Rectangle`), circular (`Disk`), or annular (`Annulus`).
+A domain is represented by a function which accepts numpy arrays of complex values and returns like arrays of boolean
+values. True values correspond to input points that belong to the domain and False to the ones that do not.
+A viewing window determines a rectangular region of complex plane which is meshed and returned by Domain.mesh(n) method. 
+Integer n defines the number of mesh points of the longer axis of the window region (either real or imaginary).
+Note that this method returned a 2D numpy array containing a complex mesh of the viewing window with no regard to 
+the mask function. Domain.domain(n) method performs a similar meshing operation but returns a 2D complex mesh with
+points outside of the domain set to numpy.nan. Domain.inmask(n) returns a Boolean 2D array corresponding to 
+a respective mesh with Boolean values marking points that belong (True) or do not belong (False) to the domain.
 
-The meshing mechanism of a `Domain` employs a 'deferred' approach, meaning the mesh and mask are not instantly calculated
-upon the creation of a `Domain` instance but are instead calculated as needed based on the number of desired mesh points.
-This allows the user to generate instances of meshes with different interval sizes depending on their needs, without having to
-re-define a domain. The mesh and mask computations are performed when invoking the `*.mesh` and `*.mask` methods of the instance respectively. 
+Domain representation function is stored in the "mask" attribute of the Domain class. 
+Viewing window is defined by Domain.window_real and Domain.window_imag attributes. Each stores a 2-tuple of real numbers 
+which correspond to left/right (for window_real) or bottom/top (for window_imag) coordinates of the viewing window.
 
-In essence, a mesh refers to a 2-D grid of complex numbers representing the points that populate a domain.
-Conversely, a mask is a 2-D Boolean array of the same size as  points belonging (or not) to the domain.
-The `*.inmask()` method returns a mask where the True values represent points belonging to the domain. for the "inmask" and
-points outside of the domain for '*.outmask` method output.
+The classes provided are:
 
-The main classes provided are:
-
-- `Domain`: This class serves as the base class for defining complex domains. 
-The meshing and masking of the domain are performed dynamically when requested.
+- `Domain`: This class serves as the base class for defining complex domains. It encapsulates 
+the meshing and masking functionality of a `Domain` instance.
 
 - `Rectangle`: A subclass of `Domain`, the `Rectangle` class allows the creation of rectangular domains centered at a given point. 
-It takes the dimensions (real and imaginary) of the rectangle and the center point as input.
+It takes the length (real and imaginary) of the rectangle and the center point as input.
 
 - `Disk`: Another subclass of `Domain`, the `Disk` class enables the creation of circular domains (disks) centered at a given point.
 It requires specifying the radius of the disk and the center point.
@@ -42,21 +40,49 @@ __all__ = ['Domain', 'Rectangle', 'Disk', 'Annulus']
 
 class Domain():
     """
-    Class that defines complex domains. Domain definition is comprised of two parts: 2D mesh of complex numbers 
-    which defines a rectangle where the actual domain resides (with sides parallel to real and imaginary axes),
-    and a corresponding 2D Boolean mask array which shows which points within the mesh belong to the Domain.
-    The mask is required to define curvilinear domains such Disk and Annular.
+    Base class that defines complex domains. 
+    
+    A domain is represented by a function which accepts numpy arrays of complex values and returns like arrays of boolean
+    values. True values correspond to input points that belong to the domain and False to the ones that do not.
+    A viewing window determines a rectangular region of complex plane which is meshed and returned by Domain.mesh(n) method. 
+    Integer n defines the number of mesh points of the longer axis of the window region (either real or imaginary).
+    Note that this method returned a 2D numpy array containing a complex mesh of the viewing window with no regard to 
+    the infunc function. Domain.domain(n) method performs a similar meshing operation but returns a 2D complex mesh with
+    points outside of the domain set to numpy.nan. Domain.inmask(n) returns a Boolean 2D array corresponding to 
+    a respective mesh with Boolean values marking points that belong (True) or do not belong (False) to the domain.
 
-    The meshing of Domain is deferred and performed in calls of *.mesh and *.mask methods. The idea behind it is
-    that mesh grain likely requires iterations to achieve the best look of a plot, so it makes sense to do it from
-    the corresponding plot function.
+    Domain representation function is stored in the "infunc" attribute of the Domain class. 
+    Viewing window is defined by Domain.window_real and Domain.window_imag attributes. Each stores a 2-tuple of real numbers 
+    which correspond to left/right (for window_real) or bottom/top (for window_imag) coordinates of the viewing window.
     """
     def __init__(self,
                  real: Tuple[float, float],
                  imag: Tuple[float, float],
-                 mask: Optional[Callable] = lambda x: np.full_like(x, True, dtype=bool),
+                 infunc: Optional[Callable] = lambda x: np.full_like(x, True, dtype=bool),
                  square: bool = True
                  ):
+        """
+        Construct a domain instance.
+
+        Parameters:
+        ----------
+        real: 2-tuple of floats
+            2-tuple defines the left and right edges of the viewing window. Input order of
+            values is irrelevant (constructor sorts them).
+        imag: 2-tuple of floats
+            2-tuple defines the bottom and top edges of the viewing window. Input order of
+            values is irrelevant (constructor sorts them).
+        infunc: Callable, optional
+            Domain representation function which accepts numpy arrays of complex values and 
+            returns like arrays of boolean values. True values correspond to input points that 
+            belong to the domain and False to the ones that do not. The default value is 
+            a function which returns True values for any points of the complex plane.
+        square: bool, optional
+            If True, the viewing window is constrained to a square (the shorter input axis is
+            scaled to be equal to the larger one). If False viewing window may be rectangular.
+            The default value is True.
+        """
+
         if real[0] == real[1]:
             msg = f"First and second values of real input cannot be equal"
             raise ValueError(msg)
@@ -70,55 +96,117 @@ class Domain():
             imag_d = abs(imag[0] - imag[1])
             delta = (real_d - imag_d)/2
             if delta >= 0:
-                self.real_range = (min(real), max(real))
-                self.imag_range = (min(imag) - delta, max(imag) + delta)
+                self.window_real = (min(real), max(real))
+                self.window_imag = (min(imag) - delta, max(imag) + delta)
             else:
-                self.real_range = (min(real) - delta, max(real) + delta)
-                self.imag_range = (min(imag), max(imag))
+                self.window_real = (min(real) - delta, max(real) + delta)
+                self.window_imag = (min(imag), max(imag))
         else:
-            self.real_range = (min(real), max(real))
-            self.imag_range = (min(imag), max(imag))
-        self.mask = mask
+            self.window_real = (min(real), max(real))
+            self.window_imag = (min(imag), max(imag))
+        self.infunc = infunc
 
-    def spacing(self, n):
-        # calculating point spacing for real and imaginary axes
-        real_length = self.real_range[1] - self.real_range[0]
-        imag_length = self.imag_range[1] - self.imag_range[0]
+    def spacing(self, n: int) -> float:
+        """
+        Calculate point spacing of the viewing window mesh.
+
+        This spacing is used for meshing of both real and imaginary axes.
+
+        Parameters:
+        ----------
+        n: int
+            Number of sampling points for the longer axis of the viewing window.
+
+        Returns:
+        -------
+        float
+            Distance between adjacent sampling points.
+        """
+
+        real_length = self.window_real[1] - self.window_real[0]
+        imag_length = self.window_imag[1] - self.window_imag[0]
         return max([real_length, imag_length])/n
 
-    def mesh(self, n):
+    def mesh(self, n: int):
         """
-        Return a rectangular complex mesh.
+        Generate a rectangular complex mesh corresponding to the viewing window of the domain.
         
-        The distance between axis points is defined by dividing the longer axis by input n.
+        The distance between axis points is defined by invoking the *.spacing(n) method.
+
+        Parameters:
+        ----------
+        n: int
+            Number of sampling points for the longer axis of the viewing window.
+
+        Returns:
+        -------
+        numpy.array of complex type
+            Viewing window mesh as a 2D array of complex values.
         """
 
-        # calculating point spacing for real and imaginary axes
-        real_length = self.real_range[1] - self.real_range[0]
-        imag_length = self.imag_range[1] - self.imag_range[0]
+        real_length = self.window_real[1] - self.window_real[0]
+        imag_length = self.window_imag[1] - self.window_imag[0]
         spacing = self.spacing(n)
         
-        real_axis = np.linspace(self.real_range[0], self.real_range[1], ceil(real_length/spacing))
-        imag_axis = np.linspace(self.imag_range[0], self.imag_range[1], ceil(imag_length/spacing))
+        real_axis = np.linspace(self.window_real[0], self.window_real[1], ceil(real_length/spacing))
+        imag_axis = np.linspace(self.window_imag[0], self.window_imag[1], ceil(imag_length/spacing))
         x, y = np.meshgrid(real_axis, imag_axis)
-        z = x + 1j*y
-        return z
+        return x + 1j*y
     
-    def inmask(self, n):
+    def inmask(self, n: int):
         """
-        Return a boolean mask which defines a valid domain within the rectangular mesh region.
+        Generate a boolean mask with True values marking mesh points that belong to the domain.
+
+        Parameters:
+        ----------
+        n: int
+            Number of sampling points for the longer axis of the viewing window.
+
+        Returns:
+        -------
+        numpy.array of bool type
+            Boolean mask of viewing window mesh with True values marking points that belong to the domain.
         """
 
         z = self.mesh(n)
-        return self.mask(z)
+        return self.infunc(z)
     
-    def outmask(self, n):
+    def outmask(self, n: int):
+        """
+        Generate a boolean mask with True values marking mesh points that do NOT belong to the domain.
+
+        Parameters:
+        ----------
+        n: int
+            Number of sampling points for the longer axis of the viewing window.
+
+        Returns:
+        -------
+        numpy.array of bool type
+            Boolean mask of viewing window mesh with True values marking points that do NOT belong to the domain.
+        """
+
         return ~self.inmask(n)
         
-    def domain(self, n):
+    def domain(self, n: int):
         """
-        Return a domain mesh (rectangular mesh with values outside of the domain set to np.nan)
+        Generate a rectangular complex mesh corresponding to the domain.
+
+        The size of the mesh corresponds to the viewing window, but values 
+        outside of the domain are set to numpy.nan. The distance between axis 
+        points is defined by invoking the *.spacing(n) method.
+
+        Parameters:
+        ----------
+        n: int
+            Number of sampling points for the longer axis of the viewing window.
+
+        Returns:
+        -------
+        numpy.array of complex type
+            Domain mesh as a 2D array of complex values.
         """
+
         mesh = self.mesh(n)
         mesh[~self.outmask(n)] = np.nan
         return mesh
@@ -126,64 +214,134 @@ class Domain():
     def union(self, a):
         """
         Create a union of Domain with another instance of Domain.
+
+        Viewing window is updated to contain viewing windows of both parent domains.
+
+        Parameters:
+        ----------
+        a: complexplorer.Domain
+            Domain instance.
+
+        Returns:
+        -------
+        complexplorer.Domain
+            Domain instance corresponding to the union of input domains.
         """
 
-        left = min(list(self.real_range) + list(a.real_range))
-        right = max(list(self.real_range) + list(a.real_range))
-        bottom = min(list(self.imag_range) + list(a.imag_range))
-        top = max(list(self.imag_range) + list(a.imag_range))
-        mask = lambda z: np.logical_or(self.mask(z), a.mask(z))
-        return Domain((left, right), (bottom, top), mask=mask, square=self.square)
+        left = min(list(self.window_real) + list(a.window_real))
+        right = max(list(self.window_real) + list(a.window_real))
+        bottom = min(list(self.window_imag) + list(a.window_imag))
+        top = max(list(self.window_imag) + list(a.window_imag))
+        infunc = lambda z: np.logical_or(self.infunc(z), a.infunc(z))
+        return Domain((left, right), (bottom, top), infunc=infunc, square=self.square)
     
     def intersection(self, a):
         """
         Create an intersection of Domain with another instance of Domain.
+
+        Viewing window is updated to contain viewing windows of both parent domains.
+        This operation may result in a larger viewing window that needed to show 
+        the domain, but viewing window can be adjusted by direct manipulation of 
+        *.real and *.imag attribute values.
+
+        Parameters:
+        ----------
+        a: complexplorer.Domain
+            Domain instance.
+
+        Returns:
+        -------
+        complexplorer.Domain
+            Domain instance corresponding to the intersection of input domains.
         """
 
-        left = min(list(self.real_range) + list(a.real_range))
-        right = max(list(self.real_range) + list(a.real_range))
-        bottom = min(list(self.imag_range) + list(a.imag_range))
-        top = max(list(self.imag_range) + list(a.imag_range))
-        mask = lambda z: np.logical_and(self.mask(z), a.mask(z))
-        return Domain((left, right), (bottom, top), mask=mask, square=self.square)
+        left = min(self.window_real + a.window_real)
+        right = max(self.window_real + a.window_real)
+        bottom = min(self.window_imag + a.window_imag)
+        top = max(self.window_imag + a.window_imag)
+        infunc = lambda z: np.logical_and(self.infunc(z), a.infunc(z))
+        return Domain((left, right), (bottom, top), infunc=infunc, square=self.square)
     
 class Rectangle(Domain):
     def __init__(self, real: float, imag: float, center: complex = 0+0.0j, square: bool = True):
         """
-        Intialize a Domain intance corresponding to Rectangle centered at center.
+        Create a Rectangle domain.
+
+        Parameters:
+        ----------
+        real: float
+            Length of the real axis of the domain.
+        imag: float
+            Length of the imaginary axis of the domain.
+        center: complex, optional
+            Defines the center of the domain. The default value is the origin of the complex plane.
+        square: bool, optional
+            If True the size of the viewing window is constrained to a square with a side 
+            corresponding to the larger axis of the rectangle.
+
+        Returns:
+        -------
+        complexplorer.Domain
+            Domain instance corresponding to input rectangle.
         """
 
         real = abs(real)/2
         imag = abs(imag)/2
-        real_range = (center.real - real, center.real + real)
-        imag_range = (center.imag - imag, center.imag + imag)
-        def mask_func(z):
-            a = np.greater_equal(np.real(z), real_range[0]).astype(int)
-            b = np.greater_equal(real_range[1], np.real(z)).astype(int)
-            c = np.greater_equal(np.imag(z), imag_range[0]).astype(int)
-            d = np.greater_equal(imag_range[1], np.imag(z)).astype(int)
+        window_real = (center.real - real, center.real + real)
+        window_imag = (center.imag - imag, center.imag + imag)
+        def infunc(z):
+            a = np.greater_equal(np.real(z), window_real[0]).astype(int)
+            b = np.greater_equal(window_real[1], np.real(z)).astype(int)
+            c = np.greater_equal(np.imag(z), window_imag[0]).astype(int)
+            d = np.greater_equal(window_imag[1], np.imag(z)).astype(int)
             return np.equal(a + b + c + d, 4)
 
-        super().__init__(real_range, imag_range, mask=mask_func, square=square)
+        super().__init__(window_real, window_imag, infunc=infunc, square=square)
 
 class Disk(Domain):
     def __init__(self, radius: float, center: complex = 0+0.0j):
         """
-        Intialize a Domain instance corresponding to Rectangle centered at center.
+        Create a Disk domain.
+
+        Parameters:
+        ----------
+        radius: float
+            Radius of the disk.
+        center: complex, optional
+            Defines the center of the domain. The default value is the origin of the complex plane.
+
+        Returns:
+        -------
+        complexplorer.Domain
+            Domain instance corresponding to input disk.
         """
 
         if radius <= 0:
             raise ValueError('Radius must be positive')
         
-        real_range = (center.real - radius, center.real + radius)
-        imag_range = (center.imag - radius, center.imag + radius)
-        mask_func = lambda x: np.less_equal(np.absolute(x - center), radius)
-        super().__init__(real_range, imag_range, mask=mask_func)
+        window_real = (center.real - radius, center.real + radius)
+        window_imag = (center.imag - radius, center.imag + radius)
+        infunc = lambda x: np.less_equal(np.absolute(x - center), radius)
+        super().__init__(window_real, window_imag, infunc=infunc)
 
 class Annulus(Domain):
     def __init__(self, radius_inner: float, radius_outer: float, center: complex = 0+0.0j):
         """
-        Initialize a Domain instance of Annulus (ring)
+        Create an Annulus domain.
+
+        Parameters:
+        ----------
+        radius_inner: float
+            Inner radius of the annulus region.
+        radius_outer: float
+            Outer radius of the annulus region.
+        center: complex, optional
+            Defines the center of the domain. The default value is the origin of the complex plane.
+
+        Returns:
+        -------
+        complexplorer.Domain
+            Domain instance corresponding to input annulus.
         """
 
         if radius_inner <= 0:
@@ -191,10 +349,10 @@ class Annulus(Domain):
         if radius_outer <= radius_inner:
             raise ValueError('radius_outer must be greater than radius_inner')
         
-        real_range = (center.real - radius_outer, center.real + radius_outer)
-        imag_range = (center.imag - radius_outer, center.imag + radius_outer)
-        def mask_func(x):
+        window_real = (center.real - radius_outer, center.real + radius_outer)
+        window_imag = (center.imag - radius_outer, center.imag + radius_outer)
+        def infunc(x):
             belongs_inside_outer = np.less_equal(np.absolute(x - center), radius_outer)
             belongs_outside_inner = np.greater_equal(np.absolute(x - center), radius_inner)
             return np.logical_and(belongs_inside_outer, belongs_outside_inner)
-        super().__init__(real_range, imag_range, mask=mask_func)
+        super().__init__(window_real, window_imag, infunc=infunc)

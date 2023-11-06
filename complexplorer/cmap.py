@@ -4,8 +4,24 @@ from typing import Optional, Tuple
 from complexplorer.domain import Domain
 from complexplorer.funcs import phase, sawtooth
 
-OUT_OF_DOMAIN_COLOR_HSV = (0., 0.01, 0.9)
+"""
+This module contains a set of classes for the construction of color maps.
 
+A color map is represented by a class which defines a function that 
+converts input complex values into numpy arrays of HSV or RGB values, 
+with individual H/S/V or R/G/B values mapped to [0, 1] interval.
+
+
+The classes provided are:
+
+- `Cmap`: This class serves as a base class for color maps and defines 
+an informal interface for other color map classes. It implements 
+the `*.hsv()` and `*.rgb()` methods which are used to convert 
+input complex values to HSV and RGB-valued arrays.
+"""
+
+
+OUT_OF_DOMAIN_COLOR_HSV = (0., 0.01, 0.9)
 
 class Cmap():
     "Cmap class defines a function that returns a color map corresponding to input complex matrix"
