@@ -10,47 +10,129 @@ This module contains a set of classes for the construction of color maps.
 A color map is represented by a class which defines a function that 
 converts input complex values into numpy arrays of HSV or RGB values, 
 with individual H/S/V or R/G/B values mapped to [0, 1] interval.
-
+Input values which correspond to the True values of the like-shaped 
+outmask array (values outside of the domain) are set to 
+OUT_OF_DOMAIN_COLOR_HSV color.
 
 The classes provided are:
 
 - `Cmap`: This class serves as a base class for color maps and defines 
-an informal interface for other color map classes. It implements 
+an informal interface for child color map classes. It implements 
 the `*.hsv()` and `*.rgb()` methods which are used to convert 
 input complex values to HSV and RGB-valued arrays.
+
+- 
 """
 
-
+# default out of domain color (gray)
 OUT_OF_DOMAIN_COLOR_HSV = (0., 0.01, 0.9)
 
 class Cmap():
     "Cmap class defines a function that returns a color map corresponding to input complex matrix"
 
-    def __init__(self, out_of_domain_hsv=OUT_OF_DOMAIN_COLOR_HSV):
+    def __init__(self, out_of_domain_hsv: Optional[Tuple] = OUT_OF_DOMAIN_COLOR_HSV):
+        """
+        Base Cmap constructor.
+        
+        Parameters:
+        ----------
+        out_of_domain_hsv: 3-tuple, optional
+            3-tuple of HSV values corresponding to the color of complex points with values
+            outside of the domain. The default is OUT_OF_DOMAIN_COLOR_HSV (gray).
+        
+        """
+
         self.out_of_domain_hsv = out_of_domain_hsv
 
     def hsv_tuple(self, z):
+        "Return a 3-tuple of (H, S, V) arrays"
+
         raise NotImplementedError(".hsv_tuple method not implemented")
     
-    def hsv(self, z, mask=None):
+    def hsv(self, z, outmask=None):
+        """
+        Return a numpy array of HSV values corresponding to the input z array of complex values.
+
+        HSV values are mapped to [0, 1] interval.
+
+        Parameters:
+        ----------
+        z: numpy.array
+            Array of complex values
+        outmask: numpy.array
+            Boolean array of the same shape as z input, with True values corresponding to points 
+            outside of the domain.
+
+        """
 
         H, S, V = self.hsv_tuple(z)
-        # applying domain mask
-        if mask is not None:
-            H[mask] = self.out_of_domain_hsv[0]
-            S[mask] = self.out_of_domain_hsv[1]
-            V[mask] = self.out_of_domain_hsv[2]
+        # applying domain outmask
+        if outmask is not None:
+            H[outmask] = self.out_of_domain_hsv[0]
+            S[outmask] = self.out_of_domain_hsv[1]
+            V[outmask] = self.out_of_domain_hsv[2]
         HSV = np.dstack((H,S,V))
         return HSV
     
-    def rgb(self, z, mask=None):
-        HSV = self.hsv(z, mask=mask)
+    def rgb(self, z, outmask=None):
+        """
+        Return a numpy array of RGB values corresponding to the input z array of complex values.
+
+        RGB values are mapped to [0, 1] interval.
+
+        Parameters:
+        ----------
+        z: numpy.array
+            Array of complex values
+        outmask: numpy.array
+            Boolean array of the same shape as z input, with True values corresponding to points 
+            outside of the domain.
+            
+        """
+
+        HSV = self.hsv(z, outmask=outmask)
         RGB = colors.hsv_to_rgb(HSV)
         return RGB
     
 class Phase(Cmap):
-    def __init__(self, n_phi: Optional[int] = None, r_linear_step: float = None,
-                 r_log_base: Optional[float] = None, v_base: float = 0.5, out_of_domain_hsv=OUT_OF_DOMAIN_COLOR_HSV):
+    def __init__(self,
+                 n_phi: Optional[int] = None,
+                 r_linear_step: float = None,
+                 r_log_base: Optional[float] = None,
+                 v_base: float = 0.5,
+                 out_of_domain_hsv=OUT_OF_DOMAIN_COLOR_HSV):
+        """
+        Phase color map constructor.
+
+        Class implements both regular and enhanced phase color maps.
+        If any of the n_phi, r_linear_step, r_log_base are not None, 
+        output phase portrait is enhanced. If n_phi value is given,
+        the phase is used for enhancement, if either (or both) r_linear_step and 
+        r_log_base are given then modulus is used for enhancement.
+
+        Parameters:
+        ----------
+        n_phi: int, optional
+            Number of sectors used for enhanced color mapping of complex phase.
+            The default is None (no enhanced color mapping of complex phase).
+        r_linear_step: float, optional
+            Linear step value is used to divide input complex values and normalize 
+            the modulus which is used for corresponding enhanced color mapping via 
+            a sawtooth function.
+        r_log_base: float, optional
+            Logarithm base used to calculate the log of the modulus of the input 
+            values prior to evaluating a sawtooth function and generating 
+            a logarithmic enhanced color map.
+        v_base: float, optional
+            Base value for the V (must belog to [0, 1) interval). Smaller values 
+            produce darker grades of gray (darker enhanced effect), while larger 
+            values give lighter grades of gray.
+        out_of_domain_hsv: 3-tuple, optional
+            3-tuple of HSV values corresponding to the color of complex points with values
+            outside of the domain. The default is OUT_OF_DOMAIN_COLOR_HSV (gray).
+
+        """
+
         if v_base < 0 or v_base > 1:
             raise ValueError("v_base must be within [0, 1) interval")
         if n_phi is not None:
@@ -63,6 +145,9 @@ class Phase(Cmap):
         self.out_of_domain_hsv = out_of_domain_hsv
 
     def hsv_tuple(self, z):
+        """
+        
+        """
         
         phi = phase(z)
         S = np.ones_like(z, dtype=float)
