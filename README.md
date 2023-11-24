@@ -1,9 +1,20 @@
 # Complexplorer
 
-*"...to refer just to the scope and to the consistency of complex 
+*We cannot directly see the minute details of a Dedekind cut, nor is it clear that arbitrarily great or
+arbitrarily tiny times or lengths actually exist in nature. One could say that 
+the so-called ‘real numbers’ are as much a product of mathematicians’ 
+imaginations as are the complex numbers. Yet we shall find that complex 
+numbers, as much as reals, and perhaps even more, find a unity with 
+nature that is truly remarkable. It is as though Nature herself is as 
+impressed by the scope and consistency of the complex-number system 
+as we are ourselves, and has entrusted to these numbers the precise 
+operations of her world at its minutest scales.* ...
+
+*Moreover, to refer just to the scope and to the consistency of complex 
 numbers does not do justice to this system. There is something more 
-which, in my view, can only be referred to as ‘magic’."*  
--Road to Reality, Chapter 4 - Magical Complex Numbers, Sir Roger Penrose
+which, in my view, can only be referred to as ‘magic’.*
+
+[Road to Reality](https://www.ams.org/notices/200606/rev-blank.pdf), Chapter 4 - Magical Complex Numbers, Sir Roger Penrose
 
 Complexplorer is a Python library for visualization of complex functions. 
 The library was insipred by Elias Wegert's book ["Visual Complex Functions - An Introduction with Phase Portraits"](https://link.springer.com/book/10.1007/978-3-0348-0180-5) and it greatly benefitted from discussions and feedback that Elias kindly provided.
