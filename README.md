@@ -75,13 +75,13 @@ to generate regular phase color maps or enhanced phase color maps.
 
 ## Example notebooks
 
-* [Basic functionality overview](examples/plot_examples.ipynb)
+* [Basic functionality overview](https://github.com/kuvychko/complexplorer/tree/main/examples/plot_example.ipynb)
 
-* [Domains and color maps](examples/domains_cmaps.ipynb)
+* [Domains and color maps](https://github.com/kuvychko/complexplorer/tree/main/examples/domains_cmaps.ipynb)
 
 ## Gallery
 
-Examples below use a test function $f(z) = \frac{z - 1}{z^2 + z + 1}$, a standard example from ["Visual Complex Functions - An Introduction with Phase Portraits"](https://link.springer.com/book/10.1007/978-3-0348-0180-5). Different color maps and plot types are shown. For the code used to generate these plots see this [example Jupyter notebook](examples/plot_examples.ipynb)
+Examples below use a test function $f(z) = \frac{z - 1}{z^2 + z + 1}$, a standard example from ["Visual Complex Functions - An Introduction with Phase Portraits"](https://link.springer.com/book/10.1007/978-3-0348-0180-5). Different color maps and plot types are shown. For the code used to generate these plots see this [example Jupyter notebook](https://github.com/kuvychko/complexplorer/tree/main/examples/plot_example.ipynb)
 
 ### Phase portraits (domain and co-domain side-by-side)
 
