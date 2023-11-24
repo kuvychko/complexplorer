@@ -14,14 +14,23 @@ Input values which correspond to the True values of the like-shaped
 outmask array (values outside of the domain) are set to 
 OUT_OF_DOMAIN_COLOR_HSV color.
 
-The classes provided are:
+Classes:
+--------
 
 - `Cmap`: This class serves as a base class for color maps and defines 
 an informal interface for child color map classes. It implements 
 the `*.hsv()` and `*.rgb()` methods which are used to convert 
 input complex values to HSV and RGB-valued arrays.
 
-- 
+- `Phase`: This class implements a phase color map. It can be used
+to generate regular phase color maps or enhanced phase color maps.
+
+- `Chessboard`: This class implements a chessboard color map.
+
+- `PolarChessboard`: This class implements a polar chessboard color map.
+
+- `LogRings`: This class implements a logarithmic black and white rings color map.
+
 """
 
 # default out of domain color (gray)
@@ -45,7 +54,17 @@ class Cmap():
         self.out_of_domain_hsv = out_of_domain_hsv
 
     def hsv_tuple(self, z):
-        "Return a 3-tuple of (H, S, V) arrays"
+        """
+        Return a 3-tuple of (H, S, V) arrays corresponding to the input z array of complex values.
+
+        HSV values are mapped to [0, 1] interval.
+
+        Parameters:
+        ----------
+        z: numpy.array
+            Array of complex values
+        
+        """
 
         raise NotImplementedError(".hsv_tuple method not implemented")
     
@@ -146,7 +165,15 @@ class Phase(Cmap):
 
     def hsv_tuple(self, z):
         """
-        
+        Return a 3-tuple of (H, S, V) arrays corresponding to the input z array of complex values.
+
+        HSV values are mapped to [0, 1] interval.
+
+        Parameters:
+        ----------
+        z: numpy.array
+            Array of complex values        
+
         """
         
         phi = phase(z)
@@ -170,12 +197,43 @@ class Phase(Cmap):
         return H, S, V
 
 class Chessboard(Cmap):
+    """
+    Chessboard color map constructor.
+    
+    Class implements a chessboard color map with a given spacing and center.
+    """
+
     def __init__(self, spacing: float = 1., center: complex = 0+0.0j, out_of_domain_hsv=OUT_OF_DOMAIN_COLOR_HSV):
+        """
+        Chessboard color map constructor.
+        
+        Parameters:
+        ----------
+        spacing: float, optional
+            Spacing between chessboard squares. The default is 1.
+        center: complex, optional
+            Complex value corresponding to the center of the chessboard. The default is 0+0.0j.
+        out_of_domain_hsv: 3-tuple, optional
+            3-tuple of HSV values corresponding to the color of complex points with values
+            outside of the domain. The default is OUT_OF_DOMAIN_COLOR_HSV (gray).
+
+        """
+
         self.center = center
         self.spacing = spacing
         self.out_of_domain_hsv = out_of_domain_hsv
 
     def hsv_tuple(self, z):
+        """
+        Return a 3-tuple of (H, S, V) arrays corresponding to the input z array of complex values.
+        
+        Parameters:
+        ----------
+        z: numpy.array
+            Array of complex values
+
+        """
+
         S = np.zeros_like(z, dtype=float)
         H = np.ones_like(z, dtype=float) # fill values do not matter
         V = np.zeros_like(z, dtype=float) # this defines a white plane
@@ -192,13 +250,53 @@ class Chessboard(Cmap):
         return H, S, V
 
 class PolarChessboard(Cmap):
-    def __init__(self, n_phi: Optional[int] = None, spacing: float = 1, r_log = None, out_of_domain_hsv=OUT_OF_DOMAIN_COLOR_HSV):
+    """
+    Polar chessboard color map constructor.
+    """
+
+    def __init__(
+        self,
+        n_phi: int = 6,
+        spacing: float = 1,
+        r_log = None,
+        out_of_domain_hsv=OUT_OF_DOMAIN_COLOR_HSV
+        ):
+        """
+        Polar chessboard color map constructor.
+
+        Parameters:
+        ----------
+        n_phi: int, optional
+            Phase spacing between chessboard squares in number of sectors. 
+            The default is 6.
+        spacing: float, optional
+            Modulus spacing between chessboard squares. The default is 1.
+        r_log: float, optional
+            Logarithm base used to calculate the log of the modulus prior to 
+            building of the chessboard. The default is None (no logarithmic scaling of 
+            modulus).
+        out_of_domain_hsv: 3-tuple, optional
+            3-tuple of HSV values corresponding to the color of complex points with values
+            outside of the domain. The default is OUT_OF_DOMAIN_COLOR_HSV (gray).
+
+        """
+
         self.phi = np.pi / int(n_phi)
         self.spacing = spacing
         self.r_log = r_log
         self.out_of_domain_hsv = out_of_domain_hsv
 
     def hsv_tuple(self, z):
+        """
+        Return a 3-tuple of (H, S, V) arrays corresponding to the input z array of complex values.
+
+        Parameters:
+        ----------
+        z: numpy.array
+            Array of complex values
+
+        """
+
         S = np.zeros_like(z, dtype=float)
         H = np.ones_like(z, dtype=float) # fill values do not matter
         V = np.zeros_like(z, dtype=float) # this defines a white plane
@@ -220,11 +318,38 @@ class PolarChessboard(Cmap):
         return H, S, V
 
 class LogRings(Cmap):
+    """
+    Logarithmic black and white rings color map constructor.
+    """
+
     def __init__(self, log_spacing: float = 0.2, out_of_domain_hsv=OUT_OF_DOMAIN_COLOR_HSV):
+        """
+        Logarithmic black and white rings color map constructor.
+
+        Parameters:
+        ----------
+        log_spacing: float, optional
+            Logarithmic spacing between the rings. The default is 0.2.
+        out_of_domain_hsv: 3-tuple, optional
+            3-tuple of HSV values corresponding to the color of complex points with values
+            outside of the domain. The default is OUT_OF_DOMAIN_COLOR_HSV (gray).
+
+        """
+
         self.log_spacing = log_spacing
         self.out_of_domain_hsv = out_of_domain_hsv
 
     def hsv_tuple(self, z):
+        """
+        Return a 3-tuple of (H, S, V) arrays corresponding to the input z array of complex values.
+
+        Parameters:
+        ----------
+        z: numpy.array
+            Array of complex values
+
+        """
+
         S = np.zeros_like(z, dtype=float)
         H = np.ones_like(z, dtype=float) # fill values do not matter
         V = np.zeros_like(z, dtype=float) # this defines a white plane

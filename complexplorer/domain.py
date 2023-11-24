@@ -20,7 +20,8 @@ Domain representation function is stored in the "mask" attribute of the Domain c
 Viewing window is defined by Domain.window_real and Domain.window_imag attributes. Each stores a 2-tuple of real numbers 
 which correspond to left/right (for window_real) or bottom/top (for window_imag) coordinates of the viewing window.
 
-The classes provided are:
+Classes:
+-------
 
 - `Domain`: This class serves as the base class for defining complex domains. It encapsulates 
 the meshing and masking functionality of a `Domain` instance.
