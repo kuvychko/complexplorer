@@ -216,8 +216,8 @@ def riemann(func, n=80, cmap=Phase(6, 0.6), project_from_north=False, ax=None, t
         ax.set_aspect('equal')
         ax.view_init(20, 45)
         if title: ax.set_title(title, fontsize=14)
+        if filename: plt.savefig(filename) # order matters here - must be before tight_layout otherwise margins are messed up
         fig.tight_layout(rect=[-0.2, -0.2, 1.5, 1.5])
-        if filename: plt.savefig(filename)
 
     else:
         ax.plot_surface(*stereographic(z, project_from_north), facecolors=RGB, rcount=n, ccount=n,

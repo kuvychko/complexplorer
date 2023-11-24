@@ -83,7 +83,7 @@ to generate regular phase color maps or enhanced phase color maps.
 
 Examples below use a test function $f(z) = \frac{z - 1}{z^2 + z + 1}$, a standard example from ["Visual Complex Functions - An Introduction with Phase Portraits"](https://link.springer.com/book/10.1007/978-3-0348-0180-5). Different color maps and plot types are shown. For the code used to generate these plots see this [example Jupyter notebook](examples/plot_examples.ipynb)
 
-### Phase portraits
+### Phase portraits (domain and co-domain side-by-side)
 
 ![Phase portraint](examples/gallery/Phase_portrait_2d.png)
 
@@ -99,7 +99,7 @@ Examples below use a test function $f(z) = \frac{z - 1}{z^2 + z + 1}$, a standar
 
 ![Logarithmic rings](examples/gallery/Logarithmic_rings_2d.png)
 
-### Analytic landscapes
+### Analytic landscapes  (domain and co-domain side-by-side)
 
 ![Phase portraint](examples/gallery/Phase_portrait_3d.png)
 
