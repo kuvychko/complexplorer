@@ -17,7 +17,8 @@ which, in my view, can only be referred to as ‘magic’.*
 [Road to Reality](https://www.ams.org/notices/200606/rev-blank.pdf), Chapter 4 - Magical Complex Numbers, Sir Roger Penrose
 
 Complexplorer is a Python library for visualization of complex functions. 
-The library was insipred by Elias Wegert's book ["Visual Complex Functions - An Introduction with Phase Portraits"](https://link.springer.com/book/10.1007/978-3-0348-0180-5) and it greatly benefitted from discussions and feedback that Elias kindly provided.
+The library was insipred by Elias Wegert's book ["Visual Complex Functions - An Introduction with Phase Portraits"](https://link.springer.com/book/10.1007/978-3-0348-0180-5) and it greatly benefitted from discussions and feedback that Elias kindly provided. The library supports enhanced phase portraits and 
+several other visual styles. 
 
 The library provides classes and functions to:  
 
@@ -31,7 +32,7 @@ Design choices of this library enable:
 * Deferred evaluation of domain meshes. Meshing is typically performed during plotting (and not during domain instanciation). This allows for quick iteration of mesh period for best visual results.
 * Different domain instances can be composed using union and intersection operations to create complex domains.
 
-One exception from the composability ideal is Riemann sphere 3D plot. It has its own meshing algorithm to balance point density between the poles and equator.
+One exception from the composability ideal is Riemann sphere 3D plot. It has its own meshing algorithm to balance point density between the poles and equator, so that function does not accept domain (or input z arrays) as its argument.
 
 Complexplorer is designed to be very light-weight in terms of its dependencies. It requires only numpy and matplotlib, which comes at a cost. 
 Matplotlib is not a 3D rendering library, so 3D visualizations are painfully slow. This is especially true for Riemann sphere plot which uses 
@@ -89,11 +90,31 @@ to generate regular phase color maps or enhanced phase color maps.
 
 * `riemann`: plot a complex function as a phase portrait on the Riemann sphere.
 
+### Supporting functions
+
+* `phase`: return a phase of complex input mapped to [0, 2*pi) interval.
+
+* `sawtooth`: return a sawtooth wave of input x.
+
+* `stereographic`: return a (x,y,z) tuple corresponding to stereographic projection of complex input z.
+
+## Installation
+
+Install using pip:
+
+```
+pip install complexplorer
+```
+
+## Documentation
+
+Every module, class, and function of the library is documented via a docstring. Use `help` or `?` to view them.
+
 ## Example notebooks
 
-* [Basic functionality overview](https://github.com/kuvychko/complexplorer/tree/main/examples/plot_example.ipynb)
+* [Basic functionality overview](https://github.com/kuvychko/complexplorer/tree/main/examples/plots_example.ipynb)
 
-* [Domains and color maps](https://github.com/kuvychko/complexplorer/tree/main/examples/domains_cmaps.ipynb)
+* [Domains and color maps](https://github.com/kuvychko/complexplorer/tree/main/examples/domains_cmaps_example.ipynb)
 
 ## Gallery
 
@@ -101,40 +122,53 @@ Examples below use a test function $f(z) = \frac{z - 1}{z^2 + z + 1}$, a standar
 
 ### Phase portraits (domain and co-domain side-by-side)
 
-![Phase portraint](examples/gallery/Phase_portrait_2d.png)
+![Phase portraint](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Phase_portrait_2d.png?raw=true)
 
-![Phase portraint phase enhanced](examples/gallery/Phase_portrait_phase_enhanced_2d.png)
 
-![Phase portraint modulus enhanced](examples/gallery/Phase_portrait_modulus_enhanced_2d.png)
+![Phase portraint phase enhanced](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Phase_portrait_phase_enhanced_2d.png?raw=true)
 
-![Enhanced phase portraint phase and modulus enhanced](examples/gallery/Enhanced_phase_portrait_phase_and_modulus_enhanced_2d.png)
+![Phase portraint modulus enhanced](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Phase_portrait_modulus_enhanced_2d.png?raw=true)
 
-![Polar chessboard linear](examples/gallery/Polar_chessboard_linear_modulus_spacing_2d.png)
+![Enhanced phase portraint phase and modulus enhanced](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Enhanced_phase_portrait_phase_and_modulus_enhanced_2d.png?raw=true)
 
-![Polar chessboard log](examples/gallery/Polar_chessboard_log_modulus_spacing_2d.png)
+![Polar chessboard linear](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Polar_chessboard_linear_modulus_spacing_2d.png?raw=true)
 
-![Logarithmic rings](examples/gallery/Logarithmic_rings_2d.png)
+![Polar chessboard log](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Polar_chessboard_log_modulus_spacing_2d.png?raw=true)
+
+![Logarithmic rings](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Logarithmic_rings_2d.png?raw=true)
 
 ### Analytic landscapes  (domain and co-domain side-by-side)
 
-![Phase portraint](examples/gallery/Phase_portrait_3d.png)
+![Phase portraint](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Phase_portrait_3d.png?raw=true)
 
-![Phase portraint phase enhanced](examples/gallery/Phase_portrait_phase_enhanced_3d.png)
+![Phase portraint phase enhanced](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Phase_portrait_phase_enhanced_3d.png?raw=true)
 
-![Phase portraint modulus enhanced](examples/gallery/Phase_portrait_modulus_enhanced_3d.png)
+![Phase portraint modulus enhanced](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Phase_portrait_modulus_enhanced_3d.png?raw=true)
 
-![Enhanced phase portraint phase and modulus enhanced](examples/gallery/Enhanced_phase_portrait_phase_and_modulus_enhanced_3d.png)
+![Enhanced phase portraint phase and modulus enhanced](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Enhanced_phase_portrait_phase_and_modulus_enhanced_3d.png?raw=true)
 
-![Polar chessboard linear](examples/gallery/Polar_chessboard_linear_modulus_spacing_3d.png)
+![Polar chessboard linear](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Polar_chessboard_linear_modulus_spacing_3d.png?raw=true)
 
-![Polar chessboard log](examples/gallery/Polar_chessboard_log_modulus_spacing_3d.png)
+![Polar chessboard log](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Polar_chessboard_log_modulus_spacing_3d.png?raw=true)
 
-![Logarithmic rings](examples/gallery/Logarithmic_rings_3d.png)
+![Logarithmic rings](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Logarithmic_rings_3d.png?raw=true)
 
 ### 2D Riemann chart (projected hemispheres)
 
-![Riemann charts](examples/gallery/riemann_chart_2d.png)
+![Riemann charts](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/riemann_chart_2d.png?raw=true)
 
 ### Riemann sphere
 
-![Riemann sphere](examples/gallery/riemann_sphere_3d.png)
+![Riemann sphere](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/riemann_sphere_3d.png?raw=true)
+
+## Future work
+
+Open an issue and leave a comment using [Bug Tracker](https://github.com/kuvychko/complexplorer/issues) if you would like to see any of these (or other) features implemented. Collaboration is always welcome!
+
+* Minimization of viewing window of the intersection of two domains to fit the resulting domain snuggly. Currently this is not implemented, and the viewing window is the same as in the case of a union operation.
+
+* Triangular meshing and corresponding 3D visualization of Riemann sphere (I am not sure if this is doable in matplotlib).
+
+* A modified Riemann sphere projection, where first spherical coordinates of points on the sphere are calculated, then radius is scaled to represent the modulus of the corresponding complex value. It would be nice to implement this using triangular mesh.
+
+* Function to convert modified Riemann sphere projection described above into an *.stl file for 3D printing ("Christmas ornaments" generator). This is Elias Wegert's idea - would be fun!

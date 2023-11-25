@@ -7,12 +7,15 @@ from complexplorer.funcs import phase, sawtooth
 """
 This module contains a set of classes for the construction of color maps.
 
+Color maps enable [domain coloring](https://en.wikipedia.org/wiki/Domain_coloring) 
+in `complexplorer` library. 
 A color map is represented by a class which defines a function that 
 converts input complex values into numpy arrays of HSV or RGB values, 
 with individual H/S/V or R/G/B values mapped to [0, 1] interval.
 Input values which correspond to the True values of the like-shaped 
 outmask array (values outside of the domain) are set to 
-OUT_OF_DOMAIN_COLOR_HSV color.
+OUT_OF_DOMAIN_COLOR_HSV color. Nearly every aspect of class instance 
+behavior is configurable via constructor parameters.
 
 Classes:
 --------

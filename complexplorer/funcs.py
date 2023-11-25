@@ -1,5 +1,19 @@
 import numpy as np
 
+"""
+Module containing various support functions.
+
+Functions:
+----------
+
+- `phase`: return a phase of complex input mapped to [0, 2*pi) interval.
+
+- `sawtooth`: return a sawtooth wave of input x.
+
+- `stereographic`: return a (x,y,z) tuple corresponding to stereographic projection of complex input z.
+
+"""
+
 def phase(z: complex):
     """
     Return a phase of complex input mapped to [0, 2*pi) interval.

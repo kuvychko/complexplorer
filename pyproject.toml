@@ -11,7 +11,7 @@ exclude = ["examples*", "tests*"]
 
 [project]
 name = "complexplorer"
-version = "0.1.1"
+version = "0.1.2"
 authors = [
   { name="Igor Kuvychko", email="igor.kuvychko@gmail.com" },
 ]
@@ -28,7 +28,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "License :: OSI Approved :: BSD-3",
+    "License :: OSI Approved :: BSD License",
     "Topic :: Scientific/Engineering :: Visualization",
     "Topic :: Multimedia :: Graphics",
     "Operating System :: OS Independent",

@@ -9,6 +9,7 @@ build/
 *.egg-info/
 *.egg
 *.ipynb_checkpoints/
+.pypirc
 
 # IDE specific files
 .idea/

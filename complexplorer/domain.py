@@ -7,17 +7,18 @@ from copy import deepcopy
 """
 This module contains a set of classes for the construction and manipulation of complex domains in the mathematical sense.
 
-A domain is represented by a function which accepts numpy arrays of complex values and returns like arrays of boolean
-values. True values correspond to input points that belong to the domain and False to the ones that do not.
-A viewing window determines a rectangular region of complex plane which is meshed and returned by Domain.mesh(n) method. 
+A domain is represented by a function which accepts numpy arrays of complex values and returns like-shaped arrays of boolean
+values. This function is stored in the `Domain.infunc` attribute. True values correspond to input points that belong 
+to the domain and False to the ones that do not.
+A viewing window determines a rectangular region of complex plane which is meshed and returned by `Domain.mesh(n)` method. 
 Integer n defines the number of mesh points of the longer axis of the window region (either real or imaginary).
 Note that this method returned a 2D numpy array containing a complex mesh of the viewing window with no regard to 
-the mask function. Domain.domain(n) method performs a similar meshing operation but returns a 2D complex mesh with
-points outside of the domain set to numpy.nan. Domain.inmask(n) returns a Boolean 2D array corresponding to 
+the mask function. `Domain.domain(n)` method performs a similar meshing operation but returns a 2D complex mesh with
+points outside of the domain set to `numpy.nan`. `Domain.inmask(n)` returns a Boolean 2D array corresponding to 
 a respective mesh with Boolean values marking points that belong (True) or do not belong (False) to the domain.
 
 Domain representation function is stored in the "mask" attribute of the Domain class. 
-Viewing window is defined by Domain.window_real and Domain.window_imag attributes. Each stores a 2-tuple of real numbers 
+Viewing window is defined by `Domain.window_real` and `Domain.window_imag` attributes. Each stores a 2-tuple of real numbers 
 which correspond to left/right (for window_real) or bottom/top (for window_imag) coordinates of the viewing window.
 
 Classes:
@@ -100,6 +101,7 @@ class Domain():
                 self.window_real = (min(real), max(real))
                 self.window_imag = (min(imag) - delta, max(imag) + delta)
             else:
+                delta *= -1
                 self.window_real = (min(real) - delta, max(real) + delta)
                 self.window_imag = (min(imag), max(imag))
         else:
