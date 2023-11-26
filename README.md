@@ -165,6 +165,8 @@ Examples below use a test function $f(z) = \frac{z - 1}{z^2 + z + 1}$, a standar
 
 Open an issue and leave a comment using [Bug Tracker](https://github.com/kuvychko/complexplorer/issues) if you would like to see any of these (or other) features implemented. Collaboration is always welcome!
 
+* Write unit tests. Currently [Basic functionality overview](https://github.com/kuvychko/complexplorer/tree/main/examples/plots_example.ipynb) notebook serves as the unit test set, but it is not a very elegant solution.
+
 * Minimization of viewing window of the intersection of two domains to fit the resulting domain snuggly. Currently this is not implemented, and the viewing window is the same as in the case of a union operation.
 
 * Triangular meshing and corresponding 3D visualization of Riemann sphere (I am not sure if this is doable in matplotlib).
