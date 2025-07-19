@@ -319,13 +319,15 @@ class TestColorMapEdgeCases:
         cmap = cmap_class(**kwargs)
         
         # Single NaN - should not crash, check shape
-        rgb_nan = cmap.rgb(np.nan)
-        assert rgb_nan.shape == (1, 1, 3)
+        with np.errstate(invalid='ignore'):  # Suppress expected NaN warnings
+            rgb_nan = cmap.rgb(np.nan)
+            assert rgb_nan.shape == (1, 1, 3)
         
         # Array with NaN - should not crash
         z = np.array([1, np.nan, 1j])
-        rgb = cmap.rgb(z)
-        assert rgb.shape == (1, 3, 3)  # 1D array becomes (1, n, 3)
+        with np.errstate(invalid='ignore'):  # Suppress expected NaN warnings
+            rgb = cmap.rgb(z)
+            assert rgb.shape == (1, 3, 3)  # 1D array becomes (1, n, 3)
     
     @pytest.mark.parametrize("cmap_class,kwargs", [
         (Phase, {'n_phi': 6}),

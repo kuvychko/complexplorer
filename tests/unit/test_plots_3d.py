@@ -221,9 +221,11 @@ class TestRiemann:
     
     def test_riemann_with_title(self):
         """Test riemann with title."""
-        func = lambda z: np.sin(z)
-        
-        riemann(func, title="Sine on Riemann Sphere", n=30)
+        # Sine can overflow for large complex values on Riemann sphere
+        with np.errstate(over='ignore'):
+            func = lambda z: np.sin(z)
+            
+            riemann(func, title="Sine on Riemann Sphere", n=30)
         
         fig = plt.gcf()
         ax = fig.axes[0]
