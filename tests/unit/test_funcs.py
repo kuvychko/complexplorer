@@ -201,26 +201,28 @@ class TestStereographicFunction:
         """Test stereographic projection of origin."""
         x, y, z = stereographic(0)
         
-        # Origin should map to south pole (or north pole if project_from_north)
+        # Origin should map to (0, 0, 1) with default projection from south
+        # The formula gives z = -1, but project_from_north=False returns -z = 1
         assert np.isclose(x, 0)
         assert np.isclose(y, 0)
-        assert np.isclose(z, -1)  # South pole with default projection
+        assert np.isclose(z, 1)  # North pole with default projection from south
         
         # Test projection from north
         x, y, z = stereographic(0, project_from_north=True)
         assert np.isclose(x, 0)
         assert np.isclose(y, 0)
-        assert np.isclose(z, -1)  # Still south pole due to formula
+        assert np.isclose(z, -1)  # South pole when projecting from north
     
     def test_stereographic_infinity(self):
         """Test stereographic projection approaching infinity."""
-        # Large values should approach north pole
+        # Large values should approach south pole with default projection from south
+        # The formula gives z approaching 1, but project_from_north=False returns -z = -1
         z_large = 1e10
         x, y, z = stereographic(z_large)
         
         assert np.abs(x) < 0.1  # x, y should be small
         assert np.abs(y) < 0.1
-        assert z > 0.9  # z should be close to 1 (north pole)
+        assert z < -0.9  # z should be close to -1 (south pole)
     
     def test_stereographic_real_axis(self):
         """Test stereographic projection along real axis."""
@@ -251,7 +253,7 @@ class TestStereographicFunction:
     def test_stereographic_inverse_property(self):
         """Test inverse relationship of stereographic projection."""
         # For a point z, if (x,y,w) is its stereographic projection,
-        # then z = (x + iy) / (1 - w) for projection from south pole
+        # then z = (x + iy) / (1 + w) for default projection
         
         test_points = [0.5, -0.5, 0.5j, 1+1j, 2-1j]
         
@@ -259,8 +261,8 @@ class TestStereographicFunction:
             x, y, w = stereographic(z)
             
             # Reconstruct z from projection
-            if w != 1:  # Avoid division by zero
-                z_reconstructed = (x + 1j*y) / (1 - w)
+            if w != -1:  # Avoid division by zero (happens at infinity)
+                z_reconstructed = (x + 1j*y) / (1 + w)
                 np.testing.assert_allclose(z, z_reconstructed, rtol=1e-10)
     
     def test_stereographic_projection_direction(self):
@@ -313,6 +315,6 @@ class TestFunctionEdgeCases:
             z = 1e10 * direction
             x, y, z_coord = stereographic(z)
             
-            # Should be close to north pole
+            # Should be close to south pole with default projection
             assert np.sqrt(x**2 + y**2 + z_coord**2) <= 1.0001  # On sphere
-            assert z_coord > 0.9  # Near north pole
+            assert z_coord < -0.9  # Near south pole
