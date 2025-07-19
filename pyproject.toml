@@ -35,6 +35,19 @@ classifiers = [
     "Framework :: Matplotlib",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=3.0.0",
+    "pytest-timeout>=2.1.0",
+]
+pyvista = [
+    "pyvista>=0.38.0",
+]
+all = [
+    "complexplorer[dev,pyvista]",
+]
+
 [project.urls]
 "Homepage" = "https://github.com/kuvychko/complexplorer"
 "Bug Tracker" = "https://github.com/kuvychko/complexplorer/issues"

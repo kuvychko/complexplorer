@@ -20,18 +20,25 @@ def phase(z: complex):
     
     Parameters:
     -----------
-    z: complex
-        Input complex number.
+    z: complex or array_like
+        Input complex number or array of complex numbers.
 
     Returns:
     --------
-    float
+    float or ndarray
         Phase of input z mapped to [0, 2*pi) interval.
     """
 
     phi = np.angle(z)
     # convert phase angles from [pi, -pi) which is the output of numpy.angle to [0, 2*pi)
-    phi[phi<0] = 2*np.pi + phi[phi<0]
+    
+    # Handle both scalar and array inputs
+    if np.isscalar(phi):
+        if phi < 0:
+            phi = 2*np.pi + phi
+    else:
+        phi[phi<0] = 2*np.pi + phi[phi<0]
+    
     return phi
 
 def sawtooth(x, log_base=None):
