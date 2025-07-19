@@ -251,10 +251,12 @@ class TestPlottingEdgeCases:
         """Test riemann_chart with constant function."""
         func = lambda z: 1 + 2j  # Constant function
         
-        # This currently fails due to a bug in the library where constant functions
-        # return scalar values that can't be indexed
-        with pytest.raises(TypeError, match="'numpy.float64' object does not support item assignment"):
-            riemann_chart(func, n=30)
+        riemann_chart(func, n=30)
+        
+        # Should create valid plot even though function is constant
+        fig = plt.gcf()
+        assert len(fig.axes) == 1
+        plt.close()
 
 
 class TestPlotSaving:

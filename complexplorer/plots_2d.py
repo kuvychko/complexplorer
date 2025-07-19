@@ -216,6 +216,11 @@ def riemann_chart(
         arg_label = '1/z'
         tick_labels = [-1, -2, 'inf', 2, 1]
 
+    # Ensure F is always an array, even for constant functions
+    F = np.asarray(F)
+    if F.ndim == 0:  # scalar case
+        F = np.full_like(z, F)
+
     H, S, V = cmap.hsv_tuple(F)
     # adjusting saturation outside of the unit disk
     S = np.abs(z) < 1

@@ -273,10 +273,15 @@ class Test3DPlottingEdgeCases:
         domain = Rectangle(2, 2)
         func = lambda z: 2 + 3j  # Constant
         
-        # This currently fails due to a bug in the library where constant functions
-        # return scalar values that can't be indexed with mask
-        with pytest.raises(TypeError, match="'complex' object does not support item assignment"):
-            plot_landscape(domain, func=func, n=20)
+        plot_landscape(domain, func=func, n=20)
+        # Check figure was created
+        fig = plt.gcf()
+        assert len(fig.axes) == 1
+        
+        # Z-coordinate should be constant (|2+3j| = sqrt(13))
+        expected_height = np.sqrt(13)
+        # Note: Can't easily check the actual surface data from ax
+        plt.close()
     
     def test_riemann_with_poles_at_infinity(self):
         """Test riemann sphere with functions having poles at infinity."""
