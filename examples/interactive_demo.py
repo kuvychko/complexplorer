@@ -70,12 +70,12 @@ COLOR_SCHEMES = {
         "cmap": cp.Phase(n_phi=12)
     },
     "4": {
-        "name": "Enhanced phase (6 colors, modulus)",
-        "cmap": cp.Phase(n_phi=6, r_linear_step=0.5, v_base=0.4)
+        "name": "Enhanced phase (6 colors, auto-scaled)",
+        "cmap": cp.Phase(n_phi=6, auto_scale_r=True, v_base=0.4)
     },
     "5": {
-        "name": "Enhanced phase (12 colors, modulus)",
-        "cmap": cp.Phase(n_phi=12, r_linear_step=0.5, v_base=0.4)
+        "name": "Enhanced phase (12 colors, auto-scaled)",
+        "cmap": cp.Phase(n_phi=12, auto_scale_r=True, v_base=0.4)
     },
     "6": {
         "name": "Chessboard",

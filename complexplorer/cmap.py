@@ -122,6 +122,8 @@ class Phase(Cmap):
                  r_linear_step: float = None,
                  r_log_base: Optional[float] = None,
                  v_base: float = 0.5,
+                 auto_scale_r: bool = False,
+                 scale_radius: float = 1.0,
                  out_of_domain_hsv=OUT_OF_DOMAIN_COLOR_HSV):
         """
         Phase color map constructor.
@@ -140,7 +142,7 @@ class Phase(Cmap):
         r_linear_step: float, optional
             Linear step value is used to divide input complex values and normalize 
             the modulus which is used for corresponding enhanced color mapping via 
-            a sawtooth function.
+            a sawtooth function. Cannot be used with auto_scale_r=True.
         r_log_base: float, optional
             Logarithm base used to calculate the log of the modulus of the input 
             values prior to evaluating a sawtooth function and generating 
@@ -149,6 +151,13 @@ class Phase(Cmap):
             Base value for the V (must belog to [0, 1) interval). Smaller values 
             produce darker grades of gray (darker enhanced effect), while larger 
             values give lighter grades of gray.
+        auto_scale_r: bool, optional
+            If True, automatically calculate r_linear_step to create visually square cells.
+            The calculation uses r_linear_step = 2*pi/n_phi * scale_radius.
+            Default is False for backward compatibility.
+        scale_radius: float, optional
+            Reference radius for auto-scaling calculation. Default is 1.0 (unit circle).
+            Only used when auto_scale_r=True. Larger values create larger cells.
         out_of_domain_hsv: 3-tuple, optional
             3-tuple of HSV values corresponding to the color of complex points with values
             outside of the domain. The default is OUT_OF_DOMAIN_COLOR_HSV (gray).
@@ -157,13 +166,27 @@ class Phase(Cmap):
 
         if v_base < 0 or v_base > 1:
             raise ValueError("v_base must be within [0, 1) interval")
+        
+        # Handle auto-scaling
+        if auto_scale_r:
+            if n_phi is None:
+                raise ValueError("auto_scale_r=True requires n_phi to be specified")
+            if r_linear_step is not None:
+                raise ValueError("Cannot specify both auto_scale_r=True and r_linear_step")
+            # Calculate r_linear_step for visually square cells
+            self.r_linear_step = 2 * np.pi / n_phi * scale_radius
+        else:
+            self.r_linear_step = r_linear_step
+            
         if n_phi is not None:
             self.phi = np.pi / int(n_phi)
         else:
             self.phi = None
-        self.r_linear_step = r_linear_step
+        
         self.r_log_base = r_log_base
         self.v_base = v_base
+        self.auto_scale_r = auto_scale_r
+        self.scale_radius = scale_radius
         self.out_of_domain_hsv = out_of_domain_hsv
 
     def hsv_tuple(self, z):

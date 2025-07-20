@@ -43,8 +43,11 @@ dev = [
 pyvista = [
     "pyvista>=0.45.0",
 ]
+qt = [
+    "PyQt6>=6.5.0",
+]
 all = [
-    "complexplorer[dev,pyvista]",
+    "complexplorer[dev,pyvista,qt]",
 ]
 
 [project.urls]

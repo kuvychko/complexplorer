@@ -41,6 +41,15 @@ which, in my view, can only be referred to as ‘magic’.*
 
 ```bash
 pip install complexplorer
+
+# Optional: For interactive matplotlib plots in CLI scripts
+pip install "complexplorer[qt]"
+
+# Optional: For high-performance 3D visualizations
+pip install "complexplorer[pyvista]"
+
+# Optional: Install everything
+pip install "complexplorer[all]"
 ```
 
 ## 🚀 Quick Start

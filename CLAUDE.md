@@ -32,6 +32,8 @@ complexplorer/
 - Python >= 3.11
 - numpy >= 1.26.0
 - matplotlib >= 3.8.0
+- PyQt6 >= 6.5.0 (optional, for interactive matplotlib plots in CLI scripts)
+- PyVista >= 0.45.0 (optional, for high-performance 3D visualizations)
 
 ## Development Setup
 
