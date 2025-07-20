@@ -124,15 +124,35 @@ cp.riemann_pv(f, scaling='arctan', show_orientation=True)
 
 **⚠️ Important Note:** For best quality, we strongly recommend using PyVista visualizations via command-line scripts rather than Jupyter notebooks. The Jupyter backend (trame) has significant aliasing issues that cannot be compensated with higher resolution. See `examples/interactive_demo.py` for an excellent CLI-based interactive experience.
 
+### 🎯 Domain Restrictions
+
+Control numerical stability and focus visualizations on regions of interest by restricting to specific domains:
+
+```python
+# Avoid infinity at large distances
+domain = cp.Disk(radius=5, center=0)
+cp.riemann_pv(f, domain=domain, scaling='arctan')
+
+# Exclude origin for functions with poles
+domain = cp.Annulus(radius_inner=0.1, radius_outer=10, center=0)
+ornament = OrnamentGenerator(func=lambda z: 1/z, domain=domain)
+```
+
+Domain restrictions work with all visualization functions and are especially useful for:
+- Functions with essential singularities
+- Focusing on specific regions of the complex plane
+- Improving numerical stability in STL generation
+- Creating cleaner 3D prints by excluding problematic areas
+
 ### 🖨️ 3D Printing Support
 
 Transform your complex function visualizations into physical objects! Complexplorer can export Riemann sphere visualizations as STL files suitable for 3D printing:
 
 ```python
-from complexplorer.stl_export import OrnamentGeneratorV2
+from complexplorer.stl_export import OrnamentGenerator
 
 # Create STL files from your function
-ornament = OrnamentGeneratorV2(
+ornament = OrnamentGenerator(
     func=lambda z: (z - 1) / (z**2 + z + 1),
     resolution=150,
     scaling='arctan',
@@ -151,9 +171,11 @@ Features:
 - Automatic mesh healing for watertight models
 - Flat bisection planes for easy printing without supports
 - Multiple modulus scaling methods
+- Domain restrictions to avoid numerical instabilities
+- Intelligent handling of singularities through neighbor interpolation
 - Compatible with all complexplorer colormaps
 
-See the [STL Export Guide](docs/stl_export_guide.md) for detailed instructions and `examples/stl_ornament_examples.py` for more examples.
+See the [STL Export Guide](docs/stl_export_guide.md) for detailed instructions and `examples/stl_ornament_demo.ipynb` for interactive examples.
 
 ## 🤝 Contributing
 

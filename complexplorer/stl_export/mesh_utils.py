@@ -6,7 +6,10 @@ This module contains optimized helper functions for mesh generation, cutting, an
 
 import numpy as np
 import pyvista as pv
-from typing import Tuple, Optional
+from typing import Tuple, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..domain import Domain
 
 
 def cut_with_flat_plane(mesh: pv.PolyData, axis: str = 'y', 
@@ -287,17 +290,33 @@ def remove_spikes_simple(mesh: pv.PolyData, max_deviation: float = 3.0,
 
 # Mesh generation classes
 class RectangularSphereGenerator:
-    """Generate sphere with rectangular (lat-lon) grid."""
+    """Generate sphere with rectangular (lat-lon) grid.
+    
+    Parameters
+    ----------
+    radius : float, default=1.0
+        Sphere radius.
+    n_theta : int, default=100
+        Number of latitude divisions.
+    n_phi : int, default=100
+        Number of longitude divisions.
+    avoid_poles : bool, default=True
+        Whether to avoid exact poles in mesh.
+    domain : Domain, optional
+        If provided, only generate mesh points whose stereographic projections
+        fall within this domain. Helps avoid numerical instability at extreme values.
+    """
     
     def __init__(self, radius: float = 1.0, n_theta: int = 100, n_phi: int = 100,
-                 avoid_poles: bool = True):
+                 avoid_poles: bool = True, domain: Optional['Domain'] = None):
         self.radius = radius
         self.n_theta = n_theta
         self.n_phi = n_phi
         self.avoid_poles = avoid_poles
+        self.domain = domain
         
     def generate(self) -> pv.PolyData:
-        """Generate sphere mesh."""
+        """Generate sphere mesh, optionally constrained by domain."""
         # Create angles avoiding exact poles if requested
         if self.avoid_poles:
             theta = np.linspace(0.01, np.pi - 0.01, self.n_theta)
@@ -312,11 +331,30 @@ class RectangularSphereGenerator:
         Y = self.radius * np.sin(THETA) * np.sin(PHI)
         Z = self.radius * np.cos(THETA)
         
+        # If domain is specified, filter points
+        if self.domain is not None:
+            # Project points to complex plane
+            w = stereographic_projection(X.ravel(), Y.ravel(), Z.ravel())
+            
+            # Check which points are in domain
+            in_domain = self.domain.infunc(w)
+            in_domain = in_domain.reshape(X.shape)
+            
+            # Mark out-of-domain points as NaN
+            X = np.where(in_domain, X, np.nan)
+            Y = np.where(in_domain, Y, np.nan)
+            Z = np.where(in_domain, Z, np.nan)
+        
         # Create structured grid
         grid = pv.StructuredGrid(X, Y, Z)
         
-        # Convert to PolyData
-        return grid.extract_surface()
+        # Convert to PolyData and remove any NaN points
+        mesh = grid.extract_surface()
+        if self.domain is not None:
+            # Remove cells with NaN vertices
+            mesh = mesh.remove_cells(np.any(np.isnan(mesh.points), axis=1))
+        
+        return mesh
 
 
 def stereographic_projection(x, y, z, from_north=True):

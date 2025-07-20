@@ -15,18 +15,20 @@ The STL export module allows you to transform complex function visualizations on
 - **Print-Ready Output**: Generates watertight meshes with flat bottoms for bed adhesion
 - **Empty Layer Prevention**: Advanced healing algorithm specifically targets gaps between layers
 - **Spike Elimination**: Intelligent smoothing removes artifacts while preserving detail
+- **Domain Restrictions**: Limit visualization to specific regions for better numerical stability
+- **Singularity Handling**: Automatic neighbor interpolation creates smooth surfaces at poles and infinities
 
 ## Basic Usage
 
 ```python
 import complexplorer as cp
-from complexplorer.stl_export import OrnamentGeneratorV2
+from complexplorer.stl_export import OrnamentGenerator
 
 # Define your complex function
 func = lambda z: (z - 1) / (z**2 + z + 1)
 
 # Create ornament generator
-ornament = OrnamentGeneratorV2(
+ornament = OrnamentGenerator(
     func=func,
     resolution=150,  # Higher = more detail
     scaling='arctan',  # Modulus scaling method
@@ -41,6 +43,34 @@ top_file, bottom_file = ornament.generate_ornament(
     output_prefix='my_ornament'
 )
 ```
+
+### Domain Restrictions
+
+New in v1.1.0: You can restrict the visualization to specific domains to avoid numerical instabilities or focus on regions of interest:
+
+```python
+# Avoid infinity at large distances
+domain = cp.Disk(radius=5, center=0)
+ornament = OrnamentGenerator(func=func, domain=domain, resolution=150)
+
+# Exclude origin for functions with poles
+domain = cp.Annulus(radius_inner=0.1, radius_outer=3, center=0)
+ornament = OrnamentGenerator(
+    func=lambda z: np.exp(1/z), 
+    domain=domain,
+    scaling='arctan'
+)
+
+# Focus on a specific rectangular region
+domain = cp.Rectangle(re_length=4, im_length=4, center=1+1j)
+ornament = OrnamentGenerator(func=func, domain=domain)
+```
+
+Domain restrictions are especially useful for:
+- Functions with essential singularities (e.g., exp(1/z))
+- Avoiding numerical overflow at poles
+- Creating ornaments focused on specific features
+- Improving mesh quality by excluding problematic regions
 
 ## Scaling Methods
 

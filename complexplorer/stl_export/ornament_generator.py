@@ -7,7 +7,10 @@ from complex function visualizations on the Riemann sphere.
 
 import numpy as np
 import pyvista as pv
-from typing import Callable, Optional, Tuple, Dict, Union
+from typing import Callable, Optional, Tuple, Dict, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..domain import Domain
 import os
 import warnings
 
@@ -44,16 +47,20 @@ class OrnamentGenerator:
         Parameters for the scaling function.
     cmap : Cmap, optional
         Color map for visualization. Default is Phase(12).
+    domain : Domain, optional
+        If provided, only generate mesh points whose stereographic projections
+        fall within this domain. Helps avoid numerical instability at extreme values.
     """
     
     def __init__(self, func: Callable, resolution: int = 150,
                  scaling: str = 'constant', scaling_params: Optional[dict] = None,
-                 cmap: Optional[Cmap] = None):
+                 cmap: Optional[Cmap] = None, domain: Optional['Domain'] = None):
         self.func = func
         self.resolution = resolution
         self.scaling = scaling
         self.scaling_params = scaling_params or {}
         self.cmap = cmap or Phase(12)
+        self.domain = domain
         
         # Components
         self.healer = MeshHealer(smooth=False)
@@ -87,7 +94,8 @@ class OrnamentGenerator:
             radius=1.0,
             n_theta=self.resolution,
             n_phi=self.resolution,
-            avoid_poles=True  # Important for better pole behavior
+            avoid_poles=True,  # Important for better pole behavior
+            domain=self.domain  # Pass domain to constrain mesh generation
         )
         sphere = generator.generate()
         

@@ -36,6 +36,7 @@ complexplorer/
 - Python >= 3.11
 - numpy >= 1.26.0
 - matplotlib >= 3.8.0
+- scipy >= 1.11.0 (for mesh interpolation and signal processing)
 
 Optional dependencies:
 - PyQt6 >= 6.5.0 (for interactive matplotlib plots in CLI scripts)

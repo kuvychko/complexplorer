@@ -22,8 +22,11 @@ handles structured grids vs triangular meshes.
 
 import numpy as np
 import pyvista as pv
-from typing import Optional, Tuple, Dict, List, Set
+from typing import Optional, Tuple, Dict, List, Set, TYPE_CHECKING
 from dataclasses import dataclass, field
+
+if TYPE_CHECKING:
+    from .domain import Domain
 
 
 @dataclass
@@ -219,18 +222,22 @@ class RectangularSphereGenerator:
         Number of longitude divisions (around equator).
     avoid_poles : bool, default=True
         If True, slightly offset from exact poles to avoid singularities.
+    domain : Domain, optional
+        If provided, only generate mesh points whose stereographic projections
+        fall within this domain. Helps avoid numerical instability at extreme values.
     """
     
     def __init__(self, radius: float = 1.0, n_theta: int = 100, n_phi: int = 100,
-                 avoid_poles: bool = True):
+                 avoid_poles: bool = True, domain: Optional['Domain'] = None):
         self.radius = radius
         self.n_theta = n_theta
         self.n_phi = n_phi
         self.avoid_poles = avoid_poles
+        self.domain = domain
         
     def generate(self) -> pv.StructuredGrid:
         """
-        Generate the rectangular sphere mesh.
+        Generate the rectangular sphere mesh, optionally constrained by domain.
         
         Returns
         -------
@@ -253,6 +260,20 @@ class RectangularSphereGenerator:
         X = self.radius * np.sin(THETA) * np.cos(PHI)
         Y = self.radius * np.sin(THETA) * np.sin(PHI)
         Z = self.radius * np.cos(THETA)
+        
+        # If domain is specified, filter points
+        if self.domain is not None:
+            # Project points to complex plane
+            w = stereographic_projection(X.ravel(), Y.ravel(), Z.ravel())
+            
+            # Check which points are in domain
+            in_domain = self.domain.infunc(w)
+            in_domain = in_domain.reshape(X.shape)
+            
+            # Mark out-of-domain points as NaN
+            X = np.where(in_domain, X, np.nan)
+            Y = np.where(in_domain, Y, np.nan)
+            Z = np.where(in_domain, Z, np.nan)
         
         # Create structured grid
         grid = pv.StructuredGrid(X, Y, Z)

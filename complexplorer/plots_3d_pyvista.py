@@ -480,6 +480,7 @@ def riemann_pv(
     cmap: Optional[Cmap] = None,
     scaling: str = 'constant',
     scaling_params: Optional[dict] = None,
+    domain: Optional['Domain'] = None,
     project_from_north: bool = True,
     interactive: bool = True,
     camera_position: Union[str, Tuple] = 'iso',
@@ -661,8 +662,46 @@ def riemann_pv(
     else:
         raise ValueError(f"Unknown scaling method: {scaling}")
     
-    # Handle infinities in radii
-    radii[~finite_mask] = radii[finite_mask].max() if np.any(finite_mask) else 1.0
+    # Handle infinities in radii by interpolating from neighbors
+    if not np.all(finite_mask):
+        from scipy.ndimage import generic_filter
+        
+        if mesh_type == 'rectangular':
+            # For structured grids, use 2D neighbor interpolation
+            radii_2d = radii.reshape((n_phi, n_theta))
+            finite_mask_2d = finite_mask.reshape((n_phi, n_theta))
+            
+            def neighbor_mean(values):
+                """Average of finite neighbors."""
+                finite_vals = values[np.isfinite(values)]
+                return np.mean(finite_vals) if len(finite_vals) > 0 else np.nan
+            
+            # Apply filter iteratively until all NaN/inf are filled
+            filled_radii = radii_2d.copy()
+            max_iterations = 10
+            for _ in range(max_iterations):
+                old_filled = filled_radii.copy()
+                # Use wrap mode to handle periodic boundary in phi direction
+                filled_radii = generic_filter(filled_radii, neighbor_mean, size=3, mode='wrap')
+                # Only update the invalid points
+                filled_radii[finite_mask_2d] = radii_2d[finite_mask_2d]
+                # Check if we've filled all invalid points
+                if np.all(np.isfinite(filled_radii)):
+                    break
+                # Check if no progress was made
+                if np.array_equal(old_filled, filled_radii):
+                    # Fill remaining with median of valid values
+                    filled_radii[~np.isfinite(filled_radii)] = np.median(radii[finite_mask])
+                    break
+            
+            radii = filled_radii.ravel()
+        else:
+            # For unstructured meshes, use median of valid values
+            valid_radii = radii[finite_mask]
+            if len(valid_radii) > 0:
+                radii[~finite_mask] = np.median(valid_radii)
+            else:
+                radii[~finite_mask] = 1.0
     
     # Scale sphere points
     if mesh_type == 'rectangular':
