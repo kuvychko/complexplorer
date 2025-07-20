@@ -100,6 +100,20 @@ cp.plot_landscape(domain, func=f, cmap=cmap, z_max=10)
 cp.riemann(f, n=800, cmap=cmap)
 ```
 
+### 🚀 High-Performance 3D Visualizations with PyVista
+
+For interactive, high-quality 3D visualizations, Complexplorer includes PyVista-based plotting functions:
+
+```python
+# High-performance 3D landscape
+cp.plot_landscape_pv(domain, f, cmap=cmap, show_orientation=True)
+
+# Interactive Riemann sphere with modulus scaling
+cp.riemann_pv(f, scaling='arctan', show_orientation=True)
+```
+
+**⚠️ Important Note:** For best quality, we strongly recommend using PyVista visualizations via command-line scripts rather than Jupyter notebooks. The Jupyter backend (trame) has significant aliasing issues that cannot be compensated with higher resolution. See `examples/interactive_demo.py` for an excellent CLI-based interactive experience.
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to:

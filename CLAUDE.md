@@ -93,8 +93,18 @@ The library deals with complex functions f: ℂ → ℂ. Key mathematical concep
 ### Performance Considerations
 
 - Matplotlib is not optimized for 3D rendering, so 3D plots can be slow
+- PyVista provides 15-30x faster 3D rendering with better quality
 - The Riemann sphere plot uses a rectangular mesh which is inefficient at poles
 - Domain meshing is deferred until plot time for flexibility
+
+### PyVista Integration
+
+The project includes high-performance PyVista-based 3D plotting functions:
+- `plot_landscape_pv()`: Fast 3D landscape visualization
+- `pair_plot_landscape_pv()`: Side-by-side domain/codomain comparison
+- `riemann_pv()`: Riemann sphere with multiple modulus scaling options
+
+**Important**: For best quality, use PyVista functions via command-line scripts rather than Jupyter notebooks. The Jupyter trame backend has severe aliasing issues. See `examples/interactive_demo.py` for an optimal interactive experience.
 
 ### Future Improvements (from README)
 

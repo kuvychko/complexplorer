@@ -135,6 +135,24 @@ class TestPlotLandscapePv:
         
         assert filename.exists()
     
+    def test_orientation_axes(self, simple_setup):
+        """Test orientation axes widget display."""
+        domain, func = simple_setup
+        
+        # Test with orientation axes enabled (default)
+        plot_landscape_pv(
+            domain, func, n=20,
+            interactive=False,
+            show_orientation=True
+        )
+        
+        # Test with orientation axes disabled
+        plot_landscape_pv(
+            domain, func, n=20,
+            interactive=False,
+            show_orientation=False
+        )
+    
     def test_return_plotter(self, simple_setup):
         """Test returning plotter object."""
         domain, func = simple_setup
@@ -171,6 +189,25 @@ class TestPairPlotLandscapePv:
         pair_plot_landscape_pv(
             domain, func, n=20,
             interactive=False
+        )
+    
+    def test_pair_plot_orientation_axes(self):
+        """Test pair plot with orientation axes."""
+        domain = Rectangle(2, 2)
+        func = lambda z: z**2
+        
+        # Test with orientation axes enabled
+        pair_plot_landscape_pv(
+            domain, func, n=20,
+            interactive=False,
+            show_orientation=True
+        )
+        
+        # Test with orientation axes disabled
+        pair_plot_landscape_pv(
+            domain, func, n=20,
+            interactive=False,
+            show_orientation=False
         )
     
     def test_pair_plot_with_linking(self):
@@ -291,6 +328,28 @@ class TestRiemannPv:
         
         with pytest.raises(ValueError, match="Unknown scaling method"):
             riemann_pv(func, scaling='invalid', interactive=False)
+    
+    def test_orientation_axes(self):
+        """Test orientation axes widget display."""
+        func = lambda z: (z - 1) / (z + 1)
+        
+        # Test with orientation axes enabled (default)
+        riemann_pv(
+            func,
+            n_theta=50,
+            n_phi=50,
+            show_orientation=True,
+            interactive=False
+        )
+        
+        # Test with orientation axes disabled
+        riemann_pv(
+            func,
+            n_theta=50,
+            n_phi=50,
+            show_orientation=False,
+            interactive=False
+        )
     
     def test_quality_settings(self):
         """Test high quality and anti-aliasing settings."""

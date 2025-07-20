@@ -27,6 +27,67 @@ from complexplorer.cmap import Phase, Cmap
 from complexplorer.domain import Domain
 
 
+def _add_axes_widget(plotter, labels=('Re', 'Im', 'Z'), position=(0.0, 0.0), 
+                     size=0.25, label_size=(0.25, 0.1)):
+    """
+    Add a labeled axes widget to the plotter.
+    
+    Parameters
+    ----------
+    plotter : pv.Plotter
+        The PyVista plotter object.
+    labels : tuple of str, default=('Re', 'Im', 'Z')
+        Labels for x, y, z axes.
+    position : tuple of float, default=(0.0, 0.0)
+        Position of widget in viewport coordinates (0-1).
+    size : float, default=0.25
+        Size of the widget as fraction of viewport.
+    label_size : tuple of float, default=(0.25, 0.1)
+        Width and height of the axes label actors (values between 0 and 1).
+    """
+    # Check if we're in off-screen mode (static rendering)
+    is_static = plotter.off_screen
+    
+    if is_static:
+        # For static rendering, use viewport-based approach
+        axes_actor = plotter.add_axes(
+            xlabel=labels[0],
+            ylabel=labels[1],
+            zlabel=labels[2],
+            line_width=4,
+            labels_off=False,
+            box=False,
+            interactive=True,
+            viewport=(0, 0, size, size),
+            label_size=label_size,
+            cone_radius=0.4,
+            shaft_length=0.8,
+            tip_length=0.2,
+            ambient=0.5,
+            color='black',
+        )
+    else:
+        # For interactive mode, use the standard add_axes without viewport
+        # This seems to work better in Jupyter notebooks
+        axes_actor = plotter.add_axes(
+            xlabel=labels[0],
+            ylabel=labels[1],
+            zlabel=labels[2],
+            line_width=4,
+            labels_off=False,
+            box=False,
+            interactive=True,
+            label_size=label_size,
+            cone_radius=0.4,
+            shaft_length=0.8,
+            tip_length=0.2,
+            ambient=0.5,
+            color='black',
+        )
+    
+    return axes_actor
+
+
 def _ensure_pyvista_setup():
     """Ensure PyVista is properly configured for the current environment."""
     # Set conservative defaults for better compatibility
@@ -147,6 +208,7 @@ def plot_landscape_pv(
     title: Optional[str] = None,
     filename: Optional[str] = None,
     return_plotter: bool = False,
+    show_orientation: bool = True,
     **kwargs
 ) -> Optional[pv.Plotter]:
     """
@@ -191,6 +253,8 @@ def plot_landscape_pv(
         Save plot to file (PNG, PDF, etc.).
     return_plotter : bool, default=False
         If True, return the plotter object for further customization.
+    show_orientation : bool, default=True
+        If True, show orientation axes widget with Re/Im/Z labels.
     **kwargs
         Additional arguments passed to plotter.add_mesh().
     
@@ -233,8 +297,9 @@ def plot_landscape_pv(
     # Set camera
     plotter.camera_position = camera_position
     
-    # Add axes
-    plotter.show_axes()
+    # Add orientation axes
+    if show_orientation:
+        _add_axes_widget(plotter, labels=('Re', 'Im', 'Z'))
     
     # Add title
     if title:
@@ -276,6 +341,7 @@ def pair_plot_landscape_pv(
     title: Optional[str] = None,
     filename: Optional[str] = None,
     link_views: bool = True,
+    show_orientation: bool = True,
     **kwargs
 ) -> Optional[pv.Plotter]:
     """
@@ -320,6 +386,8 @@ def pair_plot_landscape_pv(
         Save plot to file.
     link_views : bool, default=True
         If True, synchronize camera movement between subplots.
+    show_orientation : bool, default=True
+        If True, show orientation axes widget with Re/Im/Z labels.
     **kwargs
         Additional arguments passed to plotter.add_mesh().
     
@@ -360,7 +428,8 @@ def pair_plot_landscape_pv(
         **kwargs
     )
     plotter.add_text("Domain", font_size=12)
-    plotter.show_axes()
+    if show_orientation:
+        _add_axes_widget(plotter, labels=('Re', 'Im', 'Z'))
     plotter.camera_position = camera_position
     
     # Plot codomain (function)
@@ -374,7 +443,8 @@ def pair_plot_landscape_pv(
         **kwargs
     )
     plotter.add_text("Codomain", font_size=12)
-    plotter.show_axes()
+    if show_orientation:
+        _add_axes_widget(plotter, labels=('Re', 'Im', 'Z'))
     plotter.camera_position = camera_position
     
     # Link views if requested
@@ -414,7 +484,7 @@ def riemann_pv(
     interactive: bool = True,
     camera_position: Union[str, Tuple] = 'iso',
     show_grid: bool = True,
-    show_axes: bool = True,
+    show_orientation: bool = True,
     window_size: Tuple[int, int] = (800, 800),
     title: Optional[str] = None,
     filename: Optional[str] = None,
@@ -472,8 +542,8 @@ def riemann_pv(
         Camera position: 'iso', 'xy', 'xz', 'yz', or custom.
     show_grid : bool, default=True
         If True, show latitude/longitude grid lines.
-    show_axes : bool, default=True
-        If True, show coordinate axes.
+    show_orientation : bool, default=True
+        If True, show orientation axes widget with Re/Im/Z labels.
     window_size : tuple, default=(800, 800)
         Window size in pixels.
     title : str, optional
@@ -742,9 +812,9 @@ def riemann_pv(
     # Set camera
     plotter.camera_position = camera_position
     
-    # Add axes
-    if show_axes:
-        plotter.show_axes()
+    # Add orientation axes
+    if show_orientation:
+        _add_axes_widget(plotter, labels=('Re', 'Im', 'Z'))
     
     # Add title
     if title:
