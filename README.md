@@ -37,6 +37,8 @@ which, in my view, can only be referred to as ‘magic’.*
 
 ## 📦 Installation
 
+**Requirements**: Python 3.11 or higher
+
 ```bash
 pip install complexplorer
 ```
@@ -77,8 +79,8 @@ Explore the full range of visualizations in our [**Gallery**](docs/gallery/READM
 ## 📚 Documentation
 
 - **[Gallery](docs/gallery/README.md)** - Visual showcase with code examples
-- **[Tutorial: Basic Usage](examples/plots_example.ipynb)** - Getting started guide
-- **[Tutorial: Domains & Color Maps](examples/domains_cmaps_example.ipynb)** - Advanced features
+- **[Tutorial: Plotting Functions](examples/plotting_tutorial.ipynb)** - Comprehensive plotting guide
+- **[Tutorial: Domains & Color Maps](examples/domains_and_colormaps_tutorial.ipynb)** - Domain creation and color mapping
 - **API Reference** - Use `help()` on any function or class
 
 ## 🛠️ Advanced Example

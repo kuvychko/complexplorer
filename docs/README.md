@@ -8,8 +8,8 @@ Welcome to the Complexplorer documentation! This library provides elegant visual
 Explore beautiful visualizations with code examples. See phase portraits, analytic landscapes, and Riemann sphere projections.
 
 ### 📖 Tutorials
-- [Basic Usage](../examples/plots_example.ipynb) - Getting started with complexplorer
-- [Domains & Color Maps](../examples/domains_cmaps_example.ipynb) - Advanced visualization techniques
+- [Plotting Functions](../examples/plotting_tutorial.ipynb) - Comprehensive guide to all plotting capabilities
+- [Domains & Color Maps](../examples/domains_and_colormaps_tutorial.ipynb) - Understanding domains and color mapping
 
 ### 🔧 API Reference
 - **Domains**: `Rectangle`, `Disk`, `Annulus` - Define regions in the complex plane

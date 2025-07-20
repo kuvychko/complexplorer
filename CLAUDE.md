@@ -22,16 +22,16 @@ complexplorer/
 │   ├── plots_2d.py        # 2D plotting functions
 │   └── plots_3d.py        # 3D plotting functions
 ├── examples/              # Example notebooks and output images
-├── tests/                 # Test directories (currently empty)
+├── tests/                 # Unit tests with comprehensive coverage
 ├── pyproject.toml         # Project configuration
 └── README.md              # Project documentation
 ```
 
 ## Dependencies
 
-- Python >= 3.7
-- numpy >= 1.20
-- matplotlib >= 3.6
+- Python >= 3.11
+- numpy >= 1.26.0
+- matplotlib >= 3.8.0
 
 ## Development Setup
 
@@ -66,7 +66,7 @@ pytest tests/unit/test_domain.py -v
 
 ### Testing
 
-Currently, the `examples/plots_example.ipynb` notebook serves as the primary test suite. Run this notebook to verify that all functionality works correctly after making changes.
+The project has a comprehensive unit test suite with 116 tests covering all major functionality. Tests are located in the `tests/` directory and can be run using pytest.
 
 ### Code Style
 
@@ -99,7 +99,7 @@ The library deals with complex functions f: ℂ → ℂ. Key mathematical concep
 ### Future Improvements (from README)
 
 - Auto-tuning of modulus discretization for square enhanced regions
-- Unit tests implementation
+- PyVista implementation for 3D plots
 - Triangular meshing for Riemann sphere
 - STL file export for 3D printing
 - Optimized viewing windows for domain intersections
