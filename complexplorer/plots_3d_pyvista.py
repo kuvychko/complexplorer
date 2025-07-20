@@ -29,6 +29,12 @@ from complexplorer.domain import Domain
 
 def _ensure_pyvista_setup():
     """Ensure PyVista is properly configured for the current environment."""
+    # Set conservative defaults for better compatibility
+    # Users can increase these if their system supports it
+    if pv.global_theme.multi_samples is None:
+        pv.global_theme.multi_samples = 2  # Conservative default
+    pv.global_theme.smooth_shading = True
+    
     backend = pv.global_theme.jupyter_backend
     if backend is None:
         # Not in Jupyter, use default
@@ -395,58 +401,368 @@ def pair_plot_landscape_pv(
         plotter.close()
 
 
-# Placeholder for riemann_pv - will be implemented after icosahedral meshing
 def riemann_pv(
     func: Callable,
+    n_theta: int = 100,
+    n_phi: int = 100,
+    mesh_type: str = 'rectangular',
     n_subdivisions: int = 4,
     cmap: Optional[Cmap] = None,
-    scaling: str = 'arctan',
+    scaling: str = 'constant',
     scaling_params: Optional[dict] = None,
     project_from_north: bool = True,
     interactive: bool = True,
+    camera_position: Union[str, Tuple] = 'iso',
     show_grid: bool = True,
     show_axes: bool = True,
-    colorbar: bool = True,
+    window_size: Tuple[int, int] = (800, 800),
+    title: Optional[str] = None,
+    filename: Optional[str] = None,
+    return_plotter: bool = False,
+    high_quality: bool = True,
+    anti_aliasing: Union[bool, str] = True,
+    aa_samples: int = 4,
+    use_pbr: bool = False,
     **kwargs
 ):
     """
     Plot a complex function on the Riemann sphere using PyVista.
     
-    NOTE: This function requires the mesh_utils module with icosahedral
-    sphere generation, which will be implemented in Phase 2.
+    By default, this function uses rectangular (latitude-longitude) meshing which
+    provides better visual quality in PyVista despite slight pole distortion.
+    Icosahedral meshing is available as an alternative for uniform sampling.
     
     Parameters
     ----------
     func : Callable
         Complex function to visualize.
+    n_theta : int, default=100
+        Number of latitude divisions (for rectangular mesh).
+    n_phi : int, default=100
+        Number of longitude divisions (for rectangular mesh).
+    mesh_type : str, default='rectangular'
+        Type of sphere meshing:
+        - 'rectangular': Latitude-longitude grid (better PyVista rendering)
+        - 'icosahedral': Uniform triangular mesh (better mathematical properties)
+        - 'uv': PyVista's built-in UV sphere
     n_subdivisions : int, default=4
-        Number of icosphere subdivisions (controls resolution).
+        For icosahedral mesh: subdivision level (0-8).
+        Level 0: 20 faces, Level n: 20 * 4^n faces.
     cmap : Cmap, optional
         Color map to use. Default is Phase(6, 0.6).
-    scaling : str, default='arctan'
-        Modulus scaling method: 'arctan', 'logarithmic', 'linear_clamp', 'custom'.
+    scaling : str, default='constant'
+        Modulus scaling method:
+        - 'constant': Traditional Riemann sphere (radius = 1)
+        - 'arctan': Smooth compression mapping [0, ∞) to [r_min, r_max]
+        - 'logarithmic': Log scaling for large dynamic range
+        - 'linear_clamp': Linear with saturation
+        - 'custom': User-defined function
     scaling_params : dict, optional
-        Parameters for the scaling function.
+        Parameters for the scaling function:
+        - For 'constant': {'radius': 1.0}
+        - For 'arctan': {'r_min': 0.2, 'r_max': 1.0}
+        - For 'logarithmic': {'base': e, 'r_min': 0.2, 'r_max': 1.0}
+        - For 'linear_clamp': {'m_max': 10, 'r_min': 0.2, 'r_max': 1.0}
+        - For 'custom': {'scaling_func': callable, 'r_min': 0.2, 'r_max': 1.0}
     project_from_north : bool, default=True
         If True, use stereographic projection from north pole.
     interactive : bool, default=True
         If True, show interactive widget.
+    camera_position : str or tuple, default='iso'
+        Camera position: 'iso', 'xy', 'xz', 'yz', or custom.
     show_grid : bool, default=True
         If True, show latitude/longitude grid lines.
     show_axes : bool, default=True
         If True, show coordinate axes.
-    colorbar : bool, default=True
-        If True, show color scale bar.
+    window_size : tuple, default=(800, 800)
+        Window size in pixels.
+    title : str, optional
+        Title for the plot.
+    filename : str, optional
+        Save plot to file.
+    return_plotter : bool, default=False
+        If True, return the plotter object.
+    high_quality : bool, default=True
+        If True, enable high-quality rendering with enhanced shading.
+    anti_aliasing : bool or str, default=True
+        If True, automatically select best available anti-aliasing.
+        If string, use specific method: 'msaa', 'ssaa', 'fxaa', or 'none'.
+    aa_samples : int, default=4
+        Number of samples for MSAA/SSAA (2, 4, or 8).
+    use_pbr : bool, default=False
+        If True, use physically based rendering (requires compatible GPU/drivers).
+        May cause shader errors on some systems.
     **kwargs
-        Additional arguments for visualization.
+        Additional arguments passed to plotter.add_mesh().
     
-    Raises
-    ------
-    NotImplementedError
-        This function requires icosahedral meshing (Phase 2).
+    Returns
+    -------
+    plotter : pv.Plotter, optional
+        Only returned if return_plotter=True.
+    
+    Examples
+    --------
+    >>> import complexplorer as cp
+    >>> # Traditional Riemann sphere with rectangular mesh
+    >>> cp.riemann_pv(lambda z: (z-1)/(z+1))
+    >>> # With modulus scaling
+    >>> cp.riemann_pv(lambda z: z**2, scaling='arctan')
+    >>> # Using icosahedral mesh
+    >>> cp.riemann_pv(lambda z: z**2, mesh_type='icosahedral', n_subdivisions=4)
+    
+    Notes
+    -----
+    PyVista renders rectangular meshes more smoothly than triangular meshes,
+    so the default rectangular mesh often looks better despite mathematical
+    imperfections near poles.
     """
-    raise NotImplementedError(
-        "riemann_pv requires icosahedral sphere meshing. "
-        "This will be implemented in Phase 2 of the PyVista integration. "
-        "See docs/icosphere_technical_spec.md for details."
+    from complexplorer.mesh_utils import (
+        IcosphereGenerator, RectangularSphereGenerator, 
+        stereographic_projection, ModulusScaling
     )
+    
+    _ensure_pyvista_setup()
+    
+    # Default colormap
+    if cmap is None:
+        cmap = Phase(6, 0.6)
+    
+    # Generate sphere mesh based on type
+    if mesh_type == 'rectangular':
+        generator = RectangularSphereGenerator(radius=1.0, n_theta=n_theta, n_phi=n_phi)
+        sphere = generator.generate()
+    elif mesh_type == 'uv':
+        generator = RectangularSphereGenerator(radius=1.0, n_theta=n_theta, n_phi=n_phi)
+        sphere = generator.generate_uv_sphere()
+    elif mesh_type == 'icosahedral':
+        generator = IcosphereGenerator(radius=1.0, subdivisions=n_subdivisions)
+        sphere = generator.generate()
+    else:
+        raise ValueError(f"Unknown mesh_type: {mesh_type}. Use 'rectangular', 'uv', or 'icosahedral'")
+    
+    # Get sphere points
+    points = sphere.points
+    x, y, z = points[:, 0], points[:, 1], points[:, 2]
+    
+    # Stereographic projection to complex plane
+    w = stereographic_projection(x, y, z, from_north=project_from_north)
+    
+    # Evaluate function
+    f_vals = func(w)
+    
+    # Handle infinities and NaN
+    finite_mask = np.isfinite(f_vals)
+    f_vals[~finite_mask] = 0  # Temporary value for color calculation
+    
+    # Get colors from colormap
+    rgb = cmap.rgb(f_vals.reshape(-1, 1)).squeeze()
+    sphere["RGB"] = rgb
+    
+    # Apply modulus scaling
+    moduli = np.abs(f_vals)
+    
+    # Set up scaling parameters with defaults
+    if scaling_params is None:
+        scaling_params = {}
+    
+    # Apply scaling based on method
+    if scaling == 'constant':
+        radius = scaling_params.get('radius', 1.0)
+        radii = ModulusScaling.constant(moduli, radius)
+    elif scaling == 'arctan':
+        r_min = scaling_params.get('r_min', 0.2)
+        r_max = scaling_params.get('r_max', 1.0)
+        radii = ModulusScaling.arctan(moduli, r_min, r_max)
+    elif scaling == 'logarithmic':
+        base = scaling_params.get('base', np.e)
+        r_min = scaling_params.get('r_min', 0.2)
+        r_max = scaling_params.get('r_max', 1.0)
+        radii = ModulusScaling.logarithmic(moduli, base, r_min, r_max)
+    elif scaling == 'linear_clamp':
+        m_max = scaling_params.get('m_max', 10)
+        r_min = scaling_params.get('r_min', 0.2)
+        r_max = scaling_params.get('r_max', 1.0)
+        radii = ModulusScaling.linear_clamp(moduli, m_max, r_min, r_max)
+    elif scaling == 'custom':
+        scaling_func = scaling_params.get('scaling_func', lambda x: x)
+        r_min = scaling_params.get('r_min', 0.2)
+        r_max = scaling_params.get('r_max', 1.0)
+        radii = ModulusScaling.custom(moduli, scaling_func, r_min, r_max)
+    else:
+        raise ValueError(f"Unknown scaling method: {scaling}")
+    
+    # Handle infinities in radii
+    radii[~finite_mask] = radii[finite_mask].max() if np.any(finite_mask) else 1.0
+    
+    # Scale sphere points
+    if mesh_type == 'rectangular':
+        # For structured grids, we need to reshape and recreate
+        n_points = n_phi * n_theta
+        radii_reshaped = radii.reshape((n_phi, n_theta))
+        
+        # Get original grid shape
+        theta = np.linspace(0.01, np.pi - 0.01, n_theta)
+        phi = np.linspace(0, 2 * np.pi, n_phi)
+        THETA, PHI = np.meshgrid(theta, phi)
+        
+        # Apply radial scaling
+        X = radii_reshaped * np.sin(THETA) * np.cos(PHI)
+        Y = radii_reshaped * np.sin(THETA) * np.sin(PHI)
+        Z = radii_reshaped * np.cos(THETA)
+        
+        # Create new scaled grid
+        sphere = pv.StructuredGrid(X, Y, Z)
+        sphere["RGB"] = rgb
+    else:
+        # For unstructured meshes, simple point scaling works
+        scaled_points = points * radii[:, np.newaxis]
+        sphere.points = scaled_points
+    
+    # Store additional data
+    sphere["magnitude"] = moduli
+    sphere["phase"] = np.angle(f_vals)
+    
+    # Create plotter
+    plotter = pv.Plotter(
+        off_screen=not interactive,
+        window_size=window_size
+    )
+    
+    # Enable anti-aliasing
+    if anti_aliasing and anti_aliasing != 'none':
+        aa_applied = False
+        
+        if isinstance(anti_aliasing, str):
+            # User specified a specific method
+            if anti_aliasing in ['msaa', 'ssaa']:
+                try:
+                    plotter.enable_anti_aliasing(anti_aliasing, multi_samples=aa_samples)
+                    aa_applied = True
+                except:
+                    pass
+            elif anti_aliasing == 'fxaa':
+                try:
+                    plotter.enable_anti_aliasing('fxaa')
+                    aa_applied = True
+                except:
+                    pass
+        else:
+            # Auto-select best available method
+            # Try methods in order of compatibility
+            aa_methods = [
+                ('msaa', {'multi_samples': aa_samples}),    # Most compatible
+                ('fxaa', {}),                               # Fast fallback
+                ('ssaa', {'multi_samples': aa_samples}),    # High quality but demanding
+            ]
+            
+            for method, params in aa_methods:
+                try:
+                    plotter.enable_anti_aliasing(method, **params)
+                    aa_applied = True
+                    break
+                except:
+                    continue
+        
+        if not aa_applied:
+            # Last resort: try setting multi_samples on the render window
+            try:
+                plotter.ren_win.SetMultiSamples(aa_samples)
+            except:
+                # If all else fails, continue without anti-aliasing
+                pass
+    
+    # Configure mesh rendering parameters
+    mesh_kwargs = {
+        'rgb': True,
+        'smooth_shading': True,
+        'specular': 0.5,
+        'specular_power': 20,
+    }
+    
+    # Add high-quality rendering options
+    if high_quality:
+        if use_pbr:
+            # PBR settings (may cause shader errors on some systems)
+            mesh_kwargs.update({
+                'pbr': True,
+                'metallic': 0.2,
+                'roughness': 0.5,
+                'interpolate_before_map': True,
+            })
+        else:
+            # Enhanced settings without PBR (more compatible)
+            mesh_kwargs.update({
+                'smooth_shading': True,
+                'specular': 0.8,
+                'specular_power': 50,
+                'ambient': 0.3,
+                'diffuse': 0.7,
+            })
+    
+    mesh_kwargs.update(kwargs)
+    
+    actor = plotter.add_mesh(sphere, **mesh_kwargs)
+    
+    # Add grid lines if requested
+    if show_grid:
+        # Create latitude/longitude lines
+        n_lat = 9  # Number of latitude lines
+        n_lon = 12  # Number of longitude lines
+        
+        # Latitude lines
+        for i in range(1, n_lat):
+            lat = np.pi * i / n_lat - np.pi / 2
+            theta = np.linspace(0, 2 * np.pi, 100)
+            x_lat = np.cos(lat) * np.cos(theta)
+            y_lat = np.cos(lat) * np.sin(theta)
+            z_lat = np.full_like(theta, np.sin(lat))
+            points_lat = np.column_stack([x_lat, y_lat, z_lat])
+            
+            if scaling == 'constant':
+                points_lat *= scaling_params.get('radius', 1.0)
+            
+            line = pv.PolyData(points_lat)
+            plotter.add_mesh(line, color='gray', line_width=0.5, opacity=0.3)
+        
+        # Longitude lines
+        for i in range(n_lon):
+            lon = 2 * np.pi * i / n_lon
+            phi = np.linspace(-np.pi / 2, np.pi / 2, 100)
+            x_lon = np.cos(phi) * np.cos(lon)
+            y_lon = np.cos(phi) * np.sin(lon)
+            z_lon = np.sin(phi)
+            points_lon = np.column_stack([x_lon, y_lon, z_lon])
+            
+            if scaling == 'constant':
+                points_lon *= scaling_params.get('radius', 1.0)
+            
+            line = pv.PolyData(points_lon)
+            plotter.add_mesh(line, color='gray', line_width=0.5, opacity=0.3)
+    
+    # Set camera
+    plotter.camera_position = camera_position
+    
+    # Add axes
+    if show_axes:
+        plotter.show_axes()
+    
+    # Add title
+    if title:
+        plotter.add_text(title, font_size=14)
+    
+    # Show or save
+    if interactive:
+        plotter.show()
+    else:
+        if filename:
+            if filename.endswith(('.pdf', '.svg', '.eps')):
+                plotter.save_graphic(filename)
+            else:
+                plotter.screenshot(filename)
+        else:
+            plotter.show(screenshot=True)
+    
+    if return_plotter:
+        return plotter
+    else:
+        plotter.close()

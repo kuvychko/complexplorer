@@ -200,12 +200,121 @@ class TestPairPlotLandscapePv:
 
 
 class TestRiemannPv:
-    """Test the riemann_pv function placeholder."""
+    """Test the riemann_pv function."""
     
-    def test_not_implemented(self):
-        """Test that riemann_pv raises NotImplementedError."""
-        with pytest.raises(NotImplementedError, match="icosahedral sphere meshing"):
-            riemann_pv(lambda z: z)
+    def test_basic_riemann_sphere(self):
+        """Test basic Riemann sphere visualization."""
+        func = lambda z: z
+        
+        # Should not raise any errors with default rectangular mesh
+        riemann_pv(func, n_theta=50, n_phi=50, interactive=False)
+    
+    def test_constant_scaling(self):
+        """Test traditional Riemann sphere with constant radius."""
+        func = lambda z: (z - 1) / (z + 1)
+        
+        riemann_pv(
+            func,
+            n_theta=50,
+            n_phi=50,
+            scaling='constant',
+            scaling_params={'radius': 1.5},
+            interactive=False
+        )
+    
+    def test_icosahedral_mesh(self):
+        """Test Riemann sphere with icosahedral mesh."""
+        func = lambda z: z**2
+        
+        riemann_pv(
+            func,
+            mesh_type='icosahedral',
+            n_subdivisions=2,
+            interactive=False
+        )
+    
+    def test_uv_mesh(self):
+        """Test Riemann sphere with UV mesh."""
+        func = lambda z: 1 / z
+        
+        riemann_pv(
+            func,
+            mesh_type='uv',
+            n_theta=50,
+            n_phi=50,
+            interactive=False
+        )
+    
+    def test_arctan_scaling(self):
+        """Test Riemann sphere with arctan modulus scaling."""
+        func = lambda z: z**2
+        
+        riemann_pv(
+            func,
+            n_theta=50,
+            n_phi=50,
+            scaling='arctan',
+            scaling_params={'r_min': 0.3, 'r_max': 1.2},
+            interactive=False
+        )
+    
+    def test_with_grid_lines(self):
+        """Test Riemann sphere with latitude/longitude grid."""
+        func = lambda z: 1 / z
+        
+        riemann_pv(
+            func,
+            n_theta=50,
+            n_phi=50,
+            show_grid=True,
+            interactive=False
+        )
+    
+    def test_file_output(self, tmp_path):
+        """Test saving Riemann sphere to file."""
+        func = lambda z: np.sin(z)
+        filename = tmp_path / "riemann_sphere.png"
+        
+        riemann_pv(
+            func,
+            n_theta=50,
+            n_phi=50,
+            interactive=False,
+            filename=str(filename)
+        )
+        
+        assert filename.exists()
+    
+    def test_invalid_scaling(self):
+        """Test error handling for invalid scaling method."""
+        func = lambda z: z
+        
+        with pytest.raises(ValueError, match="Unknown scaling method"):
+            riemann_pv(func, scaling='invalid', interactive=False)
+    
+    def test_quality_settings(self):
+        """Test high quality and anti-aliasing settings."""
+        func = lambda z: z**2
+        
+        # Test with quality settings disabled
+        riemann_pv(
+            func,
+            n_theta=30,
+            n_phi=30,
+            high_quality=False,
+            anti_aliasing=False,
+            interactive=False
+        )
+        
+        # Test with quality settings enabled
+        riemann_pv(
+            func,
+            n_theta=30,
+            n_phi=30,
+            high_quality=True,
+            anti_aliasing=True,
+            interactive=False
+        )
 
 
 # Fixtures for PyVista configuration
