@@ -32,6 +32,7 @@ which, in my view, can only be referred to as ‘magic’.*
 - **🎨 Rich visualization options**: Phase portraits, enhanced phase portraits, chessboard patterns, and more
 - **🗺️ Flexible domains**: Rectangles, disks, annuli, and custom domains via composition
 - **📊 Multiple plot types**: 2D images, 3D analytic landscapes, Riemann sphere projections
+- **🖨️ 3D Printing Support**: Export complex function visualizations as STL files for 3D printing
 - **🧩 Composable design**: Mix any domain, color map, and plot type
 - **🚀 Lightweight**: Requires only NumPy and Matplotlib
 
@@ -122,6 +123,37 @@ cp.riemann_pv(f, scaling='arctan', show_orientation=True)
 ```
 
 **⚠️ Important Note:** For best quality, we strongly recommend using PyVista visualizations via command-line scripts rather than Jupyter notebooks. The Jupyter backend (trame) has significant aliasing issues that cannot be compensated with higher resolution. See `examples/interactive_demo.py` for an excellent CLI-based interactive experience.
+
+### 🖨️ 3D Printing Support
+
+Transform your complex function visualizations into physical objects! Complexplorer can export Riemann sphere visualizations as STL files suitable for 3D printing:
+
+```python
+from complexplorer.stl_export import OrnamentGeneratorV2
+
+# Create STL files from your function
+ornament = OrnamentGeneratorV2(
+    func=lambda z: (z - 1) / (z**2 + z + 1),
+    resolution=150,
+    scaling='arctan',
+    cmap=cp.Phase(n_phi=12, auto_scale_r=True)
+)
+
+# Generate print-ready STL files
+top_file, bottom_file = ornament.generate_ornament(
+    cut_mode='real',
+    size_mm=80,
+    smooth=True
+)
+```
+
+Features:
+- Automatic mesh healing for watertight models
+- Flat bisection planes for easy printing without supports
+- Multiple modulus scaling methods
+- Compatible with all complexplorer colormaps
+
+See the [STL Export Guide](docs/stl_export_guide.md) for detailed instructions and `examples/stl_ornament_examples.py` for more examples.
 
 ## 🤝 Contributing
 
