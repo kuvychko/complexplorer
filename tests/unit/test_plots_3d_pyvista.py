@@ -248,7 +248,9 @@ class TestRiemannPv:
     
     def test_constant_scaling(self):
         """Test traditional Riemann sphere with constant radius."""
-        func = lambda z: (z - 1) / (z + 1)
+        def func(z):
+            with np.errstate(divide='ignore', invalid='ignore'):
+                return (z - 1) / (z + 1)
         
         riemann_pv(
             func,
@@ -272,7 +274,9 @@ class TestRiemannPv:
     
     def test_uv_mesh(self):
         """Test Riemann sphere with UV mesh."""
-        func = lambda z: 1 / z
+        def func(z):
+            with np.errstate(divide='ignore', invalid='ignore'):
+                return 1 / z
         
         riemann_pv(
             func,
@@ -297,7 +301,9 @@ class TestRiemannPv:
     
     def test_with_grid_lines(self):
         """Test Riemann sphere with latitude/longitude grid."""
-        func = lambda z: 1 / z
+        def func(z):
+            with np.errstate(divide='ignore', invalid='ignore'):
+                return 1 / z
         
         riemann_pv(
             func,
@@ -331,7 +337,9 @@ class TestRiemannPv:
     
     def test_orientation_axes(self):
         """Test orientation axes widget display."""
-        func = lambda z: (z - 1) / (z + 1)
+        def func(z):
+            with np.errstate(divide='ignore', invalid='ignore'):
+                return (z - 1) / (z + 1)
         
         # Test with orientation axes enabled (default)
         riemann_pv(
