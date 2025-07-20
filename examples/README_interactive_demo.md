@@ -44,10 +44,11 @@ chmod +x examples/interactive_demo.py
 1. Basic phase portrait
 2. Enhanced phase (6 colors)
 3. Enhanced phase (12 colors)
-4. Enhanced phase (24 colors)
-5. Chessboard pattern
-6. Polar chessboard
-7. Logarithmic rings
+4. Enhanced phase (6 colors, auto-scaled)
+5. Enhanced phase (24 colors)
+6. Chessboard pattern
+7. Polar chessboard
+8. Logarithmic rings
 
 ### Domains
 1. Square (4×4)

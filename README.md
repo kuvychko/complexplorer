@@ -95,9 +95,9 @@ Explore the full range of visualizations in our [**Gallery**](docs/gallery/READM
 ## 🛠️ Advanced Example
 
 ```python
-# Create an enhanced phase portrait with custom parameters
+# Create an enhanced phase portrait with auto-scaling for square cells
 domain = cp.Annulus(0.5, 2, center=1j)  # Annular domain
-cmap = cp.Phase(n_phi=6, r_linear_step=0.4)  # Enhanced phase portrait
+cmap = cp.Phase(n_phi=6, auto_scale_r=True, v_base=0.4)  # Auto-scaled enhanced phase
 
 # 2D visualization with domain and codomain side-by-side
 cp.pair_plot(domain, f, cmap=cmap, figsize=(10, 5))

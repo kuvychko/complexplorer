@@ -32,7 +32,7 @@ cp.pair_plot(domain, func, cmap=cp.Phase(r_linear_step=0.6))
 #### Enhanced Phase Portrait (Phase and Modulus)
 ![Enhanced phase portrait](../../examples/gallery/Enhanced_phase_portrait_phase_and_modulus_enhanced_2d.png)
 ```python
-cp.pair_plot(domain, func, cmap=cp.Phase(n_phi=6, r_linear_step=0.6))
+cp.pair_plot(domain, func, cmap=cp.Phase(n_phi=6, auto_scale_r=True))
 ```
 
 ### Chessboard Patterns
@@ -80,7 +80,7 @@ cp.pair_plot_landscape(domain, func, cmap=cp.Phase())
 #### Enhanced Phase Portrait Landscape
 ![Enhanced phase portrait 3D](../../examples/gallery/Enhanced_phase_portrait_phase_and_modulus_enhanced_3d.png)
 ```python
-cp.pair_plot_landscape(domain, func, cmap=cp.Phase(n_phi=6, r_linear_step=0.6))
+cp.pair_plot_landscape(domain, func, cmap=cp.Phase(n_phi=6, auto_scale_r=True))
 ```
 
 #### Polar Chessboard Landscape
@@ -102,7 +102,7 @@ cp.riemann_hemispheres(func)
 #### 3D Riemann Sphere
 ![Riemann sphere](../../examples/gallery/riemann_sphere_3d.png)
 ```python
-cp.riemann(func, n=600, cmap=cp.Phase(n_phi=6, r_linear_step=1))
+cp.riemann(func, n=600, cmap=cp.Phase(n_phi=6, auto_scale_r=True, scale_radius=1.6))
 ```
 
 ## Understanding the Visualizations

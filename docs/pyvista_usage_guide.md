@@ -16,6 +16,12 @@ The Jupyter trame backend has severe aliasing and rendering issues that cannot b
 # Install complexplorer with PyVista support
 pip install "complexplorer[pyvista]"
 
+# For interactive matplotlib plots in CLI scripts
+pip install "complexplorer[qt]"
+
+# Or install everything
+pip install "complexplorer[all]"
+
 # Or install PyVista separately
 pip install pyvista>=0.45.0
 ```
@@ -51,7 +57,7 @@ cp.pair_plot_landscape_pv(
     n=200,
     z_max=10,
     show_orientation=True,
-    cmap=cp.Phase(12)  # Enhanced phase portrait
+    cmap=cp.Phase(n_phi=12, auto_scale_r=True)  # Auto-scaled enhanced phase
 )
 ```
 
@@ -106,7 +112,7 @@ cp.plot_landscape_pv(
     my_complex_function,
     n=300,
     z_max=20,
-    cmap=cp.Phase(n_phi=12),
+    cmap=cp.Phase(n_phi=12, auto_scale_r=True),
     show_orientation=True,
     title="sin(z)/z",
     interactive=True

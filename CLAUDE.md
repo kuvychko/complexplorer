@@ -20,9 +20,13 @@ complexplorer/
 │   ├── cmap.py            # Color map classes (Phase, Chessboard, etc.)
 │   ├── funcs.py           # Supporting functions (phase, sawtooth, stereographic)
 │   ├── plots_2d.py        # 2D plotting functions
-│   └── plots_3d.py        # 3D plotting functions
+│   ├── plots_3d.py        # 3D plotting functions (matplotlib)
+│   ├── plots_3d_pyvista.py # 3D plotting functions (PyVista)
+│   ├── mesh_utils.py      # Mesh generation utilities for Riemann sphere
+│   └── utils.py           # Backend detection and setup utilities
 ├── examples/              # Example notebooks and output images
-├── tests/                 # Unit tests with comprehensive coverage
+├── tests/                 # Unit tests
+│   └── unit/              # Unit tests with comprehensive coverage
 ├── pyproject.toml         # Project configuration
 └── README.md              # Project documentation
 ```
@@ -32,8 +36,10 @@ complexplorer/
 - Python >= 3.11
 - numpy >= 1.26.0
 - matplotlib >= 3.8.0
-- PyQt6 >= 6.5.0 (optional, for interactive matplotlib plots in CLI scripts)
-- PyVista >= 0.45.0 (optional, for high-performance 3D visualizations)
+
+Optional dependencies:
+- PyQt6 >= 6.5.0 (for interactive matplotlib plots in CLI scripts)
+- PyVista >= 0.45.0 (for high-performance 3D visualizations)
 
 ## Development Setup
 
@@ -47,8 +53,12 @@ source .venv/bin/activate
 # Install the package in editable mode with all development dependencies
 uv pip install -e ".[dev]"
 
-# Or install with all optional dependencies (includes PyVista)
+# Or install with all optional dependencies (includes PyVista and PyQt6)
 uv pip install -e ".[all]"
+
+# Or install specific optional features
+uv pip install -e ".[qt]"     # For interactive matplotlib plots
+uv pip install -e ".[pyvista]" # For high-performance 3D
 ```
 
 ### Running Tests
@@ -68,7 +78,7 @@ pytest tests/unit/test_domain.py -v
 
 ### Testing
 
-The project has a comprehensive unit test suite with 116 tests covering all major functionality. Tests are located in the `tests/` directory and can be run using pytest.
+The project has a comprehensive unit test suite covering all major functionality. Tests are located in the `tests/unit/` directory and can be run using pytest.
 
 ### Code Style
 
@@ -108,13 +118,13 @@ The project includes high-performance PyVista-based 3D plotting functions:
 
 **Important**: For best quality, use PyVista functions via command-line scripts rather than Jupyter notebooks. The Jupyter trame backend has severe aliasing issues. See `examples/interactive_demo.py` for an optimal interactive experience.
 
-### Future Improvements (from README)
+### Future Improvements
 
-- Auto-tuning of modulus discretization for square enhanced regions
-- PyVista implementation for 3D plots
-- Triangular meshing for Riemann sphere
 - STL file export for 3D printing
+- Animation capabilities for parameter exploration
 - Optimized viewing windows for domain intersections
+- Documentation framework (Sphinx/MkDocs)
+- Additional mesh generation options
 
 ## Quick Reference
 
@@ -130,8 +140,8 @@ domain = cp.Rectangle(re_length=4, im_length=4)
 def f(z):
     return (z - 1) / (z**2 + z + 1)
 
-# Choose color map
-cmap = cp.Phase(n_phase=6, enhance_phase=True)
+# Choose color map (auto-scaled enhanced phase)
+cmap = cp.Phase(n_phi=6, auto_scale_r=True)
 
 # Create visualization
 cp.plot(domain, f, cmap)
@@ -140,13 +150,22 @@ cp.plot(domain, f, cmap)
 ### Common Color Maps
 
 - `Phase()`: Basic or enhanced phase portraits
+  - Use `auto_scale_r=True` for automatic square cell sizing
+  - Set `n_phi` for number of phase sectors
+  - Adjust `scale_radius` to control cell size
 - `Chessboard()`: Cartesian grid pattern
 - `PolarChessboard()`: Polar grid pattern
 - `LogRings()`: Logarithmic black/white rings
 
 ### Plot Types
 
+#### Matplotlib-based:
 - `plot()`: Basic 2D visualization
 - `pair_plot()`: Side-by-side domain and codomain
 - `plot_landscape()`: 3D surface plot
 - `riemann()`: Riemann sphere visualization
+
+#### PyVista-based (high-performance):
+- `plot_landscape_pv()`: Fast 3D landscape
+- `pair_plot_landscape_pv()`: Fast side-by-side 3D
+- `riemann_pv()`: Interactive Riemann sphere with modulus scaling
