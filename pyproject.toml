@@ -11,7 +11,7 @@ exclude = ["examples*", "tests*"]
 
 [project]
 name = "complexplorer"
-version = "0.1.2"
+version = "1.0.0"
 authors = [
   { name="Igor Kuvychko", email="igor.kuvychko@gmail.com" },
 ]
