@@ -788,7 +788,7 @@ def riemann_pv(
     
     # Add grid lines if requested
     if show_grid:
-        # Create latitude/longitude lines
+        # Create latitude/longitude lines on the unit sphere
         n_lat = 9  # Number of latitude lines
         n_lon = 12  # Number of longitude lines
         
@@ -799,43 +799,11 @@ def riemann_pv(
             x_lat = np.cos(lat) * np.cos(theta)
             y_lat = np.cos(lat) * np.sin(theta)
             z_lat = np.full_like(theta, np.sin(lat))
+            points_lat = np.column_stack([x_lat, y_lat, z_lat])
             
-            # Apply stereographic projection and function evaluation for grid lines
-            w_lat = stereographic_projection(x_lat, y_lat, z_lat, from_north=project_from_north)
-            f_vals_lat = func(w_lat)
-            moduli_lat = np.abs(f_vals_lat)
-            
-            # Apply the same scaling as the surface
-            if scaling == 'constant':
-                radii_lat = np.full_like(moduli_lat, scaling_params.get('radius', 1.0))
-            elif scaling == 'arctan':
-                r_min = scaling_params.get('r_min', 0.2)
-                r_max = scaling_params.get('r_max', 1.0)
-                radii_lat = ModulusScaling.arctan(moduli_lat, r_min, r_max)
-            elif scaling == 'logarithmic':
-                base = scaling_params.get('base', np.e)
-                r_min = scaling_params.get('r_min', 0.2)
-                r_max = scaling_params.get('r_max', 1.0)
-                radii_lat = ModulusScaling.logarithmic(moduli_lat, base, r_min, r_max)
-            elif scaling == 'linear_clamp':
-                m_max = scaling_params.get('m_max', 10)
-                r_min = scaling_params.get('r_min', 0.2)
-                r_max = scaling_params.get('r_max', 1.0)
-                radii_lat = ModulusScaling.linear_clamp(moduli_lat, m_max, r_min, r_max)
-            elif scaling == 'custom':
-                scaling_func = scaling_params.get('scaling_func', lambda x: x)
-                r_min = scaling_params.get('r_min', 0.2)
-                r_max = scaling_params.get('r_max', 1.0)
-                radii_lat = ModulusScaling.custom(moduli_lat, scaling_func, r_min, r_max)
-            else:
-                radii_lat = np.ones_like(moduli_lat)
-            
-            # Scale the grid line points
-            points_lat = np.column_stack([
-                x_lat * radii_lat,
-                y_lat * radii_lat,
-                z_lat * radii_lat
-            ])
+            # Keep grid lines at unit sphere radius
+            if scaling == 'constant' and scaling_params.get('radius', 1.0) != 1.0:
+                points_lat *= scaling_params.get('radius', 1.0)
             
             line = pv.PolyData(points_lat)
             plotter.add_mesh(line, color='gray', line_width=0.5, opacity=0.3)
@@ -847,43 +815,11 @@ def riemann_pv(
             x_lon = np.cos(phi) * np.cos(lon)
             y_lon = np.cos(phi) * np.sin(lon)
             z_lon = np.sin(phi)
+            points_lon = np.column_stack([x_lon, y_lon, z_lon])
             
-            # Apply stereographic projection and function evaluation for grid lines
-            w_lon = stereographic_projection(x_lon, y_lon, z_lon, from_north=project_from_north)
-            f_vals_lon = func(w_lon)
-            moduli_lon = np.abs(f_vals_lon)
-            
-            # Apply the same scaling as the surface
-            if scaling == 'constant':
-                radii_lon = np.full_like(moduli_lon, scaling_params.get('radius', 1.0))
-            elif scaling == 'arctan':
-                r_min = scaling_params.get('r_min', 0.2)
-                r_max = scaling_params.get('r_max', 1.0)
-                radii_lon = ModulusScaling.arctan(moduli_lon, r_min, r_max)
-            elif scaling == 'logarithmic':
-                base = scaling_params.get('base', np.e)
-                r_min = scaling_params.get('r_min', 0.2)
-                r_max = scaling_params.get('r_max', 1.0)
-                radii_lon = ModulusScaling.logarithmic(moduli_lon, base, r_min, r_max)
-            elif scaling == 'linear_clamp':
-                m_max = scaling_params.get('m_max', 10)
-                r_min = scaling_params.get('r_min', 0.2)
-                r_max = scaling_params.get('r_max', 1.0)
-                radii_lon = ModulusScaling.linear_clamp(moduli_lon, m_max, r_min, r_max)
-            elif scaling == 'custom':
-                scaling_func = scaling_params.get('scaling_func', lambda x: x)
-                r_min = scaling_params.get('r_min', 0.2)
-                r_max = scaling_params.get('r_max', 1.0)
-                radii_lon = ModulusScaling.custom(moduli_lon, scaling_func, r_min, r_max)
-            else:
-                radii_lon = np.ones_like(moduli_lon)
-            
-            # Scale the grid line points
-            points_lon = np.column_stack([
-                x_lon * radii_lon,
-                y_lon * radii_lon,
-                z_lon * radii_lon
-            ])
+            # Keep grid lines at unit sphere radius
+            if scaling == 'constant' and scaling_params.get('radius', 1.0) != 1.0:
+                points_lon *= scaling_params.get('radius', 1.0)
             
             line = pv.PolyData(points_lon)
             plotter.add_mesh(line, color='gray', line_width=0.5, opacity=0.3)
