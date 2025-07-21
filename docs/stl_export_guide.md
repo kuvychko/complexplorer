@@ -1,237 +1,260 @@
-# STL Export Guide for 3D Printing
+# STL Export Guide - Complete Meshes (No Cutting!)
 
-This guide explains how to generate 3D-printable STL files from complex function visualizations using complexplorer's STL export functionality.
+This guide explains how to generate 3D-printable STL files from complex function visualizations.
 
 ## Overview
 
-The STL export module allows you to transform complex function visualizations on the Riemann sphere into physical 3D objects. This is perfect for creating educational models, mathematical art, or unique decorative items.
+The `OrnamentGenerator` creates complete, watertight Riemann sphere meshes. Users can orient and slice the mesh however they want in their 3D printing slicer software.
 
-## Key Features
-
-- **Flat Bisection Planes**: Ensures perfectly flat cutting surfaces for optimal 3D printing
-- **Automatic Mesh Healing**: Fixes common mesh defects like holes and non-manifold edges
-- **Multiple Scaling Methods**: Control how the modulus affects the 3D shape
-- **Colormap Support**: All complexplorer colormaps work with STL generation
-- **Print-Ready Output**: Generates watertight meshes with flat bottoms for bed adhesion
-- **Empty Layer Prevention**: Advanced healing algorithm specifically targets gaps between layers
-- **Spike Elimination**: Intelligent smoothing removes artifacts while preserving detail
-- **Domain Restrictions**: Limit visualization to specific regions for better numerical stability
-- **Singularity Handling**: Automatic neighbor interpolation creates smooth surfaces at poles and infinities
+### Advantages:
+- **No "peg" artifacts** from incorrect pole detection
+- **Unlimited cutting angles** - slice at any orientation in your slicer
+- **Simpler code** - no complex bisection algorithms
+- **Better for asymmetric functions** - no forced symmetry
+- **Hollow ornaments** - use your slicer's infill settings
 
 ## Basic Usage
 
 ```python
-import complexplorer as cp
+from complexplorer.cmap import Phase
 from complexplorer.stl_export import OrnamentGenerator
 
 # Define your complex function
 func = lambda z: (z - 1) / (z**2 + z + 1)
 
-# Create ornament generator
-ornament = OrnamentGenerator(
+# Create generator
+generator = OrnamentGenerator(
     func=func,
-    resolution=150,  # Higher = more detail
-    scaling='arctan',  # Modulus scaling method
-    cmap=cp.Phase(n_phi=12, auto_scale_r=True)
+    resolution=120,
+    scaling='arctan',
+    scaling_params={'r_min': 0.3, 'r_max': 1.2},
+    cmap=Phase(12)
 )
 
-# Generate STL files
-top_file, bottom_file = ornament.generate_ornament(
-    cut_mode='real',  # Cut along real axis
-    size_mm=80,       # Diameter in millimeters
-    smooth=True,      # Apply smoothing
-    output_prefix='my_ornament'
+# Generate complete watertight mesh
+filename = generator.generate_ornament(
+    output_file='my_ornament.stl',
+    size_mm=80,
+    smooth=True
 )
 ```
 
-### Domain Restrictions
+That's it! You get a single STL file that you can:
+- Import into any slicer (PrusaSlicer, Cura, etc.)
+- Orient however you like
+- Cut at any angle or position
+- Make hollow with infill settings
 
-New in v1.1.0: You can restrict the visualization to specific domains to avoid numerical instabilities or focus on regions of interest:
+## How It Works
+
+### Spherical Shell Clipping
+Instead of trying to heal complex, jagged tears from singularities:
+
+1. **Clip to spherical shell** - Creates clean circular boundaries
+2. **Cap the boundaries** - Simple radial triangulation
+3. **Result** - Watertight mesh ready for printing
 
 ```python
-# Avoid infinity at large distances
-domain = cp.Disk(radius=5, center=0)
-ornament = OrnamentGenerator(func=func, domain=domain, resolution=150)
-
-# Exclude origin for functions with poles
-domain = cp.Annulus(radius_inner=0.1, radius_outer=3, center=0)
-ornament = OrnamentGenerator(
-    func=lambda z: np.exp(1/z), 
-    domain=domain,
-    scaling='arctan'
-)
-
-# Focus on a specific rectangular region
-domain = cp.Rectangle(re_length=4, im_length=4, center=1+1j)
-ornament = OrnamentGenerator(func=func, domain=domain)
+# The healing happens automatically with spherical shell clipping
+generator.heal_mesh(smooth=True, smooth_iterations=20)
 ```
-
-Domain restrictions are especially useful for:
-- Functions with essential singularities (e.g., exp(1/z))
-- Avoiding numerical overflow at poles
-- Creating ornaments focused on specific features
-- Improving mesh quality by excluding problematic regions
 
 ## Scaling Methods
 
-The `scaling` parameter controls how the modulus (magnitude) of complex values affects the 3D shape:
+Same as v1, but now applied to the complete sphere:
 
-### 1. Constant Scaling
+### Arctan Scaling (Recommended)
+```python
+scaling='arctan'
+scaling_params={'r_min': 0.3, 'r_max': 1.0}
+```
+Smoothly maps all values to a bounded range. Perfect for functions with poles.
+
+### Linear Clamp
+```python
+scaling='linear_clamp'
+scaling_params={'m_max': 10, 'r_min': 0.3, 'r_max': 1.2}
+```
+Linear up to m_max, then clamped. Good for controlled visualization.
+
+### Logarithmic
+```python
+scaling='logarithmic'
+scaling_params={'base': np.e, 'r_min': 0.3, 'r_max': 1.0}
+```
+Emphasizes small modulus values. Great for functions with zeros.
+
+### Constant
 ```python
 scaling='constant'
 scaling_params={'radius': 1.0}
 ```
-All points are projected to a sphere of fixed radius. Good for visualizing phase only.
+Perfect sphere - shows only phase information.
 
-### 2. Arctan Scaling
+## Domain Restrictions
+
+Still supported for focusing on specific regions:
+
 ```python
-scaling='arctan'
-scaling_params={'r_min': 0.2, 'r_max': 1.0}
-```
-Uses arctangent to smoothly map all modulus values to a bounded range. Great for functions with poles.
+from complexplorer import Disk, Annulus
 
-### 3. Logarithmic Scaling
-```python
-scaling='logarithmic'
-scaling_params={'base': np.e, 'r_min': 0.2, 'r_max': 1.0}
-```
-Emphasizes differences in small modulus values. Useful for functions with zeros.
+# Avoid infinity
+domain = Disk(radius=5)
+generator = OrnamentGenerator(func=func, domain=domain)
 
-### 4. Linear Clamp Scaling
-```python
-scaling='linear_clamp'
-scaling_params={'m_max': 10, 'r_min': 0.2, 'r_max': 1.0}
-```
-Linear scaling up to m_max, then clamped. Good for controlled visualization range.
-
-## Cutting Modes
-
-The ornament is cut into two halves for easier printing:
-
-- `'real'`: Cut along the real axis (y=0)
-- `'imaginary'`: Cut along the imaginary axis (x=0)
-- `'angle:degrees'`: Cut at a specified angle (e.g., `'angle:45'`)
-
-## Advanced Options
-
-### Custom Resolution
-```python
-# Higher resolution for detailed functions
-ornament = OrnamentGenerator(func=func, resolution=300)
-
-# Lower resolution for faster generation
-ornament = OrnamentGenerator(func=func, resolution=80)
+# Exclude origin for 1/z type functions
+domain = Annulus(radius_inner=0.1, radius_outer=3)
+generator = OrnamentGenerator(func=lambda z: 1/z, domain=domain)
 ```
 
-### Smoothing Control
+## Step-by-Step Control
+
+For advanced users who want more control:
+
 ```python
-# Generate sphere and heal mesh separately
-sphere = ornament.generate_sphere(verbose=True)
-healed = ornament.heal_mesh(
-    smooth=True,
-    smooth_iterations=30,  # More iterations = smoother
-    verbose=True
-)
-```
+# 1. Create generator
+generator = OrnamentGenerator(func, resolution=150)
 
-### Manual Processing
-```python
-# Step-by-step generation for full control
-ornament = OrnamentGenerator(func, resolution=200)
+# 2. Generate sphere
+sphere = generator.generate_sphere(verbose=True)
 
-# 1. Generate Riemann sphere
-sphere = ornament.generate_sphere()
+# 3. Heal with spherical clipping
+healed = generator.heal_mesh(smooth=True, verbose=True)
 
-# 2. Heal mesh defects
-healed = ornament.heal_mesh(smooth=True)
-
-# 3. Cut into halves
-top, bottom = ornament.cut(mode='real')
-
-# 4. Validate printability
-ornament.validate_printability(top)
-ornament.validate_printability(bottom)
+# 4. Validate
+generator.validate_printability(verbose=True)
 
 # 5. Export with custom size
-ornament.export('top.stl', top, size_mm=100)
-ornament.export('bottom.stl', bottom, size_mm=100)
+generator.export('output.stl', size_mm=100)
 ```
 
-## Colormap Examples
+## Migration from v1
 
-### Enhanced Phase Portrait
+If you have code using the old `OrnamentGenerator`:
+
 ```python
-cmap = cp.Phase(n_phi=12, auto_scale_r=True)
+# Old way (v1)
+from complexplorer.stl_export import OrnamentGenerator
+ornament = OrnamentGenerator(func, resolution=150)
+top, bottom = ornament.generate_ornament(cut_mode='real')
+
+# New way (v2)
+from complexplorer.stl_export import OrnamentGenerator
+ornament = OrnamentGeneratorV2(func, resolution=150)
+complete_file = ornament.generate_ornament()
 ```
 
-### Chessboard Pattern
+## Slicing in Your 3D Printer Software
+
+### PrusaSlicer
+1. Import the STL file
+2. Use "Cut" tool (C key)
+3. Position cut plane wherever you want
+4. Export both parts
+
+### Cura
+1. Import the STL
+2. Use "Mesh Tools" → "Split model into parts"
+3. Position as desired
+
+### Benefits of Slicer Cutting
+- Visual preview of cut position
+- Multiple cut angles in one session
+- Automatic support generation
+- Hollow ornaments with vase mode
+- Different infill patterns for each half
+
+## Examples
+
+### Simple Pole Function
 ```python
-cmap = cp.Chessboard(spacing=1.0)
+func = lambda z: 1/z
+generator = OrnamentGenerator(
+    func=func,
+    scaling='arctan',
+    scaling_params={'r_min': 0.3, 'r_max': 1.2}
+)
+generator.generate_ornament('simple_pole.stl')
 ```
 
-### Polar Chessboard
+### Multiple Singularities
 ```python
-cmap = cp.PolarChessboard(n_phi=8, spacing=0.5)
+func = lambda z: 1/(z**4 - 1)  # Singularities at ±1, ±i
+generator = OrnamentGenerator(
+    func=func,
+    scaling='logarithmic',
+    scaling_params={'base': 2, 'r_min': 0.25, 'r_max': 1.1}
+)
+generator.generate_ornament('four_poles.stl')
 ```
 
-### Logarithmic Rings
+### Identity Function (Previously Problematic)
 ```python
-cmap = cp.LogRings(base=2)
+func = lambda z: z
+generator = OrnamentGenerator(
+    func=func,
+    scaling='arctan',
+    scaling_params={'r_min': 0.3, 'r_max': 1.0}
+)
+generator.generate_ornament('identity_clean.stl')
 ```
 
-## 3D Printing Tips
+## Tips for Best Results
 
-1. **No Supports Needed**: The flat bottom ensures good bed adhesion
-2. **Recommended Settings**:
-   - Layer height: 0.15-0.2mm
-   - Infill: 20-30% for decorative use
-   - Print speed: Standard (50-60 mm/s)
-   
-3. **Assembly**: Print both halves and glue together with cyanoacrylate or epoxy
-4. **Finishing**: Sand the seam and optionally paint to highlight features
+1. **Resolution**: 100-150 for most functions, 200+ for high detail
+2. **Smoothing**: 20-30 iterations usually sufficient
+3. **Size**: 60-100mm diameter works well for desktop display
+4. **Scaling**: Use arctan for functions with poles, logarithmic for zeros
 
 ## Troubleshooting
 
-### Gaps in Mesh
-If your slicer reports gaps:
-- Increase resolution (200-300)
-- Enable smoothing
-- Use mesh repair in your slicer
+### File Too Large
+- Reduce resolution to 80-120
+- Binary STL format is default (smaller files)
 
-### Large File Size
-- Reduce resolution (100-150)
-- Use binary STL format (default)
+### Slicer Reports Non-Manifold
+- Usually fine for printing
+- Use slicer's repair function if needed
 
-### Poor Detail
-- Increase resolution
-- Adjust scaling parameters
-- Choose appropriate colormap
+### Want Traditional Halves?
+- Use your slicer's cut tool
+- Or use the original `OrnamentGenerator` (still available)
 
-## Example Functions
+## Complete Example Script
 
-### Rational Functions
 ```python
-# Simple poles and zeros
-f1 = lambda z: (z - 1) / (z + 1)
-f2 = lambda z: 1 / (z**2 + 1)
-f3 = lambda z: (z**2 - 1) / (z**2 + z + 1)
+#!/usr/bin/env python3
+"""Generate a collection of mathematical ornaments."""
+
+from complexplorer.cmap import Phase
+from complexplorer.stl_export import OrnamentGenerator
+import numpy as np
+
+# Collection of interesting functions
+functions = [
+    ("mobius", lambda z: (z - 1) / (z + 1)),
+    ("quadratic", lambda z: z**2),
+    ("sine", lambda z: np.sin(z)),
+    ("rational", lambda z: (z**2 - 1) / (z**2 + z + 1)),
+]
+
+for name, func in functions:
+    print(f"Generating {name}...")
+    
+    generator = OrnamentGenerator(
+        func=func,
+        resolution=120,
+        scaling='arctan',
+        scaling_params={'r_min': 0.3, 'r_max': 1.0},
+        cmap=Phase(12)
+    )
+    
+    generator.generate_ornament(
+        output_file=f'{name}_ornament.stl',
+        size_mm=80,
+        smooth=True
+    )
+
+print("All ornaments generated!")
+print("Import into your slicer and cut at any angle you like!")
 ```
-
-### Transcendental Functions  
-```python
-# Interesting periodic behavior
-f4 = lambda z: np.sin(z)
-f5 = lambda z: np.exp(z)
-f6 = lambda z: np.log(z + 1)
-```
-
-### Polynomials
-```python
-# Multiple roots create symmetry
-f7 = lambda z: z**3 - 1
-f8 = lambda z: z**4 + z**2 + 1
-```
-
-## Complete Example
-
-See `examples/stl_ornament_examples.py` for a comprehensive set of examples generating various ornaments with different functions and settings.
