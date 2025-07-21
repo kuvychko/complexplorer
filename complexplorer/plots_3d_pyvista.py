@@ -616,6 +616,8 @@ def riemann_pv(
     f_vals[~finite_mask] = 0  # Temporary value for color calculation
     
     # Get colors from colormap
+    # Since RectangularSphereGenerator returns PolyData (not StructuredGrid),
+    # we should not try to reshape the values - just use them as is
     rgb = cmap.rgb(f_vals.reshape(-1, 1)).squeeze()
     sphere["RGB"] = rgb
     
@@ -694,28 +696,10 @@ def riemann_pv(
                 radii[~finite_mask] = 1.0
     
     # Scale sphere points
-    if mesh_type == 'rectangular':
-        # For structured grids, we need to reshape and recreate
-        n_points = n_phi * n_theta
-        radii_reshaped = radii.reshape((n_phi, n_theta))
-        
-        # Get original grid shape
-        theta = np.linspace(0.01, np.pi - 0.01, n_theta)
-        phi = np.linspace(0, 2 * np.pi, n_phi)
-        THETA, PHI = np.meshgrid(theta, phi)
-        
-        # Apply radial scaling
-        X = radii_reshaped * np.sin(THETA) * np.cos(PHI)
-        Y = radii_reshaped * np.sin(THETA) * np.sin(PHI)
-        Z = radii_reshaped * np.cos(THETA)
-        
-        # Create new scaled grid
-        sphere = pv.StructuredGrid(X, Y, Z)
-        sphere["RGB"] = rgb
-    else:
-        # For unstructured meshes, simple point scaling works
-        scaled_points = points * radii[:, np.newaxis]
-        sphere.points = scaled_points
+    # Always use simple point scaling - don't recreate the grid
+    # as that would change the point ordering
+    scaled_points = points * radii[:, np.newaxis]
+    sphere.points = scaled_points
     
     # Store additional data
     sphere["magnitude"] = moduli
