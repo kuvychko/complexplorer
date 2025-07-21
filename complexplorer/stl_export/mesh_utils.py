@@ -132,35 +132,153 @@ def _cap_flat_boundary(mesh: pv.PolyData, axis: str, position: float,
     axis_idx = {'x': 0, 'y': 1, 'z': 2}[axis]
     boundary_points[:, axis_idx] = position
     
-    # Get 2D projection for triangulation
-    if axis == 'x':
-        points_2d = boundary_points[:, [1, 2]]  # y, z
-    elif axis == 'y':
-        points_2d = boundary_points[:, [0, 2]]  # x, z
-    else:  # z
-        points_2d = boundary_points[:, [0, 1]]  # x, y
+    # Check if this is a pole-crossing cut
+    # For a cut perpendicular to an axis, check variation along that axis
+    cut_range = boundary_points[:, axis_idx].max() - boundary_points[:, axis_idx].min()
+    
+    # The boundary should be planar (all points at same position along cut axis)
+    # If there's significant variation, something is wrong
+    if cut_range > 0.01:
+        print(f"  WARNING: Boundary not planar! Range along {axis}: {cut_range:.4f}")
+    
+    # Check if boundary has multiple disconnected components (like at poles)
+    # This happens when cutting through poles (Z axis cuts)
+    is_pole_cut = False
+    if axis == 'z':
+        # For Z cuts, check if we're near the poles
+        is_pole_cut = abs(position) > 0.9  # Near poles if |z| > 0.9
+    
+    if is_pole_cut and verbose:
+        print(f"  Detected pole-crossing cut at z={position:.3f}")
+    
+    # Special handling for pole-crossing cuts
+    if is_pole_cut:
+        # For pole cuts, we need to handle the two separate loops
+        # Split boundary into upper and lower parts based on Z
+        z_median = np.median(boundary_points[:, 2])
+        upper_mask = boundary_points[:, 2] > z_median
+        lower_mask = ~upper_mask
         
-    # Sort points by angle for simple triangulation
-    center_2d = points_2d.mean(axis=0)
-    angles = np.arctan2(points_2d[:, 1] - center_2d[1],
-                       points_2d[:, 0] - center_2d[0])
-    sorted_indices = np.argsort(angles)
-    
-    # Create cap center at exact position
-    center_3d = boundary_points.mean(axis=0)
-    center_3d[axis_idx] = position
-    
-    # Build triangles
-    all_points = np.vstack([boundary_points[sorted_indices], center_3d])
-    center_idx = n_boundary
-    
-    faces = []
-    for i in range(n_boundary):
-        next_i = (i + 1) % n_boundary
-        faces.extend([3, i, next_i, center_idx])
+        # Create two separate caps
+        all_faces = []
+        all_points = [boundary_points]
         
-    # Create cap
-    cap = pv.PolyData(all_points, faces=faces)
+        for mask, name in [(upper_mask, "upper"), (lower_mask, "lower")]:
+            if np.sum(mask) > 2:
+                loop_points = boundary_points[mask]
+                loop_center = np.median(loop_points, axis=0)
+                loop_center[axis_idx] = position
+                
+                # Add center point
+                center_idx = len(boundary_points) + len(all_points) - 1
+                all_points.append(loop_center.reshape(1, 3))
+                
+                # Create fan triangulation for this loop
+                loop_indices = np.where(mask)[0]
+                
+                # Sort by angle around center
+                if axis == 'x':
+                    angles = np.arctan2(loop_points[:, 2] - loop_center[2],
+                                      loop_points[:, 1] - loop_center[1])
+                elif axis == 'y':
+                    angles = np.arctan2(loop_points[:, 2] - loop_center[2],
+                                      loop_points[:, 0] - loop_center[0])
+                else:  # z
+                    angles = np.arctan2(loop_points[:, 1] - loop_center[1],
+                                      loop_points[:, 0] - loop_center[0])
+                
+                sorted_order = np.argsort(angles)
+                sorted_indices = loop_indices[sorted_order]
+                
+                # Build triangles
+                for i in range(len(sorted_indices)):
+                    j = (i + 1) % len(sorted_indices)
+                    all_faces.extend([3, sorted_indices[i], sorted_indices[j], center_idx])
+                
+                if verbose:
+                    print(f"    Created {len(sorted_indices)} triangles for {name} loop")
+        
+        # Create cap mesh
+        all_points = np.vstack(all_points)
+        cap = pv.PolyData(all_points, faces=all_faces)
+        
+    else:
+        # Non-pole cut - use standard triangulation
+        try:
+            # Create a polyline from boundary points
+            # First, order the points to form a closed loop
+            from scipy.spatial import distance_matrix
+            
+            # Start with first point
+            ordered_indices = [0]
+            remaining = set(range(1, n_boundary))
+            
+            # Greedy nearest neighbor to order points
+            while remaining:
+                last_idx = ordered_indices[-1]
+                distances = np.array([np.linalg.norm(boundary_points[last_idx] - boundary_points[i]) 
+                                    for i in remaining])
+                nearest_idx = list(remaining)[np.argmin(distances)]
+                ordered_indices.append(nearest_idx)
+                remaining.remove(nearest_idx)
+            
+            # Create ordered boundary
+            ordered_boundary = boundary_points[ordered_indices]
+            
+            # Close the loop
+            closed_boundary = np.vstack([ordered_boundary, ordered_boundary[0]])
+            
+            # Create polyline
+            lines = np.full((n_boundary, 3), 2, dtype=int)
+            lines[:, 1] = np.arange(n_boundary)
+            lines[:, 2] = np.arange(1, n_boundary + 1)
+            lines[-1, 2] = 0
+            
+            boundary_poly = pv.PolyData(ordered_boundary, lines=lines)
+            
+            # Fill the boundary using delaunay
+            cap = boundary_poly.delaunay_2d(progress_bar=False)
+            
+            # Ensure cap is at exact position
+            cap.points[:, axis_idx] = position
+            
+        except Exception as e:
+            if verbose:
+                print(f"  Delaunay triangulation failed: {e}, using simple fan triangulation")
+            
+            # Fallback to simple fan triangulation from centroid
+            # But use a more robust center calculation
+            if axis == 'x':
+                other_axes = [1, 2]
+            elif axis == 'y':
+                other_axes = [0, 2]
+            else:  # z
+                other_axes = [0, 1]
+            
+            # Use median for more robust center
+            center_3d = np.zeros(3)
+            center_3d[other_axes[0]] = np.median(boundary_points[:, other_axes[0]])
+            center_3d[other_axes[1]] = np.median(boundary_points[:, other_axes[1]])
+            center_3d[axis_idx] = position
+            
+            # Sort points by angle for simple triangulation
+            points_2d = boundary_points[:, other_axes]
+            center_2d = points_2d.mean(axis=0)
+            angles = np.arctan2(points_2d[:, 1] - center_2d[1],
+                               points_2d[:, 0] - center_2d[0])
+            sorted_indices = np.argsort(angles)
+            
+            # Build triangles
+            all_points = np.vstack([boundary_points[sorted_indices], center_3d])
+            center_idx = n_boundary
+            
+            faces = []
+            for i in range(n_boundary):
+                next_i = (i + 1) % n_boundary
+                faces.extend([3, i, next_i, center_idx])
+                
+            # Create cap
+            cap = pv.PolyData(all_points, faces=faces)
     
     # Merge with mesh
     capped = mesh + cap
@@ -173,7 +291,8 @@ def _cap_flat_boundary(mesh: pv.PolyData, axis: str, position: float,
         capped = capped.remove_duplicate_cells()
     
     if verbose:
-        print(f"  Added cap with {len(faces)//4} triangles")
+        n_cap_faces = cap.n_faces if hasattr(cap, 'n_faces') else len(faces)//4
+        print(f"  Added cap with {n_cap_faces} triangles")
         
     return capped
 

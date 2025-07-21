@@ -147,25 +147,10 @@ class OrnamentGenerator:
         # Handle infinities in radii
         radii[~finite_mask] = radii[finite_mask].max() if np.any(finite_mask) else 1.0
         
-        # Apply radial scaling
-        radii_reshaped = radii.reshape((self.resolution, self.resolution))
-        
-        # Get original angles
-        theta = np.linspace(0.01, np.pi - 0.01, self.resolution)
-        phi = np.linspace(0, 2 * np.pi, self.resolution)
-        THETA, PHI = np.meshgrid(theta, phi)
-        
-        # Apply radial scaling
-        X = radii_reshaped * np.sin(THETA) * np.cos(PHI)
-        Y = radii_reshaped * np.sin(THETA) * np.sin(PHI)
-        Z = radii_reshaped * np.cos(THETA)
-        
-        # Create new scaled grid
-        sphere = pv.StructuredGrid(X, Y, Z)
-        sphere["RGB"] = rgb_flat
-        
-        # Convert to PolyData for better processing
-        sphere = sphere.extract_surface()
+        # Apply radial scaling by modifying the points directly
+        # This preserves the mesh connectivity
+        scaled_points = points * radii[:, np.newaxis]
+        sphere.points = scaled_points
         
         # Store additional data
         sphere["magnitude"] = moduli
