@@ -261,30 +261,16 @@ class TestRiemannPv:
             interactive=False
         )
     
-    def test_icosahedral_mesh(self):
-        """Test Riemann sphere with icosahedral mesh."""
+    def test_invalid_mesh_type(self):
+        """Test that invalid mesh types raise ValueError."""
         func = lambda z: z**2
         
-        riemann_pv(
-            func,
-            mesh_type='icosahedral',
-            n_subdivisions=2,
-            interactive=False
-        )
-    
-    def test_uv_mesh(self):
-        """Test Riemann sphere with UV mesh."""
-        def func(z):
-            with np.errstate(divide='ignore', invalid='ignore'):
-                return 1 / z
-        
-        riemann_pv(
-            func,
-            mesh_type='uv',
-            n_theta=50,
-            n_phi=50,
-            interactive=False
-        )
+        with pytest.raises(ValueError, match="Only 'rectangular' is currently supported"):
+            riemann_pv(
+                func,
+                mesh_type='invalid',
+                interactive=False
+            )
     
     def test_arctan_scaling(self):
         """Test Riemann sphere with arctan modulus scaling."""

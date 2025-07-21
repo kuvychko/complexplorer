@@ -1,12 +1,20 @@
 """
-Fast mesh utility functions for STL export.
+STL-specific utility functions for 3D printing.
 
-This module contains optimized helper functions for mesh generation, cutting, and healing.
+This module contains STL-specific functions for cutting, capping, and healing meshes.
+General mesh utilities should be imported from complexplorer.mesh_utils.
 """
 
 import numpy as np
 import pyvista as pv
 from typing import Tuple, Optional, TYPE_CHECKING
+
+# Import general mesh utilities from the main module
+from ..mesh_utils import (
+    RectangularSphereGenerator,
+    stereographic_projection,
+    ModulusScaling
+)
 
 if TYPE_CHECKING:
     from ..domain import Domain
@@ -405,120 +413,3 @@ def remove_spikes_simple(mesh: pv.PolyData, max_deviation: float = 3.0,
     This replaces the slow O(n²) implementation.
     """
     return remove_spikes_fast(mesh, percentile=95.0, smooth_factor=0.5, verbose=verbose)
-
-
-# Mesh generation classes
-class RectangularSphereGenerator:
-    """Generate sphere with rectangular (lat-lon) grid.
-    
-    Parameters
-    ----------
-    radius : float, default=1.0
-        Sphere radius.
-    n_theta : int, default=100
-        Number of latitude divisions.
-    n_phi : int, default=100
-        Number of longitude divisions.
-    avoid_poles : bool, default=True
-        Whether to avoid exact poles in mesh.
-    domain : Domain, optional
-        If provided, only generate mesh points whose stereographic projections
-        fall within this domain. Helps avoid numerical instability at extreme values.
-    """
-    
-    def __init__(self, radius: float = 1.0, n_theta: int = 100, n_phi: int = 100,
-                 avoid_poles: bool = True, domain: Optional['Domain'] = None):
-        self.radius = radius
-        self.n_theta = n_theta
-        self.n_phi = n_phi
-        self.avoid_poles = avoid_poles
-        self.domain = domain
-        
-    def generate(self) -> pv.PolyData:
-        """Generate sphere mesh, optionally constrained by domain."""
-        # Create angles avoiding exact poles if requested
-        if self.avoid_poles:
-            theta = np.linspace(0.01, np.pi - 0.01, self.n_theta)
-        else:
-            theta = np.linspace(0, np.pi, self.n_theta)
-            
-        phi = np.linspace(0, 2 * np.pi, self.n_phi)
-        THETA, PHI = np.meshgrid(theta, phi)
-        
-        # Convert to Cartesian
-        X = self.radius * np.sin(THETA) * np.cos(PHI)
-        Y = self.radius * np.sin(THETA) * np.sin(PHI)
-        Z = self.radius * np.cos(THETA)
-        
-        # If domain is specified, filter points
-        if self.domain is not None:
-            # Project points to complex plane
-            w = stereographic_projection(X.ravel(), Y.ravel(), Z.ravel())
-            
-            # Check which points are in domain
-            in_domain = self.domain.infunc(w)
-            in_domain = in_domain.reshape(X.shape)
-            
-            # Mark out-of-domain points as NaN
-            X = np.where(in_domain, X, np.nan)
-            Y = np.where(in_domain, Y, np.nan)
-            Z = np.where(in_domain, Z, np.nan)
-        
-        # Create structured grid
-        grid = pv.StructuredGrid(X, Y, Z)
-        
-        # Convert to PolyData and remove any NaN points
-        mesh = grid.extract_surface()
-        if self.domain is not None:
-            # Remove cells with NaN vertices
-            mesh = mesh.remove_cells(np.any(np.isnan(mesh.points), axis=1))
-        
-        return mesh
-
-
-def stereographic_projection(x, y, z, from_north=True):
-    """Apply stereographic projection from sphere to complex plane."""
-    if from_north:
-        # Project from north pole (0, 0, 1)
-        denominator = 1 - z
-        # Avoid division by zero at north pole
-        denominator = np.where(np.abs(denominator) < 1e-10, 1e-10, denominator)
-        w = (x + 1j * y) / denominator
-    else:
-        # Project from south pole (0, 0, -1)
-        denominator = 1 + z
-        denominator = np.where(np.abs(denominator) < 1e-10, 1e-10, denominator)
-        w = (x + 1j * y) / denominator
-    return w
-
-
-class ModulusScaling:
-    """Methods for scaling sphere radius based on function modulus."""
-    
-    @staticmethod
-    def constant(moduli, radius=1.0):
-        """Constant radius regardless of modulus."""
-        return np.full_like(moduli, radius)
-    
-    @staticmethod
-    def arctan(moduli, r_min=0.2, r_max=1.0):
-        """Smooth scaling using arctangent."""
-        # Map [0, ∞) to [0, 1] using arctan
-        normalized = (2/np.pi) * np.arctan(moduli)
-        return r_min + (r_max - r_min) * normalized
-    
-    @staticmethod
-    def logarithmic(moduli, base=np.e, r_min=0.2, r_max=1.0):
-        """Logarithmic scaling."""
-        # Avoid log(0)
-        safe_moduli = np.maximum(moduli, 1e-10)
-        log_moduli = np.log(safe_moduli) / np.log(base)
-        # Map to [0, 1] using sigmoid-like function
-        normalized = 1 / (1 + np.exp(-log_moduli))
-        return r_min + (r_max - r_min) * normalized
-    
-    @staticmethod
-    def linear_clamp(moduli, m_max=10, r_min=0.2, r_max=1.0):
-        """Linear scaling up to m_max, then clamped."""
-        normalized = np.minimum(moduli / m_max, 1.0)
-        return r_min + (r_max - r_min) * normalized

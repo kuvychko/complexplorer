@@ -16,7 +16,7 @@ import warnings
 
 from ..cmap import Phase, Cmap
 from .mesh_healing import MeshHealer, ImprovedMeshHealer
-from .mesh_utils import (
+from .stl_utils import (
     cut_with_flat_plane, ensure_flat_bottom, remove_spikes_simple,
     RectangularSphereGenerator, stereographic_projection, ModulusScaling
 )

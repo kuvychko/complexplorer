@@ -512,13 +512,9 @@ def riemann_pv(
     n_phi : int, default=100
         Number of longitude divisions (for rectangular mesh).
     mesh_type : str, default='rectangular'
-        Type of sphere meshing:
-        - 'rectangular': Latitude-longitude grid (better PyVista rendering)
-        - 'icosahedral': Uniform triangular mesh (better mathematical properties)
-        - 'uv': PyVista's built-in UV sphere
+        Type of sphere meshing. Currently only 'rectangular' (latitude-longitude grid) is supported.
     n_subdivisions : int, default=4
-        For icosahedral mesh: subdivision level (0-8).
-        Level 0: 20 faces, Level n: 20 * 4^n faces.
+        Deprecated parameter, kept for backward compatibility.
     cmap : Cmap, optional
         Color map to use. Default is Phase(6, 0.6).
     scaling : str, default='constant'
@@ -578,8 +574,8 @@ def riemann_pv(
     >>> cp.riemann_pv(lambda z: (z-1)/(z+1))
     >>> # With modulus scaling
     >>> cp.riemann_pv(lambda z: z**2, scaling='arctan')
-    >>> # Using icosahedral mesh
-    >>> cp.riemann_pv(lambda z: z**2, mesh_type='icosahedral', n_subdivisions=4)
+    >>> # With custom resolution
+    >>> cp.riemann_pv(lambda z: z**2, n_theta=150, n_phi=150)
     
     Notes
     -----
@@ -588,7 +584,7 @@ def riemann_pv(
     imperfections near poles.
     """
     from complexplorer.mesh_utils import (
-        IcosphereGenerator, RectangularSphereGenerator, 
+        RectangularSphereGenerator, 
         stereographic_projection, ModulusScaling
     )
     
@@ -598,18 +594,12 @@ def riemann_pv(
     if cmap is None:
         cmap = Phase(6, 0.6)
     
-    # Generate sphere mesh based on type
-    if mesh_type == 'rectangular':
-        generator = RectangularSphereGenerator(radius=1.0, n_theta=n_theta, n_phi=n_phi)
-        sphere = generator.generate()
-    elif mesh_type == 'uv':
-        generator = RectangularSphereGenerator(radius=1.0, n_theta=n_theta, n_phi=n_phi)
-        sphere = generator.generate_uv_sphere()
-    elif mesh_type == 'icosahedral':
-        generator = IcosphereGenerator(radius=1.0, subdivisions=n_subdivisions)
-        sphere = generator.generate()
-    else:
-        raise ValueError(f"Unknown mesh_type: {mesh_type}. Use 'rectangular', 'uv', or 'icosahedral'")
+    # Generate sphere mesh
+    if mesh_type != 'rectangular':
+        raise ValueError(f"Unknown mesh_type: {mesh_type}. Only 'rectangular' is currently supported.")
+    
+    generator = RectangularSphereGenerator(radius=1.0, n_theta=n_theta, n_phi=n_phi, domain=domain)
+    sphere = generator.generate()
     
     # Get sphere points
     points = sphere.points
