@@ -119,9 +119,15 @@ class OrnamentGenerator:
         f_vals[~finite_mask] = 0
         
         # Get colors
-        f_vals_reshaped = f_vals.reshape((self.resolution, self.resolution))
-        rgb = self.cmap.rgb(f_vals_reshaped)
-        rgb_flat = rgb.reshape(-1, 3)
+        if self.domain is None:
+            # Regular grid - can reshape
+            f_vals_reshaped = f_vals.reshape((self.resolution, self.resolution))
+            rgb = self.cmap.rgb(f_vals_reshaped)
+            rgb_flat = rgb.reshape(-1, 3)
+        else:
+            # Irregular points due to domain filtering - process as 1D array
+            rgb = self.cmap.rgb(f_vals.reshape(-1, 1)).squeeze()
+            rgb_flat = rgb
         sphere["RGB"] = rgb_flat
         
         # Apply modulus scaling
