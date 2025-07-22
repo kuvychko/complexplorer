@@ -198,6 +198,7 @@ def plot_landscape_pv(
     n: int = 100,
     cmap: Optional[Cmap] = None,
     interactive: bool = True,
+    notebook: Optional[bool] = None,
     camera_position: Union[str, Tuple] = 'iso',
     show_edges: bool = False,
     edge_color: str = 'gray',
@@ -233,6 +234,9 @@ def plot_landscape_pv(
         Color map to use. Default is Phase(6, 0.6).
     interactive : bool, default=True
         If True, show interactive widget. If False, render static image.
+    notebook : bool, optional
+        If True, render inline in Jupyter notebooks. If False, render in external window.
+        If None, uses PyVista's default behavior (auto-detect environment).
     camera_position : str or tuple, default='iso'
         Camera position: 'iso', 'xy', 'xz', 'yz', or custom (position, focal_point, up).
     show_edges : bool, default=False
@@ -277,10 +281,14 @@ def plot_landscape_pv(
     )
     
     # Create plotter
-    plotter = pv.Plotter(
-        off_screen=not interactive,
-        window_size=window_size
-    )
+    plotter_kwargs = {
+        'off_screen': not interactive,
+        'window_size': window_size
+    }
+    if notebook is not None:
+        plotter_kwargs['notebook'] = notebook
+    
+    plotter = pv.Plotter(**plotter_kwargs)
     
     # Add mesh
     mesh_kwargs = {
@@ -331,6 +339,7 @@ def pair_plot_landscape_pv(
     n: int = 100,
     cmap: Optional[Cmap] = None,
     interactive: bool = True,
+    notebook: Optional[bool] = None,
     camera_position: Union[str, Tuple] = 'iso',
     show_edges: bool = False,
     edge_color: str = 'gray',
@@ -366,6 +375,9 @@ def pair_plot_landscape_pv(
         Color map to use. Default is Phase(6, 0.5).
     interactive : bool, default=True
         If True, show interactive widget.
+    notebook : bool, optional
+        If True, render inline in Jupyter notebooks. If False, render in external window.
+        If None, uses PyVista's default behavior (auto-detect environment).
     camera_position : str or tuple, default='iso'
         Camera position for both views.
     show_edges : bool, default=False
@@ -411,11 +423,15 @@ def pair_plot_landscape_pv(
     )
     
     # Create plotter with subplots
-    plotter = pv.Plotter(
-        shape=(1, 2),
-        off_screen=not interactive,
-        window_size=window_size
-    )
+    plotter_kwargs = {
+        'shape': (1, 2),
+        'off_screen': not interactive,
+        'window_size': window_size
+    }
+    if notebook is not None:
+        plotter_kwargs['notebook'] = notebook
+    
+    plotter = pv.Plotter(**plotter_kwargs)
     
     # Plot domain (identity)
     plotter.subplot(0, 0)
@@ -483,6 +499,7 @@ def riemann_pv(
     domain: Optional['Domain'] = None,
     project_from_north: bool = True,
     interactive: bool = True,
+    notebook: Optional[bool] = None,
     camera_position: Union[str, Tuple] = 'iso',
     show_grid: bool = True,
     show_orientation: bool = True,
@@ -535,6 +552,9 @@ def riemann_pv(
         If True, use stereographic projection from north pole.
     interactive : bool, default=True
         If True, show interactive widget.
+    notebook : bool, optional
+        If True, render inline in Jupyter notebooks. If False, render in external window.
+        If None, uses PyVista's default behavior (auto-detect environment).
     camera_position : str or tuple, default='iso'
         Camera position: 'iso', 'xy', 'xz', 'yz', or custom.
     show_grid : bool, default=True
@@ -706,10 +726,14 @@ def riemann_pv(
     sphere["phase"] = np.angle(f_vals)
     
     # Create plotter
-    plotter = pv.Plotter(
-        off_screen=not interactive,
-        window_size=window_size
-    )
+    plotter_kwargs = {
+        'off_screen': not interactive,
+        'window_size': window_size
+    }
+    if notebook is not None:
+        plotter_kwargs['notebook'] = notebook
+    
+    plotter = pv.Plotter(**plotter_kwargs)
     
     # Enable anti-aliasing
     if anti_aliasing and anti_aliasing != 'none':

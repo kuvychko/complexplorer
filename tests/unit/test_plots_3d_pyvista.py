@@ -176,6 +176,31 @@ class TestPlotLandscapePv:
         domain = Rectangle(2, 2)
         with pytest.raises(ValueError, match="both f and func parameters cannot be None"):
             plot_landscape_pv(domain, None)
+    
+    def test_notebook_parameter(self, simple_setup):
+        """Test notebook parameter functionality."""
+        domain, func = simple_setup
+        
+        # Test with notebook=False (external window)
+        plot_landscape_pv(
+            domain, func, n=20,
+            interactive=False,
+            notebook=False
+        )
+        
+        # Test with notebook=True (inline)
+        plot_landscape_pv(
+            domain, func, n=20,
+            interactive=False,
+            notebook=True
+        )
+        
+        # Test with notebook=None (default)
+        plot_landscape_pv(
+            domain, func, n=20,
+            interactive=False,
+            notebook=None
+        )
 
 
 class TestPairPlotLandscapePv:
@@ -234,6 +259,32 @@ class TestPairPlotLandscapePv:
         )
         
         assert filename.exists()
+    
+    def test_notebook_parameter(self):
+        """Test notebook parameter functionality for pair plots."""
+        domain = Rectangle(2, 2)
+        func = lambda z: z**2
+        
+        # Test with notebook=False
+        pair_plot_landscape_pv(
+            domain, func, n=20,
+            interactive=False,
+            notebook=False
+        )
+        
+        # Test with notebook=True
+        pair_plot_landscape_pv(
+            domain, func, n=20,
+            interactive=False,
+            notebook=True
+        )
+        
+        # Test with notebook=None
+        pair_plot_landscape_pv(
+            domain, func, n=20,
+            interactive=False,
+            notebook=None
+        )
 
 
 class TestRiemannPv:
@@ -367,6 +418,37 @@ class TestRiemannPv:
             high_quality=True,
             anti_aliasing=True,
             interactive=False
+        )
+    
+    def test_notebook_parameter(self):
+        """Test notebook parameter functionality for Riemann sphere."""
+        func = lambda z: (z - 1) / (z + 1)
+        
+        # Test with notebook=False
+        riemann_pv(
+            func,
+            n_theta=30,
+            n_phi=30,
+            interactive=False,
+            notebook=False
+        )
+        
+        # Test with notebook=True
+        riemann_pv(
+            func,
+            n_theta=30,
+            n_phi=30,
+            interactive=False,
+            notebook=True
+        )
+        
+        # Test with notebook=None
+        riemann_pv(
+            func,
+            n_theta=30,
+            n_phi=30,
+            interactive=False,
+            notebook=None
         )
 
 
