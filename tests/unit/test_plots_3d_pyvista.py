@@ -5,6 +5,7 @@ Unit tests for PyVista-based 3D plotting functions.
 import pytest
 import numpy as np
 import sys
+from unittest import mock
 
 # Skip all tests if PyVista is not available
 pyvista = pytest.importorskip("pyvista")
@@ -449,6 +450,81 @@ class TestRiemannPv:
             n_phi=30,
             interactive=False,
             notebook=None
+        )
+
+
+class TestHTMLExport:
+    """Test HTML export functionality."""
+    
+    def test_html_export_warning(self):
+        """Test warning when exporting HTML without trame."""
+        import warnings
+        from complexplorer.plots_3d_pyvista import _handle_export
+        
+        # Mock plotter
+        plotter = mock.Mock()
+        plotter.export_html.side_effect = ImportError("No module named 'trame'")
+        
+        # Test that ImportError is raised with helpful message
+        with pytest.raises(ImportError, match="HTML export requires 'trame'"):
+            _handle_export(plotter, "test.html", interactive=True)
+    
+    def test_html_export_formats(self, tmp_path):
+        """Test different file format handling."""
+        from complexplorer.plots_3d_pyvista import _handle_export
+        
+        # Mock plotter
+        plotter = mock.Mock()
+        
+        # Test HTML export
+        _handle_export(plotter, "test.html", interactive=True)
+        plotter.export_html.assert_called_once_with("test.html")
+        
+        # Test PDF export
+        plotter.reset_mock()
+        _handle_export(plotter, "test.pdf", interactive=True)
+        plotter.save_graphic.assert_called_once_with("test.pdf")
+        
+        # Test PNG export
+        plotter.reset_mock()
+        _handle_export(plotter, "test.png", interactive=True)
+        plotter.screenshot.assert_called_once_with("test.png")
+    
+    @pytest.mark.skipif(not hasattr(pyvista.Plotter, 'export_html'), 
+                        reason="export_html not available in this PyVista version")
+    def test_plot_html_export(self, tmp_path):
+        """Test HTML export for all plot types."""
+        # Skip if trame not available
+        try:
+            import trame
+        except ImportError:
+            pytest.skip("trame not installed")
+        
+        # Test plot_landscape_pv
+        domain = Rectangle(2, 2)
+        func = lambda z: z
+        filename1 = tmp_path / "landscape.html"
+        
+        plot_landscape_pv(
+            domain, func, n=20,
+            interactive=True,
+            filename=str(filename1)
+        )
+        
+        # Test pair_plot_landscape_pv
+        filename2 = tmp_path / "pair.html"
+        pair_plot_landscape_pv(
+            domain, func, n=20,
+            interactive=True,
+            filename=str(filename2)
+        )
+        
+        # Test riemann_pv
+        filename3 = tmp_path / "riemann.html"
+        riemann_pv(
+            func, n_theta=20, n_phi=20,
+            interactive=True,
+            filename=str(filename3)
         )
 
 

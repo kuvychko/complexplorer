@@ -27,6 +27,40 @@ from complexplorer.cmap import Phase, Cmap
 from complexplorer.domain import Domain
 
 
+def _handle_export(plotter: pv.Plotter, filename: str, interactive: bool) -> None:
+    """
+    Handle file export based on extension.
+    
+    Parameters
+    ----------
+    plotter : pv.Plotter
+        The plotter to export.
+    filename : str
+        Output filename with extension.
+    interactive : bool
+        Whether in interactive mode.
+    """
+    if filename.endswith('.html'):
+        # HTML export works differently with interactive mode
+        if not interactive:
+            warnings.warn(
+                "HTML export works best with interactive=True. "
+                "The file will be created but may not display properly."
+            )
+        try:
+            plotter.export_html(filename)
+            print(f"Interactive HTML saved to: {filename}")
+        except ImportError:
+            raise ImportError(
+                "HTML export requires 'trame'. "
+                "Install with: pip install trame"
+            )
+    elif filename.endswith(('.pdf', '.svg', '.eps')):
+        plotter.save_graphic(filename)
+    else:
+        plotter.screenshot(filename)
+
+
 def _add_axes_widget(plotter, labels=('Re', 'Im', 'Z'), position=(0.0, 0.0), 
                      size=0.25, label_size=(0.25, 0.1)):
     """
@@ -254,7 +288,13 @@ def plot_landscape_pv(
     title : str, optional
         Title for the plot.
     filename : str, optional
-        Save plot to file (PNG, PDF, etc.).
+        Save plot to file. Supported formats:
+        - Static images: .png, .jpg, .jpeg
+        - Vector graphics: .pdf, .svg, .eps
+        - Interactive HTML: .html (requires trame) Supported formats:
+        - Static images: .png, .jpg, .jpeg
+        - Vector graphics: .pdf, .svg, .eps
+        - Interactive HTML: .html (requires trame)
     return_plotter : bool, default=False
         If True, return the plotter object for further customization.
     show_orientation : bool, default=True
@@ -314,16 +354,14 @@ def plot_landscape_pv(
         plotter.add_text(title, font_size=14)
     
     # Show or save
-    if interactive:
+    if interactive and not filename:
         plotter.show()
+    elif filename:
+        _handle_export(plotter, filename, interactive)
+        if interactive and not filename.endswith('.html'):
+            plotter.show()
     else:
-        if filename:
-            if filename.endswith(('.pdf', '.svg', '.eps')):
-                plotter.save_graphic(filename)
-            else:
-                plotter.screenshot(filename)
-        else:
-            plotter.show(screenshot=True)
+        plotter.show(screenshot=True)
     
     if return_plotter:
         return plotter
@@ -395,7 +433,10 @@ def pair_plot_landscape_pv(
     title : str, optional
         Title for the plot.
     filename : str, optional
-        Save plot to file.
+        Save plot to file. Supported formats:
+        - Static images: .png, .jpg, .jpeg
+        - Vector graphics: .pdf, .svg, .eps
+        - Interactive HTML: .html (requires trame)
     link_views : bool, default=True
         If True, synchronize camera movement between subplots.
     show_orientation : bool, default=True
@@ -473,17 +514,18 @@ def pair_plot_landscape_pv(
                         position='upper_edge', color='black')
     
     # Show or save
-    if interactive:
+    if interactive and not filename:
         plotter.show()
         return plotter
-    else:
-        if filename:
-            if filename.endswith(('.pdf', '.svg', '.eps')):
-                plotter.save_graphic(filename)
-            else:
-                plotter.screenshot(filename)
+    elif filename:
+        _handle_export(plotter, filename, interactive)
+        if interactive and not filename.endswith('.html'):
+            plotter.show()
+            return plotter
         else:
-            plotter.show(screenshot=True)
+            plotter.close()
+    else:
+        plotter.show(screenshot=True)
         plotter.close()
 
 
@@ -566,7 +608,10 @@ def riemann_pv(
     title : str, optional
         Title for the plot.
     filename : str, optional
-        Save plot to file.
+        Save plot to file. Supported formats:
+        - Static images: .png, .jpg, .jpeg
+        - Vector graphics: .pdf, .svg, .eps
+        - Interactive HTML: .html (requires trame)
     return_plotter : bool, default=False
         If True, return the plotter object.
     high_quality : bool, default=True
@@ -860,16 +905,14 @@ def riemann_pv(
         plotter.add_text(title, font_size=14)
     
     # Show or save
-    if interactive:
+    if interactive and not filename:
         plotter.show()
+    elif filename:
+        _handle_export(plotter, filename, interactive)
+        if interactive and not filename.endswith('.html'):
+            plotter.show()
     else:
-        if filename:
-            if filename.endswith(('.pdf', '.svg', '.eps')):
-                plotter.save_graphic(filename)
-            else:
-                plotter.screenshot(filename)
-        else:
-            plotter.show(screenshot=True)
+        plotter.show(screenshot=True)
     
     if return_plotter:
         return plotter
