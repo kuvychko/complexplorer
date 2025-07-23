@@ -189,7 +189,7 @@ class Domain():
             Boolean mask of viewing window mesh with True values marking points that do NOT belong to the domain.
         """
 
-        return ~self.inmask(n)
+        return np.logical_not(self.inmask(n))
         
     def domain(self, n: int):
         """

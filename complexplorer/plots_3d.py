@@ -85,6 +85,12 @@ def plot_landscape(
         mask = None
 
     if f is None: f = func(z)
+    
+    # Ensure f is always an array, even for constant functions
+    f = np.asarray(f)
+    if f.ndim == 0:  # scalar case
+        f = np.full_like(z, f)
+    
     if mask is not None: f[mask] = np.nan
     if z_max is not None and z_max <=0: raise ValueError('z_max must be positive or None')
 

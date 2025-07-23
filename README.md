@@ -1,5 +1,9 @@
 # Complexplorer
 
+[![PyPI version](https://badge.fury.io/py/complexplorer.svg)](https://badge.fury.io/py/complexplorer)
+[![Python](https://img.shields.io/pypi/pyversions/complexplorer.svg)](https://pypi.org/project/complexplorer/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 *We cannot directly see the minute details of a Dedekind cut, nor is it clear that arbitrarily great or
 arbitrarily tiny times or lengths actually exist in nature. One could say that 
 the so-called ‘real numbers’ are as much a product of mathematicians’ 
@@ -16,163 +20,188 @@ which, in my view, can only be referred to as ‘magic’.*
 
 [Road to Reality](https://www.ams.org/notices/200606/rev-blank.pdf), Chapter 4 - Magical Complex Numbers, Sir Roger Penrose
 
-Complexplorer is a Python library for visualization of complex functions. 
-The library was insipred by Elias Wegert's book ["Visual Complex Functions - An Introduction with Phase Portraits"](https://link.springer.com/book/10.1007/978-3-0348-0180-5) and it greatly benefitted from discussions and feedback that Elias kindly provided. The library supports enhanced phase portraits and 
-several other visual styles. 
+**Complexplorer** is a Python library for elegant visualization of complex-valued functions. Create stunning phase portraits, analytic landscapes, and Riemann sphere projections with just a few lines of code.
 
-The library provides classes and functions to:  
+<p align="center">
+  <img src="examples/gallery/Enhanced_phase_portrait_phase_and_modulus_enhanced_2d.png" width="45%">
+  <img src="examples/gallery/riemann_sphere_3d.png" width="45%">
+</p>
 
-* Create complex domains and corresponding complex-valued 2D arrays (meshes)
-* Convert complex-valued 2D arrays to HSV and RGB color maps according to various schemes (Enhanced Phase Portrait, Chessboard, PolarChessboard, LogRings)
-* Visualize complex-valued 2D arrays as 2D and 3D plots (2D image, 3D analytic landscape, 3D Riemann sphere)
+## ✨ Features
 
-Design choices of this library enable:  
+- **🎨 Rich visualization options**: Phase portraits, enhanced phase portraits, chessboard patterns, and more
+- **🗺️ Flexible domains**: Rectangles, disks, annuli, and custom domains via composition
+- **📊 Multiple plot types**: 2D images, 3D analytic landscapes, Riemann sphere projections
+- **🖨️ 3D Printing Support**: Export complex function visualizations as STL files for 3D printing
+- **🧩 Composable design**: Mix any domain, color map, and plot type
+- **🚀 Lightweight**: Requires only NumPy and Matplotlib
 
-* Simple composability: any domain can be used with any plot and any color map, yielding a multitude of different visualizations.
-* Deferred evaluation of domain meshes. Meshing is typically performed during plotting (and not during domain instanciation). This allows for quick iteration of mesh period for best visual results.
-* Different domain instances can be composed using union and intersection operations to create complex domains.
+## 📦 Installation
 
-One exception from the composability ideal is Riemann sphere 3D plot. It has its own meshing algorithm to balance point density between the poles and equator, so that function does not accept domain (or input z arrays) as its argument.
+**Requirements**: Python 3.11 or higher
 
-Complexplorer is designed to be very light-weight in terms of its dependencies. It requires only numpy and matplotlib, which comes at a cost. 
-Matplotlib is not a 3D rendering library, so 3D visualizations are painfully slow. This is especially true for Riemann sphere plot which uses 
-a custom rectangular mesh that wastes a lot of points at the poles. A triangular mesh would be the right tool here, but I have not figured out how to achieve arbitrary point coloring in matplotlib.
-
-## Library overview
-
-The library contains following classes and functions.
-
-### Domains
-
-* `Domain`: This class serves as the base class for defining complex domains. It encapsulates 
-the meshing and masking functionality of a `Domain` instance.
-
-* `Rectangle`: A subclass of `Domain`, the `Rectangle` class allows the creation of rectangular domains centered at a given point. 
-It takes the length (real and imaginary) of the rectangle and the center point as input.
-
-* `Disk`: Another subclass of `Domain`, the `Disk` class enables the creation of circular domains (disks) centered at a given point.
-It requires specifying the radius of the disk and the center point.
-
-* `Annulus`: The `Annulus` class, also a subclass of `Domain`, enables the creation of annular domains (rings) centered at a given point.
-It requires specifying the inner and outer radii and the center point.
-
-### Color maps
-
-* `Cmap`: This class serves as a base class for color maps and defines 
-an informal interface for child color map classes. It implements 
-the `*.hsv()` and `*.rgb()` methods which are used to convert 
-input complex values to HSV and RGB-valued arrays.
-
-* `Phase`: This class implements a phase color map. It can be used
-to generate regular phase color maps or enhanced phase color maps.
-
-* `Chessboard`: This class implements a chessboard color map.
-
-* `PolarChessboard`: This class implements a polar chessboard color map.
-
-* `LogRings`: This class implements a logarithmic black and white rings color map.
-
-### 2D plotting functions
-
-* `plot`: plot complex function as pullback of the color map of the co-domain to the domain.
-
-* `pair_plot`: plot color maps of the domain and the pullback of the co-domain of the function.
-
-* `riemann_chart`: plot the phase portrait of a complex function projected from the Riemann hemisphere.
-
-* `riemann_hemispheres`: plot a pair of phase portraits corresponding to the upper and lower hemispheres of the Riemann sphere.
-
-### 3D plotting functions
-
-* `plot_landscape`: plot a complex function as a 3D landscape on the complex plane.
-
-* `pair_plot_landscape`: - plot analytic landscapes of the domain and the pullback of the co-domain of the function.
-
-* `riemann`: plot a complex function as a phase portrait on the Riemann sphere.
-
-### Supporting functions
-
-* `phase`: return a phase of complex input mapped to [0, 2*pi) interval.
-
-* `sawtooth`: return a sawtooth wave of input x.
-
-* `stereographic`: return a (x,y,z) tuple corresponding to stereographic projection of complex input z.
-
-## Installation
-
-Install using pip:
-
-```
+```bash
 pip install complexplorer
+
+# Optional: For interactive matplotlib plots in CLI scripts
+pip install "complexplorer[qt]"
+
+# Optional: For high-performance 3D visualizations
+pip install "complexplorer[pyvista]"
+
+# Optional: Install everything
+pip install "complexplorer[all]"
 ```
 
-## Documentation
+## 🚀 Quick Start
 
-Every module, class, and function of the library is documented via a docstring. Use `help` or `?` to view them.
+```python
+import complexplorer as cp
+import numpy as np
 
-## Example notebooks
+# Define a complex function
+def f(z):
+    return (z - 1) / (z**2 + z + 1)
 
-* [Basic functionality overview](https://github.com/kuvychko/complexplorer/tree/main/examples/plots_example.ipynb)
+# Create a domain
+domain = cp.Rectangle(3, 3)
 
-* [Domains and color maps](https://github.com/kuvychko/complexplorer/tree/main/examples/domains_cmaps_example.ipynb)
+# Visualize!
+cp.plot(domain, f)
+```
 
-## Gallery
+## 🎨 Gallery
 
-Examples below use a test function $f(z) = \frac{z - 1}{z^2 + z + 1}$, a standard example from ["Visual Complex Functions - An Introduction with Phase Portraits"](https://link.springer.com/book/10.1007/978-3-0348-0180-5). Different color maps and plot types are shown. For the code used to generate these plots see this [example Jupyter notebook](https://github.com/kuvychko/complexplorer/tree/main/examples/plot_example.ipynb)
+Explore the full range of visualizations in our [**Gallery**](docs/gallery/README.md), featuring:
+- Phase portraits with various enhancements
+- Chessboard and polar patterns  
+- 3D analytic landscapes
+- Riemann sphere projections
 
-### Phase portraits (domain and co-domain side-by-side)
+<p align="center">
+  <a href="docs/gallery/README.md">
+    <img src="examples/gallery/Polar_chessboard_log_modulus_spacing_2d.png" width="30%">
+    <img src="examples/gallery/Phase_portrait_phase_enhanced_3d.png" width="30%">
+    <img src="examples/gallery/riemann_chart_2d.png" width="30%">
+  </a>
+</p>
 
-![Phase portraint](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Phase_portrait_2d.png?raw=true)
+## 📚 Documentation
 
+- **[Gallery](docs/gallery/README.md)** - Visual showcase with code examples
+- **[Tutorial: Plotting Functions](examples/plotting_tutorial.ipynb)** - Comprehensive plotting guide
+- **[Tutorial: Domains & Color Maps](examples/domains_and_colormaps_tutorial.ipynb)** - Domain creation and color mapping
+- **API Reference** - Use `help()` on any function or class
 
-![Phase portraint phase enhanced](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Phase_portrait_phase_enhanced_2d.png?raw=true)
+## 🛠️ Advanced Example
 
-![Phase portraint modulus enhanced](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Phase_portrait_modulus_enhanced_2d.png?raw=true)
+```python
+# Create an enhanced phase portrait with auto-scaling for square cells
+domain = cp.Annulus(0.5, 2, center=1j)  # Annular domain
+cmap = cp.Phase(n_phi=6, auto_scale_r=True, v_base=0.4)  # Auto-scaled enhanced phase
 
-![Enhanced phase portraint phase and modulus enhanced](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Enhanced_phase_portrait_phase_and_modulus_enhanced_2d.png?raw=true)
+# 2D visualization with domain and codomain side-by-side
+cp.pair_plot(domain, f, cmap=cmap, figsize=(10, 5))
 
-![Polar chessboard linear](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Polar_chessboard_linear_modulus_spacing_2d.png?raw=true)
+# 3D analytic landscape
+cp.plot_landscape(domain, func=f, cmap=cmap, z_max=10)
 
-![Polar chessboard log](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Polar_chessboard_log_modulus_spacing_2d.png?raw=true)
+# Riemann sphere projection
+cp.riemann(f, n=800, cmap=cmap)
+```
 
-![Logarithmic rings](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Logarithmic_rings_2d.png?raw=true)
+### 🚀 High-Performance 3D Visualizations with PyVista
 
-### Analytic landscapes  (domain and co-domain side-by-side)
+For interactive, high-quality 3D visualizations, Complexplorer includes PyVista-based plotting functions:
 
-![Phase portraint](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Phase_portrait_3d.png?raw=true)
+```python
+# High-performance 3D landscape
+cp.plot_landscape_pv(domain, f, cmap=cmap, show_orientation=True)
 
-![Phase portraint phase enhanced](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Phase_portrait_phase_enhanced_3d.png?raw=true)
+# Interactive Riemann sphere with modulus scaling
+cp.riemann_pv(f, scaling='arctan', show_orientation=True)
+```
 
-![Phase portraint modulus enhanced](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Phase_portrait_modulus_enhanced_3d.png?raw=true)
+**⚠️ Important Note:** For best quality, we strongly recommend using PyVista visualizations via command-line scripts rather than Jupyter notebooks. The Jupyter backend (trame) has significant aliasing issues that cannot be compensated with higher resolution. See `examples/interactive_demo.py` for an excellent CLI-based interactive experience.
 
-![Enhanced phase portraint phase and modulus enhanced](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Enhanced_phase_portrait_phase_and_modulus_enhanced_3d.png?raw=true)
+### 🎯 Domain Restrictions
 
-![Polar chessboard linear](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Polar_chessboard_linear_modulus_spacing_3d.png?raw=true)
+Control numerical stability and focus visualizations on regions of interest by restricting to specific domains:
 
-![Polar chessboard log](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Polar_chessboard_log_modulus_spacing_3d.png?raw=true)
+```python
+# Avoid infinity at large distances
+domain = cp.Disk(radius=5, center=0)
+cp.riemann_pv(f, domain=domain, scaling='arctan')
 
-![Logarithmic rings](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/Logarithmic_rings_3d.png?raw=true)
+# Exclude origin for functions with poles
+domain = cp.Annulus(radius_inner=0.1, radius_outer=10, center=0)
+ornament = OrnamentGenerator(func=lambda z: 1/z, domain=domain)
+```
 
-### 2D Riemann chart (projected hemispheres)
+Domain restrictions work with all visualization functions and are especially useful for:
+- Functions with essential singularities
+- Focusing on specific regions of the complex plane
+- Improving numerical stability in STL generation
+- Creating cleaner 3D prints by excluding problematic areas
 
-![Riemann charts](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/riemann_chart_2d.png?raw=true)
+### 🖨️ 3D Printing Support
 
-### Riemann sphere
+Transform your complex function visualizations into physical objects! Complexplorer can export Riemann sphere visualizations as STL files suitable for 3D printing:
 
-![Riemann sphere](https://github.com/kuvychko/complexplorer/blob/main/examples/gallery/riemann_sphere_3d.png?raw=true)
+```python
+from complexplorer.stl_export import OrnamentGenerator
 
-## Future work
+# Create STL files from your function
+ornament = OrnamentGenerator(
+    func=lambda z: (z - 1) / (z**2 + z + 1),
+    resolution=150,
+    scaling='arctan',
+    cmap=cp.Phase(n_phi=12, auto_scale_r=True)
+)
 
-Open an issue and leave a comment using [Bug Tracker](https://github.com/kuvychko/complexplorer/issues) if you would like to see any of these (or other) features implemented. Collaboration is always welcome!
+# Generate print-ready STL files
+top_file, bottom_file = ornament.generate_ornament(
+    cut_mode='real',
+    size_mm=80,
+    smooth=True
+)
+```
 
-* Enable "auto-tuning" of modulus discretization in relation to phase discretization to achieve "nearly square" enhanced regions (with logarithmic modulus spacing). In current implementation both spacings are controlled independently, so enhanced regions (or "tiles") typically look like rectangles rather than squares. This can be implemented either by adding an optional boolean parameter switch to Phase color map, or by sub-classing Phase to make EnhancedPhase to reduce the number of unused parameters. 
+Features:
+- Automatic mesh healing for watertight models
+- Flat bisection planes for easy printing without supports
+- Multiple modulus scaling methods
+- Domain restrictions to avoid numerical instabilities
+- Intelligent handling of singularities through neighbor interpolation
+- Compatible with all complexplorer colormaps
 
-* Write unit tests. Currently [Basic functionality overview](https://github.com/kuvychko/complexplorer/tree/main/examples/plots_example.ipynb) notebook serves as the unit test set, but it is not a very elegant solution.
+See the [STL Export Guide](docs/stl_export_guide.md) for detailed instructions and `examples/stl_ornament_demo.ipynb` for interactive examples.
 
-* Minimization of viewing window of the intersection of two domains to fit the resulting domain snuggly. Currently this is not implemented, and the viewing window is the same as in the case of a union operation.
+## 🤝 Contributing
 
-* Triangular meshing and corresponding 3D visualization of Riemann sphere (I am not sure if this is doable in matplotlib).
+Contributions are welcome! Please feel free to:
+- Report bugs or suggest features via [Issues](https://github.com/kuvychko/complexplorer/issues)
+- Submit pull requests with improvements
+- Share your visualizations and examples
+- Improve documentation
 
-* A modified Riemann sphere projection, where first spherical coordinates of points on the sphere are calculated, then radius is scaled to represent the modulus of the corresponding complex value. It would be nice to implement this using triangular mesh.
+## 📖 Citation
 
-* Function to convert modified Riemann sphere projection described above into an *.stl file for 3D printing ("Christmas ornaments" generator). This is Elias Wegert's idea - would be fun!
+If you use Complexplorer in your research, please cite:
+
+```bibtex
+@software{complexplorer,
+  author = {Igor Kuvychko},
+  title = {Complexplorer: A Python library for visualization of complex functions},
+  url = {https://github.com/kuvychko/complexplorer},
+  year = {2024}
+}
+```
+
+## 🙏 Acknowledgments
+
+This library was inspired by Elias Wegert's beautiful book ["Visual Complex Functions"](https://link.springer.com/book/10.1007/978-3-0348-0180-5) and benefited greatly from his feedback and suggestions.
+
+## 📝 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
