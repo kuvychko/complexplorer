@@ -538,6 +538,7 @@ def riemann_pv(
     cmap: Optional[Cmap] = None,
     scaling: str = 'constant',
     scaling_params: Optional[dict] = None,
+    scaling_preset: Optional[str] = None,
     domain: Optional['Domain'] = None,
     project_from_north: bool = True,
     interactive: bool = True,
@@ -582,6 +583,10 @@ def riemann_pv(
         - 'arctan': Smooth compression mapping [0, ∞) to [r_min, r_max]
         - 'logarithmic': Log scaling for large dynamic range
         - 'linear_clamp': Linear with saturation
+        - 'power': Power scaling with adjustable exponent
+        - 'sigmoid': S-curve scaling with adjustable steepness
+        - 'adaptive': Automatically adapts to data range, ignoring outliers
+        - 'hybrid': Linear near zero, logarithmic for large values
         - 'custom': User-defined function
     scaling_params : dict, optional
         Parameters for the scaling function:
@@ -589,7 +594,16 @@ def riemann_pv(
         - For 'arctan': {'r_min': 0.2, 'r_max': 1.0}
         - For 'logarithmic': {'base': e, 'r_min': 0.2, 'r_max': 1.0}
         - For 'linear_clamp': {'m_max': 10, 'r_min': 0.2, 'r_max': 1.0}
+        - For 'power': {'exponent': 0.5, 'r_min': 0.2, 'r_max': 1.0}
+        - For 'sigmoid': {'steepness': 2.0, 'center': 1.0, 'r_min': 0.2, 'r_max': 1.0}
+        - For 'adaptive': {'low_percentile': 10, 'high_percentile': 90, 'r_min': 0.2, 'r_max': 1.0}
+        - For 'hybrid': {'transition': 1.0, 'r_min': 0.2, 'r_max': 1.0}
         - For 'custom': {'scaling_func': callable, 'r_min': 0.2, 'r_max': 1.0}
+    scaling_preset : str, optional
+        Use a predefined scaling configuration:
+        - 'balanced': General purpose sigmoid scaling
+        - 'detail_near_zero': Emphasizes small values with hybrid scaling
+        - 'auto': Adaptive scaling for unknown functions
     project_from_north : bool, default=True
         If True, use stereographic projection from north pole.
     interactive : bool, default=True
@@ -689,6 +703,34 @@ def riemann_pv(
     # Apply modulus scaling
     moduli = np.abs(f_vals)
     
+    # Handle presets
+    if scaling_preset:
+        preset_configs = {
+            'balanced': {
+                'scaling': 'sigmoid',
+                'params': {'steepness': 2.0, 'center': 1.0, 'r_min': 0.2, 'r_max': 1.0}
+            },
+            'detail_near_zero': {
+                'scaling': 'hybrid',
+                'params': {'transition': 0.5, 'r_min': 0.2, 'r_max': 1.0}
+            },
+            'auto': {
+                'scaling': 'adaptive',
+                'params': {'low_percentile': 5, 'high_percentile': 95, 'r_min': 0.2, 'r_max': 1.0}
+            }
+        }
+        if scaling_preset not in preset_configs:
+            raise ValueError(f"Unknown scaling preset: {scaling_preset}. Available: {list(preset_configs.keys())}")
+        
+        preset = preset_configs[scaling_preset]
+        scaling = preset['scaling']
+        if scaling_params is None:
+            scaling_params = {}
+        # Update params with preset values (user params take precedence)
+        preset_params = preset['params'].copy()
+        preset_params.update(scaling_params)
+        scaling_params = preset_params
+    
     # Set up scaling parameters with defaults
     if scaling_params is None:
         scaling_params = {}
@@ -711,6 +753,28 @@ def riemann_pv(
         r_min = scaling_params.get('r_min', 0.2)
         r_max = scaling_params.get('r_max', 1.0)
         radii = ModulusScaling.linear_clamp(moduli, m_max, r_min, r_max)
+    elif scaling == 'power':
+        exponent = scaling_params.get('exponent', 0.5)
+        r_min = scaling_params.get('r_min', 0.2)
+        r_max = scaling_params.get('r_max', 1.0)
+        radii = ModulusScaling.power(moduli, exponent, r_min, r_max)
+    elif scaling == 'sigmoid':
+        steepness = scaling_params.get('steepness', 2.0)
+        center = scaling_params.get('center', 1.0)
+        r_min = scaling_params.get('r_min', 0.2)
+        r_max = scaling_params.get('r_max', 1.0)
+        radii = ModulusScaling.sigmoid(moduli, steepness, center, r_min, r_max)
+    elif scaling == 'adaptive':
+        low_percentile = scaling_params.get('low_percentile', 10)
+        high_percentile = scaling_params.get('high_percentile', 90)
+        r_min = scaling_params.get('r_min', 0.2)
+        r_max = scaling_params.get('r_max', 1.0)
+        radii = ModulusScaling.adaptive(moduli, low_percentile, high_percentile, r_min, r_max)
+    elif scaling == 'hybrid':
+        transition = scaling_params.get('transition', 1.0)
+        r_min = scaling_params.get('r_min', 0.2)
+        r_max = scaling_params.get('r_max', 1.0)
+        radii = ModulusScaling.hybrid(moduli, transition, r_min, r_max)
     elif scaling == 'custom':
         scaling_func = scaling_params.get('scaling_func', lambda x: x)
         r_min = scaling_params.get('r_min', 0.2)

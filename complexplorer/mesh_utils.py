@@ -10,7 +10,7 @@ This module provides sphere meshing using rectangular (latitude-longitude) grid:
 
 import numpy as np
 import pyvista as pv
-from typing import Optional, Tuple, TYPE_CHECKING
+from typing import Optional, Tuple, TYPE_CHECKING, Callable
 
 if TYPE_CHECKING:
     from .domain import Domain
@@ -266,5 +266,130 @@ class ModulusScaling:
             normalized = (moduli / max_mod) ** exponent
         else:
             normalized = np.zeros_like(moduli)
+        # Map to [r_min, r_max]
+        return r_min + (r_max - r_min) * normalized
+    
+    @staticmethod
+    def custom(moduli: np.ndarray, scaling_func: Callable[[np.ndarray], np.ndarray],
+               r_min: float = 0.5, r_max: float = 1.5) -> np.ndarray:
+        """
+        Custom scaling function.
+        
+        Parameters
+        ----------
+        moduli : ndarray
+            Modulus values |f(z)|.
+        scaling_func : callable
+            User-defined function that maps moduli to [0, 1].
+        r_min, r_max : float
+            Range for final radius values.
+            
+        Returns
+        -------
+        radii : ndarray
+            Scaled radius values.
+        """
+        # Apply custom function and clip to [0, 1]
+        normalized = np.clip(scaling_func(moduli), 0, 1)
+        # Map to [r_min, r_max]
+        return r_min + (r_max - r_min) * normalized
+    
+    @staticmethod
+    def sigmoid(moduli: np.ndarray, steepness: float = 2.0, center: float = 1.0,
+                r_min: float = 0.5, r_max: float = 1.5) -> np.ndarray:
+        """
+        Sigmoid (S-curve) scaling.
+        
+        Provides smooth transition with adjustable steepness and center.
+        Good general-purpose scaling for most functions.
+        
+        Parameters
+        ----------
+        moduli : ndarray
+            Modulus values |f(z)|.
+        steepness : float, default=2.0
+            Controls transition sharpness (higher = steeper).
+        center : float, default=1.0
+            Center of transition (where r ≈ (r_min + r_max) / 2).
+        r_min, r_max : float
+            Range for final radius values.
+        """
+        # Sigmoid function
+        normalized = 1 / (1 + np.exp(-steepness * (moduli - center)))
+        # Map to [r_min, r_max]
+        return r_min + (r_max - r_min) * normalized
+    
+    @staticmethod
+    def adaptive(moduli: np.ndarray, low_percentile: float = 10, high_percentile: float = 90,
+                 r_min: float = 0.5, r_max: float = 1.5) -> np.ndarray:
+        """
+        Adaptive percentile-based scaling.
+        
+        Automatically adjusts to data range, ignoring outliers.
+        Excellent for unknown functions or those with extreme values.
+        
+        Parameters
+        ----------
+        moduli : ndarray
+            Modulus values |f(z)|.
+        low_percentile : float, default=10
+            Lower percentile for mapping to r_min.
+        high_percentile : float, default=90
+            Upper percentile for mapping to r_max.
+        r_min, r_max : float
+            Range for final radius values.
+        """
+        # Get finite values only
+        finite_moduli = moduli[np.isfinite(moduli)]
+        if len(finite_moduli) == 0:
+            return np.full_like(moduli, r_min)
+        
+        # Calculate percentiles
+        p_low = np.percentile(finite_moduli, low_percentile)
+        p_high = np.percentile(finite_moduli, high_percentile)
+        
+        # Handle edge case where all values are similar
+        if p_high <= p_low:
+            return np.full_like(moduli, (r_min + r_max) / 2)
+        
+        # Normalize to [0, 1] based on percentiles
+        normalized = np.clip((moduli - p_low) / (p_high - p_low), 0, 1)
+        
+        # Map to [r_min, r_max]
+        return r_min + (r_max - r_min) * normalized
+    
+    @staticmethod
+    def hybrid(moduli: np.ndarray, transition: float = 1.0,
+               r_min: float = 0.5, r_max: float = 1.5) -> np.ndarray:
+        """
+        Hybrid linear-logarithmic scaling.
+        
+        Linear for |f| < transition, logarithmic for larger values.
+        Ideal for functions with detailed behavior near zero.
+        
+        Parameters
+        ----------
+        moduli : ndarray
+            Modulus values |f(z)|.
+        transition : float, default=1.0
+            Transition point between linear and logarithmic.
+        r_min, r_max : float
+            Range for final radius values.
+        """
+        normalized = np.zeros_like(moduli)
+        
+        # Linear part: [0, transition] -> [0, 0.5]
+        small_mask = moduli <= transition
+        if np.any(small_mask):
+            normalized[small_mask] = 0.5 * moduli[small_mask] / transition
+        
+        # Logarithmic part: (transition, ∞) -> (0.5, 1]
+        large_mask = ~small_mask
+        if np.any(large_mask):
+            with np.errstate(divide='ignore', invalid='ignore'):
+                log_values = np.log(moduli[large_mask] / transition)
+                # Use tanh to compress to (0.5, 1]
+                normalized[large_mask] = 0.5 + 0.5 * np.tanh(log_values)
+        
         # Map to [r_min, r_max]
         return r_min + (r_max - r_min) * normalized
