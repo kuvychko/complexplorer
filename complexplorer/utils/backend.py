@@ -1,0 +1,70 @@
+"""Backend setup utilities for matplotlib and PyQt6."""
+
+import sys
+import os
+import warnings
+
+
+def setup_matplotlib_backend(force_qt: bool = False):
+    """Set up matplotlib backend for interactive plots.
+    
+    Parameters
+    ----------
+    force_qt : bool
+        Force PyQt6 backend even in non-interactive environments
+        
+    Returns
+    -------
+    str
+        The backend that was set up
+    """
+    import matplotlib
+    
+    # Check if we're in a notebook environment
+    if 'ipykernel' in sys.modules or 'IPython' in sys.modules:
+        return matplotlib.get_backend()
+    
+    # Check if we're in a headless environment
+    if not force_qt and (os.environ.get('DISPLAY') is None and sys.platform != 'win32'):
+        matplotlib.use('Agg')
+        return 'Agg'
+    
+    # Try to use PyQt6 if available
+    try:
+        import PyQt6
+        matplotlib.use('Qt6Agg')
+        return 'Qt6Agg'
+    except ImportError:
+        # Fall back to default
+        return matplotlib.get_backend()
+
+
+def ensure_interactive_plots():
+    """Ensure plots are shown in an interactive environment.
+    
+    This function sets up the backend and ensures plt.ion() is called
+    for interactive plots when running scripts.
+    """
+    import matplotlib.pyplot as plt
+    
+    backend = setup_matplotlib_backend()
+    
+    # Enable interactive mode for supported backends
+    if backend not in ['Agg', 'svg', 'pdf', 'ps']:
+        plt.ion()
+    
+    return backend
+
+
+# Legacy compatibility
+def setup_backend(force_qt: bool = False):
+    """Legacy function name for setup_matplotlib_backend."""
+    warnings.warn(
+        "setup_backend is deprecated, use setup_matplotlib_backend instead",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    return setup_matplotlib_backend(force_qt)
+
+
+__all__ = ['setup_matplotlib_backend', 'ensure_interactive_plots', 'setup_backend']

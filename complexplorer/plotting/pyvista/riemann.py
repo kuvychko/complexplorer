@@ -12,6 +12,7 @@ from ...core.colormap import Colormap, Phase
 from ...core.scaling import ModulusScaling
 from ...utils.validation import ValidationError
 from ...utils.mesh import RectangularSphereGenerator
+from ...utils.mesh_distortion import apply_modulus_distortion, get_default_scaling_params
 from .utils import (
     check_pyvista_available, handle_export, add_axes_widget,
     ensure_pyvista_setup, get_camera_position
@@ -126,7 +127,7 @@ def riemann_pv(
     
     # Default modulus parameters
     if modulus_params is None:
-        modulus_params = {}
+        modulus_params = get_default_scaling_params(modulus_mode, for_stl=False)
     
     # Create sphere mesh generator
     gen = RectangularSphereGenerator(
@@ -155,31 +156,14 @@ def riemann_pv(
     rgb = cmap.rgb(f_vals)
     mesh["RGB"] = rgb
     
-    # Apply modulus scaling if requested
-    if modulus_mode != 'constant':
-        moduli = np.abs(f_vals)
-        
-        # Get scaling method
-        if modulus_mode == 'custom':
-            if 'scaling_func' not in modulus_params:
-                raise ValidationError(
-                    "Custom mode requires 'scaling_func' in modulus_params"
-                )
-            radii = ModulusScaling.custom(moduli, **modulus_params)
-        else:
-            # Use built-in scaling method
-            scaling_method = getattr(ModulusScaling, modulus_mode, None)
-            if scaling_method is None:
-                raise ValidationError(
-                    f"Unknown modulus mode: {modulus_mode}. "
-                    f"Available: constant, linear, arctan, logarithmic, "
-                    f"linear_clamp, power, sigmoid, adaptive, hybrid, custom"
-                )
-            radii = scaling_method(moduli, **modulus_params)
-        
-        # Scale points
-        points_scaled = points * radii[:, np.newaxis]
-        mesh.points = points_scaled
+    # Apply modulus scaling
+    moduli = np.abs(f_vals)
+    
+    # Use shared distortion function
+    scaled_points, radii = apply_modulus_distortion(
+        points, moduli, modulus_mode, modulus_params
+    )
+    mesh.points = scaled_points
     
     # Store additional scalars
     mesh["magnitude"] = np.abs(f_vals)
