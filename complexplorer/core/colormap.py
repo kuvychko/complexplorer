@@ -235,8 +235,10 @@ class Chessboard(Colormap):
         z_shifted = (z - self.center) / self.spacing
         
         # Check which square each point is in
-        real_idx = np.floor(np.real(z_shifted)).astype(int)
-        imag_idx = np.floor(np.imag(z_shifted)).astype(int)
+        # Suppress warnings for NaN/inf values
+        with np.errstate(invalid='ignore'):
+            real_idx = np.floor(np.real(z_shifted)).astype(int)
+            imag_idx = np.floor(np.imag(z_shifted)).astype(int)
         
         # Chessboard pattern: white if indices have same parity
         V = ((real_idx + imag_idx) % 2 == 0).astype(float)

@@ -352,8 +352,10 @@ def riemann(func: Callable,
     
     # Convert to complex plane via stereographic projection
     # Using formula: z = r * e^(i*theta) where r = sin(psi) / (1 - cos(psi))
-    r = np.sin(psi_grid) / (1 - np.cos(psi_grid))
-    z = r * np.exp(1.0j * theta_grid)
+    # Suppress divide by zero warning as we handle it with tol
+    with np.errstate(divide='ignore', invalid='ignore'):
+        r = np.sin(psi_grid) / (1 - np.cos(psi_grid))
+        z = r * np.exp(1.0j * theta_grid)
     
     # Evaluate function and get colors
     f_z = func(z)

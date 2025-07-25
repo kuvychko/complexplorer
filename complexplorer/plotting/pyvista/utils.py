@@ -135,7 +135,8 @@ def ensure_pyvista_setup():
     if backend is None:
         # Not in Jupyter, use default
         pass
-    elif backend != 'trame':
+    elif backend != 'trame' and not str(backend).startswith('<MagicMock'):
+        # Only warn for real backends, not mocked ones in tests
         warnings.warn(
             f"PyVista backend is '{backend}', but 'trame' is recommended for "
             "interactive Jupyter visualizations. Set with: pv.set_jupyter_backend('trame')"

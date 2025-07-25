@@ -16,8 +16,7 @@ The `OrnamentGenerator` creates complete, watertight Riemann sphere meshes. User
 ## Basic Usage
 
 ```python
-from complexplorer.cmap import Phase
-from complexplorer.stl_export import OrnamentGenerator
+from complexplorer import Phase, OrnamentGenerator
 
 # Define your complex function
 func = lambda z: (z - 1) / (z**2 + z + 1)
@@ -28,7 +27,7 @@ generator = OrnamentGenerator(
     resolution=120,
     scaling='arctan',
     scaling_params={'r_min': 0.3, 'r_max': 1.2},
-    cmap=Phase(12)
+    cmap=Phase(n_phi=12)
 )
 
 # Generate complete watertight mesh
@@ -134,12 +133,12 @@ If you have code using the old `OrnamentGenerator`:
 
 ```python
 # Old way (v1)
-from complexplorer.stl_export import OrnamentGenerator
+from complexplorer import OrnamentGenerator
 ornament = OrnamentGenerator(func, resolution=150)
 top, bottom = ornament.generate_ornament(cut_mode='real')
 
 # New way (v2)
-from complexplorer.stl_export import OrnamentGenerator
+from complexplorer import OrnamentGenerator
 ornament = OrnamentGeneratorV2(func, resolution=150)
 complete_file = ornament.generate_ornament()
 ```
@@ -226,8 +225,7 @@ generator.generate_ornament('identity_clean.stl')
 #!/usr/bin/env python3
 """Generate a collection of mathematical ornaments."""
 
-from complexplorer.cmap import Phase
-from complexplorer.stl_export import OrnamentGenerator
+from complexplorer import Phase, OrnamentGenerator
 import numpy as np
 
 # Collection of interesting functions
@@ -246,7 +244,7 @@ for name, func in functions:
         resolution=120,
         scaling='arctan',
         scaling_params={'r_min': 0.3, 'r_max': 1.0},
-        cmap=Phase(12)
+        cmap=Phase(n_phi=12)
     )
     
     generator.generate_ornament(

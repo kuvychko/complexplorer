@@ -78,7 +78,9 @@ def sawtooth(x: Union[float, np.ndarray],
     >>> sawtooth(2.3, period=2.0)
     0.15
     """
-    return np.mod(x / period, 1.0)
+    # Suppress warnings for edge cases
+    with np.errstate(invalid='ignore'):
+        return np.mod(x / period, 1.0)
 
 
 def sawtooth_log(x: Union[float, np.ndarray],
@@ -186,9 +188,11 @@ def stereographic_projection(z: Union[complex, np.ndarray],
     Y = np.imag(z)
     denominator = 1 + X**2 + Y**2
     
-    x = 2 * X / denominator
-    y = 2 * Y / denominator
-    z_coord = (-1 + X**2 + Y**2) / denominator
+    # Suppress warnings for points at infinity
+    with np.errstate(divide='ignore', invalid='ignore'):
+        x = 2 * X / denominator
+        y = 2 * Y / denominator
+        z_coord = (-1 + X**2 + Y**2) / denominator
     
     if project_from_north:
         z_coord = z_coord

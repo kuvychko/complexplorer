@@ -295,8 +295,9 @@ class TestIntegration:
         def func(z):
             # Weierstrass function approximation
             result = np.zeros_like(z, dtype=complex)
-            for n in range(5):
-                result += np.cos(3**n * np.pi * z) / 2**n
+            with np.errstate(over='ignore', invalid='ignore'):
+                for n in range(5):
+                    result += np.cos(3**n * np.pi * z) / 2**n
             return result
         
         fig = pair_plot(domain=domain, func=func, n=100,

@@ -26,7 +26,7 @@ cp.pair_plot(domain, func, cmap=cp.Phase(n_phi=6))
 #### Enhanced Phase Portrait (Modulus Enhancement)
 ![Phase portrait modulus enhanced](../../examples/gallery/Phase_portrait_modulus_enhanced_2d.png)
 ```python
-cp.pair_plot(domain, func, cmap=cp.Phase(r_linear_step=0.6))
+cp.pair_plot(domain, func, cmap=cp.Phase(n_phi=4, r_linear_step=0.6))
 ```
 
 #### Enhanced Phase Portrait (Phase and Modulus)
@@ -48,7 +48,7 @@ cp.pair_plot(domain, func, cmap=cp.Chessboard(spacing=0.25))
 #### Polar Chessboard (Linear Spacing)
 ![Polar chessboard linear](../../examples/gallery/Polar_chessboard_linear_modulus_spacing_2d.png)
 ```python
-cp.pair_plot(domain, func, cmap=cp.PolarChessboard(n_phi=6, r_spacing=0.25))
+cp.pair_plot(domain, func, cmap=cp.PolarChessboard(n_phi=6, spacing=0.25))
 ```
 
 #### Polar Chessboard (Logarithmic Spacing)
