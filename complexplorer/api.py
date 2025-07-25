@@ -196,7 +196,7 @@ class Presets:
         """Settings for publication-quality figures."""
         return {
             'cmap': Phase(n_phi=12, auto_scale_r=True, scale_radius=0.8),
-            'n': 800
+            'resolution': 800
         }
     
     @staticmethod
@@ -204,7 +204,7 @@ class Presets:
         """Settings for interactive exploration."""
         return {
             'cmap': Phase(n_phi=6, auto_scale_r=True),
-            'n': 400
+            'resolution': 400
         }
     
     @staticmethod
@@ -212,7 +212,7 @@ class Presets:
         """Settings for high contrast visualization."""
         return {
             'cmap': Phase(n_phi=16, auto_scale_r=True, scale_radius=0.5),
-            'n': 600
+            'resolution': 600
         }
 
 

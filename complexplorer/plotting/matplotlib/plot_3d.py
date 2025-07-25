@@ -135,7 +135,7 @@ def plot_landscape(domain: Optional[Domain] = None,
                   z: Optional[np.ndarray] = None,
                   f: Optional[np.ndarray] = None,
                   func: Optional[Callable] = None,
-                  n: int = 100,
+                  resolution: int = 100,
                   cmap: Optional[Colormap] = None,
                   ax: Optional[Axes3D] = None,
                   antialiased: bool = False,
@@ -158,7 +158,7 @@ def plot_landscape(domain: Optional[Domain] = None,
         2D array of complex codomain values.
     func : callable, optional
         Complex function. If None, f must be provided.
-    n : int, optional
+    resolution : int, optional
         Resolution (number of points along longest edge).
     cmap : Colormap, optional
         Colormap to use. Defaults to enhanced phase portrait.
@@ -213,8 +213,8 @@ def plot_landscape(domain: Optional[Domain] = None,
     
     # Get mesh and mask
     if z is None:
-        z = domain.mesh(n)
-        mask = domain.outmask(n)
+        z = domain.mesh(resolution)
+        mask = domain.outmask(resolution)
     else:
         mask = None
     
@@ -272,7 +272,7 @@ def plot_landscape(domain: Optional[Domain] = None,
         fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
     
     ax.plot_surface(np.real(z), np.imag(z), z_coord, 
-                   rcount=n, ccount=n, 
+                   rcount=resolution, ccount=resolution, 
                    facecolors=rgb,
                    linewidth=0, 
                    antialiased=antialiased)
@@ -291,7 +291,7 @@ def pair_plot_landscape(domain: Optional[Domain] = None,
                        func: Optional[Callable] = None,
                        z: Optional[np.ndarray] = None,
                        f: Optional[np.ndarray] = None,
-                       n: int = 100,
+                       resolution: int = 100,
                        cmap: Optional[Colormap] = None,
                        title: Optional[str] = None,
                        figsize: Tuple[float, float] = (10, 5),
@@ -312,7 +312,7 @@ def pair_plot_landscape(domain: Optional[Domain] = None,
         2D array of complex domain values.
     f : ndarray, optional
         2D array of complex codomain values.
-    n : int, optional
+    resolution : int, optional
         Resolution (number of points along longest edge).
     cmap : Colormap, optional
         Colormap to use.
@@ -348,12 +348,12 @@ def pair_plot_landscape(domain: Optional[Domain] = None,
     fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
     
     # Plot domain (identity)
-    plot_landscape(domain=domain, func=lambda x: x, z=z, f=z, n=n, 
+    plot_landscape(domain=domain, func=lambda x: x, z=z, f=z, resolution=resolution, 
                   cmap=cmap, ax=ax0, zaxis_log=zaxis_log, z_max=z_max,
                   modulus_mode=modulus_mode, modulus_params=modulus_params)
     
     # Plot codomain
-    plot_landscape(domain=domain, func=func, z=z, f=f, n=n,
+    plot_landscape(domain=domain, func=func, z=z, f=f, resolution=resolution,
                   cmap=cmap, ax=ax1, zaxis_log=zaxis_log, z_max=z_max,
                   modulus_mode=modulus_mode, modulus_params=modulus_params)
     
@@ -367,7 +367,7 @@ def pair_plot_landscape(domain: Optional[Domain] = None,
 
 
 def riemann(func: Callable,
-            n: int = 80,
+            resolution: int = 80,
             cmap: Optional[Colormap] = None,
             project_from_north: bool = False,
             ax: Optional[Axes3D] = None,
@@ -383,7 +383,7 @@ def riemann(func: Callable,
     ----------
     func : callable
         Complex function to visualize.
-    n : int, optional
+    resolution : int, optional
         Number of mesh points in each direction.
     cmap : Colormap, optional
         Colormap to use.
@@ -415,8 +415,8 @@ def riemann(func: Callable,
     
     # Create sphere mesh in spherical coordinates
     tol = 1e-8
-    psi_axis = np.linspace(tol, np.pi - tol, n)
-    theta_axis = np.linspace(0, 2 * np.pi, n)
+    psi_axis = np.linspace(tol, np.pi - tol, resolution)
+    theta_axis = np.linspace(0, 2 * np.pi, resolution)
     theta_grid, psi_grid = np.meshgrid(theta_axis, psi_axis)
     
     # Convert to complex plane via stereographic projection
@@ -445,7 +445,7 @@ def riemann(func: Callable,
     
     # Plot sphere
     ax.plot_surface(X, Y, Z, facecolors=rgb, 
-                   rcount=n, ccount=n,
+                   rcount=resolution, ccount=resolution,
                    linewidth=0, antialiased=False)
     
     # Configure axes

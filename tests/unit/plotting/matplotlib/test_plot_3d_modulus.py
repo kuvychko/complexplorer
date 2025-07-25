@@ -20,7 +20,7 @@ class TestModulusScaling:
         domain = Rectangle(2, 2)
         func = lambda z: z
         
-        ax = plot_landscape(domain=domain, func=func, n=20)
+        ax = plot_landscape(domain=domain, func=func, resolution=20)
         assert isinstance(ax, Axes3D)
         plt.close('all')
     
@@ -29,7 +29,7 @@ class TestModulusScaling:
         domain = Rectangle(2, 2)
         func = lambda z: z**2
         
-        ax = plot_landscape(domain=domain, func=func, n=20, 
+        ax = plot_landscape(domain=domain, func=func, resolution=20, 
                           modulus_mode='constant')
         assert isinstance(ax, Axes3D)
         plt.close('all')
@@ -39,7 +39,7 @@ class TestModulusScaling:
         domain = Rectangle(2, 2)
         func = lambda z: z
         
-        ax = plot_landscape(domain=domain, func=func, n=20,
+        ax = plot_landscape(domain=domain, func=func, resolution=20,
                           modulus_mode='linear',
                           modulus_params={'scale': 0.5})
         assert isinstance(ax, Axes3D)
@@ -50,7 +50,7 @@ class TestModulusScaling:
         domain = Rectangle(3, 3)
         func = lambda z: 1/z  # Has pole at origin
         
-        ax = plot_landscape(domain=domain, func=func, n=30,
+        ax = plot_landscape(domain=domain, func=func, resolution=30,
                           modulus_mode='arctan')
         assert isinstance(ax, Axes3D)
         plt.close('all')
@@ -60,7 +60,7 @@ class TestModulusScaling:
         domain = Disk(2)
         func = lambda z: np.exp(z)
         
-        ax = plot_landscape(domain=domain, func=func, n=30,
+        ax = plot_landscape(domain=domain, func=func, resolution=30,
                           modulus_mode='logarithmic')
         assert isinstance(ax, Axes3D)
         plt.close('all')
@@ -73,7 +73,7 @@ class TestModulusScaling:
         def custom_scale(moduli):
             return np.sqrt(moduli)
         
-        ax = plot_landscape(domain=domain, func=func, n=25,
+        ax = plot_landscape(domain=domain, func=func, resolution=25,
                           modulus_mode='custom',
                           modulus_params={'scaling_func': custom_scale})
         assert isinstance(ax, Axes3D)
@@ -103,7 +103,7 @@ class TestModulusScaling:
         domain = Rectangle(2, 2)
         func = lambda z: z**3
         
-        ax = plot_landscape(domain=domain, func=func, n=20,
+        ax = plot_landscape(domain=domain, func=func, resolution=20,
                           modulus_mode='linear',
                           modulus_params={'scale': 2.0},
                           z_max=5.0)
@@ -115,7 +115,7 @@ class TestModulusScaling:
         domain = Rectangle(3, 3)
         func = lambda z: (z-1)/(z+1)
         
-        ax = plot_landscape(domain=domain, func=func, n=25,
+        ax = plot_landscape(domain=domain, func=func, resolution=25,
                           modulus_mode='arctan',
                           zaxis_log=True)
         assert isinstance(ax, Axes3D)
@@ -130,7 +130,7 @@ class TestPairPlotModulus:
         domain = Rectangle(2, 2)
         func = lambda z: z**2
         
-        fig = pair_plot_landscape(domain=domain, func=func, n=20,
+        fig = pair_plot_landscape(domain=domain, func=func, resolution=20,
                                 modulus_mode='arctan')
         assert isinstance(fig, Figure)
         assert len(fig.axes) == 2
@@ -141,7 +141,7 @@ class TestPairPlotModulus:
         domain = Disk(1.5)
         func = lambda z: np.sin(z)
         
-        fig = pair_plot_landscape(domain=domain, func=func, n=25,
+        fig = pair_plot_landscape(domain=domain, func=func, resolution=25,
                                 modulus_mode='linear',
                                 modulus_params={'scale': 0.2})
         assert isinstance(fig, Figure)
@@ -157,7 +157,7 @@ class TestIntegrationWithColormaps:
         func = lambda z: (z**3 - 1) / (z**3 + 1)
         cmap = Phase(n_phi=6, auto_scale_r=True)
         
-        ax = plot_landscape(domain=domain, func=func, cmap=cmap, n=40,
+        ax = plot_landscape(domain=domain, func=func, cmap=cmap, resolution=40,
                           modulus_mode='sigmoid',
                           modulus_params={'steepness': 3.0, 'center': 1.0})
         assert isinstance(ax, Axes3D)
@@ -171,7 +171,7 @@ class TestIntegrationWithColormaps:
             # Function with wide range of values
             return np.where(np.abs(z) < 0.5, 100.0, 1/z)
         
-        ax = plot_landscape(domain=domain, func=func, n=50,
+        ax = plot_landscape(domain=domain, func=func, resolution=50,
                           modulus_mode='adaptive',
                           modulus_params={'low_percentile': 20, 
                                         'high_percentile': 80})
@@ -187,7 +187,7 @@ class TestEdgeCases:
         domain = Rectangle(2, 2)
         func = lambda z: 2 + 3j
         
-        ax = plot_landscape(domain=domain, func=func, n=20,
+        ax = plot_landscape(domain=domain, func=func, resolution=20,
                           modulus_mode='linear')
         assert isinstance(ax, Axes3D)
         plt.close('all')
@@ -203,7 +203,7 @@ class TestEdgeCases:
             return result
         
         # Should handle infinities gracefully
-        ax = plot_landscape(domain=domain, func=func, n=20,
+        ax = plot_landscape(domain=domain, func=func, resolution=20,
                           modulus_mode='arctan')
         assert isinstance(ax, Axes3D)
         plt.close('all')
@@ -215,7 +215,7 @@ class TestEdgeCases:
         
         # Should use default parameters for each mode
         for mode in ['linear', 'arctan', 'logarithmic', 'power']:
-            ax = plot_landscape(domain=domain, func=func, n=20,
+            ax = plot_landscape(domain=domain, func=func, resolution=20,
                               modulus_mode=mode)
             assert isinstance(ax, Axes3D)
             plt.close('all')

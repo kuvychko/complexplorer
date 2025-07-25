@@ -78,7 +78,7 @@ class TestPlotLandscape:
         domain = Rectangle(3, 3)
         func = lambda z: (z - 1) / (z + 1)
         
-        plot_landscape(domain=domain, func=func, n=40)
+        plot_landscape(domain=domain, func=func, resolution=40)
         plt.close('all')
     
     def test_with_arrays(self):
@@ -106,7 +106,7 @@ class TestPlotLandscape:
         func = lambda z: 2 + 3j
         
         # Should handle scalar output
-        plot_landscape(domain=domain, func=func, n=30)
+        plot_landscape(domain=domain, func=func, resolution=30)
         plt.close('all')
     
     def test_with_axes(self):
@@ -117,7 +117,7 @@ class TestPlotLandscape:
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         
-        result = plot_landscape(domain=domain, func=func, ax=ax, n=30)
+        result = plot_landscape(domain=domain, func=func, ax=ax, resolution=30)
         
         assert result is ax
         plt.close('all')
@@ -127,7 +127,7 @@ class TestPlotLandscape:
         domain = Disk(1.5)
         func = lambda z: np.exp(z)
         
-        plot_landscape(domain=domain, func=func, n=40, antialiased=True)
+        plot_landscape(domain=domain, func=func, resolution=40, antialiased=True)
         plt.close('all')
     
     def test_custom_colormap(self):
@@ -136,7 +136,7 @@ class TestPlotLandscape:
         func = lambda z: z**3 - z
         cmap = Chessboard(spacing=0.5)
         
-        plot_landscape(domain=domain, func=func, cmap=cmap, n=50)
+        plot_landscape(domain=domain, func=func, cmap=cmap, resolution=50)
         plt.close('all')
 
 
@@ -148,7 +148,7 @@ class TestPairPlotLandscape:
         domain = Rectangle(3, 3)
         func = lambda z: (z**2 + 1) / (z**2 - 1)
         
-        fig = pair_plot_landscape(domain=domain, func=func, n=40)
+        fig = pair_plot_landscape(domain=domain, func=func, resolution=40)
         
         assert isinstance(fig, Figure)
         assert len(fig.axes) == 2
@@ -162,7 +162,7 @@ class TestPairPlotLandscape:
         func = lambda z: np.log(z + 1)
         
         fig = pair_plot_landscape(domain=domain, func=func, 
-                                 title="Logarithm", n=30)
+                                 title="Logarithm", resolution=30)
         
         assert fig._suptitle is not None
         assert fig._suptitle.get_text() == "Logarithm"
@@ -174,7 +174,7 @@ class TestPairPlotLandscape:
         func = lambda z: 1 / (z**2 + 1)
         
         fig = pair_plot_landscape(domain=domain, func=func,
-                                 zaxis_log=True, n=50)
+                                 zaxis_log=True, resolution=50)
         
         assert len(fig.axes) == 2
         plt.close('all')
@@ -185,7 +185,7 @@ class TestPairPlotLandscape:
         func = lambda z: z**4 - 1
         filename = tmp_path / "landscape.png"
         
-        fig = pair_plot_landscape(domain=domain, func=func, n=30,
+        fig = pair_plot_landscape(domain=domain, func=func, resolution=30,
                                  filename=str(filename))
         
         assert filename.exists()
@@ -199,7 +199,7 @@ class TestRiemann:
         """Test basic Riemann sphere plot."""
         func = lambda z: (z - 1) / (z + 1)
         
-        riemann(func, n=50)
+        riemann(func, resolution=50)
         plt.close('all')
     
     def test_with_axes(self):
@@ -209,7 +209,7 @@ class TestRiemann:
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         
-        result = riemann(func, n=40, ax=ax)
+        result = riemann(func, resolution=40, ax=ax)
         
         assert result is ax
         plt.close('all')
@@ -218,7 +218,7 @@ class TestRiemann:
         """Test projection from north pole."""
         func = lambda z: 1 / z
         
-        riemann(func, n=40, project_from_north=True)
+        riemann(func, resolution=40, project_from_north=True)
         plt.close('all')
     
     def test_with_title(self):
@@ -228,7 +228,7 @@ class TestRiemann:
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         
-        riemann(func, n=30, ax=ax, title="Rational Function")
+        riemann(func, resolution=30, ax=ax, title="Rational Function")
         
         assert ax.get_title() == "Rational Function"
         plt.close('all')
@@ -238,7 +238,7 @@ class TestRiemann:
         func = lambda z: np.sin(z)
         cmap = Phase(n_phi=8, v_base=0.7)
         
-        riemann(func, n=60, cmap=cmap)
+        riemann(func, resolution=60, cmap=cmap)
         plt.close('all')
     
     def test_save_to_file(self, tmp_path):
@@ -246,7 +246,7 @@ class TestRiemann:
         func = lambda z: z**3 - z
         filename = tmp_path / "riemann.png"
         
-        riemann(func, n=40, filename=str(filename))
+        riemann(func, resolution=40, filename=str(filename))
         
         assert filename.exists()
         plt.close('all')
@@ -259,7 +259,7 @@ class TestRiemann:
                 result = np.exp(1/z)
             return np.where(np.isfinite(result), result, 0)
         
-        riemann(func, n=60)
+        riemann(func, resolution=60)
         plt.close('all')
 
 
@@ -272,7 +272,7 @@ class TestIntegration3D:
         func = lambda z: (z**2 - 1) / (z**2 + 2*z + 2)
         
         # Should show poles and zeros clearly with log scale
-        plot_landscape(domain=domain, func=func, n=60, 
+        plot_landscape(domain=domain, func=func, resolution=60, 
                       zaxis_log=True, z_max=10)
         plt.close('all')
     
@@ -281,7 +281,7 @@ class TestIntegration3D:
         domain = Rectangle(4, 4, center=0.5+0j)
         func = lambda z: np.sqrt(z)
         
-        plot_landscape(domain=domain, func=func, n=80)
+        plot_landscape(domain=domain, func=func, resolution=80)
         plt.close('all')
     
     def test_oscillating_function(self):
@@ -289,7 +289,7 @@ class TestIntegration3D:
         domain = Rectangle(10, 10)
         func = lambda z: np.cos(z) * np.sin(z)
         
-        fig = pair_plot_landscape(domain=domain, func=func, n=100,
+        fig = pair_plot_landscape(domain=domain, func=func, resolution=100,
                                  title="Oscillating Function")
         
         assert isinstance(fig, Figure)

@@ -32,7 +32,7 @@ def create_complex_surface(
     func: Optional[Callable],
     z: Optional[np.ndarray] = None,
     f: Optional[np.ndarray] = None,
-    n: int = 100,
+    resolution: int = 100,
     cmap: Optional[Colormap] = None,
     z_scale: float = 1.0,
     log_z: bool = False,
@@ -52,7 +52,7 @@ def create_complex_surface(
         Domain mesh.
     f : ndarray, optional
         Function values.
-    n : int, optional
+    resolution : int, optional
         Resolution.
     cmap : Colormap, optional
         Colormap for coloring.
@@ -82,8 +82,8 @@ def create_complex_surface(
     
     # Get domain mesh
     if z is None:
-        z = domain.mesh(n)
-        mask = domain.outmask(n)
+        z = domain.mesh(resolution)
+        mask = domain.outmask(resolution)
     else:
         mask = None
     
@@ -161,7 +161,7 @@ def plot_landscape_pv(
     func: Optional[Callable] = None,
     z: Optional[np.ndarray] = None,
     f: Optional[np.ndarray] = None,
-    n: int = 100,
+    resolution: int = 100,
     cmap: Optional[Colormap] = None,
     interactive: bool = True,
     notebook: Optional[bool] = None,
@@ -195,7 +195,7 @@ def plot_landscape_pv(
         2D array of complex domain values.
     f : ndarray, optional
         2D array of complex codomain values.
-    n : int, optional
+    resolution : int, optional
         Resolution (number of points along longest edge).
     cmap : Colormap, optional
         Colormap to use. Defaults to enhanced phase portrait.
@@ -245,7 +245,7 @@ def plot_landscape_pv(
     --------
     >>> # Interactive visualization
     >>> domain = Rectangle(4, 4)
-    >>> plot_landscape_pv(domain, lambda z: z**2, n=150)
+    >>> plot_landscape_pv(domain, lambda z: z**2, resolution=150)
     
     >>> # Save static image
     >>> plot_landscape_pv(domain, lambda z: 1/z, 
@@ -256,7 +256,7 @@ def plot_landscape_pv(
     
     # Create surface mesh
     grid, rgb = create_complex_surface(
-        domain, func, z, f, n, cmap, z_scale, log_z, z_max,
+        domain, func, z, f, resolution, cmap, z_scale, log_z, z_max,
         modulus_mode, modulus_params
     )
     
@@ -319,7 +319,7 @@ def pair_plot_landscape_pv(
     func: Optional[Callable] = None,
     z: Optional[np.ndarray] = None,
     f: Optional[np.ndarray] = None,
-    n: int = 100,
+    resolution: int = 100,
     cmap: Optional[Colormap] = None,
     interactive: bool = True,
     notebook: Optional[bool] = None,
@@ -347,7 +347,7 @@ def pair_plot_landscape_pv(
         2D array of complex domain values.
     f : ndarray, optional
         2D array of complex codomain values.
-    n : int, optional
+    resolution : int, optional
         Resolution.
     cmap : Colormap, optional
         Colormap to use.
@@ -400,7 +400,7 @@ def pair_plot_landscape_pv(
     # Left subplot: Domain (identity function)
     plotter.subplot(0, 0)
     grid_domain, _ = create_complex_surface(
-        domain, lambda x: x, z, z, n, cmap, z_scale, log_z, z_max,
+        domain, lambda x: x, z, z, resolution, cmap, z_scale, log_z, z_max,
         modulus_mode, modulus_params
     )
     plotter.add_mesh(
@@ -418,7 +418,7 @@ def pair_plot_landscape_pv(
     # Right subplot: Codomain
     plotter.subplot(0, 1)
     grid_codomain, _ = create_complex_surface(
-        domain, func, z, f, n, cmap, z_scale, log_z, z_max,
+        domain, func, z, f, resolution, cmap, z_scale, log_z, z_max,
         modulus_mode, modulus_params
     )
     plotter.add_mesh(

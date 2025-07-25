@@ -41,7 +41,7 @@ for i, (mode, description) in enumerate(modes):
     cp.plot_landscape(
         domain=domain,
         func=f,
-        n=80,
+        resolution=80,
         ax=ax,
         cmap=cmap,
         modulus_mode=mode,
@@ -67,7 +67,7 @@ fig2, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5),
 cp.plot_landscape(
     domain=domain,
     func=f,
-    n=80,
+    resolution=80,
     ax=ax1,
     cmap=cmap,
     modulus_mode='arctan'
@@ -84,7 +84,7 @@ def custom_scale(moduli):
 cp.plot_landscape(
     domain=domain,
     func=f,
-    n=80,
+    resolution=80,
     ax=ax2,
     cmap=cmap,
     modulus_mode='custom',
@@ -116,7 +116,7 @@ for i, param in enumerate(params):
     cp.plot_landscape(
         domain=domain,
         func=f,
-        n=80,
+        resolution=80,
         ax=ax,
         cmap=cmap,
         modulus_mode='arctan',

@@ -74,7 +74,7 @@ class TestPlotFunction:
         func = lambda z: z**3 - 1
         
         # Should not raise
-        plot(domain=domain, func=func, n=50)
+        plot(domain=domain, func=func, resolution=50)
         plt.close('all')
     
     def test_with_arrays(self):
@@ -106,7 +106,7 @@ class TestPlotFunction:
         func = lambda z: np.exp(z)
         cmap = Chessboard(spacing=0.5)
         
-        plot(domain=domain, func=func, cmap=cmap, n=60)
+        plot(domain=domain, func=func, cmap=cmap, resolution=60)
         plt.close('all')
     
     def test_with_axes(self):
@@ -141,7 +141,7 @@ class TestPairPlot:
         domain = Rectangle(3, 2)
         func = lambda z: (z**2 - 1) / (z**2 + 1)
         
-        fig = pair_plot(domain=domain, func=func, n=40)
+        fig = pair_plot(domain=domain, func=func, resolution=40)
         
         assert isinstance(fig, Figure)
         assert len(fig.axes) == 2
@@ -179,7 +179,7 @@ class TestRiemannChart:
         """Test south hemisphere visualization."""
         func = lambda z: (z - 1) / (z + 1)
         
-        ax = riemann_chart(func, n=50, show_south_hemisphere=True)
+        ax = riemann_chart(func, resolution=50, show_south_hemisphere=True)
         
         assert isinstance(ax, Axes)
         assert "Re(z)" in ax.get_xlabel()
@@ -191,7 +191,7 @@ class TestRiemannChart:
         """Test north hemisphere visualization."""
         func = lambda z: z**2
         
-        ax = riemann_chart(func, n=50, show_south_hemisphere=False)
+        ax = riemann_chart(func, resolution=50, show_south_hemisphere=False)
         
         assert "Re(1/z)" in ax.get_xlabel()
         assert "Im(1/z)" in ax.get_ylabel()
@@ -217,7 +217,7 @@ class TestRiemannChart:
         func = lambda z: 1/z
         domain = Disk(3)  # Will be used for masking
         
-        ax = riemann_chart(func, domain=domain, n=40)
+        ax = riemann_chart(func, domain=domain, resolution=40)
         
         assert isinstance(ax, Axes)
         plt.close('all')
@@ -227,7 +227,7 @@ class TestRiemannChart:
         func = lambda z: 1 + 2j
         
         # Should handle scalar output gracefully
-        ax = riemann_chart(func, n=30)
+        ax = riemann_chart(func, resolution=30)
         
         assert isinstance(ax, Axes)
         plt.close('all')
@@ -240,7 +240,7 @@ class TestRiemannHemispheres:
         """Test basic hemisphere pair plot."""
         func = lambda z: (z**2 + 1) / (z**2 - 1)
         
-        fig = riemann_hemispheres(func, n=50)
+        fig = riemann_hemispheres(func, resolution=50)
         
         assert isinstance(fig, Figure)
         assert len(fig.axes) == 2
@@ -253,7 +253,7 @@ class TestRiemannHemispheres:
         """Test with overall title."""
         func = lambda z: np.exp(z)
         
-        fig = riemann_hemispheres(func, title="Exponential", n=40)
+        fig = riemann_hemispheres(func, title="Exponential", resolution=40)
         
         assert fig._suptitle.get_text() == "Exponential"
         plt.close('all')
@@ -263,7 +263,7 @@ class TestRiemannHemispheres:
         func = lambda z: z**3 - z
         filename = tmp_path / "riemann.png"
         
-        fig = riemann_hemispheres(func, n=30, filename=str(filename))
+        fig = riemann_hemispheres(func, resolution=30, filename=str(filename))
         
         assert filename.exists()
         plt.close('all')
@@ -277,7 +277,7 @@ class TestIntegration:
         domain = Rectangle(re_length=4, im_length=2, center=1+0j)
         func = lambda z: np.sin(z) * np.cos(z)
         
-        plot(domain=domain, func=func, n=60)
+        plot(domain=domain, func=func, resolution=60)
         plt.close('all')
     
     def test_disk_domain(self):
@@ -285,7 +285,7 @@ class TestIntegration:
         domain = Disk(radius=2.5, center=-1+1j)
         func = lambda z: (z**4 - 1) / (z**4 + 1)
         
-        plot(domain=domain, func=func, n=80)
+        plot(domain=domain, func=func, resolution=80)
         plt.close('all')
     
     def test_complex_function(self):
@@ -300,7 +300,7 @@ class TestIntegration:
                     result += np.cos(3**n * np.pi * z) / 2**n
             return result
         
-        fig = pair_plot(domain=domain, func=func, n=100,
+        fig = pair_plot(domain=domain, func=func, resolution=100,
                        title="Weierstrass approximation")
         
         assert isinstance(fig, Figure)

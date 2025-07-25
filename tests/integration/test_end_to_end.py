@@ -41,7 +41,7 @@ class TestBasicWorkflows:
         cmap = Phase(n_phi=6, auto_scale_r=True)
         
         # Create 2D plot
-        ax = plot(domain, func, cmap=cmap, n=50)
+        ax = plot(domain, func, cmap=cmap, resolution=50)
         assert ax is not None
         
         # Close plot
@@ -60,7 +60,7 @@ class TestBasicWorkflows:
         cmap = Phase(n_phi=12, r_linear_step=0.5, v_base=0.4)
         
         # Create plot
-        ax = plot(domain, func, cmap=cmap, n=60)
+        ax = plot(domain, func, cmap=cmap, resolution=60)
         assert ax is not None
         
         import matplotlib.pyplot as plt
@@ -72,7 +72,7 @@ class TestBasicWorkflows:
         domain = Rectangle(4, 4)
         
         # Create 3D plot
-        ax = plot_landscape(domain, func=func, n=40)
+        ax = plot_landscape(domain, func=func, resolution=40)
         assert ax is not None
         
         import matplotlib.pyplot as plt
@@ -84,7 +84,7 @@ class TestBasicWorkflows:
         domain = Rectangle(3, 3)
         
         # Create Riemann sphere plot
-        ax = riemann(func=func, n=30)
+        ax = riemann(func=func, resolution=30)
         assert ax is not None
         
         import matplotlib.pyplot as plt
@@ -109,7 +109,7 @@ class TestColormapVariations:
         ]
         
         for cmap in colormaps:
-            ax = plot(domain, func, cmap=cmap, n=30)
+            ax = plot(domain, func, cmap=cmap, resolution=30)
             assert ax is not None
         
         import matplotlib.pyplot as plt
@@ -130,7 +130,7 @@ class TestColormapVariations:
         
         for config in configs:
             cmap = Phase(**config)
-            ax = plot(domain, func, cmap=cmap, n=40)
+            ax = plot(domain, func, cmap=cmap, resolution=40)
             assert ax is not None
         
         import matplotlib.pyplot as plt
@@ -149,7 +149,7 @@ class TestHighLevelAPI:
         assert ax is not None
         
         # 3D quick plot
-        ax = quick_plot(func, mode='3d', n=30)
+        ax = quick_plot(func, mode='3d', resolution=30)
         assert ax is not None
         
         import matplotlib.pyplot as plt
@@ -300,7 +300,7 @@ class TestPyVistaIntegration:
         # Mock the plotter to avoid display
         from unittest import mock
         with mock.patch('pyvista.Plotter'):
-            plot_landscape_pv(domain, func, n=30, show=False)
+            plot_landscape_pv(domain, func, resolution=30, show=False)
     
     def test_pyvista_riemann(self):
         """Test PyVista Riemann sphere."""
@@ -328,7 +328,7 @@ class TestComplexFunctions:
         cmap = Phase(n_phi=6, auto_scale_r=True)
         
         for func in polynomials:
-            ax = plot(domain, func, cmap=cmap, n=30)
+            ax = plot(domain, func, cmap=cmap, resolution=30)
             assert ax is not None
         
         import matplotlib.pyplot as plt
@@ -348,7 +348,7 @@ class TestComplexFunctions:
         cmap = Phase(n_phi=8, r_linear_step=0.5, v_base=0.4)
         
         for func in rationals:
-            ax = plot(domain, func, cmap=cmap, n=40)
+            ax = plot(domain, func, cmap=cmap, resolution=40)
             assert ax is not None
         
         import matplotlib.pyplot as plt
@@ -366,7 +366,7 @@ class TestComplexFunctions:
         domain = Rectangle(3, 3)
         
         for func in funcs:
-            ax = plot(domain, func, n=40)
+            ax = plot(domain, func, resolution=40)
             assert ax is not None
         
         import matplotlib.pyplot as plt
@@ -381,7 +381,7 @@ class TestEdgeCases:
         func = lambda z: 1 + 0j
         domain = Rectangle(2, 2)
         
-        ax = plot(domain, func, n=20)
+        ax = plot(domain, func, resolution=20)
         assert ax is not None
         
         import matplotlib.pyplot as plt
@@ -392,7 +392,7 @@ class TestEdgeCases:
         func = lambda z: z**2
         domain = Rectangle(0.1, 0.1)
         
-        ax = plot(domain, func, n=20)
+        ax = plot(domain, func, resolution=20)
         assert ax is not None
         
         import matplotlib.pyplot as plt
@@ -404,7 +404,7 @@ class TestEdgeCases:
         domain = Rectangle(2, 2)
         
         # Need high resolution
-        ax = plot(domain, func, n=100)
+        ax = plot(domain, func, resolution=100)
         assert ax is not None
         
         import matplotlib.pyplot as plt

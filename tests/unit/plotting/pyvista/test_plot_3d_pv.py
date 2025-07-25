@@ -27,7 +27,7 @@ class TestCreateComplexSurface:
         domain = Rectangle(2, 2)
         func = lambda z: z**2
         
-        grid, rgb = create_complex_surface(domain, func, n=50)
+        grid, rgb = create_complex_surface(domain, func, resolution=50)
         
         assert isinstance(grid, pyvista.StructuredGrid)
         assert grid.n_points == 50 * 50
@@ -55,7 +55,7 @@ class TestCreateComplexSurface:
         func = lambda z: z**2
         cmap = Chessboard(spacing=0.5)
         
-        grid, rgb = create_complex_surface(domain, func, cmap=cmap, n=40)
+        grid, rgb = create_complex_surface(domain, func, cmap=cmap, resolution=40)
         
         assert grid.n_points == 40 * 40
         assert rgb.shape == (40, 40, 3)
@@ -65,7 +65,7 @@ class TestCreateComplexSurface:
         domain = Rectangle(2, 2)
         func = lambda z: z**2
         
-        grid, rgb = create_complex_surface(domain, func, n=100)
+        grid, rgb = create_complex_surface(domain, func, resolution=100)
         
         assert grid.n_points == 100 * 100
         assert rgb.shape == (100, 100, 3)
@@ -81,7 +81,7 @@ class TestPlotLandscapePV:
         
         with mock.patch('pyvista.Plotter') as MockPlotter:
             plotter = MockPlotter.return_value
-            result = plot_landscape_pv(domain, func, n=50, show=False)
+            result = plot_landscape_pv(domain, func, resolution=50, show=False)
             
             # Function doesn't return plotter when show=False
             assert result is None
@@ -97,7 +97,7 @@ class TestPlotLandscapePV:
         with mock.patch('pyvista.Plotter') as MockPlotter:
             plotter = MockPlotter.return_value
             result = plot_landscape_pv(
-                domain, func, cmap=cmap, n=60, show=False
+                domain, func, cmap=cmap, resolution=60, show=False
             )
             
             # Function doesn't return plotter when show=False
@@ -112,7 +112,7 @@ class TestPlotLandscapePV:
         with mock.patch('pyvista.Plotter') as MockPlotter:
             plotter = MockPlotter.return_value
             plot_landscape_pv(
-                domain, func, n=30, filename="test.png", show=False
+                domain, func, resolution=30, filename="test.png", show=False
             )
             
             plotter.screenshot.assert_called_once_with("test.png")
@@ -145,7 +145,7 @@ class TestPairPlotLandscapePV:
         
         with mock.patch('pyvista.Plotter') as MockPlotter:
             plotter = MockPlotter.return_value
-            result = pair_plot_landscape_pv(domain, func, n=40, show=False)
+            result = pair_plot_landscape_pv(domain, func, resolution=40, show=False)
             
             # Function doesn't return plotter when show=False
             assert result is None

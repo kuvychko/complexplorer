@@ -23,7 +23,7 @@ class TestCoreWorkflows:
         domain = Rectangle(2, 2)
         
         # Basic plot
-        ax = plot(domain, func, n=30)
+        ax = plot(domain, func, resolution=30)
         assert ax is not None
         
         import matplotlib.pyplot as plt
@@ -35,7 +35,7 @@ class TestCoreWorkflows:
         domain = Rectangle(3, 3)
         cmap = Phase(n_phi=6, auto_scale_r=True)
         
-        ax = plot(domain, func, cmap=cmap, n=40)
+        ax = plot(domain, func, cmap=cmap, resolution=40)
         assert ax is not None
         
         import matplotlib.pyplot as plt
@@ -46,7 +46,7 @@ class TestCoreWorkflows:
         func = lambda z: z**3 - z
         domain = Rectangle(2, 2)
         
-        ax = plot_landscape(domain, func=func, n=30)
+        ax = plot_landscape(domain, func=func, resolution=30)
         assert ax is not None
         
         import matplotlib.pyplot as plt
@@ -57,7 +57,7 @@ class TestCoreWorkflows:
         func = lambda z: (z**2 - 1) / (z**2 + 1)
         domain = Rectangle(2.5, 2.5)
         
-        ax = riemann(func=func, n=25)
+        ax = riemann(func=func, resolution=25)
         assert ax is not None
         
         import matplotlib.pyplot as plt
@@ -68,7 +68,7 @@ class TestCoreWorkflows:
         func = lambda z: np.exp(z) / (z + 1)
         
         # Quick plot
-        ax = quick_plot(func, mode='2d', n=30)
+        ax = quick_plot(func, mode='2d', resolution=30)
         assert ax is not None
         
         # Analyze function
@@ -88,7 +88,7 @@ class TestDomainTypes:
         func = lambda z: z**2 - 1
         domain = Rectangle(3, 2)  # 3 wide, 2 tall
         
-        ax = plot(domain, func, n=40)
+        ax = plot(domain, func, resolution=40)
         assert ax is not None
         
         import matplotlib.pyplot as plt
@@ -99,7 +99,7 @@ class TestDomainTypes:
         func = lambda z: z**3
         domain = Disk(1.5)
         
-        ax = plot(domain, func, n=40)
+        ax = plot(domain, func, resolution=40)
         assert ax is not None
         
         import matplotlib.pyplot as plt
@@ -110,7 +110,7 @@ class TestDomainTypes:
         func = lambda z: (z - 0.5) / (z + 0.5)
         domain = Annulus(0.3, 1.5)  # Avoid poles
         
-        ax = plot(domain, func, n=40)
+        ax = plot(domain, func, resolution=40)
         assert ax is not None
         
         import matplotlib.pyplot as plt
@@ -125,7 +125,7 @@ class TestFunctionTypes:
         func = lambda z: z**4 - 2*z**2 + 1
         domain = Rectangle(2, 2)
         
-        ax = plot(domain, func, n=40)
+        ax = plot(domain, func, resolution=40)
         assert ax is not None
         
         import matplotlib.pyplot as plt
@@ -137,7 +137,7 @@ class TestFunctionTypes:
         # Use domain that avoids the pole
         domain = Annulus(1, 2)
         
-        ax = plot(domain, func, n=40)
+        ax = plot(domain, func, resolution=40)
         assert ax is not None
         
         import matplotlib.pyplot as plt
@@ -148,7 +148,7 @@ class TestFunctionTypes:
         func = lambda z: np.sin(z) * np.exp(-np.abs(z)/3)
         domain = Rectangle(4, 4)
         
-        ax = plot(domain, func, n=50)
+        ax = plot(domain, func, resolution=50)
         assert ax is not None
         
         import matplotlib.pyplot as plt

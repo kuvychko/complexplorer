@@ -142,7 +142,7 @@ def plot(domain: Optional[Domain] = None,
          func: Optional[Callable] = None,
          z: Optional[np.ndarray] = None,
          f: Optional[np.ndarray] = None,
-         n: int = 400,
+         resolution: int = 400,
          cmap: Optional[Colormap] = None,
          ax: Optional[Axes] = None,
          title: Optional[str] = None,
@@ -163,7 +163,7 @@ def plot(domain: Optional[Domain] = None,
         2D array of complex domain values.
     f : ndarray, optional
         2D array of complex codomain values.
-    n : int, optional
+    resolution : int, optional
         Resolution (number of points along longest edge).
     cmap : Colormap, optional
         Colormap to use. Defaults to enhanced phase portrait.
@@ -183,7 +183,7 @@ def plot(domain: Optional[Domain] = None,
     --------
     >>> # Using domain and function
     >>> domain = Rectangle(4, 4)
-    >>> plot(domain, lambda z: z**2, n=200)
+    >>> plot(domain, lambda z: z**2, resolution=200)
     
     >>> # Using pre-computed arrays
     >>> z = domain.mesh(200)
@@ -203,8 +203,8 @@ def plot(domain: Optional[Domain] = None,
     
     # Get mesh and mask
     if z is None:
-        z = domain.mesh(n)
-        mask = domain.outmask(n)
+        z = domain.mesh(resolution)
+        mask = domain.outmask(resolution)
     else:
         mask = None
     
@@ -255,7 +255,7 @@ def pair_plot(domain: Optional[Domain] = None,
               func: Optional[Callable] = None,
               z: Optional[np.ndarray] = None,
               f: Optional[np.ndarray] = None,
-              n: int = 400,
+              resolution: int = 400,
               cmap: Optional[Colormap] = None,
               title: Optional[str] = None,
               figsize: Tuple[float, float] = (10, 5),
@@ -272,7 +272,7 @@ def pair_plot(domain: Optional[Domain] = None,
         2D array of complex domain values.
     f : ndarray, optional
         2D array of complex codomain values.
-    n : int, optional
+    resolution : int, optional
         Resolution (number of points along longest edge).
     cmap : Colormap, optional
         Colormap to use. Defaults to enhanced phase portrait.
@@ -295,11 +295,11 @@ def pair_plot(domain: Optional[Domain] = None,
     fig, (ax0, ax1) = plt.subplots(1, 2, figsize=figsize)
     
     # Plot domain
-    plot(domain=domain, func=lambda x: x, z=z, f=z, n=n, 
+    plot(domain=domain, func=lambda x: x, z=z, f=z, resolution=resolution, 
          cmap=cmap, title='Domain z', ax=ax0)
     
     # Plot codomain
-    plot(domain=domain, func=func, z=z, f=f, n=n,
+    plot(domain=domain, func=func, z=z, f=f, resolution=resolution,
          cmap=cmap, title='Codomain f(z)', ax=ax1)
     
     if title:
@@ -315,7 +315,7 @@ def pair_plot(domain: Optional[Domain] = None,
 
 def riemann_chart(func: Callable,
                   domain: Optional[Domain] = None,
-                  n: int = 100,
+                  resolution: int = 100,
                   show_south_hemisphere: bool = True,
                   project_from_north: bool = True,
                   cmap: Optional[Colormap] = None,
@@ -333,7 +333,7 @@ def riemann_chart(func: Callable,
         Complex function to visualize.
     domain : Domain, optional
         If provided, its mask will be applied.
-    n : int, optional
+    resolution : int, optional
         Resolution for the mesh.
     show_south_hemisphere : bool, optional
         If True, show lower hemisphere; else upper.
@@ -371,7 +371,7 @@ def riemann_chart(func: Callable,
     if domain and hasattr(domain, 'mask_list'):
         dom.mask_list = domain.mask_list
     
-    z = dom.mesh(n)
+    z = dom.mesh(resolution)
     
     # Adjust hemisphere based on projection
     if not project_from_north:
@@ -401,7 +401,7 @@ def riemann_chart(func: Callable,
     S = np.where(inside_unit, S, S * 0.7)
     
     # Draw unit circle
-    spacing = dom.spacing(n)
+    spacing = dom.spacing(resolution)
     unit_circle_tol = spacing * unit_circle_width
     on_unit_circle = np.abs(np.abs(z) - 1) < unit_circle_tol
     V[on_unit_circle] = 0
@@ -432,7 +432,7 @@ def riemann_chart(func: Callable,
 
 def riemann_hemispheres(func: Callable,
                        title: Optional[str] = None,
-                       n: int = 400,
+                       resolution: int = 400,
                        margin: float = 0.05,
                        unit_circle_width: float = 1.0,
                        figsize: Tuple[float, float] = (12, 4),
@@ -445,7 +445,7 @@ def riemann_hemispheres(func: Callable,
         Complex function to visualize.
     title : str, optional
         Overall figure title.
-    n : int, optional
+    resolution : int, optional
         Resolution for the mesh.
     margin : float, optional
         Margin around unit disk.
@@ -464,12 +464,12 @@ def riemann_hemispheres(func: Callable,
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=figsize)
     
     # South hemisphere
-    riemann_chart(func, n=n, show_south_hemisphere=True, ax=ax1,
+    riemann_chart(func, resolution=resolution, show_south_hemisphere=True, ax=ax1,
                   margin=margin, unit_circle_width=unit_circle_width)
     ax1.set_title("South (lower) hemisphere")
     
     # North hemisphere  
-    riemann_chart(func, n=n, show_south_hemisphere=False, ax=ax2,
+    riemann_chart(func, resolution=resolution, show_south_hemisphere=False, ax=ax2,
                   margin=margin, unit_circle_width=unit_circle_width)
     ax2.set_title("North (upper) hemisphere")
     

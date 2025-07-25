@@ -32,7 +32,7 @@ except ImportError:
 
 def riemann_pv(
     func: Callable,
-    n: int = 100,
+    resolution: int = 100,
     cmap: Optional[Colormap] = None,
     domain: Optional['Domain'] = None,
     interactive: bool = True,
@@ -58,7 +58,7 @@ def riemann_pv(
     ----------
     func : callable
         Complex function to visualize.
-    n : int, optional
+    resolution : int, optional
         Resolution (number of divisions in each direction).
     cmap : Colormap, optional
         Colormap for coloring. Defaults to Phase(6, 0.6).
@@ -131,8 +131,8 @@ def riemann_pv(
     
     # Create sphere mesh generator
     gen = RectangularSphereGenerator(
-        n_theta=n,
-        n_phi=n,
+        n_theta=resolution,
+        n_phi=resolution,
         avoid_poles=True,
         domain=domain
     )
