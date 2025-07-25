@@ -10,7 +10,9 @@ import warnings
 
 from ...core.domain import Domain
 from ...core.colormap import Colormap, Phase
+from ...core.scaling import ModulusScaling
 from ...utils.validation import ValidationError
+from ...utils.mesh_distortion import get_default_scaling_params
 from .utils import (
     check_pyvista_available, handle_export, add_axes_widget,
     ensure_pyvista_setup, get_camera_position
@@ -34,7 +36,9 @@ def create_complex_surface(
     cmap: Optional[Colormap] = None,
     z_scale: float = 1.0,
     log_z: bool = False,
-    z_max: Optional[float] = None
+    z_max: Optional[float] = None,
+    modulus_mode: str = 'none',
+    modulus_params: Optional[dict] = None
 ) -> Tuple['pv.StructuredGrid', np.ndarray]:
     """Create a PyVista mesh for a complex function surface.
     
@@ -58,6 +62,10 @@ def create_complex_surface(
         Use logarithmic height.
     z_max : float, optional
         Maximum height value.
+    modulus_mode : str, optional
+        How to scale the height based on modulus.
+    modulus_params : dict, optional
+        Parameters for modulus scaling method.
         
     Returns
     -------
@@ -94,6 +102,23 @@ def create_complex_surface(
     
     # Calculate height (magnitude)
     magnitude = np.abs(f)
+    
+    # Apply modulus scaling if requested
+    if modulus_mode != 'none':
+        if modulus_params is None:
+            modulus_params = get_default_scaling_params(modulus_mode)
+        
+        if modulus_mode == 'custom':
+            if 'scaling_func' not in modulus_params:
+                raise ValidationError("Custom mode requires 'scaling_func' in modulus_params")
+            magnitude = modulus_params['scaling_func'](magnitude)
+        else:
+            scaling_method = getattr(ModulusScaling, modulus_mode, None)
+            if scaling_method is None:
+                raise ValidationError(f"Unknown scaling mode: {modulus_mode}")
+            magnitude = scaling_method(magnitude, **modulus_params)
+    
+    # Apply z_max clipping after scaling
     if z_max is not None:
         magnitude = np.clip(magnitude, 0, z_max)
     
@@ -146,6 +171,8 @@ def plot_landscape_pv(
     z_scale: float = 1.0,
     log_z: bool = False,
     z_max: Optional[float] = None,
+    modulus_mode: str = 'none',
+    modulus_params: Optional[dict] = None,
     window_size: Tuple[int, int] = (800, 600),
     title: Optional[str] = None,
     filename: Optional[str] = None,
@@ -188,6 +215,11 @@ def plot_landscape_pv(
         If True, use logarithmic scaling for height.
     z_max : float, optional
         Maximum value for height clipping.
+    modulus_mode : str, optional
+        How to scale the height based on modulus.
+        See plot_landscape for available modes.
+    modulus_params : dict, optional
+        Parameters for modulus scaling method.
     window_size : tuple, optional
         Window size in pixels.
     title : str, optional
@@ -224,7 +256,8 @@ def plot_landscape_pv(
     
     # Create surface mesh
     grid, rgb = create_complex_surface(
-        domain, func, z, f, n, cmap, z_scale, log_z, z_max
+        domain, func, z, f, n, cmap, z_scale, log_z, z_max,
+        modulus_mode, modulus_params
     )
     
     # Create plotter
@@ -294,6 +327,8 @@ def pair_plot_landscape_pv(
     z_scale: float = 1.0,
     log_z: bool = False,
     z_max: Optional[float] = None,
+    modulus_mode: str = 'none',
+    modulus_params: Optional[dict] = None,
     window_size: Tuple[int, int] = (1200, 600),
     title: Optional[str] = None,
     filename: Optional[str] = None,
@@ -328,6 +363,10 @@ def pair_plot_landscape_pv(
         Use logarithmic scaling.
     z_max : float, optional
         Maximum height value.
+    modulus_mode : str, optional
+        How to scale the height based on modulus.
+    modulus_params : dict, optional
+        Parameters for modulus scaling method.
     window_size : tuple, optional
         Window size in pixels.
     title : str, optional
@@ -361,7 +400,8 @@ def pair_plot_landscape_pv(
     # Left subplot: Domain (identity function)
     plotter.subplot(0, 0)
     grid_domain, _ = create_complex_surface(
-        domain, lambda x: x, z, z, n, cmap, z_scale, log_z, z_max
+        domain, lambda x: x, z, z, n, cmap, z_scale, log_z, z_max,
+        modulus_mode, modulus_params
     )
     plotter.add_mesh(
         grid_domain,
@@ -378,7 +418,8 @@ def pair_plot_landscape_pv(
     # Right subplot: Codomain
     plotter.subplot(0, 1)
     grid_codomain, _ = create_complex_surface(
-        domain, func, z, f, n, cmap, z_scale, log_z, z_max
+        domain, func, z, f, n, cmap, z_scale, log_z, z_max,
+        modulus_mode, modulus_params
     )
     plotter.add_mesh(
         grid_codomain,

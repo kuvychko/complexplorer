@@ -108,6 +108,9 @@ cp.pair_plot(domain, f, cmap=cmap, figsize=(10, 5))
 # 3D analytic landscape
 cp.plot_landscape(domain, f, cmap=cmap, z_scale=0.3)
 
+# 3D landscape with modulus scaling for better visualization
+cp.plot_landscape(domain, f, cmap=cmap, modulus_mode='arctan')
+
 # Riemann sphere projection
 cp.riemann(f, resolution=800, cmap=cmap)
 ```
@@ -125,6 +128,27 @@ cp.riemann_pv(f, modulus_scaling='arctan', notebook=False, show=True)
 ```
 
 **⚠️ Important Note:** For best quality, we strongly recommend using PyVista visualizations via command-line scripts rather than Jupyter notebooks. The Jupyter backend (trame) has significant aliasing issues that cannot be compensated with higher resolution. See `examples/interactive_demo.py` for an excellent CLI-based interactive experience.
+
+### 📊 Modulus Scaling for 3D Landscapes
+
+Control how the magnitude (modulus) of complex values is mapped to height in 3D visualizations:
+
+```python
+# Different scaling modes for various visualization needs
+cp.plot_landscape(domain, f, modulus_mode='constant')     # Phase only (flat)
+cp.plot_landscape(domain, f, modulus_mode='arctan')       # Smooth bounded scaling
+cp.plot_landscape(domain, f, modulus_mode='logarithmic')  # Emphasize poles/zeros
+cp.plot_landscape(domain, f, modulus_mode='adaptive')     # Auto-adjust to data
+
+# Custom scaling function for specific needs
+def custom_scale(moduli):
+    return np.tanh(moduli / 2)  # Custom transformation
+
+cp.plot_landscape(domain, f, modulus_mode='custom', 
+                 modulus_params={'scaling_func': custom_scale})
+```
+
+Available modes: `none`, `constant`, `linear`, `arctan`, `logarithmic`, `linear_clamp`, `power`, `sigmoid`, `adaptive`, `hybrid`, `custom`. See `examples/modulus_scaling_showcase.py` for comprehensive examples.
 
 ### 🎯 Domain Restrictions
 

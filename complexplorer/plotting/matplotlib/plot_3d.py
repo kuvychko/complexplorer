@@ -14,7 +14,9 @@ from mpl_toolkits.mplot3d import Axes3D
 from ...core.domain import Domain
 from ...core.colormap import Colormap, Phase
 from ...core.functions import stereographic_projection
+from ...core.scaling import ModulusScaling
 from ...utils.validation import ValidationError
+from ...utils.mesh_distortion import get_default_scaling_params
 
 
 class Matplotlib3DPlotter:  # (Base3DPlotter):  # TODO: Add base class
@@ -29,6 +31,8 @@ class Matplotlib3DPlotter:  # (Base3DPlotter):  # TODO: Add base class
                       zaxis_log: bool = False,
                       z_max: Optional[float] = None,
                       antialiased: bool = False,
+                      modulus_mode: str = 'none',
+                      modulus_params: Optional[dict] = None,
                       config = None) -> Axes3D:  # config: Optional[PlotConfig] = None
         """Plot 3D landscape of complex function.
         
@@ -50,6 +54,10 @@ class Matplotlib3DPlotter:  # (Base3DPlotter):  # TODO: Add base class
             Maximum z-value to display.
         antialiased : bool, optional
             Enable antialiasing.
+        modulus_mode : str, optional
+            How to scale the height based on modulus.
+        modulus_params : dict, optional
+            Parameters for modulus scaling method.
         config : PlotConfig, optional
             Additional plot configuration.
             
@@ -75,8 +83,25 @@ class Matplotlib3DPlotter:  # (Base3DPlotter):  # TODO: Add base class
         # Get RGB colors
         rgb = colormap.rgb(f_z, outmask=mask)
         
-        # Calculate z-coordinates
+        # Calculate z-coordinates (moduli)
         z_coord = np.abs(f_z)
+        
+        # Apply modulus scaling if requested
+        if modulus_mode != 'none':
+            if modulus_params is None:
+                modulus_params = get_default_scaling_params(modulus_mode)
+            
+            if modulus_mode == 'custom':
+                if 'scaling_func' not in modulus_params:
+                    raise ValidationError("Custom mode requires 'scaling_func' in modulus_params")
+                z_coord = modulus_params['scaling_func'](z_coord)
+            else:
+                scaling_method = getattr(ModulusScaling, modulus_mode, None)
+                if scaling_method is None:
+                    raise ValidationError(f"Unknown scaling mode: {modulus_mode}")
+                z_coord = scaling_method(z_coord, **modulus_params)
+        
+        # Apply z_max clipping after scaling
         if z_max is not None:
             if z_max <= 0:
                 raise ValidationError('z_max must be positive')
@@ -115,7 +140,9 @@ def plot_landscape(domain: Optional[Domain] = None,
                   ax: Optional[Axes3D] = None,
                   antialiased: bool = False,
                   zaxis_log: bool = False,
-                  z_max: Optional[float] = None) -> Optional[Axes3D]:
+                  z_max: Optional[float] = None,
+                  modulus_mode: str = 'none',
+                  modulus_params: Optional[dict] = None) -> Optional[Axes3D]:
     """Plot complex function as 3D landscape.
     
     The height represents |f(z)| and color represents the phase or
@@ -143,6 +170,22 @@ def plot_landscape(domain: Optional[Domain] = None,
         Use logarithmic scale for z-axis.
     z_max : float, optional
         Maximum z-value to display.
+    modulus_mode : str, optional
+        How to scale the height based on modulus:
+        - 'none': Direct modulus as height (default)
+        - 'constant': Fixed height (shows phase only)
+        - 'linear': Linear scaling with parameter
+        - 'arctan': Smooth bounded scaling
+        - 'logarithmic': Log scaling
+        - 'linear_clamp': Linear with clamping
+        - 'power': Power scaling
+        - 'sigmoid': S-curve scaling
+        - 'adaptive': Percentile-based
+        - 'hybrid': Linear near zero, log for large
+        - 'custom': User-defined function
+    modulus_params : dict, optional
+        Parameters for modulus scaling method.
+        See ModulusScaling class for parameter details.
         
     Returns
     -------
@@ -195,8 +238,25 @@ def plot_landscape(domain: Optional[Domain] = None,
     # Get RGB colors
     rgb = cmap.rgb(f, outmask=mask)
     
-    # Calculate z-coordinates
+    # Calculate z-coordinates (moduli)
     z_coord = np.abs(f)
+    
+    # Apply modulus scaling if requested
+    if modulus_mode != 'none':
+        if modulus_params is None:
+            modulus_params = get_default_scaling_params(modulus_mode)
+        
+        if modulus_mode == 'custom':
+            if 'scaling_func' not in modulus_params:
+                raise ValidationError("Custom mode requires 'scaling_func' in modulus_params")
+            z_coord = modulus_params['scaling_func'](z_coord)
+        else:
+            scaling_method = getattr(ModulusScaling, modulus_mode, None)
+            if scaling_method is None:
+                raise ValidationError(f"Unknown scaling mode: {modulus_mode}")
+            z_coord = scaling_method(z_coord, **modulus_params)
+    
+    # Apply z_max clipping after scaling
     if z_max is not None:
         z_coord = np.clip(z_coord, 0, z_max)
     
@@ -237,6 +297,8 @@ def pair_plot_landscape(domain: Optional[Domain] = None,
                        figsize: Tuple[float, float] = (10, 5),
                        zaxis_log: bool = False,
                        z_max: Optional[float] = None,
+                       modulus_mode: str = 'none',
+                       modulus_params: Optional[dict] = None,
                        filename: Optional[str] = None) -> Figure:
     """Plot domain and codomain landscapes side by side.
     
@@ -262,6 +324,11 @@ def pair_plot_landscape(domain: Optional[Domain] = None,
         Use logarithmic scale for z-axis.
     z_max : float, optional
         Maximum z-value to display.
+    modulus_mode : str, optional
+        How to scale the height based on modulus.
+        See plot_landscape for available modes.
+    modulus_params : dict, optional
+        Parameters for modulus scaling method.
     filename : str, optional
         If provided, save figure to this file.
         
@@ -282,11 +349,13 @@ def pair_plot_landscape(domain: Optional[Domain] = None,
     
     # Plot domain (identity)
     plot_landscape(domain=domain, func=lambda x: x, z=z, f=z, n=n, 
-                  cmap=cmap, ax=ax0, zaxis_log=zaxis_log, z_max=z_max)
+                  cmap=cmap, ax=ax0, zaxis_log=zaxis_log, z_max=z_max,
+                  modulus_mode=modulus_mode, modulus_params=modulus_params)
     
     # Plot codomain
     plot_landscape(domain=domain, func=func, z=z, f=f, n=n,
-                  cmap=cmap, ax=ax1, zaxis_log=zaxis_log, z_max=z_max)
+                  cmap=cmap, ax=ax1, zaxis_log=zaxis_log, z_max=z_max,
+                  modulus_mode=modulus_mode, modulus_params=modulus_params)
     
     if title:
         fig.suptitle(title)
