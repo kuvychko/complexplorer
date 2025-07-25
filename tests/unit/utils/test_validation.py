@@ -121,16 +121,16 @@ class TestValidateColormap:
     def test_none_colormap_with_default(self):
         """Test None colormap with default class."""
         class MockCmap:
-            def __init__(self, n_phi=6, n_r=0.6):
+            def __init__(self, n_phi=6, auto_scale_r=True):
                 self.n_phi = n_phi
-                self.n_r = n_r
+                self.auto_scale_r = auto_scale_r
             def hsv(self): pass
             def rgb(self): pass
         
         cmap = validate_colormap(None, default_class=MockCmap)
         assert isinstance(cmap, MockCmap)
         assert cmap.n_phi == 6
-        assert cmap.n_r == 0.6
+        assert cmap.auto_scale_r is True
     
     def test_valid_colormap(self):
         """Test with valid colormap."""

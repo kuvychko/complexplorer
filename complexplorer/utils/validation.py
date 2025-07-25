@@ -132,7 +132,7 @@ def validate_colormap(cmap: Optional[Any], default_class: Any = None) -> Any:
                 )
         
         # Return default colormap with standard parameters
-        return default_class(n_phi=6, n_r=0.6)
+        return default_class(n_phi=6, auto_scale_r=True)
     
     # Validate that cmap has required methods
     required_methods = ['hsv', 'rgb']
