@@ -222,6 +222,9 @@ def plot_landscape(domain: Optional[Domain] = None,
     
     if return_ax:
         return ax
+    else:
+        # Return the current axes even if we created it
+        return plt.gca()
 
 
 def pair_plot_landscape(domain: Optional[Domain] = None,
@@ -389,3 +392,6 @@ def riemann(func: Callable,
     
     if return_ax:
         return ax
+    else:
+        # Return the current axes even if we created it
+        return plt.gca()

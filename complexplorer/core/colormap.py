@@ -74,7 +74,7 @@ class Colormap(ABC):
         H, S, V = self.hsv_tuple(z)
         
         # Apply out-of-domain coloring
-        if outmask is not None:
+        if outmask is not None and z.ndim > 0:
             H = H.copy()
             S = S.copy()
             V = V.copy()

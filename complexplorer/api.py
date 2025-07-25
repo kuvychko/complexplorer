@@ -49,7 +49,7 @@ def quick_plot(func: Callable[[complex], complex],
         domain = Rectangle(4, 4)
     
     if 'cmap' not in kwargs:
-        kwargs['cmap'] = Phase(auto_scale_r=True)
+        kwargs['cmap'] = Phase(n_phi=6, auto_scale_r=True)
     
     if mode == '2d':
         return plot_2d(domain, func, **kwargs)
@@ -57,12 +57,12 @@ def quick_plot(func: Callable[[complex], complex],
         if HAS_PYVISTA and kwargs.get('backend', 'matplotlib') == 'pyvista':
             return plot_landscape_pv(domain, func, **kwargs)
         else:
-            return plot_3d_landscape(domain, func, **kwargs)
+            return plot_3d_landscape(domain, func=func, **kwargs)
     elif mode == 'riemann':
         if HAS_PYVISTA and kwargs.get('backend', 'matplotlib') == 'pyvista':
             return riemann_pv(func, **kwargs)
         else:
-            return plot_riemann(domain, func, **kwargs)
+            return plot_riemann(func, **kwargs)
     else:
         raise ValueError(f"Unknown mode: {mode}")
 
@@ -196,8 +196,6 @@ class Presets:
         """Settings for publication-quality figures."""
         return {
             'cmap': Phase(n_phi=12, auto_scale_r=True, scale_radius=0.8),
-            'dpi': 300,
-            'figsize': (8, 6),
             'n': 800
         }
     
@@ -206,8 +204,7 @@ class Presets:
         """Settings for interactive exploration."""
         return {
             'cmap': Phase(n_phi=6, auto_scale_r=True),
-            'n': 400,
-            'backend': 'pyvista' if HAS_PYVISTA else 'matplotlib'
+            'n': 400
         }
     
     @staticmethod

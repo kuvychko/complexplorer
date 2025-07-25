@@ -124,7 +124,7 @@ def validate_colormap(cmap: Optional[Any], default_class: Any = None) -> Any:
         if default_class is None:
             # Import default here to avoid circular imports
             try:
-                from complexplorer.legacy.cmap import Phase
+                from complexplorer.core.colormap import Phase
                 default_class = Phase
             except ImportError:
                 raise ValidationError(

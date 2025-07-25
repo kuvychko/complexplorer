@@ -212,6 +212,11 @@ def plot(domain: Optional[Domain] = None,
     if f is None:
         f = func(z)
     
+    # Ensure f has the same shape as z if it's a scalar
+    f = np.asarray(f)
+    if f.ndim == 0:
+        f = np.full_like(z, f)
+    
     # Get RGB values
     rgb = cmap.rgb(f, outmask=mask)
     
@@ -235,6 +240,8 @@ def plot(domain: Optional[Domain] = None,
             plt.title(title)
         if filename:
             plt.savefig(filename)
+        # Return the current axes
+        return plt.gca()
     else:
         ax.imshow(rgb, origin="lower", extent=extent, aspect=aspect)
         ax.set_xlabel("Re(z)")

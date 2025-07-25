@@ -162,6 +162,70 @@ class TestPhase:
         assert 0.5 <= V[0] <= 1.0  # Within range
         assert 0.5 <= V[1] <= 1.0
     
+    def test_auto_scale_calculation(self):
+        """Test that auto-scaling calculates correct r_linear_step."""
+        # Test with n_phi = 6
+        cmap = Phase(n_phi=6, auto_scale_r=True)
+        expected_r_step = 2 * np.pi / 6  # ≈ 1.047
+        assert np.isclose(cmap.r_linear_step, expected_r_step)
+        
+        # Test with n_phi = 12
+        cmap = Phase(n_phi=12, auto_scale_r=True)
+        expected_r_step = 2 * np.pi / 12  # ≈ 0.524
+        assert np.isclose(cmap.r_linear_step, expected_r_step)
+        
+        # Test with n_phi = 24
+        cmap = Phase(n_phi=24, auto_scale_r=True)
+        expected_r_step = 2 * np.pi / 24  # ≈ 0.262
+        assert np.isclose(cmap.r_linear_step, expected_r_step)
+    
+    def test_auto_scale_with_custom_radius(self):
+        """Test auto-scaling with custom scale_radius."""
+        # Test with scale_radius = 2.0
+        cmap = Phase(n_phi=6, auto_scale_r=True, scale_radius=2.0)
+        expected_r_step = 2 * np.pi / 6 * 2.0  # ≈ 2.094
+        assert np.isclose(cmap.r_linear_step, expected_r_step)
+        
+        # Test with scale_radius = 0.5
+        cmap = Phase(n_phi=12, auto_scale_r=True, scale_radius=0.5)
+        expected_r_step = 2 * np.pi / 12 * 0.5  # ≈ 0.262
+        assert np.isclose(cmap.r_linear_step, expected_r_step)
+    
+    def test_auto_scale_visual_consistency(self):
+        """Test that auto-scaled and manually calculated values produce same output."""
+        # Create test complex values
+        z = np.array([1+0j, 0+1j, -1+0j, 0-1j, 0.5+0.5j])
+        
+        # Manual calculation for n_phi=6
+        n_phi = 6
+        manual_r_step = 2 * np.pi / n_phi
+        cmap_manual = Phase(n_phi=n_phi, r_linear_step=manual_r_step, v_base=0.4)
+        
+        # Auto-scaled version
+        cmap_auto = Phase(n_phi=n_phi, auto_scale_r=True, v_base=0.4)
+        
+        # Get HSV values
+        hsv_manual = cmap_manual.hsv_tuple(z)
+        hsv_auto = cmap_auto.hsv_tuple(z)
+        
+        # They should be identical
+        np.testing.assert_array_almost_equal(hsv_manual, hsv_auto)
+    
+    def test_auto_scale_edge_cases(self):
+        """Test edge cases for auto-scaling."""
+        # Very small n_phi
+        cmap1 = Phase(n_phi=2, auto_scale_r=True)
+        assert np.isclose(cmap1.r_linear_step, np.pi)
+        
+        # Large n_phi
+        cmap2 = Phase(n_phi=100, auto_scale_r=True)
+        assert np.isclose(cmap2.r_linear_step, 2 * np.pi / 100)
+        
+        # With logarithmic scaling (should still work)
+        cmap3 = Phase(n_phi=6, auto_scale_r=True, r_log_base=2.0)
+        assert np.isclose(cmap3.r_linear_step, 2 * np.pi / 6)
+        assert cmap3.r_log_base == 2.0
+    
     def test_hsv_enhanced_modulus(self):
         """Test enhanced modulus coloring."""
         cmap = Phase(r_linear_step=1.0, v_base=0.5)

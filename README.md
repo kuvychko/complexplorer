@@ -89,8 +89,10 @@ Explore the full range of visualizations in our [**Gallery**](docs/gallery/READM
 ## 📚 Documentation
 
 - **[Gallery](docs/gallery/README.md)** - Visual showcase with code examples
-- **[Tutorial: Plotting Functions](examples/plotting_tutorial.ipynb)** - Comprehensive plotting guide
-- **[Tutorial: Domains & Color Maps](examples/domains_and_colormaps_tutorial.ipynb)** - Domain creation and color mapping
+- **[Getting Started](examples/getting_started.ipynb)** - Beginner-friendly introduction
+- **[Advanced Features](examples/advanced_features.ipynb)** - 3D visualization, STL export, and more
+- **[API Cookbook](examples/api_cookbook.ipynb)** - Ready-to-use code recipes
+- **[Interactive Demo](examples/interactive_showcase.py)** - Run `python examples/interactive_showcase.py`
 - **API Reference** - Use `help()` on any function or class
 
 ## 🛠️ Advanced Example
@@ -104,10 +106,10 @@ cmap = cp.Phase(n_phi=6, auto_scale_r=True, v_base=0.4)  # Auto-scaled enhanced 
 cp.pair_plot(domain, f, cmap=cmap, figsize=(10, 5))
 
 # 3D analytic landscape
-cp.plot_landscape(domain, func=f, cmap=cmap, z_max=10)
+cp.plot_landscape(domain, f, cmap=cmap, z_scale=0.3)
 
 # Riemann sphere projection
-cp.riemann(f, n=800, cmap=cmap)
+cp.riemann(f, resolution=800, cmap=cmap)
 ```
 
 ### 🚀 High-Performance 3D Visualizations with PyVista
@@ -116,10 +118,10 @@ For interactive, high-quality 3D visualizations, Complexplorer includes PyVista-
 
 ```python
 # High-performance 3D landscape
-cp.plot_landscape_pv(domain, f, cmap=cmap, show_orientation=True)
+cp.plot_landscape_pv(domain, f, cmap=cmap, notebook=False, show=True)
 
 # Interactive Riemann sphere with modulus scaling
-cp.riemann_pv(f, scaling='arctan', show_orientation=True)
+cp.riemann_pv(f, modulus_scaling='arctan', notebook=False, show=True)
 ```
 
 **⚠️ Important Note:** For best quality, we strongly recommend using PyVista visualizations via command-line scripts rather than Jupyter notebooks. The Jupyter backend (trame) has significant aliasing issues that cannot be compensated with higher resolution. See `examples/interactive_demo.py` for an excellent CLI-based interactive experience.
@@ -134,8 +136,8 @@ domain = cp.Disk(radius=5, center=0)
 cp.riemann_pv(f, domain=domain, scaling='arctan')
 
 # Exclude origin for functions with poles
-domain = cp.Annulus(radius_inner=0.1, radius_outer=10, center=0)
-ornament = OrnamentGenerator(func=lambda z: 1/z, domain=domain)
+domain = cp.Annulus(inner_radius=0.1, outer_radius=10, center=0)
+ornament = cp.OrnamentGenerator(func=lambda z: 1/z, domain=domain)
 ```
 
 Domain restrictions work with all visualization functions and are especially useful for:
@@ -149,7 +151,8 @@ Domain restrictions work with all visualization functions and are especially use
 Transform your complex function visualizations into physical objects! Complexplorer can export Riemann sphere visualizations as STL files suitable for 3D printing:
 
 ```python
-from complexplorer.stl_export import OrnamentGenerator
+# STL export is available with PyVista installed
+from complexplorer.export.stl import OrnamentGenerator
 
 # Create STL files from your function
 ornament = OrnamentGenerator(
@@ -159,9 +162,9 @@ ornament = OrnamentGenerator(
     cmap=cp.Phase(n_phi=12, auto_scale_r=True)
 )
 
-# Generate print-ready STL files
-top_file, bottom_file = ornament.generate_ornament(
-    cut_mode='real',
+# Generate print-ready STL file
+stl_file = ornament.generate_ornament(
+    output_file='complex_ornament.stl',
     size_mm=80,
     smooth=True
 )
@@ -175,7 +178,7 @@ Features:
 - Intelligent handling of singularities through neighbor interpolation
 - Compatible with all complexplorer colormaps
 
-See the [STL Export Guide](docs/stl_export_guide.md) for detailed instructions and `examples/stl_ornament_demo.ipynb` for interactive examples.
+See `examples/advanced_features.ipynb` for interactive STL export examples.
 
 ## 🤝 Contributing
 
