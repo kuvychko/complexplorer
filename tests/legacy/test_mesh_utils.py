@@ -6,7 +6,7 @@ import pytest
 import numpy as np
 import pyvista as pv
 
-from complexplorer.mesh_utils import (
+from complexplorer import (
     RectangularSphereGenerator,
     stereographic_projection,
     inverse_stereographic,

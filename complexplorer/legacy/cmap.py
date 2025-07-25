@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.colors as colors
 from typing import Optional, Tuple
-from complexplorer.domain import Domain
-from complexplorer.funcs import phase, sawtooth
+from .domain import Domain
+from .funcs import phase, sawtooth
 
 """
 This module contains a set of classes for the construction of color maps.

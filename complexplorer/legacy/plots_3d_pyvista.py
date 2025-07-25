@@ -23,8 +23,8 @@ except ImportError:
     warnings.warn("matplotlib not available, some color functions may be limited")
     hsv_to_rgb = None
 
-from complexplorer.cmap import Phase, Cmap
-from complexplorer.domain import Domain
+from .cmap import Phase, Cmap
+from .domain import Domain
 
 
 def _handle_export(plotter: pv.Plotter, filename: str, interactive: bool) -> None:
@@ -662,7 +662,7 @@ def riemann_pv(
     so the default rectangular mesh often looks better despite mathematical
     imperfections near poles.
     """
-    from complexplorer.mesh_utils import (
+    from .mesh_utils import (
         RectangularSphereGenerator, 
         stereographic_projection, ModulusScaling
     )

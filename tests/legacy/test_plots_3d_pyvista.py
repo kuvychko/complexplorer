@@ -11,7 +11,7 @@ from unittest import mock
 pyvista = pytest.importorskip("pyvista")
 
 from complexplorer import Rectangle, Disk, Annulus, Phase, Chessboard
-from complexplorer.plots_3d_pyvista import (
+from complexplorer import (
     plot_landscape_pv, 
     pair_plot_landscape_pv,
     riemann_pv,
@@ -459,7 +459,7 @@ class TestHTMLExport:
     def test_html_export_warning(self):
         """Test warning when exporting HTML without trame."""
         import warnings
-        from complexplorer.plots_3d_pyvista import _handle_export
+        from complexplorer import _handle_export
         
         # Mock plotter
         plotter = mock.Mock()
@@ -471,7 +471,7 @@ class TestHTMLExport:
     
     def test_html_export_formats(self, tmp_path):
         """Test different file format handling."""
-        from complexplorer.plots_3d_pyvista import _handle_export
+        from complexplorer import _handle_export
         
         # Mock plotter
         plotter = mock.Mock()

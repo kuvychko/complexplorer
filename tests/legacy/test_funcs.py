@@ -4,7 +4,7 @@ Unit tests for complexplorer function utilities.
 
 import pytest
 import numpy as np
-from complexplorer.funcs import phase, sawtooth, stereographic
+from complexplorer import phase, sawtooth, stereographic
 
 
 class TestPhaseFunction:

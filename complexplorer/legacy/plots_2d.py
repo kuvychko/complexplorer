@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
-from complexplorer.cmap import Phase, Cmap
-from complexplorer.domain import *
+from .cmap import Phase, Cmap
+from .domain import *
 from typing import Callable, Optional
 
 

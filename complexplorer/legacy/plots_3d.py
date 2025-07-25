@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from complexplorer.cmap import Phase, Cmap
-from complexplorer.domain import *
-from complexplorer.funcs import stereographic
+from .cmap import Phase, Cmap
+from .domain import *
+from .funcs import stereographic
 from typing import Callable, Optional
 
 

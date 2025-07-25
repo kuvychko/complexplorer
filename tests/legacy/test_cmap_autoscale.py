@@ -2,7 +2,7 @@
 
 import numpy as np
 import pytest
-from complexplorer.cmap import Phase
+from complexplorer import Phase
 
 
 class TestPhaseAutoScale:
