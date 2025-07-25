@@ -114,17 +114,17 @@ COLOR_SCHEMES = {
     },
     "6": {
         "name": "Cartesian chessboard",
-        "cmap": cp.Chessboard(n_squares=30),
+        "cmap": cp.Chessboard(spacing=0.2),
         "best_for": "conformal mapping"
     },
     "7": {
         "name": "Polar chessboard",
-        "cmap": cp.PolarChessboard(n_phi=16, n_r=8),
+        "cmap": cp.PolarChessboard(n_phi=16, spacing=0.3),
         "best_for": "radial structure"
     },
     "8": {
         "name": "Logarithmic rings",
-        "cmap": cp.LogRings(base=2),
+        "cmap": cp.LogRings(log_spacing=0.3),
         "best_for": "modulus levels"
     }
 }
@@ -259,20 +259,26 @@ def visualization_2d(func_data, cmap, domain, resolution):
 def visualization_3d_landscape(func_data, cmap, domain, resolution):
     """Create 3D landscape visualization."""
     print("\nZ-axis scaling options:")
-    print("1. Automatic")
-    print("2. Fixed scale (z_scale = 0.3)")
-    print("3. Extended scale (z_scale = 0.5)")
-    print("4. Custom scale")
+    print("1. Linear (default)")
+    print("2. Arctan (smooth compression)")
+    print("3. Logarithmic")
+    print("4. Custom z_scale")
     
     z_choice = get_choice("Select Z scaling (1-4)", ["1", "2", "3", "4"])
     
-    z_scale = None
-    if z_choice == "2":
-        z_scale = 0.3
+    # Set up modulus mode and z_scale
+    if z_choice == "1":
+        modulus_mode = 'none'
+        z_scale = 1.0
+    elif z_choice == "2":
+        modulus_mode = 'arctan'
+        z_scale = 1.0
     elif z_choice == "3":
-        z_scale = 0.5
+        modulus_mode = 'logarithmic'
+        z_scale = 1.0
     elif z_choice == "4":
-        z_scale = float(input("Enter z_scale value (0.1 to 1.0): "))
+        modulus_mode = 'none'
+        z_scale = float(input("Enter z_scale value (0.1 to 2.0): "))
     
     print("\nCreating 3D landscape (high-quality external window)...")
     
@@ -282,10 +288,12 @@ def visualization_3d_landscape(func_data, cmap, domain, resolution):
         cmap=cmap,
         resolution=resolution,
         z_scale=z_scale,
+        modulus_mode=modulus_mode,
         notebook=False,  # High quality
-        show=True,
+        interactive=True,  # Show interactive window
         title=f"{func_data['name']}: {func_data['description']}",
-        window_size=(1000, 800)
+        window_size=(1000, 800),
+        return_plotter=True
     )
     
     return plotter
@@ -308,20 +316,21 @@ def visualization_riemann_sphere(func_data, cmap, resolution):
         "4": ("linear_clamp", {'m_max': 5, 'r_min': 0.4, 'r_max': 1.0})
     }
     
-    modulus_scaling, scaling_params = scaling_map[scaling_choice]
+    modulus_mode, modulus_params = scaling_map[scaling_choice]
     
     print("\nCreating Riemann sphere (high-quality external window)...")
     
     plotter = cp.riemann_pv(
         func_data["func"],
         cmap=cmap,
-        modulus_scaling=modulus_scaling,
-        scaling_params=scaling_params,
+        modulus_mode=modulus_mode,
+        modulus_params=modulus_params,
         resolution=resolution,
         notebook=False,  # High quality
-        show=True,
+        interactive=True,  # Show interactive window
         title=f"{func_data['name']} on Riemann Sphere",
-        window_size=(900, 900)
+        window_size=(900, 900),
+        return_plotter=True
     )
     
     return plotter
@@ -371,7 +380,7 @@ def stl_export(func_data, cmap):
         "3": ("linear_clamp", {'m_max': 5, 'r_min': 0.4, 'r_max': 1.0})
     }
     
-    scaling, scaling_params = scaling_map[scale_choice]
+    modulus_mode, modulus_params = scaling_map[scale_choice]
     
     # Size
     size_mm = float(input("\nOrnament size in mm (default 80): ") or "80")
@@ -388,8 +397,8 @@ def stl_export(func_data, cmap):
         generator = OrnamentGenerator(
             func=func_data["func"],
             resolution=resolution,
-            scaling=scaling,
-            scaling_params=scaling_params,
+            scaling=modulus_mode,
+            scaling_params=modulus_params,
             cmap=cmap,
             domain=domain
         )

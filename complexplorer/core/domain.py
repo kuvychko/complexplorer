@@ -219,6 +219,21 @@ class Domain(ABC):
         """
         return CompositeDomain(self, other, 'intersection')
     
+    def difference(self, other: 'Domain') -> 'CompositeDomain':
+        """Create set difference with another domain.
+        
+        Parameters
+        ----------
+        other : Domain
+            Domain to subtract.
+            
+        Returns
+        -------
+        CompositeDomain
+            Points in this domain but not in other.
+        """
+        return CompositeDomain(self, other, 'difference')
+    
     def __or__(self, other: 'Domain') -> 'CompositeDomain':
         """Union operator (|)."""
         return self.union(other)
@@ -226,6 +241,10 @@ class Domain(ABC):
     def __and__(self, other: 'Domain') -> 'CompositeDomain':
         """Intersection operator (&)."""
         return self.intersection(other)
+    
+    def __sub__(self, other: 'Domain') -> 'CompositeDomain':
+        """Set difference operator (-)."""
+        return self.difference(other)
 
 
 class Rectangle(Domain):
@@ -352,8 +371,8 @@ class Annulus(Domain):
 class CompositeDomain(Domain):
     """Domain formed by set operations on other domains.
     
-    This class represents domains created by union or intersection
-    of two existing domains.
+    This class represents domains created by union, intersection,
+    or difference of two existing domains.
     
     Parameters
     ----------
@@ -361,7 +380,7 @@ class CompositeDomain(Domain):
         First domain.
     domain2 : Domain
         Second domain.
-    operation : {'union', 'intersection'}
+    operation : {'union', 'intersection', 'difference'}
         Set operation to apply.
     """
     
@@ -370,8 +389,8 @@ class CompositeDomain(Domain):
                  domain2: Domain,
                  operation: str):
         """Initialize composite domain."""
-        if operation not in ['union', 'intersection']:
-            raise ValidationError("Operation must be 'union' or 'intersection'")
+        if operation not in ['union', 'intersection', 'difference']:
+            raise ValidationError("Operation must be 'union', 'intersection', or 'difference'")
         
         self.domain1 = domain1
         self.domain2 = domain2
@@ -402,8 +421,10 @@ class CompositeDomain(Domain):
         
         if self.operation == 'union':
             return mask1 | mask2
-        else:  # intersection
+        elif self.operation == 'intersection':
             return mask1 & mask2
+        else:  # difference
+            return mask1 & ~mask2
 
 
 # Backward compatibility aliases

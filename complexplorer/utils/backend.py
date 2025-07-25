@@ -29,14 +29,20 @@ def setup_matplotlib_backend(force_qt: bool = False):
         matplotlib.use('Agg')
         return 'Agg'
     
-    # Try to use PyQt6 if available
+    # Try to use Qt backend if available
     try:
         import PyQt6
-        matplotlib.use('Qt6Agg')
-        return 'Qt6Agg'
+        # Use qtagg which supports both Qt5 and Qt6
+        matplotlib.use('qtagg')
+        return 'qtagg'
     except ImportError:
-        # Fall back to default
-        return matplotlib.get_backend()
+        try:
+            import PyQt5
+            matplotlib.use('qt5agg')
+            return 'qt5agg'
+        except ImportError:
+            # Fall back to default
+            return matplotlib.get_backend()
 
 
 def ensure_interactive_plots():

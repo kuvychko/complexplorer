@@ -270,6 +270,40 @@ class TestCompositeDomain:
         # Points in neither
         assert not intersection.contains(3+3j)
     
+    def test_difference_creation(self):
+        """Test creation of difference domains."""
+        disk1 = Disk(2)
+        disk2 = Disk(1)
+        
+        # Method call
+        diff = disk1.difference(disk2)
+        assert isinstance(diff, CompositeDomain)
+        assert diff.operation == 'difference'
+        
+        # Operator
+        diff_op = disk1 - disk2
+        assert isinstance(diff_op, CompositeDomain)
+        assert diff_op.operation == 'difference'
+    
+    def test_difference_contains(self):
+        """Test containment for set difference."""
+        # Create annulus using set difference
+        outer = Disk(3)
+        inner = Disk(1)
+        annulus = outer - inner
+        
+        # Points in outer but not inner (in the annulus)
+        assert annulus.contains(2+0j)
+        assert annulus.contains(0+2.5j)
+        
+        # Points inside inner disk (excluded)
+        assert not annulus.contains(0+0j)
+        assert not annulus.contains(0.5+0j)
+        
+        # Points outside outer disk
+        assert not annulus.contains(4+0j)
+        assert not annulus.contains(3+3j)
+    
     def test_invalid_operation(self):
         """Test invalid operation."""
         disk1 = Disk(1)
@@ -291,6 +325,17 @@ class TestCompositeDomain:
         # Should contain points in either disk AND in rectangle
         assert final.contains(0+0j)
         assert not final.contains(0+2j)  # Outside rect
+        
+        # Test with difference: (big_disk - small_disk) & rect
+        big_disk = Disk(3)
+        small_disk = Disk(1)
+        annulus = big_disk - small_disk
+        final2 = annulus & rect
+        
+        # Should contain points in annulus AND rectangle
+        assert final2.contains(1.5+0j)
+        assert not final2.contains(0+0j)  # Inside small disk
+        assert not final2.contains(3+0j)  # Outside rectangle
 
 
 class TestDomainMethods:
