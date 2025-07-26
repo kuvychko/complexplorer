@@ -90,7 +90,8 @@ Explore the full range of visualizations in our [**Gallery**](docs/gallery/READM
 
 - **[Gallery](docs/gallery/README.md)** - Visual showcase with code examples
 - **[Getting Started](examples/getting_started.ipynb)** - Beginner-friendly introduction
-- **[Advanced Features](examples/advanced_features.ipynb)** - 3D visualization, STL export, and more
+- **[Advanced Features](examples/advanced_features.ipynb)** - 3D visualization and more
+- **[STL Export Demo](examples/stl_export_demo.ipynb)** - Create 3D printable models
 - **[API Cookbook](examples/api_cookbook.ipynb)** - Ready-to-use code recipes
 - **[Interactive Demo](examples/interactive_showcase.py)** - Run `python examples/interactive_showcase.py`
 - **API Reference** - Use `help()` on any function or class
@@ -202,7 +203,7 @@ Features:
 - Intelligent handling of singularities through neighbor interpolation
 - Compatible with all complexplorer colormaps
 
-See `examples/advanced_features.ipynb` for interactive STL export examples.
+See `examples/stl_export_demo.ipynb` for a step-by-step guide to STL export.
 
 ## 🤝 Contributing
 

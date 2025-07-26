@@ -16,10 +16,16 @@ This directory contains tutorials, examples, and interactive demos for the compl
 - All colormap types in detail
 - High-performance 3D visualization with PyVista
 - Riemann sphere projections
-- STL export for 3D printing
 - Performance optimization tips
 
-### 3. API Cookbook (`api_cookbook.ipynb`)
+### 3. STL Export Demo (`stl_export_demo.ipynb`)
+- Step-by-step guide to 3D printing complex functions
+- Visualize functions on the Riemann sphere
+- Export as STL files with various scaling options
+- Tips for successful 3D printing
+- Custom scaling functions
+
+### 4. API Cookbook (`api_cookbook.ipynb`)
 - Gallery of common complex functions
 - Domain manipulation patterns
 - Colormap selection guide
@@ -77,7 +83,7 @@ This opens an external window with full interactivity and anti-aliasing.
 - PyVista is 15-30x faster than matplotlib for 3D
 
 ### STL Export
-The library can export 3D-printable STL files:
+The library can export 3D-printable STL files. See `stl_export_demo.ipynb` for a complete guide:
 ```python
 from complexplorer.export.stl import OrnamentGenerator
 generator = OrnamentGenerator(func, resolution=150)
@@ -91,6 +97,7 @@ examples/
 ├── README.md              # This file
 ├── getting_started.ipynb  # Beginner tutorial
 ├── advanced_features.ipynb # Advanced topics
+├── stl_export_demo.ipynb  # 3D printing guide
 ├── api_cookbook.ipynb     # Code recipes
 ├── interactive_showcase.py # Interactive demo
 ├── generate_gallery.py    # Gallery generator
