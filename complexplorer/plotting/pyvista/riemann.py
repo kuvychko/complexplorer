@@ -202,9 +202,9 @@ def riemann_pv(
     if title:
         plotter.add_text(title, position='upper_edge', font_size=14)
     
-    # Add orientation widget
+    # Add orientation widget with complex plane labels
     if show_orientation:
-        add_axes_widget(plotter, labels=('X', 'Y', 'Z'))
+        add_axes_widget(plotter, labels=('Re', 'Im', 'z'))
     
     # Set background
     plotter.set_background('white')
