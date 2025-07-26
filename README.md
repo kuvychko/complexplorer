@@ -24,7 +24,7 @@ which, in my view, can only be referred to as ‘magic’.*
 
 <p align="center">
   <img src="examples/gallery/Enhanced_phase_portrait_phase_and_modulus_enhanced_2d.png" width="45%">
-  <img src="examples/gallery/riemann_sphere_3d.png" width="45%">
+  <img src="examples/gallery/riemann_sphere_pyvista_3d.png" width="45%">
 </p>
 
 ## ✨ Features
@@ -121,13 +121,13 @@ For interactive, high-quality 3D visualizations, Complexplorer includes PyVista-
 
 ```python
 # High-performance 3D landscape
-cp.plot_landscape_pv(domain, f, cmap=cmap, notebook=False, show=True)
+cp.plot_landscape_pv(domain, f, cmap=cmap, notebook=False)
 
 # Interactive Riemann sphere with modulus scaling
-cp.riemann_pv(f, modulus_scaling='arctan', notebook=False, show=True)
+cp.riemann_pv(f, modulus_mode='arctan', notebook=False)
 ```
 
-**⚠️ Important Note:** For best quality, we strongly recommend using PyVista visualizations via command-line scripts rather than Jupyter notebooks. The Jupyter backend (trame) has significant aliasing issues that cannot be compensated with higher resolution. See `examples/interactive_demo.py` for an excellent CLI-based interactive experience.
+**⚠️ Important Note:** For best quality, we strongly recommend using PyVista visualizations via command-line scripts rather than Jupyter notebooks. The Jupyter backend (trame) has significant aliasing issues that cannot be compensated with higher resolution. See `examples/interactive_showcase.py` for an excellent CLI-based interactive experience.
 
 ### 📊 Modulus Scaling for 3D Landscapes
 
@@ -157,7 +157,7 @@ Control numerical stability and focus visualizations on regions of interest by r
 ```python
 # Avoid infinity at large distances
 domain = cp.Disk(radius=5, center=0)
-cp.riemann_pv(f, domain=domain, scaling='arctan')
+cp.riemann_pv(f, domain=domain, modulus_mode='arctan')
 
 # Exclude origin for functions with poles
 domain = cp.Annulus(inner_radius=0.1, outer_radius=10, center=0)
