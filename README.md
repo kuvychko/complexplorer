@@ -4,37 +4,24 @@
 [![Python](https://img.shields.io/pypi/pyversions/complexplorer.svg)](https://pypi.org/project/complexplorer/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-*We cannot directly see the minute details of a Dedekind cut, nor is it clear that arbitrarily great or
-arbitrarily tiny times or lengths actually exist in nature. One could say that 
-the so-called ‘real numbers’ are as much a product of mathematicians’ 
-imaginations as are the complex numbers. Yet we shall find that complex 
-numbers, as much as reals, and perhaps even more, find a unity with 
-nature that is truly remarkable. It is as though Nature herself is as 
-impressed by the scope and consistency of the complex-number system 
-as we are ourselves, and has entrusted to these numbers the precise 
-operations of her world at its minutest scales.* ...
-
-*Moreover, to refer just to the scope and to the consistency of complex 
-numbers does not do justice to this system. There is something more 
-which, in my view, can only be referred to as ‘magic’.*
-
-[Road to Reality](https://www.ams.org/notices/200606/rev-blank.pdf), Chapter 4 - Magical Complex Numbers, Sir Roger Penrose
-
-**Complexplorer** is a Python library for elegant visualization of complex-valued functions. Create stunning phase portraits, analytic landscapes, and Riemann sphere projections with just a few lines of code.
+**Transform complex mathematics into tangible art.** Complexplorer brings complex function visualization into the physical world through stunning Riemann relief maps and 3D-printable mathematical ornaments.
 
 <p align="center">
-  <img src="examples/gallery/Enhanced_phase_portrait_phase_and_modulus_enhanced_2d.png" width="45%">
-  <img src="examples/gallery/riemann_sphere_3d.png" width="45%">
+  <img src="examples/gallery/riemann_relief_map.png" width="42%">
+  <img src="examples/gallery/3d_printed_ornament.png" width="45%">
+  <br>
+  <em>From mathematical function to physical sculpture: f(z) = z / (z**10 - 1)</em>
 </p>
 
-## ✨ Features
+## 🌟 What Makes Complexplorer Unique
 
-- **🎨 Rich visualization options**: Phase portraits, enhanced phase portraits, chessboard patterns, and more
-- **🗺️ Flexible domains**: Rectangles, disks, annuli, and custom domains via composition
-- **📊 Multiple plot types**: 2D images, 3D analytic landscapes, Riemann sphere projections
-- **🖨️ 3D Printing Support**: Export complex function visualizations as STL files for 3D printing
-- **🧩 Composable design**: Mix any domain, color map, and plot type
-- **🚀 Lightweight**: Requires only NumPy and Matplotlib
+Unlike other domain coloring libraries, Complexplorer offers:
+
+- **🎨 Riemann Relief Maps**: First library to offer modulus-scaled Riemann sphere visualizations that reveal the true topology of complex functions
+- **🖨️ Direct STL Export**: Transform any complex function into a 3D-printable mathematical ornament
+- **🚀 PyVista Integration**: 15-30x faster 3D rendering with cinema-quality output
+- **🔧 Advanced Domain Composition**: Create complex domains through set operations (union, intersection, difference)
+- **📊 Flexible Modulus Mapping**: 10+ scaling modes to highlight different function features
 
 ## 📦 Installation
 
@@ -53,22 +40,51 @@ pip install "complexplorer[pyvista]"
 pip install "complexplorer[all]"
 ```
 
-## 🚀 Quick Start
+## 🚀 Quick Start - From Math to Matter
 
 ```python
 import complexplorer as cp
-import numpy as np
 
-# Define a complex function
-def f(z):
-    return (z - 1) / (z**2 + z + 1)
+# Define your complex function
+f = lambda z: (z**2 - 1) / (z**2 + 1)
 
-# Create a domain
-domain = cp.Rectangle(3, 3)
+# Visualize as an interactive Riemann relief map
+cp.riemann_pv(f, modulus_mode='arctan', resolution=800)
 
-# Visualize!
-cp.plot(domain, f)
+# Export as a 3D-printable mathematical ornament
+from complexplorer.export.stl import OrnamentGenerator
+
+ornament = OrnamentGenerator(f, resolution=200)
+ornament.generate_and_save('my_mathematical_ornament.stl', size_mm=80)
 ```
+
+The modulus scaling creates a topographic "relief" effect - poles become mountains, zeros become valleys, and the complex phase creates colorful contours. When 3D printed, these become beautiful mathematical ornaments that capture the essence of complex functions in physical form.
+
+Create traditional domain coloring visualizations too:
+
+```python
+# Classic phase portrait
+domain = cp.Rectangle(4, 4)
+cp.plot(domain, f, cmap=cp.Phase(n_phi=12, auto_scale_r=True))
+```
+
+## 💫 The Magic of Complex Numbers
+
+*We cannot directly see the minute details of a Dedekind cut, nor is it clear that arbitrarily great or
+arbitrarily tiny times or lengths actually exist in nature. One could say that 
+the so-called 'real numbers' are as much a product of mathematicians' 
+imaginations as are the complex numbers. Yet we shall find that complex 
+numbers, as much as reals, and perhaps even more, find a unity with 
+nature that is truly remarkable. It is as though Nature herself is as 
+impressed by the scope and consistency of the complex-number system 
+as we are ourselves, and has entrusted to these numbers the precise 
+operations of her world at its minutest scales.* ...
+
+*Moreover, to refer just to the scope and to the consistency of complex 
+numbers does not do justice to this system. There is something more 
+which, in my view, can only be referred to as 'magic'.*
+
+[Road to Reality](https://www.ams.org/notices/200606/rev-blank.pdf), Chapter 4 - Magical Complex Numbers, Sir Roger Penrose
 
 ## 🎨 Gallery
 
@@ -76,7 +92,7 @@ Explore the full range of visualizations in our [**Gallery**](docs/gallery/READM
 - Phase portraits with various enhancements
 - Chessboard and polar patterns  
 - 3D analytic landscapes
-- Riemann sphere projections
+- Riemann relief maps and mathematical ornaments
 
 <p align="center">
   <a href="docs/gallery/README.md">
@@ -89,8 +105,11 @@ Explore the full range of visualizations in our [**Gallery**](docs/gallery/READM
 ## 📚 Documentation
 
 - **[Gallery](docs/gallery/README.md)** - Visual showcase with code examples
-- **[Tutorial: Plotting Functions](examples/plotting_tutorial.ipynb)** - Comprehensive plotting guide
-- **[Tutorial: Domains & Color Maps](examples/domains_and_colormaps_tutorial.ipynb)** - Domain creation and color mapping
+- **[Getting Started](examples/getting_started.ipynb)** - Beginner-friendly introduction
+- **[Advanced Features](examples/advanced_features.ipynb)** - 3D visualization and more
+- **[STL Export Demo](examples/stl_export_demo.ipynb)** - Create 3D printable models
+- **[API Cookbook](examples/api_cookbook.ipynb)** - Ready-to-use code recipes
+- **[Interactive Demo](examples/interactive_showcase.py)** - Run `python examples/interactive_showcase.py`
 - **API Reference** - Use `help()` on any function or class
 
 ## 🛠️ Advanced Example
@@ -104,25 +123,52 @@ cmap = cp.Phase(n_phi=6, auto_scale_r=True, v_base=0.4)  # Auto-scaled enhanced 
 cp.pair_plot(domain, f, cmap=cmap, figsize=(10, 5))
 
 # 3D analytic landscape
-cp.plot_landscape(domain, func=f, cmap=cmap, z_max=10)
+cp.plot_landscape(domain, f, cmap=cmap, z_scale=0.3)
+
+# 3D landscape with modulus scaling for better visualization
+cp.plot_landscape(domain, f, cmap=cmap, modulus_mode='arctan')
 
 # Riemann sphere projection
-cp.riemann(f, n=800, cmap=cmap)
+cp.riemann(f, resolution=800, cmap=cmap)
 ```
 
-### 🚀 High-Performance 3D Visualizations with PyVista
+### 🚀 High-Performance Riemann Relief Maps with PyVista
 
-For interactive, high-quality 3D visualizations, Complexplorer includes PyVista-based plotting functions:
+Experience your complex functions in stunning detail with PyVista-powered visualizations that are 15-30x faster than traditional approaches:
 
 ```python
-# High-performance 3D landscape
-cp.plot_landscape_pv(domain, f, cmap=cmap, show_orientation=True)
+# Create an interactive Riemann relief map
+cp.riemann_pv(f, modulus_mode='arctan', resolution=800, notebook=False)
 
-# Interactive Riemann sphere with modulus scaling
-cp.riemann_pv(f, scaling='arctan', show_orientation=True)
+# High-performance 3D landscape
+cp.plot_landscape_pv(domain, f, cmap=cmap, notebook=False)
+
+# Side-by-side domain and codomain relief maps
+cp.pair_plot_landscape_pv(domain, f, cmap=cmap, window_size=(1600, 800))
 ```
 
-**⚠️ Important Note:** For best quality, we strongly recommend using PyVista visualizations via command-line scripts rather than Jupyter notebooks. The Jupyter backend (trame) has significant aliasing issues that cannot be compensated with higher resolution. See `examples/interactive_demo.py` for an excellent CLI-based interactive experience.
+**⚠️ Pro Tip:** For cinema-quality Riemann relief maps, use PyVista via command-line scripts rather than Jupyter notebooks. The CLI experience offers superior antialiasing and interactivity. Try `python examples/interactive_showcase.py` for the ultimate visualization experience!
+
+### 📊 Modulus Scaling: The Secret to Beautiful Relief Maps
+
+Control how the magnitude (modulus) of complex values creates the topography of your mathematical landscapes:
+
+```python
+# Different scaling modes for various visualization needs
+cp.plot_landscape(domain, f, modulus_mode='constant')     # Phase only (flat)
+cp.plot_landscape(domain, f, modulus_mode='arctan')       # Smooth bounded scaling
+cp.plot_landscape(domain, f, modulus_mode='logarithmic')  # Emphasize poles/zeros
+cp.plot_landscape(domain, f, modulus_mode='adaptive')     # Auto-adjust to data
+
+# Custom scaling function for specific needs
+def custom_scale(moduli):
+    return np.tanh(moduli / 2)  # Custom transformation
+
+cp.plot_landscape(domain, f, modulus_mode='custom', 
+                 modulus_params={'scaling_func': custom_scale})
+```
+
+Available modes: `none`, `constant`, `linear`, `arctan`, `logarithmic`, `linear_clamp`, `power`, `sigmoid`, `adaptive`, `hybrid`, `custom`. See `examples/modulus_scaling_showcase.py` for comprehensive examples.
 
 ### 🎯 Domain Restrictions
 
@@ -131,11 +177,11 @@ Control numerical stability and focus visualizations on regions of interest by r
 ```python
 # Avoid infinity at large distances
 domain = cp.Disk(radius=5, center=0)
-cp.riemann_pv(f, domain=domain, scaling='arctan')
+cp.riemann_pv(f, domain=domain, modulus_mode='arctan')
 
 # Exclude origin for functions with poles
-domain = cp.Annulus(radius_inner=0.1, radius_outer=10, center=0)
-ornament = OrnamentGenerator(func=lambda z: 1/z, domain=domain)
+domain = cp.Annulus(inner_radius=0.1, outer_radius=10, center=0)
+ornament = cp.OrnamentGenerator(func=lambda z: 1/z, domain=domain)
 ```
 
 Domain restrictions work with all visualization functions and are especially useful for:
@@ -144,38 +190,35 @@ Domain restrictions work with all visualization functions and are especially use
 - Improving numerical stability in STL generation
 - Creating cleaner 3D prints by excluding problematic areas
 
-### 🖨️ 3D Printing Support
+### 🖨️ 3D Printing: Mathematical Ornaments
 
-Transform your complex function visualizations into physical objects! Complexplorer can export Riemann sphere visualizations as STL files suitable for 3D printing:
+Transform your Riemann relief maps into physical mathematical ornaments! Complexplorer is the first library to offer direct STL export of complex function visualizations:
 
 ```python
-from complexplorer.stl_export import OrnamentGenerator
+from complexplorer.export.stl import OrnamentGenerator
 
-# Create STL files from your function
+# Create a mathematical ornament from any complex function
 ornament = OrnamentGenerator(
     func=lambda z: (z - 1) / (z**2 + z + 1),
     resolution=150,
-    scaling='arctan',
+    scaling='arctan',  # Creates beautiful topographic relief
     cmap=cp.Phase(n_phi=12, auto_scale_r=True)
 )
 
-# Generate print-ready STL files
-top_file, bottom_file = ornament.generate_ornament(
-    cut_mode='real',
-    size_mm=80,
-    smooth=True
-)
+# Generate print-ready STL file
+ornament.generate_and_save('mathematical_ornament.stl', size_mm=80)
 ```
 
-Features:
-- Automatic mesh healing for watertight models
-- Flat bisection planes for easy printing without supports
-- Multiple modulus scaling methods
-- Domain restrictions to avoid numerical instabilities
-- Intelligent handling of singularities through neighbor interpolation
-- Compatible with all complexplorer colormaps
+Features for perfect mathematical ornaments:
+- **Automatic mesh healing** for watertight, printable models
+- **Multiple scaling methods** to emphasize different mathematical features
+- **Domain restrictions** to handle singularities gracefully
+- **Optimized for FDM printing** - no supports needed
+- **Compatible with all colormaps** for reference when painting
 
-See the [STL Export Guide](docs/stl_export_guide.md) for detailed instructions and `examples/stl_ornament_demo.ipynb` for interactive examples.
+Your mathematical functions become conversation pieces - imagine gifting a physical representation of the Riemann zeta function or decorating with the beauty of elliptic functions!
+
+See `examples/stl_export_demo.ipynb` for a complete guide to creating mathematical ornaments.
 
 ## 🤝 Contributing
 
