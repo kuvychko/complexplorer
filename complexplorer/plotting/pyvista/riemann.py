@@ -177,7 +177,14 @@ def riemann_pv(
     if notebook is not None:
         plotter_kwargs['notebook'] = notebook
     
-    plotter_kwargs.update(kwargs)
+    # Filter kwargs to avoid passing our function parameters to PyVista
+    filtered_kwargs = {k: v for k, v in kwargs.items() 
+                      if k not in {'func', 'cmap', 'modulus_mode', 'modulus_params',
+                                   'resolution', 'n', 'domain', 'interactive',
+                                   'camera_position', 'radius', 'title',
+                                   'filename', 'return_plotter', 'show_orientation',
+                                   'show'}}
+    plotter_kwargs.update(filtered_kwargs)
     
     plotter = pv.Plotter(**plotter_kwargs)
     

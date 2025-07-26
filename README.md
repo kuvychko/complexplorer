@@ -7,8 +7,7 @@
 **Transform complex mathematics into tangible art.** Complexplorer brings complex function visualization into the physical world through stunning Riemann relief maps and 3D-printable mathematical ornaments.
 
 <p align="center">
-  <img src="examples/gallery/riemann_relief_map.png" width="42%">
-  <img src="examples/gallery/3d_printed_ornament.png" width="45%">
+  <img src="examples/gallery/Riemann_relief_map_20250726.png" width="50%">
   <br>
   <em>From mathematical function to physical sculpture: f(z) = z / (z**10 - 1)</em>
 </p>
