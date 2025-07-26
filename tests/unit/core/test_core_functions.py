@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 from complexplorer.core.functions import (
-    phase, sawtooth, sawtooth_log, sawtooth_legacy,
+    phase, sawtooth, sawtooth_log,
     stereographic_projection, inverse_stereographic
 )
 
@@ -113,26 +113,6 @@ class TestSawtoothLog:
         x = np.array([0.0, 1.0, 2.0])
         result = sawtooth_log(x, base=2.0)
         assert result[0] == 0.0
-
-
-class TestSawtoothLegacy:
-    """Test legacy sawtooth function."""
-    
-    def test_legacy_formula(self):
-        """Test ceil(x) - x formula."""
-        # Values in (0, 1]
-        assert sawtooth_legacy(0.1) == 0.9  # ceil(0.1) - 0.1 = 1 - 0.1
-        assert sawtooth_legacy(0.5) == 0.5  # ceil(0.5) - 0.5 = 1 - 0.5
-        assert sawtooth_legacy(1.0) == 0.0  # ceil(1) - 1 = 1 - 1
-        
-        # Next period
-        assert abs(sawtooth_legacy(1.1) - 0.9) < 1e-10  # ceil(1.1) - 1.1 = 2 - 1.1
-    
-    def test_legacy_with_log(self):
-        """Test legacy sawtooth with logarithm."""
-        result = sawtooth_legacy(4.0, log_base=2.0)
-        # log2(4) = 2, ceil(2) - 2 = 0
-        assert abs(result) < 1e-10
 
 
 class TestStereographicProjection:
