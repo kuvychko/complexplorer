@@ -121,31 +121,6 @@ def sawtooth_log(x: Union[float, np.ndarray],
     return result
 
 
-def sawtooth_legacy(x: Union[float, np.ndarray],
-                    log_base: Optional[float] = None) -> Union[float, np.ndarray]:
-    """Legacy sawtooth function for backward compatibility.
-    
-    This function uses ceil(x) - x formula which gives values
-    in (0, 1] instead of [0, 1).
-    
-    Parameters
-    ----------
-    x : float or np.ndarray
-        Input values.
-    log_base : float, optional
-        If provided, apply logarithm first.
-        
-    Returns
-    -------
-    float or np.ndarray
-        Sawtooth values in (0, 1].
-    """
-    with np.errstate(divide='ignore', invalid='ignore'):
-        if log_base is not None:
-            x = np.log(x) / np.log(log_base)
-        return np.ceil(x) - x
-
-
 def stereographic_projection(z: Union[complex, np.ndarray],
                            project_from_north: bool = False) -> np.ndarray:
     """Map complex plane to Riemann sphere via stereographic projection.

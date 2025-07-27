@@ -182,25 +182,3 @@ class TestWithoutPyVista:
         
         with pytest.raises(ImportError, match="PyVista is required"):
             gen.generate()
-
-
-class TestLegacyCompatibility:
-    """Test legacy API compatibility."""
-    
-    def test_stereographic_projection_alias(self):
-        """Test legacy alias works."""
-        from complexplorer.utils.mesh import stereographic_projection
-        
-        w1 = stereographic_projection(1, 0, 0)
-        w2 = sphere_to_complex(1, 0, 0)
-        
-        assert w1 == w2
-    
-    def test_inverse_stereographic_alias(self):
-        """Test legacy alias works."""
-        from complexplorer.utils.mesh import inverse_stereographic
-        
-        xyz1 = inverse_stereographic(1+0j)
-        xyz2 = complex_to_sphere(1+0j)
-        
-        assert np.allclose(xyz1, xyz2)

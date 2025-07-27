@@ -165,6 +165,9 @@ def riemann_pv(
     )
     mesh.points = scaled_points
     
+    # Store original points for grid generation if needed
+    original_points = points.copy()
+    
     # Store additional scalars
     mesh["magnitude"] = np.abs(f_vals)
     mesh["phase"] = np.angle(f_vals)
@@ -177,7 +180,14 @@ def riemann_pv(
     if notebook is not None:
         plotter_kwargs['notebook'] = notebook
     
-    plotter_kwargs.update(kwargs)
+    # Filter kwargs to avoid passing our function parameters to PyVista
+    filtered_kwargs = {k: v for k, v in kwargs.items() 
+                      if k not in {'func', 'cmap', 'modulus_mode', 'modulus_params',
+                                   'resolution', 'n', 'domain', 'interactive',
+                                   'camera_position', 'radius', 'title',
+                                   'filename', 'return_plotter', 'show_orientation',
+                                   'show'}}
+    plotter_kwargs.update(filtered_kwargs)
     
     plotter = pv.Plotter(**plotter_kwargs)
     
@@ -191,9 +201,14 @@ def riemann_pv(
         specular_power=20,
         diffuse=0.8,
         ambient=0.2,
-        show_edges=show_grid,
-        edge_color='gray' if show_grid else None,
+        show_edges=False,  # Never show triangulation edges
     )
+    
+    # Add latitude/longitude grid if requested
+    if show_grid:
+        add_lat_long_grid(plotter, radius=1.0, n_lat=10, n_long=12, 
+                         modulus_mode=modulus_mode, modulus_params=modulus_params,
+                         scaled_points=scaled_points, points=original_points)
     
     # Set camera
     plotter.camera_position = get_camera_position(camera_position)
@@ -221,3 +236,99 @@ def riemann_pv(
     
     if return_plotter:
         return plotter
+
+
+def add_lat_long_grid(plotter: 'pv.Plotter', 
+                     radius: float = 1.0,
+                     n_lat: int = 10,
+                     n_long: int = 12,
+                     modulus_mode: str = 'constant',
+                     modulus_params: Optional[dict] = None,
+                     scaled_points: Optional[np.ndarray] = None,
+                     points: Optional[np.ndarray] = None,
+                     color: str = 'black',
+                     line_width: float = 1.0,
+                     opacity: float = 0.5) -> None:
+    """Add latitude and longitude grid lines to the Riemann sphere.
+    
+    Parameters
+    ----------
+    plotter : pv.Plotter
+        The plotter to add grid lines to.
+    radius : float
+        Base radius of sphere.
+    n_lat : int
+        Number of latitude lines.
+    n_long : int  
+        Number of longitude lines.
+    modulus_mode : str
+        Modulus scaling mode.
+    modulus_params : dict, optional
+        Parameters for modulus scaling.
+    scaled_points : ndarray, optional
+        Pre-scaled sphere points for modulus distortion.
+    points : ndarray, optional
+        Original sphere points.
+    color : str
+        Color of grid lines.
+    line_width : float
+        Width of grid lines.
+    opacity : float
+        Opacity of grid lines.
+    """
+    # For simplicity, create grid on unit sphere if modulus is constant
+    # For non-constant modulus, we'd need more sophisticated interpolation
+    
+    # Create latitude lines (circles at constant theta)
+    for i in range(1, n_lat):
+        theta = i * np.pi / n_lat
+        phi = np.linspace(0, 2 * np.pi, 100)
+        
+        # Points on latitude circle
+        x = radius * np.sin(theta) * np.cos(phi)
+        y = radius * np.sin(theta) * np.sin(phi)
+        z = radius * np.full_like(phi, np.cos(theta))
+        
+        # Create polyline
+        lat_points = np.column_stack([x, y, z])
+        polyline = pv.PolyData()
+        polyline.points = lat_points
+        cells = np.column_stack([
+            np.full(len(lat_points) - 1, 2, dtype=int),
+            np.arange(len(lat_points) - 1),
+            np.arange(1, len(lat_points))
+        ])
+        polyline.lines = cells.ravel()
+        
+        plotter.add_mesh(polyline, color=color, line_width=line_width, 
+                        opacity=opacity, ambient=1.0, diffuse=0.0)
+    
+    # Create longitude lines (meridians at constant phi)
+    for i in range(n_long):
+        phi = i * 2 * np.pi / n_long
+        theta = np.linspace(0.05, np.pi - 0.05, 50)  # Avoid poles
+        
+        # Points on longitude line
+        x = radius * np.sin(theta) * np.cos(phi)
+        y = radius * np.sin(theta) * np.sin(phi)
+        z = radius * np.cos(theta)
+        
+        # Create polyline
+        long_points = np.column_stack([x, y, z])
+        polyline = pv.PolyData()
+        polyline.points = long_points
+        cells = np.column_stack([
+            np.full(len(long_points) - 1, 2, dtype=int),
+            np.arange(len(long_points) - 1),
+            np.arange(1, len(long_points))
+        ])
+        polyline.lines = cells.ravel()
+        
+        plotter.add_mesh(polyline, color=color, line_width=line_width,
+                        opacity=opacity, ambient=1.0, diffuse=0.0)
+    
+    # Add warning if modulus scaling is used
+    if modulus_mode != 'constant':
+        import warnings
+        warnings.warn("Grid lines are shown on unit sphere; they don't follow modulus distortion", 
+                     UserWarning)

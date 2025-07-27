@@ -14,7 +14,7 @@ from .colormap import (
     OUT_OF_DOMAIN_COLOR_HSV
 )
 from .functions import (
-    phase, sawtooth, sawtooth_log, sawtooth_legacy,
+    phase, sawtooth, sawtooth_log,
     stereographic_projection, inverse_stereographic, stereographic
 )
 
@@ -40,7 +40,6 @@ __all__ = [
     'phase',
     'sawtooth',
     'sawtooth_log',
-    'sawtooth_legacy',
     'stereographic_projection',
     'inverse_stereographic',
     'stereographic',

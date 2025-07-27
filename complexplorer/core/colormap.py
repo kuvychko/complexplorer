@@ -335,7 +335,3 @@ class LogRings(Colormap):
         V[np.abs(z) == 0] = 1.0  # White at origin
         
         return H, S, V
-
-
-# Backward compatibility aliases
-Cmap = Colormap  # Keep old name available

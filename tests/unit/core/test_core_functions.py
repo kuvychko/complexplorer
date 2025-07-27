@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 from complexplorer.core.functions import (
-    phase, sawtooth, sawtooth_log, sawtooth_legacy,
+    phase, sawtooth, sawtooth_log,
     stereographic_projection, inverse_stereographic
 )
 
@@ -115,26 +115,6 @@ class TestSawtoothLog:
         assert result[0] == 0.0
 
 
-class TestSawtoothLegacy:
-    """Test legacy sawtooth function."""
-    
-    def test_legacy_formula(self):
-        """Test ceil(x) - x formula."""
-        # Values in (0, 1]
-        assert sawtooth_legacy(0.1) == 0.9  # ceil(0.1) - 0.1 = 1 - 0.1
-        assert sawtooth_legacy(0.5) == 0.5  # ceil(0.5) - 0.5 = 1 - 0.5
-        assert sawtooth_legacy(1.0) == 0.0  # ceil(1) - 1 = 1 - 1
-        
-        # Next period
-        assert abs(sawtooth_legacy(1.1) - 0.9) < 1e-10  # ceil(1.1) - 1.1 = 2 - 1.1
-    
-    def test_legacy_with_log(self):
-        """Test legacy sawtooth with logarithm."""
-        result = sawtooth_legacy(4.0, log_base=2.0)
-        # log2(4) = 2, ceil(2) - 2 = 0
-        assert abs(result) < 1e-10
-
-
 class TestStereographicProjection:
     """Test stereographic projection."""
     
@@ -237,26 +217,3 @@ class TestInverseStereographic:
         
         expected = np.array([1+0j, 0+1j, -1+0j, 0-1j])
         np.testing.assert_allclose(w, expected)
-
-
-class TestBackwardCompatibility:
-    """Test backward compatibility with legacy functions."""
-    
-    def test_phase_compatibility(self):
-        """Test phase matches legacy behavior."""
-        # Legacy phase returns [0, 2π)
-        z = np.array([1+0j, 1j, -1+0j, -1j])
-        phi = phase(z)
-        
-        # All values should be non-negative
-        assert np.all(phi >= 0)
-        assert np.all(phi < 2*np.pi)
-    
-    def test_stereographic_alias(self):
-        """Test stereographic alias works."""
-        from complexplorer.core.functions import stereographic
-        
-        result1 = stereographic(1+1j)
-        result2 = stereographic_projection(1+1j)
-        
-        np.testing.assert_allclose(result1, result2)

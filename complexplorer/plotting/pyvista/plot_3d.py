@@ -268,8 +268,16 @@ def plot_landscape_pv(
     if notebook is not None:
         plotter_kwargs['notebook'] = notebook
     
-    # Add any user-provided kwargs
-    plotter_kwargs.update(kwargs)
+    # Add any user-provided kwargs, filtering out our function parameters
+    # that might have been accidentally passed as kwargs
+    filtered_kwargs = {k: v for k, v in kwargs.items() 
+                      if k not in {'resolution', 'n', 'domain', 'func', 'z', 'f',
+                                   'cmap', 'interactive', 'camera_position', 
+                                   'show_edges', 'edge_color', 'z_scale', 'log_z',
+                                   'z_max', 'modulus_mode', 'modulus_params',
+                                   'title', 'filename', 'return_plotter',
+                                   'show_orientation', 'show'}}
+    plotter_kwargs.update(filtered_kwargs)
     
     plotter = pv.Plotter(**plotter_kwargs)
     
@@ -393,7 +401,15 @@ def pair_plot_landscape_pv(
     if notebook is not None:
         plotter_kwargs['notebook'] = notebook
     
-    plotter_kwargs.update(kwargs)
+    # Filter kwargs to avoid passing our function parameters to PyVista
+    filtered_kwargs = {k: v for k, v in kwargs.items() 
+                      if k not in {'resolution', 'n', 'domain', 'func', 'z', 'f',
+                                   'cmap', 'interactive', 'camera_position', 
+                                   'show_edges', 'edge_color', 'z_scale', 'log_z',
+                                   'z_max', 'modulus_mode', 'modulus_params',
+                                   'title', 'filename', 'return_plotter',
+                                   'show_orientation', 'show'}}
+    plotter_kwargs.update(filtered_kwargs)
     
     plotter = pv.Plotter(**plotter_kwargs)
     
@@ -429,14 +445,15 @@ def pair_plot_landscape_pv(
         specular=0.5,
         specular_power=15,
     )
-    plotter.add_text("Codomain f(z)", position='upper_edge')
+    # Use title as codomain label if provided, otherwise default
+    codomain_label = title if title else "Codomain f(z)"
+    plotter.add_text(codomain_label, position='upper_edge')
     add_axes_widget(plotter, labels=('Re', 'Im', '|f|'))
     plotter.camera_position = get_camera_position(camera_position)
     
-    # Add overall title if provided
-    if title:
-        plotter.subplot(0, 0)
-        plotter.add_text(title, position='upper_edge', font_size=16)
+    # Link cameras for synchronized interaction
+    if interactive:
+        plotter.link_views()
     
     # Handle export/display
     if filename:

@@ -396,18 +396,38 @@ class CompositeDomain(Domain):
         self.domain2 = domain2
         self.operation = operation
         
-        # Calculate combined bounds
-        all_reals = [
-            domain1.window_real[0], domain1.window_real[1],
-            domain2.window_real[0], domain2.window_real[1]
-        ]
-        all_imags = [
-            domain1.window_imag[0], domain1.window_imag[1],
-            domain2.window_imag[0], domain2.window_imag[1]
-        ]
-        
-        real_bounds = (min(all_reals), max(all_reals))
-        imag_bounds = (min(all_imags), max(all_imags))
+        # Calculate combined bounds based on operation
+        if operation == 'intersection':
+            # Intersection can only be within overlap
+            real_bounds = (
+                max(domain1.window_real[0], domain2.window_real[0]),
+                min(domain1.window_real[1], domain2.window_real[1])
+            )
+            imag_bounds = (
+                max(domain1.window_imag[0], domain2.window_imag[0]),
+                min(domain1.window_imag[1], domain2.window_imag[1])
+            )
+            # Handle non-overlapping domains
+            if real_bounds[0] > real_bounds[1]:
+                real_bounds = (0, 0)
+            if imag_bounds[0] > imag_bounds[1]:
+                imag_bounds = (0, 0)
+        elif operation == 'difference':
+            # Difference is contained within first domain
+            real_bounds = domain1.window_real
+            imag_bounds = domain1.window_imag
+        else:  # union
+            # Union needs full extent of both
+            all_reals = [
+                domain1.window_real[0], domain1.window_real[1],
+                domain2.window_real[0], domain2.window_real[1]
+            ]
+            all_imags = [
+                domain1.window_imag[0], domain1.window_imag[1],
+                domain2.window_imag[0], domain2.window_imag[1]
+            ]
+            real_bounds = (min(all_reals), max(all_reals))
+            imag_bounds = (min(all_imags), max(all_imags))
         
         # Use square if either parent uses square
         square = domain1.square or domain2.square
@@ -425,21 +445,121 @@ class CompositeDomain(Domain):
             return mask1 & mask2
         else:  # difference
             return mask1 & ~mask2
-
-
-# Backward compatibility aliases
-def create_rectangle(real: float, imag: float, 
-                    center: complex = 0+0j, square: bool = True) -> Rectangle:
-    """Create a Rectangle domain (backward compatibility)."""
-    return Rectangle(real, imag, center, square)
-
-
-def create_disk(radius: float, center: complex = 0+0j) -> Disk:
-    """Create a Disk domain (backward compatibility)."""
-    return Disk(radius, center)
-
-
-def create_annulus(radius_inner: float, radius_outer: float,
-                  center: complex = 0+0j) -> Annulus:
-    """Create an Annulus domain (backward compatibility)."""
-    return Annulus(radius_inner, radius_outer, center)
+    
+    def calculate_tight_bounds(self, sample_density: int = 100) -> Tuple[Tuple[float, float], Tuple[float, float]]:
+        """Calculate tight bounds by sampling the actual domain.
+        
+        Parameters
+        ----------
+        sample_density : int
+            Number of sample points along each axis.
+            
+        Returns
+        -------
+        real_bounds, imag_bounds : tuple of tuple
+            Tight bounds for the composite domain.
+        """
+        # Get loose bounds from current window
+        real_min, real_max = self.window_real
+        imag_min, imag_max = self.window_imag
+        
+        # Create sample grid
+        real_samples = np.linspace(real_min, real_max, sample_density)
+        imag_samples = np.linspace(imag_min, imag_max, sample_density)
+        real_grid, imag_grid = np.meshgrid(real_samples, imag_samples)
+        z_samples = real_grid + 1j * imag_grid
+        
+        # Find points actually in the domain
+        mask = self.contains(z_samples.ravel())
+        if not np.any(mask):
+            # Empty domain, return small bounds at origin
+            return (-0.1, 0.1), (-0.1, 0.1)
+        
+        valid_points = z_samples.ravel()[mask]
+        
+        # Calculate tight bounds with small margin
+        margin = 0.05  # 5% margin
+        real_extent = np.real(valid_points)
+        imag_extent = np.imag(valid_points)
+        
+        real_range = real_extent.max() - real_extent.min()
+        imag_range = imag_extent.max() - imag_extent.min()
+        
+        # Ensure minimum size
+        if real_range < 0.1:
+            real_range = 0.1
+        if imag_range < 0.1:
+            imag_range = 0.1
+        
+        real_bounds = (
+            real_extent.min() - margin * real_range,
+            real_extent.max() + margin * real_range
+        )
+        imag_bounds = (
+            imag_extent.min() - margin * imag_range,
+            imag_extent.max() + margin * imag_range
+        )
+        
+        return real_bounds, imag_bounds
+    
+    @property
+    def tight_bounds(self):
+        """Get tight bounds, calculating if necessary."""
+        if not hasattr(self, '_tight_bounds'):
+            self._tight_bounds = self.calculate_tight_bounds()
+        return self._tight_bounds
+    
+    def mesh(self, n: int = 500, use_tight_bounds: bool = True) -> np.ndarray:
+        """Generate mesh grid of complex numbers.
+        
+        For composite domains, can use tight bounds for better fit.
+        
+        Parameters
+        ----------
+        n : int, optional
+            Number of points along the longer axis.
+        use_tight_bounds : bool, optional
+            If True, use tight bounds for composite domains.
+            
+        Returns
+        -------
+        np.ndarray
+            2D array of complex values.
+        """
+        n = validate_resolution(n, min_val=2, max_val=10000)
+        
+        if use_tight_bounds:
+            real_bounds, imag_bounds = self.tight_bounds
+            real_length = real_bounds[1] - real_bounds[0]
+            imag_length = imag_bounds[1] - imag_bounds[0]
+            spacing = max(real_length, imag_length) / n
+            
+            real_axis = np.linspace(
+                real_bounds[0], 
+                real_bounds[1], 
+                ceil(real_length / spacing)
+            )
+            imag_axis = np.linspace(
+                imag_bounds[0], 
+                imag_bounds[1], 
+                ceil(imag_length / spacing)
+            )
+        else:
+            # Fall back to parent implementation
+            real_length = self.window_real[1] - self.window_real[0]
+            imag_length = self.window_imag[1] - self.window_imag[0]
+            spacing = self.spacing(n)
+            
+            real_axis = np.linspace(
+                self.window_real[0], 
+                self.window_real[1], 
+                ceil(real_length / spacing)
+            )
+            imag_axis = np.linspace(
+                self.window_imag[0], 
+                self.window_imag[1], 
+                ceil(imag_length / spacing)
+            )
+        
+        x, y = np.meshgrid(real_axis, imag_axis)
+        return x + 1j * y
