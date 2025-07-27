@@ -398,32 +398,3 @@ class TestHelperFunctions:
         r_with_zero = np.array([0, 1, 2])
         result = sawtooth_log(r_with_zero, base=2.0)
         assert result[0] == 0.0  # Special case
-
-
-class TestBackwardCompatibility:
-    """Test backward compatibility with legacy colormaps."""
-    
-    def test_phase_compatibility(self):
-        """Test Phase matches legacy behavior."""
-        # Basic phase
-        cmap = Phase()
-        z = np.array([1+0j, 1j, -1+0j, -1j])
-        
-        hsv = cmap.hsv(z)
-        
-        # Should produce standard phase colors
-        assert hsv.shape == (4, 3)
-        assert 0 <= hsv.min() <= hsv.max() <= 1
-    
-    def test_enhanced_phase_compatibility(self):
-        """Test enhanced phase matches legacy."""
-        cmap = Phase(n_phi=6, r_linear_step=1.0, v_base=0.5)
-        
-        # Use values that give different sawtooth results
-        z = np.array([0.25+0j, 0.75+0j])  # r=0.25 and r=0.75
-        hsv = cmap.hsv(z)
-        
-        # Should have value modulation
-        assert hsv[0, 2] != hsv[1, 2]  # Different V values due to different r
-        # Verify it's producing enhanced phase portrait
-        assert 0.5 <= hsv[0, 2] <= 1.0  # Values are in expected range

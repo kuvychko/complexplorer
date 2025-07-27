@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Complexplorer Gallery</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .item { border: 1px solid #ddd; padding: 10px; }
+        .item img { width: 100%; height: auto; }
+        .item h3 { margin-top: 10px; }
+        .item p { color: #666; }
+        pre { background: #f4f4f4; padding: 10px; overflow-x: auto; }
+        h2 { color: #333; margin-top: 40px; }
+    </style>
+</head>
+<body>
+    <h1>Complexplorer Gallery</h1>
+    <p>Generated on 2025-07-25 19:56</p>
+
+    <h2>2D Visualizations</h2>
+    <div class='gallery'>
+        <div class='item'>
+            <img src='images/basic_phase_portrait.png' alt='Basic Phase Portrait'>
+            <h3>Basic Phase Portrait</h3>
+            <p>Basic phase portrait showing zeros and poles</p>
+            <details>
+                <summary>Show code</summary>
+                <pre>import complexplorer as cp
+
+# Define function and domain
+f = lambda z: (z - 1) / (z**2 + z + 1)
+domain = cp.Rectangle(4, 4)
+
+# Create basic phase portrait
+cp.plot(domain, f, cmap=cp.Phase())</pre>
+            </details>
+        </div>
+        <div class='item'>
+            <img src='images/enhanced_phase_portrait.png' alt='Enhanced Phase Portrait'>
+            <h3>Enhanced Phase Portrait</h3>
+            <p>Enhanced phase portrait with modulus information</p>
+            <details>
+                <summary>Show code</summary>
+                <pre>import complexplorer as cp
+
+# Define function and domain
+f = lambda z: (z - 1) / (z**2 + z + 1)
+domain = cp.Rectangle(4, 4)
+
+# Enhanced phase with auto-scaled square cells
+cmap = cp.Phase(n_phi=12, auto_scale_r=True, v_base=0.4)
+cp.plot(domain, f, cmap=cmap)</pre>
+            </details>
+        </div>
+        <div class='item'>
+            <img src='images/conformal_chessboard.png' alt='Conformal Chessboard'>
+            <h3>Conformal Chessboard</h3>
+            <p>Chessboard pattern showing conformal mapping</p>
+            <details>
+                <summary>Show code</summary>
+                <pre>import complexplorer as cp
+
+# Define function and domain
+f = lambda z: (z - 1) / (z**2 + z + 1)
+domain = cp.Rectangle(4, 4)
+
+# Cartesian chessboard pattern
+cmap = cp.Chessboard(spacing=0.2)
+cp.plot(domain, f, cmap=cmap)</pre>
+            </details>
+        </div>
+        <div class='item'>
+            <img src='images/polar_chessboard.png' alt='Polar Chessboard'>
+            <h3>Polar Chessboard</h3>
+            <p>Polar chessboard showing radial structure</p>
+            <details>
+                <summary>Show code</summary>
+                <pre>import complexplorer as cp
+
+# Define function and domain
+f = lambda z: z**3 - 1
+domain = cp.Disk(2)
+
+# Polar chessboard pattern
+cmap = cp.PolarChessboard(n_phi=12, spacing=0.3)
+cp.plot(domain, f, cmap=cmap)</pre>
+            </details>
+        </div>
+        <div class='item'>
+            <img src='images/logarithmic_rings.png' alt='Logarithmic Rings'>
+            <h3>Logarithmic Rings</h3>
+            <p>Logarithmic rings showing modulus growth</p>
+            <details>
+                <summary>Show code</summary>
+                <pre>import complexplorer as cp
+import numpy as np
+
+# Exponential function
+f = lambda z: np.exp(z)
+domain = cp.Rectangle(4, 4)
+
+# Logarithmic rings show modulus levels
+cmap = cp.LogRings(log_spacing=0.3)
+cp.plot(domain, f, cmap=cmap)</pre>
+            </details>
+        </div>
+        <div class='item'>
+            <img src='images/domain_composition.png' alt='Domain Composition'>
+            <h3>Domain Composition</h3>
+            <p>Complex domain with excluded regions</p>
+            <details>
+                <summary>Show code</summary>
+                <pre>import complexplorer as cp
+
+# Create domain with holes
+f = lambda z: (z**2 - 1) / (z**2 + 1)
+rect = cp.Rectangle(4, 4)
+hole1 = cp.Disk(0.5, center=1)
+hole2 = cp.Disk(0.5, center=-1)
+domain = rect - hole1 - hole2
+
+# Visualize with enhanced phase
+cmap = cp.Phase(n_phi=12, auto_scale_r=True)
+cp.plot(domain, f, cmap=cmap)</pre>
+            </details>
+        </div>
+    </div>
+
+    <h2>3D Visualizations</h2>
+    <div class='gallery'>
+        <div class='item'>
+            <img src='images/3d_landscape.png' alt='3D Landscape'>
+            <h3>3D Landscape</h3>
+            <p>3D landscape showing function magnitude</p>
+            <details>
+                <summary>Show code</summary>
+                <pre>import complexplorer as cp
+
+# Define function and domain
+f = lambda z: (z - 1) / (z**2 + z + 1)
+domain = cp.Rectangle(4, 4)
+
+# Create 3D landscape with PyVista
+# Use notebook=False for high-quality window
+plotter = cp.plot_landscape_pv(
+    domain, f,
+    cmap=cp.Phase(n_phi=12, auto_scale_r=True),
+    resolution=200,
+    z_scale=0.4,
+    notebook=False,
+    interactive=True  # For interactive viewing
+)</pre>
+            </details>
+        </div>
+        <div class='item'>
+            <img src='images/domain_codomain_pair.png' alt='Domain Codomain Pair'>
+            <h3>Domain Codomain Pair</h3>
+            <p>Side-by-side domain and codomain landscapes</p>
+            <details>
+                <summary>Show code</summary>
+                <pre>import complexplorer as cp
+
+# Define function and domain
+f = lambda z: z**3 - 1
+domain = cp.Disk(2)
+
+# Create side-by-side 3D landscapes
+plotter = cp.pair_plot_landscape_pv(
+    domain, f,
+    cmap=cp.Phase(n_phi=12, auto_scale_r=True),
+    resolution=200,
+    z_scale=0.3,
+    notebook=False,
+    interactive=True  # For interactive viewing,
+    window_size=(1600, 800)
+)</pre>
+            </details>
+        </div>
+    </div>
+
+    <h2>Riemann Sphere</h2>
+    <div class='gallery'>
+        <div class='item'>
+            <img src='images/riemann_sphere.png' alt='Riemann Sphere'>
+            <h3>Riemann Sphere</h3>
+            <p>Traditional Riemann sphere projection</p>
+            <details>
+                <summary>Show code</summary>
+                <pre>import complexplorer as cp
+
+# Rational function with poles
+f = lambda z: (z**2 - 1) / (z**2 + 1)
+
+# Create Riemann sphere visualization
+plotter = cp.riemann_pv(
+    f,
+    cmap=cp.Phase(n_phi=16),
+    modulus_mode='constant',
+    resolution=150,
+    notebook=False,
+    interactive=True  # For interactive viewing
+)</pre>
+            </details>
+        </div>
+        <div class='item'>
+            <img src='images/modulus_scaled_sphere.png' alt='Modulus Scaled Sphere'>
+            <h3>Modulus Scaled Sphere</h3>
+            <p>Riemann sphere with modulus-based distortion</p>
+            <details>
+                <summary>Show code</summary>
+                <pre>import complexplorer as cp
+
+# Function with interesting modulus behavior
+f = lambda z: (z - 1) * (z + 1) / (z**2 + 0.5)
+
+# Riemann sphere with arctan modulus scaling
+plotter = cp.riemann_pv(
+    f,
+    cmap=cp.Phase(n_phi=12, auto_scale_r=True),
+    modulus_mode='arctan',
+    scaling_params={'r_min': 0.3, 'r_max': 1.0},
+    resolution=200,
+    notebook=False,
+    interactive=True  # For interactive viewing
+)</pre>
+            </details>
+        </div>
+        <div class='item'>
+            <img src='images/riemann_sphere_pyvista_3d.png' alt='High-Resolution Riemann Sphere'>
+            <h3>High-Resolution Riemann Sphere</h3>
+            <p>High-resolution Riemann sphere visualization</p>
+            <details>
+                <summary>Show code</summary>
+                <pre>import complexplorer as cp
+
+# Rational function with interesting features
+f = lambda z: (z**2 - 1) / (z**2 + 1)
+
+# High-resolution Riemann sphere for publication
+plotter = cp.riemann_pv(
+    f,
+    cmap=cp.Phase(n_phi=12, auto_scale_r=True, v_base=0.4),
+    modulus_mode='constant',
+    resolution=800,
+    window_size=(1200, 1200),
+    camera_position=(2.5, 2.0, 1.5),
+    show_orientation=True,
+    notebook=False,
+    interactive=True  # For interactive viewing
+)</pre>
+            </details>
+        </div>
+    </div>
+
+    <h2>Special Functions</h2>
+    <div class='gallery'>
+        <div class='item'>
+            <img src='images/essential_singularity.png' alt='Essential Singularity'>
+            <h3>Essential Singularity</h3>
+            <p>Chaotic behavior near essential singularity</p>
+            <details>
+                <summary>Show code</summary>
+                <pre>import complexplorer as cp
+import numpy as np
+
+# Essential singularity at origin
+f = lambda z: np.exp(1/z)
+domain = cp.Annulus(0.05, 0.5)
+
+# High resolution needed near singularity
+cp.plot(domain, f, 
+        cmap=cp.Phase(n_phi=24),
+        resolution=600)</pre>
+            </details>
+        </div>
+        <div class='item'>
+            <img src='images/branch_cut.png' alt='Branch Cut'>
+            <h3>Branch Cut</h3>
+            <p>Branch cut of complex logarithm</p>
+            <details>
+                <summary>Show code</summary>
+                <pre>import complexplorer as cp
+import numpy as np
+
+# Complex logarithm with branch cut
+f = lambda z: np.log(z)
+domain = cp.Annulus(0.1, 3)
+
+# Phase portrait shows branch cut clearly
+cp.plot(domain, f, 
+        cmap=cp.Phase(n_phi=12),
+        resolution=400)</pre>
+            </details>
+        </div>
+    </div>
+
+</body>
+</html>

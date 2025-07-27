@@ -563,21 +563,3 @@ class CompositeDomain(Domain):
         
         x, y = np.meshgrid(real_axis, imag_axis)
         return x + 1j * y
-
-
-# Backward compatibility aliases
-def create_rectangle(real: float, imag: float, 
-                    center: complex = 0+0j, square: bool = True) -> Rectangle:
-    """Create a Rectangle domain (backward compatibility)."""
-    return Rectangle(real, imag, center, square)
-
-
-def create_disk(radius: float, center: complex = 0+0j) -> Disk:
-    """Create a Disk domain (backward compatibility)."""
-    return Disk(radius, center)
-
-
-def create_annulus(radius_inner: float, radius_outer: float,
-                  center: complex = 0+0j) -> Annulus:
-    """Create an Annulus domain (backward compatibility)."""
-    return Annulus(radius_inner, radius_outer, center)

@@ -62,15 +62,4 @@ def ensure_interactive_plots():
     return backend
 
 
-# Legacy compatibility
-def setup_backend(force_qt: bool = False):
-    """Legacy function name for setup_matplotlib_backend."""
-    warnings.warn(
-        "setup_backend is deprecated, use setup_matplotlib_backend instead",
-        DeprecationWarning,
-        stacklevel=2
-    )
-    return setup_matplotlib_backend(force_qt)
-
-
-__all__ = ['setup_matplotlib_backend', 'ensure_interactive_plots', 'setup_backend']
+__all__ = ['setup_matplotlib_backend', 'ensure_interactive_plots']

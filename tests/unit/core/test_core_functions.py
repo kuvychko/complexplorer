@@ -217,26 +217,3 @@ class TestInverseStereographic:
         
         expected = np.array([1+0j, 0+1j, -1+0j, 0-1j])
         np.testing.assert_allclose(w, expected)
-
-
-class TestBackwardCompatibility:
-    """Test backward compatibility with legacy functions."""
-    
-    def test_phase_compatibility(self):
-        """Test phase matches legacy behavior."""
-        # Legacy phase returns [0, 2π)
-        z = np.array([1+0j, 1j, -1+0j, -1j])
-        phi = phase(z)
-        
-        # All values should be non-negative
-        assert np.all(phi >= 0)
-        assert np.all(phi < 2*np.pi)
-    
-    def test_stereographic_alias(self):
-        """Test stereographic alias works."""
-        from complexplorer.core.functions import stereographic
-        
-        result1 = stereographic(1+1j)
-        result2 = stereographic_projection(1+1j)
-        
-        np.testing.assert_allclose(result1, result2)

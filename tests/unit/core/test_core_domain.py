@@ -405,37 +405,3 @@ class TestDomainMethods:
         
         with pytest.raises(ValidationError):
             rect.mesh(n=10001)  # Too large
-
-
-class TestBackwardCompatibility:
-    """Test backward compatibility features."""
-    
-    def test_rectangle_compatibility(self):
-        """Test Rectangle matches legacy behavior."""
-        # New API with non-square window to match legacy
-        rect_new = Rectangle(4, 2, center=1+1j, square=False)
-        
-        # Should have same bounds
-        assert rect_new.window_real == (rect_new.center.real - 2, rect_new.center.real + 2)
-        assert rect_new.window_imag == (rect_new.center.imag - 1, rect_new.center.imag + 1)
-    
-    def test_disk_compatibility(self):
-        """Test Disk matches legacy behavior."""
-        disk = Disk(2, center=1+1j)
-        
-        # Test contains matches legacy infunc
-        z = np.array([1+1j, 3+1j, 1+3j])
-        mask = disk.contains(z)
-        expected = np.abs(z - disk.center) <= disk.radius
-        np.testing.assert_array_equal(mask, expected)
-    
-    def test_annulus_compatibility(self):
-        """Test Annulus matches legacy behavior."""
-        ann = Annulus(1, 2, center=1+1j)
-        
-        # Test contains matches legacy infunc
-        z = np.array([1+1j, 2+1j, 3+1j])
-        mask = ann.contains(z)
-        dist = np.abs(z - ann.center)
-        expected = (dist >= ann.inner_radius) & (dist <= ann.outer_radius)
-        np.testing.assert_array_equal(mask, expected)
