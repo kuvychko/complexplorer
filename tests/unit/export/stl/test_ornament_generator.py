@@ -12,7 +12,7 @@ except ImportError:
     HAS_PYVISTA = False
 
 from complexplorer.export.stl import OrnamentGenerator, create_ornament
-from complexplorer.core.colormap import Phase
+from complexplorer.core.colormap import Phase, Chessboard, PolarChessboard
 from complexplorer.core.domain import Disk
 from complexplorer.utils.validation import ValidationError
 
@@ -31,6 +31,9 @@ class TestOrnamentGenerator:
         assert gen.scaling == 'arctan'
         assert isinstance(gen.cmap, Phase)
         assert gen.sphere_mesh is None
+        assert gen.texture_height == 0.0
+        assert gen.texture_mode == 'ridges'
+        assert gen.texture_sharpness == 1.0
     
     def test_init_custom(self):
         """Test initialization with custom parameters."""
@@ -44,7 +47,10 @@ class TestOrnamentGenerator:
             scaling='logarithmic',
             scaling_params={'base': 2.0},
             cmap=cmap,
-            domain=domain
+            domain=domain,
+            texture_height=0.005,
+            texture_mode='binary',
+            texture_sharpness=0.8
         )
         
         assert gen.resolution == 100
@@ -52,6 +58,9 @@ class TestOrnamentGenerator:
         assert gen.scaling_params['base'] == 2.0
         assert gen.cmap is cmap
         assert gen.domain is domain
+        assert gen.texture_height == 0.005
+        assert gen.texture_mode == 'binary'
+        assert gen.texture_sharpness == 0.8
     
     def test_default_scaling_params(self):
         """Test default parameters for different scaling methods."""
@@ -303,3 +312,147 @@ class TestComplexFunctions:
         gen.generate_and_save(str(filename), size_mm=50, verbose=False)
         
         assert os.path.exists(filename)
+
+
+@pytest.mark.skipif(not HAS_PYVISTA, reason="PyVista not installed")
+class TestOrnamentTexture:
+    """Test texture functionality in ornament generation."""
+    
+    def test_generate_with_ridges(self):
+        """Test ornament generation with ridge texture."""
+        func = lambda z: (z**2 - 1) / (z**2 + 1)
+        cmap = Phase(n_phi=6, r_linear_step=1.0)
+        gen = OrnamentGenerator(
+            func, 
+            resolution=50,
+            cmap=cmap,
+            texture_height=0.005,
+            texture_mode='ridges',
+            texture_sharpness=0.9
+        )
+        
+        sphere = gen.generate_ornament()
+        
+        # Should have modified positions due to texture
+        assert isinstance(sphere, pv.PolyData)
+        assert sphere.n_points > 0
+    
+    def test_generate_with_binary(self):
+        """Test ornament generation with binary texture."""
+        func = lambda z: z**2
+        cmap = Chessboard(spacing=0.5)
+        gen = OrnamentGenerator(
+            func,
+            resolution=40,
+            cmap=cmap,
+            texture_height=0.008,
+            texture_mode='binary'
+        )
+        
+        sphere = gen.generate_ornament()
+        
+        # Points should be displaced
+        assert isinstance(sphere, pv.PolyData)
+    
+    def test_generate_with_grooves(self):
+        """Test ornament generation with groove texture."""
+        func = lambda z: z + 1/z
+        cmap = PolarChessboard(n_phi=8, spacing=0.3)
+        gen = OrnamentGenerator(
+            func,
+            resolution=40,
+            cmap=cmap,
+            texture_height=0.006,
+            texture_mode='grooves'
+        )
+        
+        sphere = gen.generate_ornament()
+        
+        assert isinstance(sphere, pv.PolyData)
+    
+    def test_no_texture_by_default(self):
+        """Test that texture is not applied when height is 0."""
+        func = lambda z: z**3 - 1
+        gen = OrnamentGenerator(func, resolution=30)
+        
+        sphere = gen.generate_ornament()
+        
+        # Store original points
+        original_radii = np.linalg.norm(sphere.points, axis=1)
+        
+        # Generate with explicit zero texture
+        gen2 = OrnamentGenerator(func, resolution=30, texture_height=0.0)
+        sphere2 = gen2.generate_ornament()
+        radii2 = np.linalg.norm(sphere2.points, axis=1)
+        
+        # Should be identical
+        assert np.allclose(original_radii, radii2)
+    
+    def test_texture_affects_points(self):
+        """Test that texture actually modifies the mesh."""
+        func = lambda z: z**2
+        cmap = Chessboard(spacing=0.5)
+        
+        # Generate without texture
+        gen1 = OrnamentGenerator(func, resolution=30, cmap=cmap)
+        sphere1 = gen1.generate_ornament()
+        radii1 = np.linalg.norm(sphere1.points, axis=1)
+        
+        # Generate with texture
+        gen2 = OrnamentGenerator(
+            func, 
+            resolution=30, 
+            cmap=cmap,
+            texture_height=0.01,
+            texture_mode='binary'
+        )
+        sphere2 = gen2.generate_ornament()
+        radii2 = np.linalg.norm(sphere2.points, axis=1)
+        
+        # Radii should be different
+        assert not np.allclose(radii1, radii2)
+        # Some points should be raised, some lowered
+        assert np.any(radii2 > radii1)
+        assert np.any(radii2 < radii1)
+    
+    def test_save_textured_stl(self, tmp_path):
+        """Test saving STL with texture."""
+        func = lambda z: (z - 1) / (z + 1)
+        cmap = Phase(n_phi=12)
+        gen = OrnamentGenerator(
+            func,
+            resolution=40,
+            cmap=cmap,
+            texture_height=0.007,
+            texture_mode='ridges'
+        )
+        
+        gen.generate_ornament()
+        filename = tmp_path / "textured.stl"
+        saved_path = gen.save_stl(str(filename), size_mm=50, verbose=False)
+        
+        assert os.path.exists(saved_path)
+        
+        # Verify the mesh loads correctly
+        mesh = pv.read(saved_path)
+        assert mesh.n_points > 0
+        assert mesh.n_cells > 0
+    
+    def test_create_ornament_with_texture(self, tmp_path):
+        """Test convenience function with texture."""
+        func = lambda z: z**3 - z
+        filename = tmp_path / "textured_convenience.stl"
+        
+        saved_path = create_ornament(
+            func,
+            str(filename),
+            size_mm=45,
+            resolution=50,
+            cmap=Chessboard(spacing=0.4),
+            texture_height=0.005,
+            texture_mode='binary',
+            texture_sharpness=0.95,
+            verbose=False
+        )
+        
+        assert os.path.exists(saved_path)

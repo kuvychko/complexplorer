@@ -36,12 +36,11 @@ class TestComputeTextureFromColormap:
         n = 10
         z = np.array([i*0.5 + 1j*j*0.5 for i in range(n) for j in range(n)], dtype=complex)
         cmap = Chessboard(spacing=1.0)
-        mesh_shape = (n, n)
         
-        texture = compute_texture_from_colormap(z, cmap, mode='ridges', mesh_shape=mesh_shape)
+        texture = compute_texture_from_colormap(z, cmap, mode='ridges')
         
         assert texture.shape == (n*n,)
-        assert np.all(texture >= 0)  # Ridges are positive
+        assert np.all(texture >= -1) and np.all(texture <= 1)  # In valid range
         assert np.any(texture > 0)   # Some ridges exist
     
     def test_phase_ridge_mode(self):
@@ -55,35 +54,35 @@ class TestComputeTextureFromColormap:
         z = z.ravel()
         
         cmap = Phase(n_phi=6)  # 6 phase sectors
-        mesh_shape = (n, n)
         
         texture = compute_texture_from_colormap(
-            z, cmap, mode='ridges', sharpness=0.9, mesh_shape=mesh_shape
+            z, cmap, mode='ridges'
         )
         
         assert texture.shape == (n*n,)
         # Should have ridges at phase boundaries
         assert np.sum(texture > 0) > 0
     
-    def test_missing_mesh_shape_error(self):
-        """Test error when mesh_shape missing for continuous colormap."""
-        z = np.array([1+1j])
-        cmap = Phase()
+    def test_direct_computation_no_mesh_shape(self):
+        """Test that direct computation doesn't need mesh_shape."""
+        z = np.array([1+1j, 2+2j, 3+3j])
+        cmap = Phase(n_phi=4)
         
-        with pytest.raises(ValueError, match="mesh_shape required"):
-            compute_texture_from_colormap(z, cmap, mode='ridges')
+        # Should work without mesh_shape
+        texture = compute_texture_from_colormap(z, cmap, mode='ridges')
+        assert texture.shape == (3,)
     
     def test_groove_mode(self):
         """Test groove mode produces negative values."""
         n = 5
         z = np.array([i + 1j*j for i in range(n) for j in range(n)], dtype=complex)
         cmap = PolarChessboard(n_phi=4)
-        mesh_shape = (n, n)
         
-        texture = compute_texture_from_colormap(z, cmap, mode='grooves', mesh_shape=mesh_shape)
+        texture = compute_texture_from_colormap(z, cmap, mode='grooves')
         
         assert texture.shape == (n*n,)
-        assert np.all(texture <= 0)  # Grooves are negative
+        assert np.all(texture <= 1)  # In valid range
+        assert np.any(texture < 0)  # Some grooves exist
 
 
 class TestComputeSphereGradient:

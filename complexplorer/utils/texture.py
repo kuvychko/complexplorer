@@ -8,6 +8,7 @@ physical texture (ridges, grooves, or binary height variations) for
 from typing import Tuple, Optional
 import numpy as np
 from ..core.colormap import Colormap, Chessboard, PolarChessboard, LogRings
+from .texture_direct import compute_texture_direct
 
 
 def compute_texture_from_colormap(
@@ -19,6 +20,9 @@ def compute_texture_from_colormap(
 ) -> np.ndarray:
     """Convert colormap boundaries to physical texture displacement.
     
+    Uses direct computation based on colormap patterns rather than
+    gradient detection for more reliable boundary detection.
+    
     Parameters
     ----------
     f_values : ndarray
@@ -28,9 +32,11 @@ def compute_texture_from_colormap(
     mode : str
         Texture mode: 'ridges', 'grooves', or 'binary'.
     sharpness : float
-        Edge detection sensitivity (0-1). Higher = sharper detection.
+        Edge detection sensitivity (0-1). Currently unused but kept
+        for API compatibility.
     mesh_shape : tuple, optional
-        Shape of the mesh grid (n_theta, n_phi) for gradient computation.
+        Shape of the mesh grid (n_theta, n_phi). Currently unused
+        but kept for API compatibility.
         
     Returns
     -------
@@ -40,53 +46,8 @@ def compute_texture_from_colormap(
     # Ensure f_values is 1D
     f_values = np.asarray(f_values).ravel()
     
-    # Get HSV values from colormap
-    hsv = cmap.hsv(f_values)
-    
-    # Check if this is a binary colormap
-    is_binary_cmap = isinstance(cmap, (Chessboard, PolarChessboard, LogRings))
-    
-    if is_binary_cmap:
-        # Binary colormaps: use value channel directly
-        values = hsv[:, 2]  # V channel (0 or 1)
-        
-        if mode == 'binary':
-            # Direct mapping: white=up, black=down
-            return 2 * values - 1  # Maps [0,1] to [-1,1]
-        else:
-            # Edge detection for ridges/grooves
-            if mesh_shape is None:
-                raise ValueError("mesh_shape required for edge detection")
-            
-            gradient = compute_sphere_gradient(values, mesh_shape)
-            edges = gradient > 0.5  # Binary change detection
-            
-            if mode == 'ridges':
-                return edges.astype(float)
-            else:  # grooves
-                return -edges.astype(float)
-    
-    else:
-        # Continuous colormaps: detect gradients in HSV space
-        if mesh_shape is None:
-            raise ValueError("mesh_shape required for continuous colormaps")
-        
-        # Compute perceptually weighted gradient
-        gradient_magnitude = compute_hsv_gradient(hsv, mesh_shape)
-        
-        # Threshold based on sharpness parameter
-        threshold = 0.1 + 0.4 * (1 - sharpness)
-        edges = gradient_magnitude > threshold
-        
-        if mode == 'ridges':
-            # Sharp ridges at boundaries
-            return edges.astype(float)
-        elif mode == 'grooves':
-            # Grooves at boundaries
-            return -edges.astype(float)
-        else:  # 'binary'
-            # Quantize regions between edges
-            return quantize_regions(hsv, edges, mesh_shape)
+    # Use direct texture computation
+    return compute_texture_direct(f_values, cmap, mode)
 
 
 def compute_sphere_gradient(
@@ -251,7 +212,7 @@ def apply_texture_to_mesh(
     texture_mode: str,
     texture_sharpness: float,
     texture_preview_scale: float,
-    mesh_shape: Tuple[int, int]
+    mesh_shape: Optional[Tuple[int, int]] = None
 ) -> 'pv.PolyData':
     """Apply texture displacement to a mesh.
     
@@ -274,8 +235,10 @@ def apply_texture_to_mesh(
         Edge detection sensitivity.
     texture_preview_scale : float
         Preview scale factor.
-    mesh_shape : tuple
-        Shape of the mesh grid (n_theta, n_phi).
+    mesh_shape : tuple, optional
+        Shape of the mesh grid (n_theta, n_phi). If None or if the
+        mesh has been filtered by a domain, gradient-based textures
+        will be disabled.
         
     Returns
     -------
@@ -285,7 +248,7 @@ def apply_texture_to_mesh(
     if texture_height == 0:
         return mesh
     
-    # Compute texture displacement from colormap
+    # Direct texture computation works for all mesh types
     displacement = compute_texture_from_colormap(
         f_values, cmap, texture_mode, texture_sharpness, mesh_shape
     )

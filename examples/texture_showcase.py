@@ -22,7 +22,7 @@ print("   White squares raised, black squares lowered")
 cmap1 = cp.Chessboard(spacing=0.5)
 cp.riemann_pv(
     f,
-    resolution=80,
+    resolution=500,
     cmap=cmap1,
     texture_height=0.005,  # 0.5% of radius
     texture_mode='binary',
@@ -38,7 +38,7 @@ print("   Ridges appear at phase sector boundaries")
 cmap2 = cp.Phase(n_phi=12, r_linear_step=1.0, v_base=0.4)
 cp.riemann_pv(
     f,
-    resolution=100,
+    resolution=500,
     cmap=cmap2,
     texture_height=0.008,  # 0.8% of radius
     texture_mode='ridges',
@@ -54,7 +54,7 @@ print("   Grooves at polar grid boundaries")
 cmap3 = cp.PolarChessboard(n_phi=8, spacing=0.3)
 cp.riemann_pv(
     f,
-    resolution=80,
+    resolution=500,
     cmap=cmap3,
     texture_height=0.006,  # 0.6% of radius
     texture_mode='grooves',
@@ -69,7 +69,7 @@ print("   Circular ridges at logarithmic intervals")
 cmap4 = cp.LogRings(log_spacing=0.2)
 cp.riemann_pv(
     lambda z: z**3 - 1,  # Different function to show poles
-    resolution=100,
+    resolution=500,
     cmap=cmap4,
     texture_height=0.007,  # 0.7% of radius
     texture_mode='ridges',
@@ -84,7 +84,7 @@ print("   Shows texture remains uniform after scaling")
 cmap5 = cp.Phase(n_phi=6, auto_scale_r=True)
 cp.riemann_pv(
     lambda z: (z - 1) / (z**2 + z + 1),
-    resolution=100,
+    resolution=500,
     cmap=cmap5,
     modulus_mode='arctan',
     modulus_params={'r_min': 0.3, 'r_max': 2.0},  # Correct parameters for arctan
@@ -96,49 +96,40 @@ cp.riemann_pv(
     interactive=True
 )
 
-# Example 6: Side-by-side comparison
-print("\n6. Side-by-side: Smooth vs Textured")
-print("   Compare visual colormap with physical texture")
+# Example 6: Save comparison images
+print("\n6. Generating comparison images...")
+print("   Saving smooth vs textured versions for comparison")
 
-# Create a more complex function
-def g(z):
-    """Function with essential singularity."""
-    return np.exp(1/z) if np.isscalar(z) else np.where(z != 0, np.exp(1/z), 0)
+# Create a simple function for comparison
+func_compare = lambda z: (z**2 - 1) / (z**2 + 1)
+cmap_compare = cp.Chessboard(spacing=0.5)
 
-# Use PyVista's multi-subplot feature
-import pyvista as pv
-plotter = pv.Plotter(shape=(1, 2), window_size=(1200, 600))
-
-# Left: Smooth surface
-plotter.subplot(0, 0)
+# Generate smooth version
 cp.riemann_pv(
-    g,
-    resolution=80,
-    cmap=cmap2,
-    domain=cp.Disk(2),
+    func_compare,
+    resolution=150,
+    cmap=cmap_compare,
     texture_height=0.0,  # No texture
     title="Smooth (Visual Only)",
     interactive=False,
-    return_plotter=False
+    filename="showcase_smooth.png"
 )
 
-# Right: With texture
-plotter.subplot(0, 1)
+# Generate textured version
 cp.riemann_pv(
-    g,
-    resolution=80,
-    cmap=cmap2,
-    domain=cp.Disk(2),
-    texture_height=0.008,  # 0.8% of radius
-    texture_mode='ridges',
+    func_compare,
+    resolution=150,
+    cmap=cmap_compare,
+    texture_height=0.005,  # 0.5% of radius
+    texture_mode='binary',
     texture_preview_scale=10.0,
-    title="With Ridge Texture",
+    title="With Binary Texture",
     interactive=False,
-    return_plotter=False
+    filename="showcase_textured.png"
 )
 
-plotter.link_views()
-plotter.show()
+print("   ✓ Saved showcase_smooth.png and showcase_textured.png")
+print("   (Run texture_comparison.py for interactive side-by-side view)")
 
 print("\n" + "=" * 40)
 print("Texture Preview Notes:")

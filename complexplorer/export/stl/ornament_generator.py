@@ -49,6 +49,18 @@ class OrnamentGenerator:
         Colormap for visualization. Default is Phase colormap.
     domain : Domain, optional
         Domain to restrict evaluation. Helps avoid numerical issues.
+    texture_height : float, optional
+        Physical texture height as fraction of sphere radius.
+        0 = no texture. Typical: 0.001-0.01. Default 0.
+    texture_mode : str, optional
+        How to create texture from colormap boundaries:
+        - 'ridges': Raised lines at color boundaries
+        - 'grooves': Indented lines at color boundaries  
+        - 'binary': Direct height mapping (for binary colormaps)
+        Default is 'ridges'.
+    texture_sharpness : float, optional
+        Edge detection sensitivity (0-1). Higher = sharper.
+        Default is 1.0.
     """
     
     def __init__(self,
@@ -57,7 +69,10 @@ class OrnamentGenerator:
                  scaling: str = 'arctan',
                  scaling_params: Optional[Dict[str, Any]] = None,
                  cmap: Optional[Colormap] = None,
-                 domain: Optional[Domain] = None):
+                 domain: Optional[Domain] = None,
+                 texture_height: float = 0.0,
+                 texture_mode: str = 'ridges',
+                 texture_sharpness: float = 1.0):
         """Initialize ornament generator."""
         check_pyvista_available()
         
@@ -67,6 +82,9 @@ class OrnamentGenerator:
         self.scaling_params = scaling_params or get_default_scaling_params(scaling, for_stl=True)
         self.cmap = cmap or Phase(n_phi=6, auto_scale_r=True)
         self.domain = domain
+        self.texture_height = texture_height
+        self.texture_mode = texture_mode
+        self.texture_sharpness = texture_sharpness
         
         self.sphere_mesh = None
     
@@ -133,6 +151,23 @@ class OrnamentGenerator:
         sphere["magnitude"] = np.abs(f_vals)
         sphere["phase"] = np.angle(f_vals)
         sphere["radius"] = radii
+        
+        # Recompute normals after modulus scaling (critical for texture)
+        if self.scaling != 'constant':
+            sphere.compute_normals(point_normals=True, inplace=True)
+        
+        # Apply texture displacement if requested
+        if self.texture_height > 0:
+            from ...utils.texture import apply_texture_to_mesh
+            # mesh_shape is (n_theta, n_phi) for gradient computation
+            mesh_shape = (self.resolution, self.resolution)
+            # Use texture_preview_scale=1.0 for actual STL (no exaggeration)
+            sphere = apply_texture_to_mesh(
+                sphere, f_vals, self.cmap, self.texture_height, self.texture_mode,
+                self.texture_sharpness, texture_preview_scale=1.0, mesh_shape=mesh_shape
+            )
+            if verbose:
+                print(f"  Applied {self.texture_mode} texture: height={self.texture_height}")
         
         self.sphere_mesh = sphere
         
@@ -276,6 +311,9 @@ def create_ornament(func: Callable,
                       scaling_params: Optional[Dict[str, Any]] = None,
                       cmap: Optional[Colormap] = None,
                       domain: Optional[Domain] = None,
+                      texture_height: float = 0.0,
+                      texture_mode: str = 'ridges',
+                      texture_sharpness: float = 1.0,
                       verbose: bool = True) -> str:
     """Create a 3D-printable ornament from a complex function.
     
@@ -299,6 +337,17 @@ def create_ornament(func: Callable,
         Color mapping.
     domain : Domain, optional
         Domain restriction.
+    texture_height : float, optional
+        Physical texture height as fraction of sphere radius.
+        0 = no texture. Typical: 0.001-0.01. Default 0.
+    texture_mode : str, optional
+        How to create texture from colormap boundaries:
+        - 'ridges': Raised lines at color boundaries
+        - 'grooves': Indented lines at color boundaries  
+        - 'binary': Direct height mapping (for binary colormaps)
+        Default is 'ridges'.
+    texture_sharpness : float, optional
+        Edge detection sensitivity (0-1). Default is 1.0.
     verbose : bool, default=True
         Print progress.
         
@@ -308,7 +357,8 @@ def create_ornament(func: Callable,
         Path to saved STL file.
     """
     gen = OrnamentGenerator(
-        func, resolution, scaling, scaling_params, cmap, domain
+        func, resolution, scaling, scaling_params, cmap, domain,
+        texture_height, texture_mode, texture_sharpness
     )
     return gen.generate_and_save(filename, size_mm, verbose=verbose)
 
