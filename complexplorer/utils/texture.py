@@ -267,7 +267,7 @@ def apply_texture_to_mesh(
     cmap : Colormap
         Colormap for boundary detection.
     texture_height : float
-        Physical texture height in mm.
+        Physical texture height as fraction of sphere radius.
     texture_mode : str
         Texture mode: 'ridges', 'grooves', or 'binary'.
     texture_sharpness : float

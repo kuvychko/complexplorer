@@ -24,7 +24,7 @@ cp.riemann_pv(
     f,
     resolution=80,
     cmap=cmap1,
-    texture_height=0.5,
+    texture_height=0.005,  # 0.5% of radius
     texture_mode='binary',
     texture_preview_scale=10.0,
     title="Chessboard Binary Texture",
@@ -40,7 +40,7 @@ cp.riemann_pv(
     f,
     resolution=100,
     cmap=cmap2,
-    texture_height=0.8,
+    texture_height=0.008,  # 0.8% of radius
     texture_mode='ridges',
     texture_sharpness=0.9,
     texture_preview_scale=8.0,
@@ -56,7 +56,7 @@ cp.riemann_pv(
     f,
     resolution=80,
     cmap=cmap3,
-    texture_height=0.6,
+    texture_height=0.006,  # 0.6% of radius
     texture_mode='grooves',
     texture_preview_scale=10.0,
     title="Polar Chessboard with Grooves",
@@ -71,7 +71,7 @@ cp.riemann_pv(
     lambda z: z**3 - 1,  # Different function to show poles
     resolution=100,
     cmap=cmap4,
-    texture_height=0.7,
+    texture_height=0.007,  # 0.7% of radius
     texture_mode='ridges',
     texture_preview_scale=8.0,
     title="Log Rings with Ridges",
@@ -87,8 +87,8 @@ cp.riemann_pv(
     resolution=100,
     cmap=cmap5,
     modulus_mode='arctan',
-    modulus_params={'scale': 2.0},
-    texture_height=1.0,
+    modulus_params={'r_min': 0.3, 'r_max': 2.0},  # Correct parameters for arctan
+    texture_height=0.01,  # 1% of radius
     texture_mode='ridges',
     texture_sharpness=0.95,
     texture_preview_scale=5.0,
@@ -129,7 +129,7 @@ cp.riemann_pv(
     resolution=80,
     cmap=cmap2,
     domain=cp.Disk(2),
-    texture_height=0.8,
+    texture_height=0.008,  # 0.8% of radius
     texture_mode='ridges',
     texture_preview_scale=10.0,
     title="With Ridge Texture",

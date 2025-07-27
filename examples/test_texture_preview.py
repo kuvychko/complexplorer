@@ -14,7 +14,7 @@ try:
         func,
         resolution=50,
         cmap=cmap,
-        texture_height=0.5,
+        texture_height=0.005,  # 0.5% of radius
         texture_mode='binary',
         texture_preview_scale=5.0,
         interactive=False,
@@ -34,7 +34,7 @@ try:
         func,
         resolution=50,
         cmap=cmap,
-        texture_height=0.8,
+        texture_height=0.008,  # 0.8% of radius
         texture_mode='ridges',
         texture_sharpness=0.9,
         texture_preview_scale=10.0,
@@ -56,7 +56,7 @@ try:
         resolution=50,
         cmap=cmap,
         modulus_mode='arctan',
-        texture_height=0.6,
+        texture_height=0.006,  # 0.6% of radius
         texture_mode='grooves',
         texture_preview_scale=8.0,
         interactive=False,

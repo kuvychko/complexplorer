@@ -101,7 +101,8 @@ def riemann_pv(
     return_plotter : bool, optional
         If True, return the plotter object.
     texture_height : float, optional
-        Physical texture height in mm. 0 = no texture (smooth surface).
+        Physical texture height as fraction of sphere radius. 
+        0 = no texture (smooth surface). Typical values: 0.001-0.01.
     texture_mode : str, optional
         How to create texture from colormap boundaries:
         - 'ridges': Raised lines at color boundaries
@@ -258,7 +259,7 @@ def riemann_pv(
     # Add texture info if texture is applied
     if texture_height > 0 and interactive:
         texture_info = (f"Texture Preview: {texture_preview_scale}× scale\n"
-                       f"Actual height: ±{texture_height}mm")
+                       f"Actual height: ±{texture_height:.3f} radius units")
         plotter.add_text(texture_info, position='upper_right', 
                         font_size=10, color='white')
     
