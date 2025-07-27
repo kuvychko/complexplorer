@@ -46,6 +46,10 @@ def riemann_pv(
     modulus_mode: str = 'constant',
     modulus_params: Optional[dict] = None,
     return_plotter: bool = False,
+    texture_height: float = 0.0,
+    texture_mode: str = 'ridges',
+    texture_sharpness: float = 1.0,
+    texture_preview_scale: float = 5.0,
     **kwargs
 ) -> Optional['pv.Plotter']:
     """Plot complex function on the Riemann sphere using PyVista.
@@ -96,6 +100,19 @@ def riemann_pv(
         Parameters for modulus scaling method.
     return_plotter : bool, optional
         If True, return the plotter object.
+    texture_height : float, optional
+        Physical texture height in mm. 0 = no texture (smooth surface).
+    texture_mode : str, optional
+        How to create texture from colormap boundaries:
+        - 'ridges': Raised lines at color boundaries
+        - 'grooves': Indented lines at color boundaries
+        - 'binary': Direct height mapping (for binary colormaps)
+    texture_sharpness : float, optional
+        Edge detection sensitivity (0-1). Higher = sharper edge detection.
+    texture_preview_scale : float, optional
+        Scale factor for texture preview. Actual texture is multiplied
+        by this factor for better visibility. Default 5.0 means 5x
+        exaggeration in the preview.
     **kwargs
         Additional arguments passed to pv.Plotter.
         
@@ -168,6 +185,26 @@ def riemann_pv(
     # Store original points for grid generation if needed
     original_points = points.copy()
     
+    # Recompute normals after modulus scaling (critical for texture)
+    if modulus_mode != 'constant':
+        mesh.compute_normals(point_normals=True, inplace=True)
+    
+    # Apply texture displacement AFTER modulus scaling
+    if texture_height > 0:
+        from ...utils.texture import apply_texture_to_mesh
+        # mesh_shape is (n_theta, n_phi) for gradient computation
+        mesh_shape = (resolution, resolution)
+        mesh = apply_texture_to_mesh(
+            mesh, f_vals, cmap, texture_height, texture_mode,
+            texture_sharpness, texture_preview_scale, mesh_shape
+        )
+        
+        # Add texture info text
+        if interactive:
+            texture_info = (f"Texture Preview: {texture_preview_scale}× scale\n"
+                          f"Actual height: ±{texture_height}mm")
+            # This will be added to plotter later
+    
     # Store additional scalars
     mesh["magnitude"] = np.abs(f_vals)
     mesh["phase"] = np.angle(f_vals)
@@ -186,7 +223,8 @@ def riemann_pv(
                                    'resolution', 'n', 'domain', 'interactive',
                                    'camera_position', 'radius', 'title',
                                    'filename', 'return_plotter', 'show_orientation',
-                                   'show'}}
+                                   'show', 'texture_height', 'texture_mode', 
+                                   'texture_sharpness', 'texture_preview_scale'}}
     plotter_kwargs.update(filtered_kwargs)
     
     plotter = pv.Plotter(**plotter_kwargs)
@@ -216,6 +254,13 @@ def riemann_pv(
     # Add title
     if title:
         plotter.add_text(title, position='upper_edge', font_size=14)
+    
+    # Add texture info if texture is applied
+    if texture_height > 0 and interactive:
+        texture_info = (f"Texture Preview: {texture_preview_scale}× scale\n"
+                       f"Actual height: ±{texture_height}mm")
+        plotter.add_text(texture_info, position='upper_right', 
+                        font_size=10, color='white')
     
     # Add orientation widget with complex plane labels
     if show_orientation:
