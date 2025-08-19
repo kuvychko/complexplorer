@@ -246,4 +246,6 @@ This library was inspired by Elias Wegert's beautiful book ["Visual Complex Func
 
 ## 📝 License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+- **Code:** [MIT License](./LICENSE) — free for personal, academic, or commercial use.
+- **Renders & STL outputs in this repository:** [CC BY-NC 4.0](./LICENSE.art) — free for non-commercial use only.  
+  Commercial licensing (e.g. for resale, inclusion in commercial courses, or product manufacturing) is available upon request.
