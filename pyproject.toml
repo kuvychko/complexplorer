@@ -6,12 +6,13 @@ build-backend = "setuptools.build_meta"
 include-package-data = false
 
 [tool.setuptools.packages.find]
+where = ["."]
 include = ["complexplorer", "complexplorer.*"]
-exclude = ["examples*", "tests*"]
+exclude = ["examples*", "tests*", "docs*", "build*", "*.egg-info"]
 
 [project]
 name = "complexplorer"
-version = "1.0.0"
+version = "1.0.1"
 authors = [
   { name="Igor Kuvychko", email="igor.kuvychko@gmail.com" },
 ]

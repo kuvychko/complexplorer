@@ -10,10 +10,16 @@ build/
 *.egg
 *.ipynb_checkpoints/
 .pypirc
+.venv/
+venv/
+env/
 
 # IDE specific files
 .idea/
 .vscode/
+*.swp
+*.swo
+*~
 
 # Compiled Python modules
 *.pyc
@@ -21,3 +27,39 @@ build/
 # Logs and temporary files
 *.log
 *.tmp
+
+# uv specific
+uv.lock
+.python-version
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+.hypothesis/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# OS specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Claude-specific
+.claude/
+
+# Local environment files
+.env
+.env.local
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*-Copy*.ipynb
+
+# Package manager
+pip-log.txt
+pip-delete-this-directory.txt
