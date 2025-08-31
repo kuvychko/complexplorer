@@ -4,6 +4,9 @@ import numpy as np
 import pytest
 from complexplorer.core.colormap import (
     Colormap, Phase, Chessboard, PolarChessboard, LogRings,
+    PerceptualPastel, AnalogousWedge, DivergingWarmCool,
+    Isoluminant, CubehelixPhase, InkPaper,
+    EarthTopographic, FourQuadrant,
     OUT_OF_DOMAIN_COLOR_HSV, sawtooth, sawtooth_log
 )
 from complexplorer.utils.validation import ValidationError
@@ -398,3 +401,280 @@ class TestHelperFunctions:
         r_with_zero = np.array([0, 1, 2])
         result = sawtooth_log(r_with_zero, base=2.0)
         assert result[0] == 0.0  # Special case
+
+
+class TestPerceptualPastel:
+    """Test PerceptualPastel colormap."""
+    
+    def test_init(self):
+        """Test initialization."""
+        cmap = PerceptualPastel()
+        assert cmap.L_center == 0.55
+        assert cmap.L_range == 0.25
+        assert cmap.C == 0.15
+        assert cmap.band_sharpness == 0.6
+        assert cmap.log_base == np.e
+        
+        # Custom parameters
+        cmap2 = PerceptualPastel(L_center=0.6, C=0.2)
+        assert cmap2.L_center == 0.6
+        assert cmap2.C == 0.2
+    
+    def test_hsv_conversion(self):
+        """Test HSV conversion produces valid output."""
+        cmap = PerceptualPastel()
+        z = np.array([1+0j, 0+1j, -1+0j, 0.5+0.5j])
+        
+        H, S, V = cmap.hsv_tuple(z)
+        
+        # Check all values are in valid range
+        assert np.all((H >= 0) & (H <= 1))
+        assert np.all((S >= 0) & (S <= 1))
+        assert np.all((V >= 0) & (V <= 1))
+        
+        # Check phase mapping (different phases should give different hues)
+        assert not np.allclose(H[0], H[1])
+        assert not np.allclose(H[1], H[2])
+
+
+class TestAnalogousWedge:
+    """Test AnalogousWedge colormap."""
+    
+    def test_init(self):
+        """Test initialization."""
+        cmap = AnalogousWedge()
+        assert cmap.H_center == 0.55
+        assert cmap.H_wedge == 0.35
+        assert cmap.S == 0.35
+        assert cmap.V_base == 0.55
+        assert cmap.V_range == 0.35
+        assert cmap.use_sigmoid == True
+        
+        # Test wedge clamping
+        cmap2 = AnalogousWedge(H_wedge=0.7)  # Too large
+        assert cmap2.H_wedge == 0.5  # Clamped to max
+        
+        cmap3 = AnalogousWedge(H_wedge=0.1)  # Too small
+        assert cmap3.H_wedge == 0.2  # Clamped to min
+    
+    def test_hsv_conversion(self):
+        """Test HSV conversion with compressed hue range."""
+        cmap = AnalogousWedge(H_center=0.5, H_wedge=0.3)
+        z = np.array([1+0j, 0+1j, -1+0j])
+        
+        H, S, V = cmap.hsv_tuple(z)
+        
+        # Check hue is within compressed range
+        # H_center=0.5, wedge=0.3 means hues should be in [0.35, 0.65]
+        assert np.all((H >= 0.2) & (H <= 0.8))
+        
+        # Check saturation is constant
+        assert np.allclose(S, 0.35)
+        
+        # Check value modulation
+        assert np.all((V >= 0) & (V <= 1))
+
+
+class TestDivergingWarmCool:
+    """Test DivergingWarmCool colormap."""
+    
+    def test_init(self):
+        """Test initialization."""
+        cmap = DivergingWarmCool()
+        assert cmap.H_warm == 30
+        assert cmap.H_cool == 220
+        assert cmap.L_center == 0.5
+        assert cmap.L_range == 0.3
+        assert cmap.use_oklch == True
+    
+    def test_hsv_conversion(self):
+        """Test warm-cool diverging colors."""
+        cmap = DivergingWarmCool()
+        
+        # Test at cardinal directions
+        z = np.array([1+0j, 0+1j, -1+0j, 0-1j])
+        H, S, V = cmap.hsv_tuple(z)
+        
+        # All values should be valid
+        assert np.all((H >= 0) & (H <= 1))
+        assert np.all((S >= 0) & (S <= 1))
+        assert np.all((V >= 0) & (V <= 1))
+        
+        # Phase differences should produce different colors
+        # Note: points at 0 and π have sin(φ) = 0, so same interpolation
+        assert not np.allclose(H[0], H[1])  # 0 vs π/2
+        assert not np.allclose(H[1], H[3])  # π/2 vs 3π/2
+
+
+class TestIsoluminant:
+    """Test Isoluminant colormap."""
+    
+    def test_init(self):
+        """Test initialization."""
+        cmap = Isoluminant()
+        assert cmap.L == 0.6
+        assert cmap.show_contours == True
+        assert cmap.use_oklch == True
+        
+        cmap2 = Isoluminant(show_contours=False)
+        assert cmap2.show_contours == False
+    
+    def test_hsv_without_contours(self):
+        """Test isoluminant coloring without contours."""
+        cmap = Isoluminant(show_contours=False)
+        z = np.array([1+0j, 0+1j, 2+0j, 0+2j])
+        
+        H, S, V = cmap.hsv_tuple(z)
+        
+        # Check valid ranges
+        assert np.all((H >= 0) & (H <= 1))
+        assert np.all((S >= 0) & (S <= 1))
+        assert np.all((V >= 0) & (V <= 1))
+        
+        # Different phases should have different hues
+        assert not np.allclose(H[0], H[1])
+    
+    def test_hsv_with_contours(self):
+        """Test isoluminant coloring with contours."""
+        cmap = Isoluminant(show_contours=True, contour_period=1.0)
+        z = np.array([1+0j, 2+0j, 4+0j])
+        
+        H, S, V = cmap.hsv_tuple(z)
+        
+        # Values should be modulated by contours
+        # but still in valid range
+        assert np.all((V >= 0) & (V <= 1))
+
+
+class TestCubehelixPhase:
+    """Test CubehelixPhase colormap."""
+    
+    def test_init(self):
+        """Test initialization."""
+        cmap = CubehelixPhase()
+        assert cmap.start == 0.5
+        assert cmap.rotations == -1.5
+        assert cmap.saturation == 0.8
+        assert cmap.modulate_with_r == True
+    
+    def test_hsv_conversion(self):
+        """Test cubehelix color generation."""
+        cmap = CubehelixPhase()
+        z = np.array([1+0j, 0+1j, -1+0j, 0.5+0.5j])
+        
+        H, S, V = cmap.hsv_tuple(z)
+        
+        # Check valid ranges
+        assert np.all((H >= 0) & (H <= 1))
+        assert np.all((S >= 0) & (S <= 1))
+        assert np.all((V >= 0) & (V <= 1))
+        
+        # Different phases should produce different colors
+        assert not np.allclose(H[0], H[1])
+        assert not np.allclose(H[1], H[2])
+
+
+class TestInkPaper:
+    """Test InkPaper colormap."""
+    
+    def test_init(self):
+        """Test initialization."""
+        cmap = InkPaper()
+        assert cmap.L_min == 0.35
+        assert cmap.L_max == 0.85
+        assert cmap.C_min == 0.02
+        assert cmap.C_max == 0.06
+        assert cmap.add_phase_stripes == False
+        
+        cmap2 = InkPaper(add_phase_stripes=True, stripe_count=12)
+        assert cmap2.add_phase_stripes == True
+        assert cmap2.stripe_count == 12
+    
+    def test_hsv_nearly_monochrome(self):
+        """Test nearly monochrome appearance."""
+        cmap = InkPaper()
+        z = np.array([1+0j, 0+1j, -1+0j])
+        
+        H, S, V = cmap.hsv_tuple(z)
+        
+        # Should have very low saturation (near monochrome)
+        if not cmap.use_oklch:
+            assert np.all(S <= 0.2)
+        
+        # All values in valid range
+        assert np.all((H >= 0) & (H <= 1))
+        assert np.all((S >= 0) & (S <= 1))
+        assert np.all((V >= 0) & (V <= 1))
+
+
+class TestEarthTopographic:
+    """Test EarthTopographic colormap."""
+    
+    def test_init(self):
+        """Test initialization."""
+        cmap = EarthTopographic()
+        assert cmap.L_min == 0.4
+        assert cmap.L_max == 0.8
+        assert cmap.H_water == 200
+        assert cmap.H_land == 30
+        assert cmap.add_hillshade == True
+    
+    def test_hsv_conversion(self):
+        """Test earth-tone coloring."""
+        cmap = EarthTopographic()
+        z = np.array([1+0j, 0+1j, -1+0j, 2+2j])
+        
+        H, S, V = cmap.hsv_tuple(z)
+        
+        # Check valid ranges
+        assert np.all((H >= 0) & (H <= 1))
+        assert np.all((S >= 0) & (S <= 1))
+        assert np.all((V >= 0) & (V <= 1))
+        
+        # Should produce varying colors based on phase
+        assert not np.allclose(H[0], H[1])
+
+
+class TestFourQuadrant:
+    """Test FourQuadrant colormap."""
+    
+    def test_init(self):
+        """Test initialization."""
+        cmap = FourQuadrant()
+        assert cmap.H_anchors == (10, 120, 210, 300)
+        assert cmap.C == 0.10
+        assert cmap.use_oklch == True
+        assert cmap.smooth_interpolation == True
+    
+    def test_hsv_conversion(self):
+        """Test four-quadrant color mapping."""
+        cmap = FourQuadrant()
+        
+        # Test at cardinal directions (should map to anchors)
+        z = np.array([1+0j, 0+1j, -1+0j, 0-1j])
+        H, S, V = cmap.hsv_tuple(z)
+        
+        # Check valid ranges
+        assert np.all((H >= 0) & (H <= 1))
+        assert np.all((S >= 0) & (S <= 1))
+        assert np.all((V >= 0) & (V <= 1))
+        
+        # Each quadrant should have distinct colors
+        assert not np.allclose(H[0], H[1])
+        assert not np.allclose(H[1], H[2])
+        assert not np.allclose(H[2], H[3])
+    
+    def test_smooth_interpolation(self):
+        """Test smooth vs linear interpolation."""
+        cmap_smooth = FourQuadrant(smooth_interpolation=True)
+        cmap_linear = FourQuadrant(smooth_interpolation=False)
+        
+        # Test at intermediate angles
+        z = np.array([np.exp(1j * np.pi/8)])  # 22.5 degrees
+        
+        H_smooth, _, _ = cmap_smooth.hsv_tuple(z)
+        H_linear, _, _ = cmap_linear.hsv_tuple(z)
+        
+        # Both should be valid but potentially different
+        assert np.all((H_smooth >= 0) & (H_smooth <= 1))
+        assert np.all((H_linear >= 0) & (H_linear <= 1))

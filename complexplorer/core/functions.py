@@ -241,5 +241,87 @@ def inverse_stereographic(x: Union[float, np.ndarray],
     return complex(result) if scalar_input else result
 
 
+
+def sigmoid(x: Union[float, np.ndarray],
+            center: float = 0.0,
+            scale: float = 1.0) -> Union[float, np.ndarray]:
+    """Sigmoid function for smooth transitions.
+    
+    Maps input values to [0, 1] using a logistic function.
+    Useful for smooth modulus-based transitions in colormaps.
+    
+    Parameters
+    ----------
+    x : float or np.ndarray
+        Input values.
+    center : float, optional
+        Center point of the sigmoid.
+    scale : float, optional
+        Scale factor controlling steepness.
+        
+    Returns
+    -------
+    float or np.ndarray
+        Sigmoid values in [0, 1].
+        
+    Examples
+    --------
+    >>> sigmoid(0.0)
+    0.5
+    >>> sigmoid(10.0)
+    0.9999546...
+    """
+    z = (x - center) / scale
+    return 1.0 / (1.0 + np.exp(-z))
+
+
+def circular_interpolate(theta1: float, theta2: float, 
+                        t: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    """Interpolate between two angles on a circle.
+    
+    Performs shortest-path interpolation between two angles,
+    properly handling the circular wraparound at 2π.
+    
+    Parameters
+    ----------
+    theta1 : float
+        Start angle in radians.
+    theta2 : float
+        End angle in radians.
+    t : float or np.ndarray
+        Interpolation parameter(s) in [0, 1].
+        
+    Returns
+    -------
+    float or np.ndarray
+        Interpolated angle(s) in [0, 2π).
+        
+    Examples
+    --------
+    >>> circular_interpolate(0, np.pi/2, 0.5)
+    0.7853981...  # π/4
+    >>> circular_interpolate(7*np.pi/4, np.pi/4, 0.5)
+    0.0  # Correctly interpolates across 0
+    """
+    # Convert to complex for circular interpolation
+    z1 = np.exp(1j * theta1)
+    z2 = np.exp(1j * theta2)
+    
+    # Linear interpolation in complex plane
+    z_interp = (1 - t) * z1 + t * z2
+    
+    # Extract angle and ensure [0, 2π)
+    result = np.angle(z_interp)
+    if np.isscalar(result):
+        if result < 0:
+            result = 2 * np.pi + result
+    else:
+        result = np.asarray(result)
+        mask = result < 0
+        result[mask] = 2 * np.pi + result[mask]
+    
+    return result
+
+
 # Backward compatibility
 stereographic = stereographic_projection

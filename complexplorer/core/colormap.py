@@ -15,7 +15,14 @@ from typing import Optional, Tuple, Union
 import numpy as np
 import matplotlib.colors as mcolors
 from ..utils.validation import ValidationError
-from .functions import phase as phase_func, sawtooth, sawtooth_log
+from .functions import (
+    phase as phase_func, sawtooth, sawtooth_log,
+    sigmoid, circular_interpolate
+)
+from .color_utils import (
+    oklch_to_srgb, hsl_to_rgb, cubehelix,
+    interpolate_hue, clip_to_gamut
+)
 
 
 # Default color for out-of-domain points
@@ -335,3 +342,1130 @@ class LogRings(Colormap):
         V[np.abs(z) == 0] = 1.0  # White at origin
         
         return H, S, V
+
+
+class PerceptualPastel(Colormap):
+    """Perceptually uniform pastel colormap using OkLCh color space.
+    
+    Creates elegant, non-fluorescent colors with uniform perceived lightness
+    as hue cycles. Phase determines hue, modulus creates lightness bands.
+    
+    Parameters
+    ----------
+    n_phi : int, optional
+        Number of phase sectors for enhanced phase portrait.
+    r_linear_step : float, optional
+        Linear modulus step for contours.
+    r_log_base : float, optional
+        Logarithmic base for modulus contours.
+    L_center : float, optional
+        Center lightness value in [0, 1]. Default is 0.55.
+    L_range : float, optional
+        Lightness variation range. Default is 0.3.
+    C : float, optional
+        Chroma (saturation) in [0, 0.4]. Default is 0.10 for pastels.
+    v_base : float, optional
+        Base value (brightness) for phase sectors, in [0, 1). Default is 0.5.
+    auto_scale_r : bool, optional
+        Auto-calculate r_linear_step for square cells.
+    scale_radius : float, optional
+        Reference radius for auto-scaling.
+    out_of_domain_hsv : tuple, optional
+        Color for out-of-domain points.
+    """
+    
+    def __init__(self,
+                 n_phi: Optional[int] = None,
+                 r_linear_step: Optional[float] = None,
+                 r_log_base: Optional[float] = None,
+                 L_center: float = 0.55,
+                 L_range: float = 0.3,
+                 C: float = 0.1,
+                 v_base: float = 0.5,
+                 auto_scale_r: bool = False,
+                 scale_radius: float = 1.0,
+                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+        """Initialize perceptual pastel colormap."""
+        super().__init__(out_of_domain_hsv)
+        
+        # Handle auto-scaling
+        if auto_scale_r:
+            if n_phi is None:
+                raise ValidationError("auto_scale_r=True requires n_phi to be specified")
+            if r_linear_step is not None:
+                raise ValidationError("Cannot specify both auto_scale_r=True and r_linear_step")
+            r_linear_step = 2 * np.pi / n_phi * scale_radius
+        
+        self.n_phi = n_phi
+        self.phi = np.pi / n_phi if n_phi is not None else None
+        self.r_linear_step = r_linear_step
+        self.r_log_base = r_log_base
+        self.L_center = L_center
+        self.L_range = L_range
+        self.C = C
+        self.v_base = v_base
+        self.auto_scale_r = auto_scale_r
+        self.scale_radius = scale_radius
+    
+    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Convert complex values to HSV components via OkLCh."""
+        # Phase to hue (in degrees for OkLCh)
+        phi = phase_func(z)
+        H_deg = phi * 180 / np.pi  # Convert to degrees
+        
+        # Phase-based value modulation for sharp sectors
+        if self.phi is not None:
+            V_phi = sawtooth(phi, self.phi)  # Sharp sawtooth for phase sectors
+        else:
+            V_phi = np.ones_like(z, dtype=float)
+        
+        # Modulus-based modulation
+        r = np.abs(z)
+        if self.r_linear_step and self.r_log_base is None:
+            V_r = sawtooth(r, self.r_linear_step)
+        elif self.r_linear_step is None and self.r_log_base:
+            V_r = sawtooth_log(r, self.r_log_base)
+        elif self.r_linear_step and self.r_log_base:
+            V_r = sawtooth_log(r / self.r_linear_step, self.r_log_base)
+        else:
+            V_r = np.ones_like(z, dtype=float)
+        
+        # Combine phase sectors with modulus bands
+        V_scaler = 1 - self.v_base
+        L_mod = (V_phi + V_r) * V_scaler / 2 + self.v_base
+        # Map L_mod (which ranges 0.5 to 1.0 when v_base=0.5) to lightness range
+        # Normalize to [0, 1] first: (L_mod - v_base) / (1 - v_base)
+        L_normalized = (L_mod - self.v_base) / (1 - self.v_base) if self.v_base < 1 else L_mod
+        L = self.L_center + self.L_range * (L_normalized - 0.5)
+        
+        # Convert OkLCh to RGB
+        R, G, B = oklch_to_srgb(L, self.C, H_deg)
+        
+        # Convert RGB to HSV for compatibility with base class
+        hsv = mcolors.rgb_to_hsv(np.stack([R, G, B], axis=-1))
+        return hsv[..., 0], hsv[..., 1], hsv[..., 2]
+
+
+class AnalogousWedge(Colormap):
+    """Analogous color scheme with compressed hue range.
+    
+    Maps phase to a wedge of the color wheel (20-50% range) for
+    harmonious color schemes while preserving phase winding information.
+    
+    Parameters
+    ----------
+    n_phi : int, optional
+        Number of phase sectors for enhanced phase portrait.
+    r_linear_step : float, optional
+        Linear modulus step for contours.
+    r_log_base : float, optional
+        Logarithmic base for modulus contours.
+    H_center : float, optional
+        Center hue in [0, 1]. Default is 0.55 (cyan-ish).
+    H_wedge : float, optional
+        Hue range as fraction of color wheel in [0.2, 0.5]. Default is 0.35.
+    S : float, optional
+        Saturation in [0, 1]. Default is 0.35 (muted).
+    V_base : float, optional
+        Base value (brightness) in [0, 1]. Default is 0.55.
+    V_range : float, optional
+        Value modulation range. Default is 0.35.
+    auto_scale_r : bool, optional
+        Auto-calculate r_linear_step for square cells.
+    scale_radius : float, optional
+        Reference radius for auto-scaling.
+    use_sigmoid : bool, optional
+        Use sigmoid for smooth modulus mapping. Default is True.
+    out_of_domain_hsv : tuple, optional
+        Color for out-of-domain points.
+    """
+    
+    def __init__(self,
+                 n_phi: Optional[int] = None,
+                 r_linear_step: Optional[float] = None,
+                 r_log_base: Optional[float] = None,
+                 H_center: float = 0.55,
+                 H_wedge: float = 0.35,
+                 S: float = 0.35,
+                 V_base: float = 0.55,
+                 V_range: float = 0.35,
+                 auto_scale_r: bool = False,
+                 scale_radius: float = 1.0,
+                 use_sigmoid: bool = True,
+                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+        """Initialize analogous wedge colormap."""
+        super().__init__(out_of_domain_hsv)
+        
+        # Handle auto-scaling
+        if auto_scale_r:
+            if n_phi is None:
+                raise ValidationError("auto_scale_r=True requires n_phi to be specified")
+            if r_linear_step is not None:
+                raise ValidationError("Cannot specify both auto_scale_r=True and r_linear_step")
+            r_linear_step = 2 * np.pi / n_phi * scale_radius
+        
+        self.n_phi = n_phi
+        self.phi = np.pi / n_phi if n_phi is not None else None
+        self.r_linear_step = r_linear_step
+        self.r_log_base = r_log_base
+        self.H_center = H_center
+        self.H_wedge = min(0.5, max(0.2, H_wedge))  # Clamp to valid range
+        self.S = S
+        self.V_base = V_base
+        self.V_range = V_range
+        self.auto_scale_r = auto_scale_r
+        self.scale_radius = scale_radius
+        self.use_sigmoid = use_sigmoid
+    
+    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Convert complex values to HSV components."""
+        # Phase to compressed hue range
+        phi = phase_func(z)
+        H = self.H_center + self.H_wedge * (phi / (2 * np.pi) - 0.5)
+        H = np.mod(H, 1.0)  # Wrap to [0, 1]
+        
+        # Fixed saturation
+        S = np.full_like(z, self.S, dtype=float)
+        
+        # Phase-based value modulation for sharp sectors
+        if self.phi is not None:
+            V_phi = sawtooth(phi, self.phi)  # Sharp sawtooth for phase sectors
+        else:
+            V_phi = np.ones_like(z, dtype=float)
+        
+        # Modulus-based modulation
+        r = np.abs(z)
+        if self.r_linear_step and self.r_log_base is None:
+            V_r = sawtooth(r, self.r_linear_step)
+        elif self.r_linear_step is None and self.r_log_base:
+            V_r = sawtooth_log(r, self.r_log_base)
+        elif self.r_linear_step and self.r_log_base:
+            V_r = sawtooth_log(r / self.r_linear_step, self.r_log_base)
+        else:
+            # Use sigmoid or tanh for smooth modulus mapping
+            if self.use_sigmoid:
+                with np.errstate(divide='ignore', invalid='ignore'):
+                    V_r = sigmoid(np.log(r), center=0, scale=2)
+            else:
+                V_r = np.tanh(r / 2)  # Maps [0, ∞) to [0, 1)
+        
+        # Combine phase sectors with modulus
+        V_scaler = 1 - self.V_base
+        V = (V_phi + V_r) * V_scaler / 2 + self.V_base
+        V = np.clip(V, 0, 1)
+        
+        return H, S, V
+
+
+class DivergingWarmCool(Colormap):
+    """Diverging warm-cool colormap based on phase sign.
+    
+    Positive phases lean toward warm colors, negative toward cool.
+    Creates refined, cartographic appearance with natural emphasis
+    on real/imaginary axes.
+    
+    Parameters
+    ----------
+    n_phi : int, optional
+        Number of phase sectors for enhanced phase portrait.
+    r_linear_step : float, optional
+        Period for linear modulus rings. Default is None (no rings).
+    r_log_base : float, optional
+        Base for logarithmic modulus rings. Default is None (no rings).
+    auto_scale_r : bool, optional
+        Auto-calculate r_linear_step from n_phi. Default is False.
+    scale_radius : float, optional
+        Scale factor for auto-calculated r_linear_step. Default is 1.0.
+    H_warm : float, optional
+        Warm anchor hue in degrees. Default is 30 (amber).
+    H_cool : float, optional
+        Cool anchor hue in degrees. Default is 220 (indigo).
+    L_center : float, optional
+        Center lightness in [0, 1]. Default is 0.5.
+    L_range : float, optional
+        Lightness modulation range. Default is 0.3.
+    C_min : float, optional
+        Minimum chroma. Default is 0.06.
+    C_max : float, optional
+        Maximum chroma. Default is 0.16.
+    v_base : float, optional
+        Base value for phase sectors, in [0, 1). Default is 0.5.
+    use_oklch : bool, optional
+        Use OkLCh color space for perceptual uniformity. Default is True.
+    out_of_domain_hsv : tuple, optional
+        Color for out-of-domain points.
+    """
+    
+    def __init__(self,
+                 n_phi: Optional[int] = None,
+                 r_linear_step: Optional[float] = None,
+                 r_log_base: Optional[float] = None,
+                 auto_scale_r: bool = False,
+                 scale_radius: float = 1.0,
+                 H_warm: float = 30,
+                 H_cool: float = 220,
+                 L_center: float = 0.5,
+                 L_range: float = 0.3,
+                 C_min: float = 0.06,
+                 C_max: float = 0.16,
+                 v_base: float = 0.5,
+                 use_oklch: bool = True,
+                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+        """Initialize diverging warm-cool colormap."""
+        super().__init__(out_of_domain_hsv)
+        
+        # Validate parameters
+        if auto_scale_r and n_phi is None:
+            raise ValueError("auto_scale_r requires n_phi to be specified")
+        if auto_scale_r and r_linear_step is not None:
+            raise ValueError("Cannot specify both auto_scale_r and r_linear_step")
+        
+        self.n_phi = n_phi
+        self.phi = np.pi / n_phi if n_phi is not None else None
+        self.r_log_base = r_log_base
+        self.auto_scale_r = auto_scale_r
+        self.scale_radius = scale_radius
+        
+        # Calculate r_linear_step if auto_scale_r is True
+        if auto_scale_r and n_phi is not None:
+            self.r_linear_step = 2 * np.pi / n_phi * scale_radius
+        else:
+            self.r_linear_step = r_linear_step
+        
+        self.H_warm = H_warm
+        self.H_cool = H_cool
+        self.L_center = L_center
+        self.L_range = L_range
+        self.C_min = C_min
+        self.C_max = C_max
+        self.v_base = v_base
+        self.use_oklch = use_oklch
+    
+    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Convert complex values to HSV components."""
+        phi = phase_func(z)
+        r = np.abs(z)
+        
+        # Phase-based value modulation for sharp sectors
+        if self.phi is not None:
+            V_phi = sawtooth(phi, self.phi)  # Sharp sawtooth for phase sectors
+        else:
+            V_phi = np.ones_like(z, dtype=float)
+        
+        # Modulus-based value modulation
+        if self.r_linear_step is not None:
+            V_r = sawtooth(r, self.r_linear_step)
+        elif self.r_log_base is not None:
+            V_r = sawtooth_log(r, self.r_log_base)
+        else:
+            with np.errstate(divide='ignore', invalid='ignore'):
+                V_r = sigmoid(np.log(r), center=0, scale=2)
+        
+        # Map phase to warm-cool interpolation parameter
+        a = np.sin(phi)  # in [-1, 1]
+        t = (a + 1) / 2  # in [0, 1]
+        
+        if self.use_oklch:
+            # Interpolate hue in OkLCh space
+            H_deg = (1 - t) * self.H_cool + t * self.H_warm
+            
+            # Combine phase sectors with modulus
+            V_scaler = 1 - self.v_base
+            L_mod = (V_phi + V_r) * V_scaler / 2 + self.v_base
+            # Map L_mod (which ranges v_base to 1.0) to lightness range
+            # Normalize to [0, 1] first
+            L_normalized = (L_mod - self.v_base) / (1 - self.v_base) if self.v_base < 1 else L_mod
+            L = self.L_center + self.L_range * (L_normalized - 0.5)
+            
+            # Vary chroma based on phase extremity
+            C = self.C_min + (self.C_max - self.C_min) * np.abs(a)
+            
+            # Convert to RGB
+            R, G, B = oklch_to_srgb(L, C, H_deg)
+            
+            # Convert RGB to HSV
+            hsv = mcolors.rgb_to_hsv(np.stack([R, G, B], axis=-1))
+            return hsv[..., 0], hsv[..., 1], hsv[..., 2]
+        else:
+            # Simple HSV interpolation
+            H = interpolate_hue(self.H_cool / 360, self.H_warm / 360, t)
+            
+            # Combine phase sectors with modulus
+            V_scaler = 1 - self.v_base
+            V = (V_phi + V_r) * V_scaler / 2 + self.v_base
+            
+            # Vary saturation based on phase extremity
+            S = self.C_min + (self.C_max - self.C_min) * np.abs(a)
+            
+            return H, S, V
+
+
+class Isoluminant(Colormap):
+    """Isoluminant colormap with optional contour lines.
+    
+    Maintains constant lightness with hue encoding phase only.
+    Optionally overlays thin contour lines to show modulus information.
+    
+    Parameters
+    ----------
+    n_phi : int, optional
+        Number of phase sectors for enhanced phase portrait.
+    r_linear_step : float, optional
+        Period for linear modulus rings. Default is None (no rings).
+    r_log_base : float, optional
+        Base for logarithmic modulus rings. Default is None (no rings).
+    auto_scale_r : bool, optional
+        Auto-calculate r_linear_step from n_phi. Default is False.
+    scale_radius : float, optional
+        Scale factor for auto-calculated r_linear_step. Default is 1.0.
+    L : float, optional
+        Constant lightness in [0, 1]. Default is 0.6.
+    C_min : float, optional
+        Minimum chroma. Default is 0.12.
+    C_max : float, optional
+        Maximum chroma. Default is 0.18.
+    v_base : float, optional
+        Base value for phase sectors, in [0, 1). Default is 0.5.
+    show_contours : bool, optional
+        Show modulus contour lines. Default is True.
+    contour_period : float, optional
+        Period for contour lines. Default is 1.0.
+    contour_width : float, optional
+        Width parameter for contours. Default is 0.05.
+    use_oklch : bool, optional
+        Use OkLCh for perceptual uniformity. Default is True.
+    out_of_domain_hsv : tuple, optional
+        Color for out-of-domain points.
+    """
+    
+    def __init__(self,
+                 n_phi: Optional[int] = None,
+                 r_linear_step: Optional[float] = None,
+                 r_log_base: Optional[float] = None,
+                 auto_scale_r: bool = False,
+                 scale_radius: float = 1.0,
+                 L: float = 0.6,
+                 C_min: float = 0.12,
+                 C_max: float = 0.18,
+                 v_base: float = 0.5,
+                 show_contours: bool = True,
+                 contour_period: float = 1.0,
+                 contour_width: float = 0.05,
+                 use_oklch: bool = True,
+                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+        """Initialize isoluminant colormap."""
+        super().__init__(out_of_domain_hsv)
+        
+        # Validate parameters
+        if auto_scale_r and n_phi is None:
+            raise ValueError("auto_scale_r requires n_phi to be specified")
+        if auto_scale_r and r_linear_step is not None:
+            raise ValueError("Cannot specify both auto_scale_r and r_linear_step")
+        
+        self.n_phi = n_phi
+        self.phi = np.pi / n_phi if n_phi is not None else None
+        self.r_log_base = r_log_base
+        self.auto_scale_r = auto_scale_r
+        self.scale_radius = scale_radius
+        
+        # Calculate r_linear_step if auto_scale_r is True
+        if auto_scale_r and n_phi is not None:
+            self.r_linear_step = 2 * np.pi / n_phi * scale_radius
+        else:
+            self.r_linear_step = r_linear_step
+        
+        self.L = L
+        self.C_min = C_min
+        self.C_max = C_max
+        self.v_base = v_base
+        self.show_contours = show_contours
+        self.contour_period = contour_period
+        self.contour_width = contour_width
+        self.use_oklch = use_oklch
+    
+    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Convert complex values to HSV components."""
+        phi = phase_func(z)
+        r = np.abs(z)
+        
+        # Phase-based value modulation for sharp sectors
+        if self.phi is not None:
+            V_phi = sawtooth(phi, self.phi)  # Sharp sawtooth for phase sectors
+        else:
+            V_phi = np.ones_like(z, dtype=float)
+        
+        # Modulus-based value modulation (only if not using contours)
+        if not self.show_contours:
+            if self.r_linear_step is not None:
+                V_r = sawtooth(r, self.r_linear_step)
+            elif self.r_log_base is not None:
+                V_r = sawtooth_log(r, self.r_log_base)
+            else:
+                V_r = np.ones_like(z, dtype=float)
+        else:
+            V_r = np.ones_like(z, dtype=float)
+        
+        if self.use_oklch:
+            # Phase to hue in degrees
+            H_deg = phi * 180 / np.pi
+            
+            # Base lightness modulated by phase sectors and modulus
+            V_scaler = 1 - self.v_base
+            if not self.show_contours:
+                # Include modulus modulation
+                L_mod = (V_phi + V_r) * V_scaler / 2 + self.v_base
+                # Map L_mod (which ranges v_base to 1.0) to subtle lightness variation
+                L_normalized = (L_mod - self.v_base) / (1 - self.v_base) if self.v_base < 1 else L_mod
+                L = self.L + (L_normalized - 0.5) * 0.2  # Subtle modulation
+            else:
+                L_base = self.L + (V_phi - 0.5) * V_scaler * 0.2  # Subtle phase modulation
+                L = np.full_like(z, L_base, dtype=float)
+            
+            if self.show_contours:
+                r = np.abs(z)
+                with np.errstate(divide='ignore', invalid='ignore'):
+                    rho = np.log(r) / np.log(np.e)
+                T_rho = np.mod(rho / self.contour_period, 1.0)
+                # Gaussian-like contour lines
+                contour = 1 - np.exp(-np.power(T_rho / self.contour_width, 2))
+                L = L * (0.8 + 0.2 * contour)  # Darken at contours
+            
+            # Vary chroma slightly with modulus
+            r = np.abs(z)
+            C = self.C_min + (self.C_max - self.C_min) * np.tanh(r / 2)
+            
+            # Convert to RGB
+            R, G, B = oklch_to_srgb(L, C, H_deg)
+            
+            # Convert RGB to HSV
+            hsv = mcolors.rgb_to_hsv(np.stack([R, G, B], axis=-1))
+            return hsv[..., 0], hsv[..., 1], hsv[..., 2]
+        else:
+            # Simple HSV version
+            H = phi / (2 * np.pi)
+            S = np.full_like(z, 0.5, dtype=float)
+            
+            # Base value modulated by phase sectors and modulus
+            V_scaler = 1 - self.v_base
+            if not self.show_contours:
+                # Include modulus modulation
+                V_mod = (V_phi + V_r) * V_scaler / 2 + self.v_base
+                V = self.L + (V_mod - 0.75) * 0.2  # Subtle modulation
+            else:
+                V = np.full_like(z, self.L, dtype=float)
+            
+            if self.show_contours:
+                r = np.abs(z)
+                with np.errstate(divide='ignore', invalid='ignore'):
+                    rho = np.log(r) / np.log(np.e)
+                T_rho = np.mod(rho / self.contour_period, 1.0)
+                contour = 1 - np.exp(-np.power(T_rho / self.contour_width, 2))
+                V = V * (0.8 + 0.2 * contour)
+            
+            return H, S, V
+
+
+class CubehelixPhase(Colormap):
+    """Cubehelix colormap driven by complex phase.
+    
+    Uses Dave Green's cubehelix color scheme which maintains
+    monotonic perceived brightness and prints well in grayscale.
+    
+    Parameters
+    ----------
+    n_phi : int, optional
+        Number of phase sectors for enhanced phase portrait.
+    r_linear_step : float, optional
+        Period for linear modulus rings. Default is None (no rings).
+    r_log_base : float, optional
+        Base for logarithmic modulus rings. Default is None (no rings).
+    auto_scale_r : bool, optional
+        Auto-calculate r_linear_step from n_phi. Default is False.
+    scale_radius : float, optional
+        Scale factor for auto-calculated r_linear_step. Default is 1.0.
+    start : float, optional
+        Starting color (1=red, 2=green, 3=blue). Default is 0.5.
+    rotations : float, optional
+        Number of rotations through color space. Default is -1.5.
+    saturation : float, optional
+        Color saturation in [0, 1]. Default is 0.8.
+    L_min : float, optional
+        Minimum lightness. Default is 0.15.
+    L_max : float, optional
+        Maximum lightness. Default is 0.85.
+    v_base : float, optional
+        Base value for phase sectors, in [0, 1). Default is 0.5.
+    gamma : float, optional
+        Gamma correction factor. Default is 1.0.
+    modulate_with_r : bool, optional
+        Modulate lightness with modulus. Default is True.
+    out_of_domain_hsv : tuple, optional
+        Color for out-of-domain points.
+    """
+    
+    def __init__(self,
+                 n_phi: Optional[int] = None,
+                 r_linear_step: Optional[float] = None,
+                 r_log_base: Optional[float] = None,
+                 auto_scale_r: bool = False,
+                 scale_radius: float = 1.0,
+                 start: float = 0.5,
+                 rotations: float = -1.5,
+                 saturation: float = 0.8,
+                 L_min: float = 0.15,
+                 L_max: float = 0.85,
+                 v_base: float = 0.5,
+                 gamma: float = 1.0,
+                 modulate_with_r: bool = True,
+                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+        """Initialize cubehelix phase colormap."""
+        super().__init__(out_of_domain_hsv)
+        
+        # Validate parameters
+        if auto_scale_r and n_phi is None:
+            raise ValueError("auto_scale_r requires n_phi to be specified")
+        if auto_scale_r and r_linear_step is not None:
+            raise ValueError("Cannot specify both auto_scale_r and r_linear_step")
+        
+        self.n_phi = n_phi
+        self.phi = np.pi / n_phi if n_phi is not None else None
+        self.r_log_base = r_log_base
+        self.auto_scale_r = auto_scale_r
+        self.scale_radius = scale_radius
+        
+        # Calculate r_linear_step if auto_scale_r is True
+        if auto_scale_r and n_phi is not None:
+            self.r_linear_step = 2 * np.pi / n_phi * scale_radius
+        else:
+            self.r_linear_step = r_linear_step
+        
+        self.start = start
+        self.rotations = rotations
+        self.saturation = saturation
+        self.L_min = L_min
+        self.L_max = L_max
+        self.v_base = v_base
+        self.gamma = gamma
+        self.modulate_with_r = modulate_with_r
+    
+    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Convert complex values to HSV components via cubehelix."""
+        # Phase determines position along helix
+        phi = phase_func(z)
+        r = np.abs(z)
+        h = phi / (2 * np.pi)  # Normalize to [0, 1]
+        
+        # Phase-based value modulation for sharp sectors
+        if self.phi is not None:
+            V_phi = sawtooth(phi, self.phi)  # Sharp sawtooth for phase sectors
+        else:
+            V_phi = np.ones_like(z, dtype=float)
+        
+        # Modulus-based value modulation
+        if self.r_linear_step is not None:
+            V_r = sawtooth(r, self.r_linear_step)
+        elif self.r_log_base is not None:
+            V_r = sawtooth_log(r, self.r_log_base)
+        else:
+            with np.errstate(divide='ignore', invalid='ignore'):
+                V_r = sigmoid(np.log(r), center=0, scale=2)
+        
+        if self.modulate_with_r:
+            # Combine phase sectors and modulus
+            V_scaler = 1 - self.v_base
+            combined_mod = (V_phi + V_r) * V_scaler / 2 + self.v_base
+            h_effective = h * (self.L_min + (self.L_max - self.L_min) * combined_mod)
+        else:
+            # Apply phase sectors to base scaling
+            V_scaler = 1 - self.v_base
+            h_mod = h * ((V_phi * V_scaler) + self.v_base)
+            h_effective = self.L_min + h_mod * (self.L_max - self.L_min)
+        
+        # Generate cubehelix colors
+        R, G, B = cubehelix(h_effective, s=self.saturation, r=self.rotations, gamma=self.gamma)
+        
+        # Convert RGB to HSV
+        hsv = mcolors.rgb_to_hsv(np.stack([R, G, B], axis=-1))
+        return hsv[..., 0], hsv[..., 1], hsv[..., 2]
+
+
+class InkPaper(Colormap):
+    """Nearly monochrome colormap with subtle phase tints.
+    
+    Creates a classy, etching-like appearance that's almost grayscale
+    with just enough color to read phase information.
+    
+    Parameters
+    ----------
+    n_phi : int, optional
+        Number of phase sectors for enhanced phase portrait.
+    r_linear_step : float, optional
+        Period for linear modulus rings. Default is None (no rings).
+    r_log_base : float, optional
+        Base for logarithmic modulus rings. Default is None (no rings).
+    auto_scale_r : bool, optional
+        Auto-calculate r_linear_step from n_phi. Default is False.
+    scale_radius : float, optional
+        Scale factor for auto-calculated r_linear_step. Default is 1.0.
+    L_min : float, optional
+        Minimum lightness. Default is 0.35.
+    L_max : float, optional
+        Maximum lightness. Default is 0.85.
+    C_min : float, optional
+        Minimum chroma (very low for near-monochrome). Default is 0.02.
+    C_max : float, optional
+        Maximum chroma. Default is 0.06.
+    v_base : float, optional
+        Base value for phase sectors, in [0, 1). Default is 0.5.
+    add_phase_stripes : bool, optional
+        Add subtle phase stripes. Default is False.
+    stripe_count : int, optional
+        Number of phase stripes if enabled. Default is 8.
+    stripe_amplitude : float, optional
+        Amplitude of phase stripes. Default is 0.03.
+    use_oklch : bool, optional
+        Use OkLCh color space. Default is True.
+    out_of_domain_hsv : tuple, optional
+        Color for out-of-domain points.
+    """
+    
+    def __init__(self,
+                 n_phi: Optional[int] = None,
+                 r_linear_step: Optional[float] = None,
+                 r_log_base: Optional[float] = None,
+                 auto_scale_r: bool = False,
+                 scale_radius: float = 1.0,
+                 L_min: float = 0.35,
+                 L_max: float = 0.85,
+                 C_min: float = 0.02,
+                 C_max: float = 0.06,
+                 v_base: float = 0.5,
+                 add_phase_stripes: bool = False,
+                 stripe_count: int = 8,
+                 stripe_amplitude: float = 0.03,
+                 use_oklch: bool = True,
+                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+        """Initialize ink & paper colormap."""
+        super().__init__(out_of_domain_hsv)
+        
+        # Validate parameters
+        if auto_scale_r and n_phi is None:
+            raise ValueError("auto_scale_r requires n_phi to be specified")
+        if auto_scale_r and r_linear_step is not None:
+            raise ValueError("Cannot specify both auto_scale_r and r_linear_step")
+        
+        self.n_phi = n_phi
+        self.phi = np.pi / n_phi if n_phi is not None else None
+        self.r_log_base = r_log_base
+        self.auto_scale_r = auto_scale_r
+        self.scale_radius = scale_radius
+        
+        # Calculate r_linear_step if auto_scale_r is True
+        if auto_scale_r and n_phi is not None:
+            self.r_linear_step = 2 * np.pi / n_phi * scale_radius
+        else:
+            self.r_linear_step = r_linear_step
+        
+        self.L_min = L_min
+        self.L_max = L_max
+        self.C_min = C_min
+        self.C_max = C_max
+        self.v_base = v_base
+        self.add_phase_stripes = add_phase_stripes
+        self.stripe_count = stripe_count
+        self.stripe_amplitude = stripe_amplitude
+        self.use_oklch = use_oklch
+    
+    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Convert complex values to HSV components."""
+        phi = phase_func(z)
+        r = np.abs(z)
+        
+        # Phase-based value modulation for sharp sectors
+        if self.phi is not None:
+            V_phi = sawtooth(phi, self.phi)  # Sharp sawtooth for phase sectors
+        else:
+            V_phi = np.ones_like(z, dtype=float)
+        
+        # Modulus-based value modulation
+        if self.r_linear_step is not None:
+            V_r = sawtooth(r, self.r_linear_step)
+        elif self.r_log_base is not None:
+            V_r = sawtooth_log(r, self.r_log_base)
+        else:
+            with np.errstate(divide='ignore', invalid='ignore'):
+                V_r = sigmoid(np.log(r), center=0, scale=2)
+        
+        if self.use_oklch:
+            # Phase to hue (degrees)
+            H_deg = phi * 180 / np.pi
+            
+            # Combine phase sectors and modulus for lightness modulation
+            if self.phi is not None:
+                # Combine with phase sectors
+                V_scaler = 1 - self.v_base
+                combined_mod = (V_phi + V_r) * V_scaler / 2 + self.v_base
+            else:
+                combined_mod = V_r
+            L = self.L_min + (self.L_max - self.L_min) * combined_mod
+            
+            # Add phase stripes if requested
+            if self.add_phase_stripes:
+                L = L + self.stripe_amplitude * np.cos(self.stripe_count * phi)
+                L = np.clip(L, 0, 1)
+            
+            # Very low chroma for near-monochrome look
+            C = self.C_min + (self.C_max - self.C_min) * np.tanh(r)
+            
+            # Convert to RGB
+            R, G, B = oklch_to_srgb(L, C, H_deg)
+            
+            # Convert RGB to HSV
+            hsv = mcolors.rgb_to_hsv(np.stack([R, G, B], axis=-1))
+            return hsv[..., 0], hsv[..., 1], hsv[..., 2]
+        else:
+            # Simple HSV version
+            H = phi / (2 * np.pi)
+            
+            # Very low saturation
+            S = np.full_like(z, 0.1, dtype=float)
+            
+            # Combine phase sectors and modulus for value modulation
+            if self.phi is not None:
+                # Combine with phase sectors
+                V_scaler = 1 - self.v_base
+                combined_mod = (V_phi + V_r) * V_scaler / 2 + self.v_base
+            else:
+                combined_mod = V_r
+            V = self.L_min + (self.L_max - self.L_min) * combined_mod
+            
+            if self.add_phase_stripes:
+                V = V + self.stripe_amplitude * np.cos(self.stripe_count * phi)
+                V = np.clip(V, 0, 1)
+            
+            return H, S, V
+
+
+class EarthTopographic(Colormap):
+    """Earth-tone topographic colormap.
+    
+    Creates a terrain-inspired aesthetic where modulus appears as
+    elevation with phase providing subtle earth-tone tints.
+    
+    Parameters
+    ----------
+    n_phi : int, optional
+        Number of phase sectors for enhanced phase portrait.
+    r_linear_step : float, optional
+        Period for linear modulus rings. Default is None (no rings).
+    r_log_base : float, optional
+        Base for logarithmic modulus rings. Default is None (no rings).
+    auto_scale_r : bool, optional
+        Auto-calculate r_linear_step from n_phi. Default is False.
+    scale_radius : float, optional
+        Scale factor for auto-calculated r_linear_step. Default is 1.0.
+    L_min : float, optional
+        Minimum lightness. Default is 0.4.
+    L_max : float, optional
+        Maximum lightness. Default is 0.8.
+    H_water : float, optional
+        Water hue in degrees (bluish). Default is 200.
+    H_land : float, optional
+        Land hue in degrees (brownish). Default is 30.
+    C_min : float, optional
+        Minimum chroma. Default is 0.05.
+    C_max : float, optional
+        Maximum chroma. Default is 0.12.
+    add_hillshade : bool, optional
+        Add hillshade effect to modulus. Default is True.
+    hillshade_amplitude : float, optional
+        Amplitude of hillshade effect. Default is 0.07.
+    use_oklch : bool, optional
+        Use OkLCh color space. Default is True.
+    out_of_domain_hsv : tuple, optional
+        Color for out-of-domain points.
+    """
+    
+    def __init__(self,
+                 n_phi: Optional[int] = None,
+                 r_linear_step: Optional[float] = None,
+                 r_log_base: Optional[float] = None,
+                 auto_scale_r: bool = False,
+                 scale_radius: float = 1.0,
+                 L_min: float = 0.4,
+                 L_max: float = 0.8,
+                 H_water: float = 200,
+                 H_land: float = 30,
+                 C_min: float = 0.05,
+                 C_max: float = 0.12,
+                 add_hillshade: bool = True,
+                 hillshade_amplitude: float = 0.07,
+                 use_oklch: bool = True,
+                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+        """Initialize earth topographic colormap."""
+        super().__init__(out_of_domain_hsv)
+        
+        # Validate parameters
+        if auto_scale_r and n_phi is None:
+            raise ValueError("auto_scale_r requires n_phi to be specified")
+        if auto_scale_r and r_linear_step is not None:
+            raise ValueError("Cannot specify both auto_scale_r and r_linear_step")
+        
+        self.n_phi = n_phi
+        self.phi = np.pi / n_phi if n_phi is not None else None
+        self.r_log_base = r_log_base
+        self.auto_scale_r = auto_scale_r
+        self.scale_radius = scale_radius
+        
+        # Calculate r_linear_step if auto_scale_r is True
+        if auto_scale_r and n_phi is not None:
+            self.r_linear_step = 2 * np.pi / n_phi * scale_radius
+        else:
+            self.r_linear_step = r_linear_step
+        
+        self.L_min = L_min
+        self.L_max = L_max
+        self.H_water = H_water
+        self.H_land = H_land
+        self.C_min = C_min
+        self.C_max = C_max
+        self.add_hillshade = add_hillshade
+        self.hillshade_amplitude = hillshade_amplitude
+        self.use_oklch = use_oklch
+    
+    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Convert complex values to HSV components."""
+        phi = phase_func(z)
+        r = np.abs(z)
+        
+        # Phase-based value modulation for sharp sectors
+        if self.phi is not None:
+            V_phi = sawtooth(phi, self.phi)  # Sharp sawtooth for phase sectors
+        else:
+            V_phi = np.ones_like(z, dtype=float)
+        
+        # Modulus-based value modulation
+        if self.r_linear_step is not None:
+            V_r = sawtooth(r, self.r_linear_step)
+        elif self.r_log_base is not None:
+            V_r = sawtooth_log(r, self.r_log_base)
+        else:
+            with np.errstate(divide='ignore', invalid='ignore'):
+                V_r = sigmoid(np.log(r), center=0, scale=2)
+        
+        if self.use_oklch:
+            # Map phase to water/land hues
+            t = (np.sin(phi) + 1) / 2  # Map to [0, 1]
+            H_deg = (1 - t) * self.H_water + t * self.H_land
+            
+            # Base lightness from modulus
+            L_base = self.L_min + (self.L_max - self.L_min) * V_r
+            
+            # Add phase sectors if specified
+            if self.phi is not None:
+                V_scaler = 0.1  # Small phase sector contribution for earth tones
+                L = L_base * (0.9 + 0.1 * V_phi)
+            else:
+                L = L_base
+            
+            # Add hillshade effect
+            if self.add_hillshade:
+                with np.errstate(divide='ignore', invalid='ignore'):
+                    rho = np.log(r) / np.log(np.e)
+                T_rho = np.mod(rho, 1.0)
+                hillshade = np.cos(2 * np.pi * T_rho)
+                L = L + self.hillshade_amplitude * hillshade
+                L = np.clip(L, 0, 1)
+            
+            # Subtle earth-tone chroma
+            C = self.C_min + (self.C_max - self.C_min) * np.tanh(r / 2)
+            
+            # Convert to RGB
+            R, G, B = oklch_to_srgb(L, C, H_deg)
+            
+            # Convert RGB to HSV
+            hsv = mcolors.rgb_to_hsv(np.stack([R, G, B], axis=-1))
+            return hsv[..., 0], hsv[..., 1], hsv[..., 2]
+        else:
+            # Simple HSV version
+            t = (np.sin(phi) + 1) / 2
+            H = interpolate_hue(self.H_water / 360, self.H_land / 360, t)
+            
+            S = np.full_like(z, 0.3, dtype=float)
+            
+            # Base value from modulus
+            V_base = self.L_min + (self.L_max - self.L_min) * V_r
+            
+            # Add phase sectors if specified
+            if self.phi is not None:
+                V_scaler = 0.1  # Small phase sector contribution for earth tones
+                V = V_base * (0.9 + 0.1 * V_phi)
+            else:
+                V = V_base
+            
+            if self.add_hillshade:
+                with np.errstate(divide='ignore', invalid='ignore'):
+                    rho = np.log(r) / np.log(np.e)
+                T_rho = np.mod(rho, 1.0)
+                hillshade = np.cos(2 * np.pi * T_rho)
+                V = V + self.hillshade_amplitude * hillshade
+                V = np.clip(V, 0, 1)
+            
+            return H, S, V
+
+
+class FourQuadrant(Colormap):
+    """Four-quadrant colormap with smooth circular interpolation.
+    
+    Maps the four principal phase angles to four color anchors
+    and smoothly interpolates between them on the circle.
+    
+    Parameters
+    ----------
+    n_phi : int, optional
+        Number of phase sectors for enhanced phase portrait.
+    r_linear_step : float, optional
+        Period for linear modulus rings. Default is None (no rings).
+    r_log_base : float, optional
+        Base for logarithmic modulus rings. Default is None (no rings).
+    auto_scale_r : bool, optional
+        Auto-calculate r_linear_step from n_phi. Default is False.
+    scale_radius : float, optional
+        Scale factor for auto-calculated r_linear_step. Default is 1.0.
+    H_anchors : tuple, optional
+        Four hue anchors in degrees for 0°, 90°, 180°, 270°.
+        Default is (10, 120, 210, 300) for red, green, cyan, magenta.
+    C : float, optional
+        Chroma (saturation) in [0, 0.4]. Default is 0.10.
+    L_min : float, optional
+        Minimum lightness. Default is 0.4.
+    L_max : float, optional
+        Maximum lightness. Default is 0.8.
+    use_oklch : bool, optional
+        Use OkLCh for perceptual uniformity. Default is True.
+    smooth_interpolation : bool, optional
+        Use smooth spline interpolation. Default is True.
+    out_of_domain_hsv : tuple, optional
+        Color for out-of-domain points.
+    """
+    
+    def __init__(self,
+                 n_phi: Optional[int] = None,
+                 r_linear_step: Optional[float] = None,
+                 r_log_base: Optional[float] = None,
+                 auto_scale_r: bool = False,
+                 scale_radius: float = 1.0,
+                 H_anchors: Tuple[float, float, float, float] = (10, 120, 210, 300),
+                 C: float = 0.10,
+                 L_min: float = 0.4,
+                 L_max: float = 0.8,
+                 use_oklch: bool = True,
+                 smooth_interpolation: bool = True,
+                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+        """Initialize four-quadrant colormap."""
+        super().__init__(out_of_domain_hsv)
+        
+        # Validate parameters
+        if auto_scale_r and n_phi is None:
+            raise ValueError("auto_scale_r requires n_phi to be specified")
+        if auto_scale_r and r_linear_step is not None:
+            raise ValueError("Cannot specify both auto_scale_r and r_linear_step")
+        
+        self.n_phi = n_phi
+        self.phi = np.pi / n_phi if n_phi is not None else None
+        self.r_log_base = r_log_base
+        self.auto_scale_r = auto_scale_r
+        self.scale_radius = scale_radius
+        
+        # Calculate r_linear_step if auto_scale_r is True
+        if auto_scale_r and n_phi is not None:
+            self.r_linear_step = 2 * np.pi / n_phi * scale_radius
+        else:
+            self.r_linear_step = r_linear_step
+        
+        self.H_anchors = H_anchors
+        self.C = C
+        self.L_min = L_min
+        self.L_max = L_max
+        self.use_oklch = use_oklch
+        self.smooth_interpolation = smooth_interpolation
+    
+    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Convert complex values to HSV components."""
+        phi = phase_func(z)
+        r = np.abs(z)
+        
+        # Phase-based value modulation for sharp sectors
+        if self.phi is not None:
+            V_phi = sawtooth(phi, self.phi)  # Sharp sawtooth for phase sectors
+        else:
+            V_phi = np.ones_like(z, dtype=float)
+        
+        # Modulus-based value modulation
+        if self.r_linear_step is not None:
+            V_r = sawtooth(r, self.r_linear_step)
+        elif self.r_log_base is not None:
+            V_r = sawtooth_log(r, self.r_log_base)
+        else:
+            with np.errstate(divide='ignore', invalid='ignore'):
+                V_r = sigmoid(np.log(r), center=0, scale=2)
+        
+        # Map phase to hue via 4-point interpolation
+        phi_norm = phi / (2 * np.pi)  # Normalize to [0, 1]
+        
+        # Find which quadrant we're in
+        quadrant = np.floor(phi_norm * 4).astype(int) % 4
+        t_local = (phi_norm * 4) % 1  # Local interpolation parameter
+        
+        # Initialize hue array
+        shape = np.broadcast(z).shape
+        H_deg = np.zeros(shape)
+        
+        # Interpolate within each quadrant
+        for q in range(4):
+            mask = (quadrant == q)
+            if np.any(mask):
+                h1 = self.H_anchors[q]
+                h2 = self.H_anchors[(q + 1) % 4]
+                
+                if self.smooth_interpolation:
+                    # Smooth interpolation using raised cosine
+                    t_smooth = 0.5 - 0.5 * np.cos(np.pi * t_local[mask])
+                    H_deg[mask] = h1 + (h2 - h1) * t_smooth
+                else:
+                    # Linear interpolation
+                    H_deg[mask] = h1 + (h2 - h1) * t_local[mask]
+        
+        if self.use_oklch:
+            # Base lightness from modulus
+            L_base = self.L_min + (self.L_max - self.L_min) * V_r
+            
+            # Add phase sectors if specified
+            if self.phi is not None:
+                V_scaler = 0.15  # Moderate phase sector contribution
+                L = L_base * (0.85 + 0.15 * V_phi)
+            else:
+                L = L_base
+            
+            # Convert to RGB
+            R, G, B = oklch_to_srgb(L, self.C, H_deg)
+            
+            # Convert RGB to HSV
+            hsv = mcolors.rgb_to_hsv(np.stack([R, G, B], axis=-1))
+            return hsv[..., 0], hsv[..., 1], hsv[..., 2]
+        else:
+            # Simple HSV version
+            H = H_deg / 360  # Convert to [0, 1]
+            S = np.full_like(z, 0.5, dtype=float)
+            
+            # Base value from modulus
+            V_base = self.L_min + (self.L_max - self.L_min) * V_r
+            
+            # Add phase sectors if specified
+            if self.phi is not None:
+                V_scaler = 0.15  # Moderate phase sector contribution
+                V = V_base * (0.85 + 0.15 * V_phi)
+            else:
+                V = V_base
+            
+            return H, S, V

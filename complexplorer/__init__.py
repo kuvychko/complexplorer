@@ -21,7 +21,15 @@ from complexplorer.core.colormap import (
     Phase,
     Chessboard,
     PolarChessboard,
-    LogRings
+    LogRings,
+    PerceptualPastel,
+    AnalogousWedge,
+    DivergingWarmCool,
+    Isoluminant,
+    CubehelixPhase,
+    InkPaper,
+    EarthTopographic,
+    FourQuadrant
 )
 
 from complexplorer.core.functions import (
@@ -95,6 +103,9 @@ __all__ = [
     # Core classes
     'Domain', 'Rectangle', 'Disk', 'Annulus', 'CompositeDomain',
     'Colormap', 'Phase', 'Chessboard', 'PolarChessboard', 'LogRings',
+    'PerceptualPastel', 'AnalogousWedge', 'DivergingWarmCool',
+    'Isoluminant', 'CubehelixPhase', 'InkPaper',
+    'EarthTopographic', 'FourQuadrant',
     'ModulusScaling', 'get_scaling_preset',
     
     # Core functions
