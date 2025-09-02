@@ -463,7 +463,7 @@ class AnalogousWedge(Colormap):
     H_center : float, optional
         Center hue in [0, 1]. Default is 0.55 (cyan-ish).
     H_wedge : float, optional
-        Hue range as fraction of color wheel in [0.2, 0.5]. Default is 0.35.
+        Hue range as fraction of color wheel in [0.2, 0.5]. Default is 0.2.
     S : float, optional
         Saturation in [0, 1]. Default is 0.35 (muted).
     V_base : float, optional
@@ -485,7 +485,7 @@ class AnalogousWedge(Colormap):
                  r_linear_step: Optional[float] = None,
                  r_log_base: Optional[float] = None,
                  H_center: float = 0.55,
-                 H_wedge: float = 0.35,
+                 H_wedge: float = 0.2,
                  S: float = 0.35,
                  V_base: float = 0.55,
                  V_range: float = 0.35,
