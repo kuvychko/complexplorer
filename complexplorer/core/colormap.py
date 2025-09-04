@@ -585,9 +585,9 @@ class DivergingWarmCool(Colormap):
     L_range : float, optional
         Lightness modulation range. Default is 0.3.
     C_min : float, optional
-        Minimum chroma. Default is 0.06.
+        Minimum chroma. Default is 0.04.
     C_max : float, optional
-        Maximum chroma. Default is 0.16.
+        Maximum chroma. Default is 0.14.
     v_base : float, optional
         Base value for phase sectors, in [0, 1). Default is 0.5.
     use_oklch : bool, optional
@@ -606,8 +606,8 @@ class DivergingWarmCool(Colormap):
                  H_cool: float = 220,
                  L_center: float = 0.5,
                  L_range: float = 0.3,
-                 C_min: float = 0.06,
-                 C_max: float = 0.16,
+                 C_min: float = 0.04,
+                 C_max: float = 0.14,
                  v_base: float = 0.5,
                  use_oklch: bool = True,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
@@ -1180,6 +1180,8 @@ class EarthTopographic(Colormap):
         Add hillshade effect to modulus. Default is True.
     hillshade_amplitude : float, optional
         Amplitude of hillshade effect. Default is 0.07.
+    v_base : float, optional
+        Base value for phase sectors, in [0, 1). Default is 0.5.
     use_oklch : bool, optional
         Use OkLCh color space. Default is True.
     out_of_domain_hsv : tuple, optional
@@ -1200,6 +1202,7 @@ class EarthTopographic(Colormap):
                  C_max: float = 0.12,
                  add_hillshade: bool = True,
                  hillshade_amplitude: float = 0.07,
+                 v_base: float = 0.5,
                  use_oklch: bool = True,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize earth topographic colormap."""
@@ -1231,6 +1234,7 @@ class EarthTopographic(Colormap):
         self.C_max = C_max
         self.add_hillshade = add_hillshade
         self.hillshade_amplitude = hillshade_amplitude
+        self.v_base = v_base
         self.use_oklch = use_oklch
     
     def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -1261,10 +1265,12 @@ class EarthTopographic(Colormap):
             # Base lightness from modulus
             L_base = self.L_min + (self.L_max - self.L_min) * V_r
             
-            # Add phase sectors if specified
+            # Combine phase sectors with modulus
             if self.phi is not None:
-                V_scaler = 0.1  # Small phase sector contribution for earth tones
-                L = L_base * (0.9 + 0.1 * V_phi)
+                # Mix phase and modulus modulation for clear phase sectors
+                V_scaler = 1 - self.v_base
+                combined_mod = (V_phi + V_r) * V_scaler / 2 + self.v_base
+                L = self.L_min + (self.L_max - self.L_min) * combined_mod
             else:
                 L = L_base
             
@@ -1296,10 +1302,12 @@ class EarthTopographic(Colormap):
             # Base value from modulus
             V_base = self.L_min + (self.L_max - self.L_min) * V_r
             
-            # Add phase sectors if specified
+            # Combine phase sectors with modulus
             if self.phi is not None:
-                V_scaler = 0.1  # Small phase sector contribution for earth tones
-                V = V_base * (0.9 + 0.1 * V_phi)
+                # Mix phase and modulus modulation for clear phase sectors
+                V_scaler = 1 - self.v_base
+                combined_mod = (V_phi + V_r) * V_scaler / 2 + self.v_base
+                V = self.L_min + (self.L_max - self.L_min) * combined_mod
             else:
                 V = V_base
             
@@ -1345,6 +1353,8 @@ class FourQuadrant(Colormap):
         Use OkLCh for perceptual uniformity. Default is True.
     smooth_interpolation : bool, optional
         Use smooth spline interpolation. Default is True.
+    v_base : float, optional
+        Base value for phase sectors, in [0, 1). Default is 0.5.
     out_of_domain_hsv : tuple, optional
         Color for out-of-domain points.
     """
@@ -1361,6 +1371,7 @@ class FourQuadrant(Colormap):
                  L_max: float = 0.8,
                  use_oklch: bool = True,
                  smooth_interpolation: bool = True,
+                 v_base: float = 0.5,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize four-quadrant colormap."""
         super().__init__(out_of_domain_hsv)
@@ -1389,6 +1400,7 @@ class FourQuadrant(Colormap):
         self.L_max = L_max
         self.use_oklch = use_oklch
         self.smooth_interpolation = smooth_interpolation
+        self.v_base = v_base
     
     def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Convert complex values to HSV components."""
@@ -1440,10 +1452,12 @@ class FourQuadrant(Colormap):
             # Base lightness from modulus
             L_base = self.L_min + (self.L_max - self.L_min) * V_r
             
-            # Add phase sectors if specified
+            # Combine phase sectors with modulus
             if self.phi is not None:
-                V_scaler = 0.15  # Moderate phase sector contribution
-                L = L_base * (0.85 + 0.15 * V_phi)
+                # Mix phase and modulus modulation for clear phase sectors
+                V_scaler = 1 - self.v_base
+                combined_mod = (V_phi + V_r) * V_scaler / 2 + self.v_base
+                L = self.L_min + (self.L_max - self.L_min) * combined_mod
             else:
                 L = L_base
             
@@ -1461,10 +1475,12 @@ class FourQuadrant(Colormap):
             # Base value from modulus
             V_base = self.L_min + (self.L_max - self.L_min) * V_r
             
-            # Add phase sectors if specified
+            # Combine phase sectors with modulus
             if self.phi is not None:
-                V_scaler = 0.15  # Moderate phase sector contribution
-                V = V_base * (0.85 + 0.15 * V_phi)
+                # Mix phase and modulus modulation for clear phase sectors
+                V_scaler = 1 - self.v_base
+                combined_mod = (V_phi + V_r) * V_scaler / 2 + self.v_base
+                V = self.L_min + (self.L_max - self.L_min) * combined_mod
             else:
                 V = V_base
             
