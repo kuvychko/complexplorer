@@ -1,10 +1,13 @@
 # Complexplorer
 
 [![PyPI version](https://badge.fury.io/py/complexplorer.svg)](https://badge.fury.io/py/complexplorer)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/kuvychko/complexplorer/releases/tag/v2.0.0)
 [![Python](https://img.shields.io/pypi/pyversions/complexplorer.svg)](https://pypi.org/project/complexplorer/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **Transform complex mathematics into tangible art.** Complexplorer brings complex function visualization into the physical world through stunning Riemann relief maps and 3D-printable mathematical ornaments.
+
+> **🆕 Version 2.0 Released!** Major improvements include 8 new perceptually-optimized colormaps, cleaner API, and enhanced performance. See the [Migration Guide](MIGRATION_GUIDE_V2.md) if upgrading from v1.x.
 
 <p align="center">
   <img src="examples/gallery/Riemann_relief_map_20250726.png" width="50%">
@@ -62,9 +65,9 @@ The modulus scaling creates a topographic "relief" effect - poles become mountai
 Create traditional domain coloring visualizations too:
 
 ```python
-# Classic phase portrait
+# Classic phase portrait with v2.0 API
 domain = cp.Rectangle(4, 4)
-cp.plot(domain, f, cmap=cp.Phase(n_phi=12, auto_scale_r=True))
+cp.plot(domain, f, cmap=cp.Phase(n_phi=12, auto_scale_r=True))  # 'plot' replaces 'quick_plot'
 ```
 
 ## 💫 The Magic of Complex Numbers
@@ -84,6 +87,70 @@ numbers does not do justice to this system. There is something more
 which, in my view, can only be referred to as 'magic'.*
 
 [Road to Reality](https://www.ams.org/notices/200606/rev-blank.pdf), Chapter 4 - Magical Complex Numbers, Sir Roger Penrose
+
+## 🎨 New in v2.0: Advanced Colormap Families
+
+Complexplorer v2.0 introduces **8 new perceptually-optimized colormap families** that go beyond traditional phase portraits, offering superior print quality, accessibility, and artistic control.
+
+### Perceptually Uniform Colormaps
+
+**PerceptualPastel** - Elegant OkLCh-based pastels with uniform perceived brightness
+```python
+# Print-friendly, non-fluorescent colors
+cp.plot(domain, f, cmap=cp.PerceptualPastel(L_center=0.55, C=0.1))
+```
+
+**Isoluminant** - Constant brightness with phase-only hue variation
+```python
+# Perfect for identifying phase structure without brightness distractions  
+cp.plot(domain, f, cmap=cp.Isoluminant(L=0.6, C=0.15))
+```
+
+**CubehelixPhase** - Scientific coloring with optimal grayscale conversion
+```python
+# CMYK-safe, perfect for academic publications
+cp.plot(domain, f, cmap=cp.CubehelixPhase(start=0.5, rotations=1.5))
+```
+
+### Artistic & Thematic Colormaps
+
+**AnalogousWedge** - Compressed hue ranges for sophisticated aesthetics
+```python
+# Ocean theme (teal to navy)
+cp.plot(domain, f, cmap=cp.AnalogousWedge(H_center=0.55, H_wedge=0.2))
+```
+
+**DivergingWarmCool** - Cartographic style emphasizing real/imaginary axes
+```python
+# Warm for positive phase, cool for negative
+cp.plot(domain, f, cmap=cp.DivergingWarmCool(warm_hue=0.08, cool_hue=0.61))
+```
+
+**InkPaper** - Nearly monochrome with subtle phase tints
+```python
+# Elegant etching aesthetic for presentations
+cp.plot(domain, f, cmap=cp.InkPaper(phase_strength=0.05))
+```
+
+**EarthTopographic** - Terrain-inspired with natural hillshade effects  
+```python
+# Zeros as valleys, poles as peaks
+cp.plot(domain, f, cmap=cp.EarthTopographic(water_hue=0.55, land_hue=0.08))
+```
+
+**FourQuadrant** - Bauhaus-inspired geometric palette
+```python
+# Clean, reduced palette for modern aesthetics
+cp.plot(domain, f, cmap=cp.FourQuadrant(C=0.25, L_base=0.5))
+```
+
+All new colormaps support enhanced phase portraits with automatic scaling:
+```python
+cmap = cp.PerceptualPastel(n_phi=6, auto_scale_r=True)  # Square cells
+cp.plot(domain, f, cmap=cmap)
+```
+
+See our [Colormap Guide](docs/colormap_guide.md) for detailed comparisons and use cases.
 
 ## 🎨 Gallery
 

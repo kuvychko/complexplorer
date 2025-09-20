@@ -65,6 +65,68 @@ cp.pair_plot(domain, func, cmap=cp.PolarChessboard(n_phi=6, r_log=np.e))
 cp.pair_plot(domain, func, cmap=cp.LogRings(log_spacing=0.2))
 ```
 
+## New Perceptual Colormaps (v2.0)
+
+Complexplorer v2.0 introduces 8 new perceptually-optimized colormap families designed for better print quality, accessibility, and artistic control.
+
+### Perceptually Uniform Colormaps
+
+#### PerceptualPastel
+Elegant OkLCh-based pastels with uniform perceived brightness - perfect for scientific publications.
+```python
+cp.plot(domain, func, cmap=cp.PerceptualPastel(n_phi=6, auto_scale_r=True))
+```
+
+#### Isoluminant  
+Constant brightness visualization focusing purely on phase information.
+```python
+cp.plot(domain, func, cmap=cp.Isoluminant(L=0.6, C=0.15))
+```
+
+#### CubehelixPhase
+Optimal for grayscale conversion and CMYK printing.
+```python
+cp.plot(domain, func, cmap=cp.CubehelixPhase(n_phi=6, auto_scale_r=True))
+```
+
+### Artistic Colormaps
+
+#### AnalogousWedge
+Sophisticated palettes using compressed hue ranges.
+```python
+# Ocean theme
+cp.plot(domain, func, cmap=cp.AnalogousWedge(H_center=0.55, H_wedge=0.2))
+
+# Sunset theme  
+cp.plot(domain, func, cmap=cp.AnalogousWedge(H_center=0.08, H_wedge=0.25))
+```
+
+#### DivergingWarmCool
+Cartographic style emphasizing positive/negative phase distinction.
+```python
+cp.plot(domain, func, cmap=cp.DivergingWarmCool())
+```
+
+#### InkPaper
+Minimalist, nearly monochrome with subtle phase tints.
+```python
+cp.plot(domain, func, cmap=cp.InkPaper(phase_strength=0.05))
+```
+
+#### EarthTopographic
+Terrain-inspired coloring with natural hillshade effects.
+```python
+cp.plot(domain, func, cmap=cp.EarthTopographic())
+```
+
+#### FourQuadrant
+Bauhaus-inspired geometric palette with four color anchors.
+```python
+cp.plot(domain, func, cmap=cp.FourQuadrant())
+```
+
+For detailed comparisons and parameter guides, see the [Colormap Guide](../colormap_guide.md).
+
 ## 3D Visualizations
 
 ### Analytic Landscapes
@@ -133,15 +195,32 @@ domain = cp.Rectangle(4, 4)  # 4x4 square centered at origin
 def my_func(z):
     return np.sin(z) / z  # Example: sinc function
 
-# Create visualizations
-cp.plot(domain, my_func)  # Simple 2D plot
+# Create visualizations with different colormaps
+cp.plot(domain, my_func)  # Default phase portrait
+cp.plot(domain, my_func, cmap=cp.PerceptualPastel())  # New pastel colormap
+cp.plot(domain, my_func, cmap=cp.AnalogousWedge(H_center=0.55))  # Ocean theme
+
+# 3D visualizations
 cp.plot_landscape(domain, func=my_func)  # 3D landscape
-cp.riemann(my_func)  # Riemann sphere
+cp.riemann(func=my_func)  # Riemann sphere
+
+# High-performance with PyVista
+cp.plot_landscape_pv(domain, my_func, notebook=False)  # Fast, high-quality 3D
 ```
+
+### Choosing the Right Colormap
+
+- **Scientific papers**: `PerceptualPastel`, `CubehelixPhase`
+- **Presentations**: `DivergingWarmCool`, `FourQuadrant` 
+- **Artistic**: `AnalogousWedge`, `EarthTopographic`
+- **Minimal**: `InkPaper`, `Isoluminant`
+- **Educational**: `Phase` with enhancements
 
 ## More Examples
 
 For more detailed examples and explanations, see:
 - [Basic functionality tutorial](../../examples/plots_example.ipynb)
 - [Domains and color maps guide](../../examples/domains_cmaps_example.ipynb)
-- [Mathematical background](../mathematical_background.md) (coming soon)
+- [Colormap Guide](../colormap_guide.md) - Comprehensive guide to all 13 colormaps
+- [New Colormaps Showcase](../../examples/new_colormaps_showcase.py) - Interactive demo
+- [Migration Guide](../../MIGRATION_GUIDE_V2.md) - Upgrading from v1.x
