@@ -9,11 +9,11 @@ import numpy as np
 import warnings
 from typing import Callable, Optional, Dict, Any
 
-from ...core.colormap import Colormap, Phase
-from ...core.domain import Domain
-from ...utils.validation import ValidationError
-from ...utils.mesh import RectangularSphereGenerator
-from ...utils.mesh_distortion import (
+from complexplorer.core.colormap import Colormap, Phase
+from complexplorer.core.domain import Domain
+from complexplorer.utils.validation import ValidationError
+from complexplorer.utils.mesh import RectangularSphereGenerator
+from complexplorer.utils.mesh_distortion import (
     compute_riemann_sphere_distortion,
     get_default_scaling_params
 )

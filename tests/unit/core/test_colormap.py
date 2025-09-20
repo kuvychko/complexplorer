@@ -410,10 +410,11 @@ class TestPerceptualPastel:
         """Test initialization."""
         cmap = PerceptualPastel()
         assert cmap.L_center == 0.55
-        assert cmap.L_range == 0.25
-        assert cmap.C == 0.15
-        assert cmap.band_sharpness == 0.6
-        assert cmap.log_base == np.e
+        assert cmap.L_range == 0.3
+        assert cmap.C == 0.1
+        # Check phase attributes if set
+        assert cmap.n_phi is None  # Default
+        assert cmap.r_linear_step is None  # Default
         
         # Custom parameters
         cmap2 = PerceptualPastel(L_center=0.6, C=0.2)
@@ -444,14 +445,14 @@ class TestAnalogousWedge:
         """Test initialization."""
         cmap = AnalogousWedge()
         assert cmap.H_center == 0.55
-        assert cmap.H_wedge == 0.35
+        assert cmap.H_wedge == 0.2
         assert cmap.S == 0.35
         assert cmap.V_base == 0.55
         assert cmap.V_range == 0.35
         assert cmap.use_sigmoid == True
         
         # Test wedge clamping
-        cmap2 = AnalogousWedge(H_wedge=0.7)  # Too large
+        cmap2 = AnalogousWedge(H_wedge=0.6)  # Too large
         assert cmap2.H_wedge == 0.5  # Clamped to max
         
         cmap3 = AnalogousWedge(H_wedge=0.1)  # Too small

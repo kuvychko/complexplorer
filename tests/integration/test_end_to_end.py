@@ -10,7 +10,7 @@ from complexplorer.core.domain import Rectangle, Disk, Annulus
 from complexplorer.core.colormap import Phase, Chessboard, PolarChessboard, LogRings
 from complexplorer.plotting.matplotlib.plot_2d import plot, pair_plot
 from complexplorer.plotting.matplotlib.plot_3d import plot_landscape, riemann
-from complexplorer.api import quick_plot, analyze_function, Presets
+from complexplorer.api import plot as api_plot, publication_preset, interactive_preset
 from complexplorer.core.scaling import ModulusScaling, get_scaling_preset
 
 # Check if optional features are available
@@ -140,31 +140,32 @@ class TestColormapVariations:
 class TestHighLevelAPI:
     """Test high-level API functions."""
     
-    def test_quick_plot(self):
-        """Test quick_plot convenience function."""
+    def test_api_plot(self):
+        """Test API plot function (formerly quick_plot)."""
         func = lambda z: z**2 - 1
         
-        # 2D quick plot
-        ax = quick_plot(func, mode='2d')
+        # 2D plot
+        ax = api_plot(func, mode='2d')
         assert ax is not None
         
-        # 3D quick plot
-        ax = quick_plot(func, mode='3d', resolution=30)
+        # 3D plot
+        ax = api_plot(func, mode='3d', resolution=30)
         assert ax is not None
         
         import matplotlib.pyplot as plt
         plt.close('all')
     
-    def test_analyze_function(self):
-        """Test analyze_function utility."""
+    def test_enhanced_phase(self):
+        """Test enhanced phase portrait (analyze_function removed)."""
         func = lambda z: (z**2 - 1) / (z**2 + 1)
+        from complexplorer.core.colormap import Phase
         
-        results = analyze_function(func)
+        # Use enhanced phase portrait directly
+        domain = Rectangle(3, 3)
+        cmap = Phase(n_phi=12, auto_scale_r=True)
+        ax = plot(domain, func, cmap=cmap)
         
-        assert 'plot' in results
-        assert 'domain' in results
-        assert 'function' in results
-        assert 'colormap' in results
+        assert ax is not None
         
         import matplotlib.pyplot as plt
         plt.close('all')
@@ -174,12 +175,12 @@ class TestHighLevelAPI:
         func = lambda z: np.exp(z)
         
         # Publication preset
-        preset = Presets.publication_ready()
+        preset = publication_preset()
         ax = plot(Rectangle(2, 2), func, **preset)
         assert ax is not None
         
-        # High contrast preset
-        preset = Presets.high_contrast()
+        # Interactive preset
+        preset = interactive_preset()
         ax = plot(Rectangle(2, 2), func, **preset)
         assert ax is not None
         

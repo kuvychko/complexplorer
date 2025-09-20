@@ -8,8 +8,8 @@ import numpy as np
 import warnings
 from typing import Tuple, Dict, Any, Optional, Callable
 
-from ..core.scaling import ModulusScaling
-from ..utils.validation import ValidationError
+from complexplorer.core.scaling import ModulusScaling
+from complexplorer.utils.validation import ValidationError
 
 
 def apply_modulus_distortion(
@@ -117,7 +117,7 @@ def compute_riemann_sphere_distortion(
     radii : np.ndarray
         Applied scaling factors.
     """
-    from ..core.functions import inverse_stereographic
+    from complexplorer.core.functions import inverse_stereographic
     
     # Get sphere points
     points = sphere_mesh.points

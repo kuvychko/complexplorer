@@ -15,7 +15,7 @@ from abc import ABC, abstractmethod
 from math import ceil
 from typing import Optional, Tuple, Callable, Union
 import numpy as np
-from ..utils.validation import ValidationError, validate_resolution
+from complexplorer.utils.validation import ValidationError, validate_resolution
 
 
 class Domain(ABC):
@@ -503,7 +503,7 @@ class CompositeDomain(Domain):
         return real_bounds, imag_bounds
     
     @property
-    def tight_bounds(self):
+    def tight_bounds(self) -> Tuple[Tuple[float, float], Tuple[float, float]]:
         """Get tight bounds, calculating if necessary."""
         if not hasattr(self, '_tight_bounds'):
             self._tight_bounds = self.calculate_tight_bounds()

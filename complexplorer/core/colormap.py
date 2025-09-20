@@ -14,12 +14,12 @@ from abc import ABC, abstractmethod
 from typing import Optional, Tuple, Union
 import numpy as np
 import matplotlib.colors as mcolors
-from ..utils.validation import ValidationError
-from .functions import (
+from complexplorer.utils.validation import ValidationError
+from complexplorer.core.functions import (
     phase as phase_func, sawtooth, sawtooth_log,
     sigmoid, circular_interpolate
 )
-from .color_utils import (
+from complexplorer.core.color_utils import (
     oklch_to_srgb, hsl_to_rgb, cubehelix,
     interpolate_hue, clip_to_gamut
 )

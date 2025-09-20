@@ -11,15 +11,15 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d import Axes3D
 
-from ...core.domain import Domain
-from ...core.colormap import Colormap, Phase
-from ...core.functions import stereographic_projection
-from ...core.scaling import ModulusScaling
-from ...utils.validation import ValidationError
-from ...utils.mesh_distortion import get_default_scaling_params
+from complexplorer.core.domain import Domain
+from complexplorer.core.colormap import Colormap, Phase
+from complexplorer.core.functions import stereographic_projection
+from complexplorer.core.scaling import ModulusScaling
+from complexplorer.utils.validation import ValidationError
+from complexplorer.utils.mesh_distortion import get_default_scaling_params
 
 
-class Matplotlib3DPlotter:  # (Base3DPlotter):  # TODO: Add base class
+class Matplotlib3DPlotter:
     """3D plotter implementation using matplotlib."""
     
     def plot_landscape(self,

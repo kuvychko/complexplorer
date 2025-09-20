@@ -8,18 +8,18 @@ from typing import Optional, Callable, Union, Tuple, TYPE_CHECKING
 import numpy as np
 import warnings
 
-from ...core.colormap import Colormap, Phase
-from ...core.scaling import ModulusScaling
-from ...utils.validation import ValidationError
-from ...utils.mesh import RectangularSphereGenerator
-from ...utils.mesh_distortion import apply_modulus_distortion, get_default_scaling_params
+from complexplorer.core.colormap import Colormap, Phase
+from complexplorer.core.scaling import ModulusScaling
+from complexplorer.utils.validation import ValidationError
+from complexplorer.utils.mesh import RectangularSphereGenerator
+from complexplorer.utils.mesh_distortion import apply_modulus_distortion, get_default_scaling_params
 from .utils import (
     check_pyvista_available, handle_export, add_axes_widget,
     ensure_pyvista_setup, get_camera_position
 )
 
 if TYPE_CHECKING:
-    from ...core.domain import Domain
+    from complexplorer.core.domain import Domain
 
 # Import PyVista if available
 try:
@@ -145,7 +145,7 @@ def riemann_pv(
     X, Y, Z = points[:, 0], points[:, 1], points[:, 2]
     
     # Project to complex plane (from south pole by default)
-    from ...utils.mesh import sphere_to_complex
+    from complexplorer.utils.mesh import sphere_to_complex
     w = sphere_to_complex(X, Y, Z, from_north=False)
     
     # Evaluate function

@@ -8,11 +8,11 @@ from typing import Optional, Callable, Union, Tuple
 import numpy as np
 import warnings
 
-from ...core.domain import Domain
-from ...core.colormap import Colormap, Phase
-from ...core.scaling import ModulusScaling
-from ...utils.validation import ValidationError
-from ...utils.mesh_distortion import get_default_scaling_params
+from complexplorer.core.domain import Domain
+from complexplorer.core.colormap import Colormap, Phase
+from complexplorer.core.scaling import ModulusScaling
+from complexplorer.utils.validation import ValidationError
+from complexplorer.utils.mesh_distortion import get_default_scaling_params
 from .utils import (
     check_pyvista_available, handle_export, add_axes_widget,
     ensure_pyvista_setup, get_camera_position

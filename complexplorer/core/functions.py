@@ -6,7 +6,7 @@ the library for complex function visualization.
 
 from typing import Union, Tuple, Optional
 import numpy as np
-from ..utils.validation import validate_array_shape
+from complexplorer.utils.validation import validate_array_shape
 
 
 def phase(z: Union[complex, np.ndarray]) -> Union[float, np.ndarray]:

@@ -11,17 +11,14 @@ import matplotlib.colors as mcolors
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from ...core.domain import Domain, Rectangle
-from ...core.colormap import Colormap, Phase
-from ...utils.validation import (
+from complexplorer.core.domain import Domain, Rectangle
+from complexplorer.core.colormap import Colormap, Phase
+from complexplorer.utils.validation import (
     validate_domain_or_mesh, validate_function_or_values,
     validate_function, validate_colormap, validate_resolution,
     ValidationError
 )
-# from ..base import Base2DPlotter, PlotConfig  # TODO: Implement base classes
-
-
-class Matplotlib2DPlotter:  # (Base2DPlotter):  # TODO: Add base class
+class Matplotlib2DPlotter:
     """2D plotter implementation using matplotlib."""
     
     def plot_single(self, 
@@ -31,7 +28,7 @@ class Matplotlib2DPlotter:  # (Base2DPlotter):  # TODO: Add base class
                    resolution: int,
                    ax: Optional[Axes] = None,
                    title: Optional[str] = None,
-                   config = None) -> Axes:  # config: Optional[PlotConfig] = None
+                   **kwargs) -> Axes:
         """Plot a single complex function visualization.
         
         Parameters

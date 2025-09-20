@@ -58,7 +58,7 @@ def oklch_to_srgb(L: Union[float, np.ndarray],
     b_linear = -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s
     
     # Linear to sRGB (gamma correction)
-    def linear_to_srgb(c):
+    def linear_to_srgb(c: np.ndarray) -> np.ndarray:
         # Handle negative values by clipping to 0 first
         c_safe = np.maximum(c, 0)
         return np.where(c_safe <= 0.0031308,

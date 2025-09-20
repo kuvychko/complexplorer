@@ -8,7 +8,7 @@ from typing import Optional, Tuple, TYPE_CHECKING
 import numpy as np
 
 if TYPE_CHECKING:
-    from ..core.domain import Domain
+    from complexplorer.core.domain import Domain
 
 # Only import PyVista if available
 try:
