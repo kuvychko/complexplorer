@@ -139,7 +139,7 @@ def plot(domain: Optional[Domain] = None,
          func: Optional[Callable] = None,
          z: Optional[np.ndarray] = None,
          f: Optional[np.ndarray] = None,
-         resolution: int = 400,
+         resolution: int = 500,
          cmap: Optional[Colormap] = None,
          ax: Optional[Axes] = None,
          title: Optional[str] = None,
@@ -194,9 +194,9 @@ def plot(domain: Optional[Domain] = None,
     if f is None and func is None:
         raise ValidationError("Either f or func must be provided")
     
-    # Default colormap
+    # Default colormap with better initial experience
     if cmap is None:
-        cmap = Phase(n_phi=6, auto_scale_r=True)
+        cmap = Phase(n_phi=6, auto_scale_r=True, scale_radius=0.8)
     
     # Get mesh and mask
     if z is None:
@@ -252,7 +252,7 @@ def pair_plot(domain: Optional[Domain] = None,
               func: Optional[Callable] = None,
               z: Optional[np.ndarray] = None,
               f: Optional[np.ndarray] = None,
-              resolution: int = 400,
+              resolution: int = 500,
               cmap: Optional[Colormap] = None,
               title: Optional[str] = None,
               figsize: Tuple[float, float] = (10, 5),
@@ -285,9 +285,9 @@ def pair_plot(domain: Optional[Domain] = None,
     Figure
         The matplotlib figure.
     """
-    # Default colormap
+    # Default colormap with better initial experience
     if cmap is None:
-        cmap = Phase(n_phi=6, auto_scale_r=True)
+        cmap = Phase(n_phi=6, auto_scale_r=True, scale_radius=0.8)
     
     fig, (ax0, ax1) = plt.subplots(1, 2, figsize=figsize)
     
@@ -356,9 +356,9 @@ def riemann_chart(func: Callable,
     if margin > 0.5:
         raise ValidationError('Margin cannot exceed 0.5')
     
-    # Default colormap
+    # Default colormap with better initial experience
     if cmap is None:
-        cmap = Phase(n_phi=6, auto_scale_r=True)
+        cmap = Phase(n_phi=6, auto_scale_r=True, scale_radius=0.8)
     
     # Create domain for unit disk with margin
     disk_radius = 1 + margin

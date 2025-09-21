@@ -137,6 +137,12 @@ class Phase(Colormap):
         Auto-calculate r_linear_step for square cells.
     scale_radius : float, optional
         Reference radius for auto-scaling.
+    emphasize_unit_circle : bool, optional
+        If True, emphasize the unit circle |z|=1.
+    unit_circle_strength : float, optional
+        Strength of unit circle emphasis (0 to 1).
+    unit_circle_color : tuple, optional
+        Optional HSV color to blend at unit circle. If None, just brightens.
     out_of_domain_hsv : tuple, optional
         Color for out-of-domain points.
     """
@@ -148,6 +154,9 @@ class Phase(Colormap):
                  v_base: float = 0.5,
                  auto_scale_r: bool = False,
                  scale_radius: float = 1.0,
+                 emphasize_unit_circle: bool = False,
+                 unit_circle_strength: float = 0.3,
+                 unit_circle_color: Optional[Tuple[float, float, float]] = None,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize phase colormap."""
         super().__init__(out_of_domain_hsv)
@@ -155,6 +164,8 @@ class Phase(Colormap):
         # Validate v_base
         if not 0 <= v_base < 1:
             raise ValidationError("v_base must be in [0, 1)")
+        if not 0 <= unit_circle_strength <= 1:
+            raise ValidationError("unit_circle_strength must be in [0, 1]")
         
         # Handle auto-scaling
         if auto_scale_r:
@@ -172,6 +183,9 @@ class Phase(Colormap):
         self.v_base = v_base
         self.auto_scale_r = auto_scale_r
         self.scale_radius = scale_radius
+        self.emphasize_unit_circle = emphasize_unit_circle
+        self.unit_circle_strength = unit_circle_strength
+        self.unit_circle_color = unit_circle_color
     
     def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Convert complex values to HSV components."""
@@ -200,11 +214,223 @@ class Phase(Colormap):
         else:
             V_r = np.ones_like(z, dtype=float)
         
+        # Unit circle emphasis
+        if self.emphasize_unit_circle:
+            # Create emphasis near |z| = 1
+            dist_from_unit = np.abs(r - 1.0)
+            # Gaussian-like emphasis
+            unit_emphasis = np.exp(-10 * dist_from_unit**2)
+            
+            if self.unit_circle_color is not None:
+                # Blend towards specified color
+                H_unit, S_unit, V_unit = self.unit_circle_color
+                H = H * (1 - self.unit_circle_strength * unit_emphasis) + H_unit * self.unit_circle_strength * unit_emphasis
+                S = S * (1 - self.unit_circle_strength * unit_emphasis) + S_unit * self.unit_circle_strength * unit_emphasis
+            else:
+                # Just boost brightness near unit circle
+                V_r = V_r * (1 + self.unit_circle_strength * unit_emphasis)
+                V_r = np.clip(V_r, 0, 1)
+        
         # Combine value modulations
         V_scaler = 1 - self.v_base
         V = (V_phi + V_r) * V_scaler / 2 + self.v_base
         
         return H, S, V
+
+
+class OklabPhase(Colormap):
+    """Pure OKLAB phase colormap with optional enhancement.
+    
+    Implements a perceptually uniform phase portrait using the OKLAB
+    color space. Maps complex phase directly to OKLAB hue angle while
+    maintaining consistent lightness and chroma. Supports enhanced
+    phase/modulus visualization through sawtooth modulation.
+    
+    Parameters
+    ----------
+    n_phi : int, optional
+        Number of phase sectors for enhancement.
+    r_linear_step : float, optional
+        Linear modulus step for contours.
+    r_log_base : float, optional
+        Logarithmic base for modulus contours.
+    auto_scale_r : bool, optional
+        Auto-calculate r_linear_step for square cells.
+    scale_radius : float, optional
+        Reference radius for auto-scaling.
+    enhanced : bool, optional
+        If True (default), use sawtooth modulation for better structure visibility.
+        If False, use smooth OKLAB colors similar to cplot.
+    L : float, optional
+        Base lightness in OKLAB space (0 to 1).
+    C : float, optional
+        Chroma (saturation) in OKLAB space (typically 0 to 0.4).
+    v_base : float, optional
+        Base value for enhanced mode, in [0, 1).
+    emphasize_unit_circle : bool, optional
+        If True, emphasize the unit circle |z|=1.
+    unit_circle_strength : float, optional
+        Strength of unit circle emphasis (0 to 1).
+    out_of_domain_hsv : tuple, optional
+        Color for out-of-domain points.
+        
+    Notes
+    -----
+    The OKLAB color space provides perceptually uniform color gradients,
+    meaning equal steps in the color values correspond to equal perceptual
+    differences. This is particularly useful for accurate interpretation
+    of complex function behavior.
+    
+    When enhanced=True, the colormap uses sawtooth functions to create
+    discontinuous edges at phase and modulus boundaries, dramatically
+    improving the visibility of mathematical structures.
+    """
+    
+    def __init__(self,
+                 n_phi: Optional[int] = None,
+                 r_linear_step: Optional[float] = None,
+                 r_log_base: Optional[float] = None,
+                 auto_scale_r: bool = False,
+                 scale_radius: float = 1.0,
+                 enhanced: bool = True,
+                 L: float = 0.65,
+                 C: float = 0.3,
+                 v_base: float = 0.5,
+                 emphasize_unit_circle: bool = False,
+                 unit_circle_strength: float = 0.3,
+                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+        """Initialize OKLAB phase colormap."""
+        super().__init__(out_of_domain_hsv)
+        
+        # Validate parameters
+        if not 0 <= L <= 1:
+            raise ValidationError("L (lightness) must be in [0, 1]")
+        if not 0 <= C <= 0.5:
+            raise ValidationError("C (chroma) must be in [0, 0.5]")
+        if not 0 <= v_base < 1:
+            raise ValidationError("v_base must be in [0, 1)")
+        if not 0 <= unit_circle_strength <= 1:
+            raise ValidationError("unit_circle_strength must be in [0, 1]")
+        
+        # Handle auto-scaling
+        if auto_scale_r:
+            if n_phi is None:
+                raise ValidationError("auto_scale_r=True requires n_phi to be specified")
+            if r_linear_step is not None:
+                raise ValidationError("Cannot specify both auto_scale_r=True and r_linear_step")
+            # Calculate r_linear_step for visually square cells
+            r_linear_step = 2 * np.pi / n_phi * scale_radius
+        
+        self.n_phi = n_phi
+        self.phi = np.pi / n_phi if n_phi is not None else None
+        self.r_linear_step = r_linear_step
+        self.r_log_base = r_log_base
+        self.auto_scale_r = auto_scale_r
+        self.scale_radius = scale_radius
+        self.enhanced = enhanced
+        self.L = L
+        self.C = C
+        self.v_base = v_base
+        self.emphasize_unit_circle = emphasize_unit_circle
+        self.unit_circle_strength = unit_circle_strength
+    
+    def _oklab_to_rgb(self, L: np.ndarray, a: np.ndarray, b: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Convert OKLAB to RGB directly (not via OkLCh).
+        
+        This is the direct OKLAB to RGB conversion, maintaining
+        the cylindrical nature of the color space.
+        """
+        # OkLab to linear RGB
+        l_ = L + 0.3963377774 * a + 0.2158037573 * b
+        m_ = L - 0.1055613458 * a - 0.0638541728 * b
+        s_ = L - 0.0894841775 * a - 1.2914855480 * b
+        
+        l = l_ * l_ * l_
+        m = m_ * m_ * m_
+        s = s_ * s_ * s_
+        
+        r_linear = +4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s
+        g_linear = -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s
+        b_linear = -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s
+        
+        # Linear to sRGB (gamma correction)
+        def linear_to_srgb(c: np.ndarray) -> np.ndarray:
+            c_safe = np.maximum(c, 0)
+            return np.where(c_safe <= 0.0031308,
+                           12.92 * c_safe,
+                           1.055 * np.power(c_safe, 1/2.4) - 0.055)
+        
+        R = linear_to_srgb(r_linear)
+        G = linear_to_srgb(g_linear)
+        B = linear_to_srgb(b_linear)
+        
+        # Clip to valid range
+        R = np.clip(R, 0, 1)
+        G = np.clip(G, 0, 1)
+        B = np.clip(B, 0, 1)
+        
+        return R, G, B
+    
+    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Convert complex values to HSV components."""
+        # Get phase and modulus
+        phi = phase_func(z)
+        r = np.abs(z)
+        
+        if self.enhanced:
+            # Enhanced mode with sawtooth modulation (complexplorer style)
+            
+            # Phase-based value modulation
+            if self.phi is not None:
+                V_phi = sawtooth(phi, self.phi)
+            else:
+                V_phi = np.ones_like(z, dtype=float)
+            
+            # Modulus-based value modulation
+            if self.r_linear_step and self.r_log_base is None:
+                V_r = sawtooth(r, self.r_linear_step)
+            elif self.r_linear_step is None and self.r_log_base:
+                V_r = sawtooth_log(r, self.r_log_base)
+            elif self.r_linear_step and self.r_log_base:
+                V_r = sawtooth_log(r / self.r_linear_step, self.r_log_base)
+            else:
+                V_r = np.ones_like(z, dtype=float)
+            
+            # Unit circle emphasis
+            if self.emphasize_unit_circle:
+                # Create emphasis near |z| = 1
+                dist_from_unit = np.abs(r - 1.0)
+                # Gaussian-like emphasis
+                unit_emphasis = np.exp(-10 * dist_from_unit**2)
+                # Boost brightness near unit circle
+                V_r = V_r * (1 + self.unit_circle_strength * unit_emphasis)
+                V_r = np.clip(V_r, 0, 1)
+            
+            # Combine modulations for enhanced visibility
+            V_scaler = 1 - self.v_base
+            L_modulated = (V_phi + V_r) * V_scaler / 2 + self.v_base
+            
+            # Apply to OKLAB lightness
+            L_final = self.L * L_modulated
+            
+        else:
+            # Smooth mode (cplot-like)
+            L_final = self.L
+        
+        # Convert phase to OKLAB a, b components
+        # OKLAB uses a cylindrical representation where:
+        # a = chroma * cos(hue), b = chroma * sin(hue)
+        a = self.C * np.cos(phi)
+        b = self.C * np.sin(phi)
+        
+        # Convert OKLAB to RGB
+        R, G, B = self._oklab_to_rgb(L_final, a, b)
+        
+        # Convert RGB to HSV for compatibility with base class
+        rgb_array = np.stack([R, G, B], axis=-1)
+        hsv_array = mcolors.rgb_to_hsv(rgb_array)
+        
+        return hsv_array[..., 0], hsv_array[..., 1], hsv_array[..., 2]
 
 
 class Chessboard(Colormap):

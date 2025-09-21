@@ -24,6 +24,81 @@ except ImportError:
     HAS_PYVISTA = False
 
 
+def show(func: Callable[[complex], complex],
+         x_range: tuple = (-2, 2, 500),
+         y_range: Optional[tuple] = None,
+         **kwargs) -> Any:
+    """Quick plot function for simple use cases, similar to cplot.
+    
+    Parameters
+    ----------
+    func : callable
+        Complex function to visualize
+    x_range : tuple
+        (min, max) or (min, max, resolution) for real axis
+    y_range : tuple, optional
+        (min, max) or (min, max, resolution) for imaginary axis. 
+        If None, uses x_range.
+    **kwargs
+        Additional arguments passed to plot()
+    
+    Returns
+    -------
+    Any
+        Matplotlib axes or PyVista plotter depending on mode.
+        
+    Examples
+    --------
+    >>> import complexplorer as cp
+    >>> cp.show(lambda z: z**2)
+    >>> cp.show(lambda z: 1/z, (-3, 3, 500), (-3, 3, 500))
+    >>> cp.show(lambda z: np.sin(z), (-5, 5), (-5, 5))
+    """
+    # Handle y_range default
+    if y_range is None:
+        y_range = x_range
+    
+    # Parse ranges - support both (min, max) and (min, max, resolution)
+    if len(x_range) == 2:
+        x_min, x_max = x_range
+        x_res = 500
+    elif len(x_range) == 3:
+        x_min, x_max, x_res = x_range
+    else:
+        raise ValueError("x_range must be (min, max) or (min, max, resolution)")
+    
+    if len(y_range) == 2:
+        y_min, y_max = y_range
+        y_res = 500
+    elif len(y_range) == 3:
+        y_min, y_max, y_res = y_range
+    else:
+        raise ValueError("y_range must be (min, max) or (min, max, resolution)")
+    
+    # Create Rectangle domain from ranges
+    center = complex((x_min + x_max) / 2, (y_min + y_max) / 2)
+    re_length = abs(x_max - x_min)
+    im_length = abs(y_max - y_min)
+    domain = Rectangle(re_length, im_length, center=center, square=False)
+    
+    # Use the maximum resolution
+    resolution = max(x_res, y_res) if isinstance(x_res, int) and isinstance(y_res, int) else 500
+    
+    # Set default colormap if not provided (with better defaults for initial experience)
+    if 'cmap' not in kwargs:
+        kwargs['cmap'] = Phase(n_phi=6, auto_scale_r=True, scale_radius=0.8)
+    
+    # Get mode (default to 2d for simplicity)
+    mode = kwargs.pop('mode', '2d')
+    
+    # Pass resolution if not in kwargs
+    if 'resolution' not in kwargs:
+        kwargs['resolution'] = resolution
+    
+    # Call the main plot function
+    return plot(func, domain, mode, **kwargs)
+
+
 def plot(func: Callable[[complex], complex], 
          domain: Optional[Domain] = None,
          mode: str = '2d',
@@ -50,7 +125,7 @@ def plot(func: Callable[[complex], complex],
         domain = Rectangle(4, 4)
     
     if 'cmap' not in kwargs:
-        kwargs['cmap'] = Phase(n_phi=6, auto_scale_r=True)
+        kwargs['cmap'] = Phase(n_phi=6, auto_scale_r=True, scale_radius=0.8)
     
     if mode == '2d':
         return plot_2d(domain, func, **kwargs)
@@ -104,8 +179,8 @@ def interactive_preset() -> dict:
         Configuration optimized for speed and interactivity.
     """
     return {
-        'cmap': Phase(n_phi=6, auto_scale_r=True),
-        'resolution': 400
+        'cmap': Phase(n_phi=6, auto_scale_r=True, scale_radius=0.8),
+        'resolution': 500
     }
 
 
@@ -127,6 +202,7 @@ def high_contrast_preset() -> dict:
 
 
 __all__ = [
+    'show',
     'plot',
     'publication_preset',
     'interactive_preset',
