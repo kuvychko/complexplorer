@@ -54,6 +54,11 @@ def riemann_pv(
     of complex functions on the Riemann sphere with various options
     for incorporating magnitude information.
     
+    Uses stereographic projection from the north pole (standard convention):
+    - Origin (z=0) maps to south pole
+    - Infinity maps to north pole
+    - Unit circle maps to equator
+    
     Parameters
     ----------
     func : callable
@@ -144,9 +149,9 @@ def riemann_pv(
     points = mesh.points
     X, Y, Z = points[:, 0], points[:, 1], points[:, 2]
     
-    # Project to complex plane (from south pole by default)
+    # Project to complex plane (from north pole - standard convention)
     from complexplorer.utils.mesh import sphere_to_complex
-    w = sphere_to_complex(X, Y, Z, from_north=False)
+    w = sphere_to_complex(X, Y, Z, from_north=True)
     
     # Evaluate function
     f_vals = func(w)
