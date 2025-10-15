@@ -560,6 +560,12 @@ class Chessboard(Colormap):
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize chessboard colormap."""
         super().__init__(out_of_domain_hsv)
+
+        # Validate parameters
+        if spacing <= 0:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("spacing must be positive")
+
         self.spacing = spacing
         self.center = center
     
@@ -609,6 +615,18 @@ class PolarChessboard(Colormap):
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize polar chessboard."""
         super().__init__(out_of_domain_hsv)
+
+        # Validate parameters
+        if n_phi <= 0:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("n_phi must be positive")
+        if spacing <= 0:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("spacing must be positive")
+        if r_log is not None and r_log <= 0:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("r_log must be positive")
+
         self.n_phi = n_phi
         self.phi = np.pi / n_phi
         self.spacing = spacing
@@ -655,6 +673,12 @@ class LogRings(Colormap):
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize logarithmic rings."""
         super().__init__(out_of_domain_hsv)
+
+        # Validate parameters
+        if log_spacing <= 0:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("log_spacing must be positive")
+
         self.log_spacing = log_spacing
     
     def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -719,6 +743,17 @@ class PerceptualPastel(BasePhasePortrait):
         """Initialize perceptual pastel colormap."""
         super().__init__(n_phi, r_linear_step, r_log_base, v_base,
                         auto_scale_r, scale_radius, out_of_domain_hsv)
+
+        # Validate parameters
+        if not 0 <= L_center <= 1:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("L_center must be in [0, 1]")
+        if not 0 <= L_range <= 1:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("L_range must be in [0, 1]")
+        if not 0 <= C <= 0.5:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("C (chroma) must be in [0, 0.5]")
 
         self.L_center = L_center
         self.L_range = L_range
@@ -797,8 +832,22 @@ class AnalogousWedge(BasePhasePortrait):
         super().__init__(n_phi, r_linear_step, r_log_base, V_base,
                         auto_scale_r, scale_radius, out_of_domain_hsv)
 
+        # Validate parameters
+        if not 0 <= H_center <= 1:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("H_center must be in [0, 1]")
+        if not 0.2 <= H_wedge <= 0.5:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("H_wedge must be in [0.2, 0.5]")
+        if not 0 <= S <= 1:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("S (saturation) must be in [0, 1]")
+        if not 0 <= V_range <= 1:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("V_range must be in [0, 1]")
+
         self.H_center = H_center
-        self.H_wedge = min(0.5, max(0.2, H_wedge))  # Clamp to valid range
+        self.H_wedge = H_wedge  # No longer need clamping since we validate
         self.S = S
         self.V_base = V_base  # Store original parameter for backwards compatibility
         self.V_range = V_range
@@ -894,6 +943,23 @@ class DivergingWarmCool(BasePhasePortrait):
         """Initialize diverging warm-cool colormap."""
         super().__init__(n_phi, r_linear_step, r_log_base, v_base,
                         auto_scale_r, scale_radius, out_of_domain_hsv)
+
+        # Validate parameters
+        if not 0 <= L_center <= 1:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("L_center must be in [0, 1]")
+        if not 0 <= L_range <= 1:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("L_range must be in [0, 1]")
+        if not 0 <= C_min <= 0.5:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("C_min must be in [0, 0.5]")
+        if not 0 <= C_max <= 0.5:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("C_max must be in [0, 0.5]")
+        if C_min > C_max:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("C_min must be less than or equal to C_max")
 
         self.H_warm = H_warm
         self.H_cool = H_cool
@@ -1008,6 +1074,26 @@ class Isoluminant(BasePhasePortrait):
         """Initialize isoluminant colormap."""
         super().__init__(n_phi, r_linear_step, r_log_base, v_base,
                         auto_scale_r, scale_radius, out_of_domain_hsv)
+
+        # Validate parameters
+        if not 0 <= L <= 1:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("L (lightness) must be in [0, 1]")
+        if not 0 <= C_min <= 0.5:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("C_min must be in [0, 0.5]")
+        if not 0 <= C_max <= 0.5:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("C_max must be in [0, 0.5]")
+        if C_min > C_max:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("C_min must be less than or equal to C_max")
+        if contour_period <= 0:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("contour_period must be positive")
+        if contour_width <= 0:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("contour_width must be positive")
 
         self.L = L
         self.C_min = C_min
@@ -1148,6 +1234,23 @@ class CubehelixPhase(BasePhasePortrait):
         super().__init__(n_phi, r_linear_step, r_log_base, v_base,
                         auto_scale_r, scale_radius, out_of_domain_hsv)
 
+        # Validate parameters
+        if not 0 <= saturation <= 1:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("saturation must be in [0, 1]")
+        if not 0 <= L_min <= 1:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("L_min must be in [0, 1]")
+        if not 0 <= L_max <= 1:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("L_max must be in [0, 1]")
+        if L_min > L_max:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("L_min must be less than or equal to L_max")
+        if gamma <= 0:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("gamma must be positive")
+
         self.start = start
         self.rotations = rotations
         self.saturation = saturation
@@ -1249,6 +1352,32 @@ class InkPaper(BasePhasePortrait):
         """Initialize ink & paper colormap."""
         super().__init__(n_phi, r_linear_step, r_log_base, v_base,
                         auto_scale_r, scale_radius, out_of_domain_hsv)
+
+        # Validate parameters
+        if not 0 <= L_min <= 1:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("L_min must be in [0, 1]")
+        if not 0 <= L_max <= 1:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("L_max must be in [0, 1]")
+        if L_min > L_max:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("L_min must be less than or equal to L_max")
+        if not 0 <= C_min <= 0.5:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("C_min must be in [0, 0.5]")
+        if not 0 <= C_max <= 0.5:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("C_max must be in [0, 0.5]")
+        if C_min > C_max:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("C_min must be less than or equal to C_max")
+        if stripe_count <= 0:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("stripe_count must be positive")
+        if not 0 <= stripe_amplitude <= 1:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("stripe_amplitude must be in [0, 1]")
 
         self.L_min = L_min
         self.L_max = L_max
@@ -1382,6 +1511,29 @@ class EarthTopographic(BasePhasePortrait):
         """Initialize earth topographic colormap."""
         super().__init__(n_phi, r_linear_step, r_log_base, v_base,
                         auto_scale_r, scale_radius, out_of_domain_hsv)
+
+        # Validate parameters
+        if not 0 <= L_min <= 1:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("L_min must be in [0, 1]")
+        if not 0 <= L_max <= 1:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("L_max must be in [0, 1]")
+        if L_min > L_max:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("L_min must be less than or equal to L_max")
+        if not 0 <= C_min <= 0.5:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("C_min must be in [0, 0.5]")
+        if not 0 <= C_max <= 0.5:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("C_max must be in [0, 0.5]")
+        if C_min > C_max:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("C_min must be less than or equal to C_max")
+        if not 0 <= hillshade_amplitude <= 1:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("hillshade_amplitude must be in [0, 1]")
 
         self.L_min = L_min
         self.L_max = L_max
@@ -1523,6 +1675,23 @@ class FourQuadrant(BasePhasePortrait):
         """Initialize four-quadrant colormap."""
         super().__init__(n_phi, r_linear_step, r_log_base, v_base,
                         auto_scale_r, scale_radius, out_of_domain_hsv)
+
+        # Validate parameters
+        if len(H_anchors) != 4:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("H_anchors must have exactly 4 elements")
+        if not 0 <= C <= 0.5:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("C (chroma) must be in [0, 0.5]")
+        if not 0 <= L_min <= 1:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("L_min must be in [0, 1]")
+        if not 0 <= L_max <= 1:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("L_max must be in [0, 1]")
+        if L_min > L_max:
+            from complexplorer.exceptions import ColormapError
+            raise ColormapError("L_min must be less than or equal to L_max")
 
         self.H_anchors = H_anchors
         self.C = C

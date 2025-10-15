@@ -450,13 +450,14 @@ class TestAnalogousWedge:
         assert cmap.V_base == 0.55
         assert cmap.V_range == 0.35
         assert cmap.use_sigmoid == True
-        
-        # Test wedge clamping
-        cmap2 = AnalogousWedge(H_wedge=0.6)  # Too large
-        assert cmap2.H_wedge == 0.5  # Clamped to max
-        
-        cmap3 = AnalogousWedge(H_wedge=0.1)  # Too small
-        assert cmap3.H_wedge == 0.2  # Clamped to min
+
+        # Test validation of H_wedge
+        from complexplorer.exceptions import ColormapError
+        with pytest.raises(ColormapError):
+            AnalogousWedge(H_wedge=0.6)  # Too large
+
+        with pytest.raises(ColormapError):
+            AnalogousWedge(H_wedge=0.1)  # Too small
     
     def test_hsv_conversion(self):
         """Test HSV conversion with compressed hue range."""
