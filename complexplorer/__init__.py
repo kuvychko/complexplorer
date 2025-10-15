@@ -73,6 +73,24 @@ from complexplorer.api import (
     high_contrast_preset
 )
 
+# Exceptions
+from complexplorer.exceptions import (
+    ComplexplorerError,
+    ValidationError,
+    DomainError,
+    ColormapError,
+    ResolutionError,
+    ComputationError,
+    FunctionEvaluationError,
+    MeshGenerationError,
+    ExportError,
+    STLExportError,
+    ImageExportError,
+    DependencyError,
+    PyVistaNotAvailableError,
+    OptionalDependencyError
+)
+
 # STL export (requires PyVista)
 try:
     from complexplorer.export.stl import (
@@ -99,7 +117,7 @@ except ImportError:
 __all__ = [
     # Version
     '__version__',
-    
+
     # Core classes
     'Domain', 'Rectangle', 'Disk', 'Annulus', 'CompositeDomain',
     'Colormap', 'Phase', 'OklabPhase', 'Chessboard', 'PolarChessboard', 'LogRings',
@@ -107,20 +125,26 @@ __all__ = [
     'Isoluminant', 'CubehelixPhase', 'InkPaper',
     'EarthTopographic', 'FourQuadrant',
     'ModulusScaling', 'get_scaling_preset',
-    
+
     # Core functions
     'phase', 'sawtooth', 'stereographic_projection', 'inverse_stereographic',
-    
+
     # Plotting functions
     'plot', 'pair_plot', 'riemann_chart', 'riemann_hemispheres',
     'plot_landscape', 'pair_plot_landscape', 'riemann',
-    
+
     # Utilities
     'setup_matplotlib_backend', 'ensure_interactive_plots',
-    
+
     # High-level API
     'show', 'publication_preset', 'interactive_preset', 'high_contrast_preset',
-    
+
+    # Exceptions
+    'ComplexplorerError', 'ValidationError', 'DomainError', 'ColormapError',
+    'ResolutionError', 'ComputationError', 'FunctionEvaluationError',
+    'MeshGenerationError', 'ExportError', 'STLExportError', 'ImageExportError',
+    'DependencyError', 'PyVistaNotAvailableError', 'OptionalDependencyError',
+
     # Flags
     'HAS_PYVISTA', 'HAS_STL_EXPORT'
 ]

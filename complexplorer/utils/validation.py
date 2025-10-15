@@ -8,10 +8,8 @@ from typing import Optional, Callable, Union, Any
 import numpy as np
 import warnings
 
-
-class ValidationError(ValueError):
-    """Custom exception for validation errors in complexplorer."""
-    pass
+# Import exceptions from the new hierarchy
+from complexplorer.exceptions import ValidationError, DomainError, ColormapError, ResolutionError
 
 
 def validate_domain_or_mesh(domain: Optional[Any], 
