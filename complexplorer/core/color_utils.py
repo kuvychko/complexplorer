@@ -9,13 +9,17 @@ import numpy as np
 
 
 def oklch_to_srgb(L: Union[float, np.ndarray],
-                   C: Union[float, np.ndarray], 
-                   H: Union[float, np.ndarray]) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Convert OkLCh color to sRGB.
-    
+                   C: Union[float, np.ndarray],
+                   H: Union[float, np.ndarray],
+                   clip_method: str = 'adaptive_chroma') -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Convert OkLCh color to sRGB with perceptually-aware gamut mapping.
+
     OkLCh is a perceptually uniform color space based on OkLab.
     L = lightness [0, 1], C = chroma [0, ~0.4], H = hue [0, 360].
-    
+
+    When colors fall outside the sRGB gamut, this function uses adaptive
+    chroma reduction to preserve hue and lightness, minimizing visual artifacts.
+
     Parameters
     ----------
     L : float or np.ndarray
@@ -24,56 +28,118 @@ def oklch_to_srgb(L: Union[float, np.ndarray],
         Chroma (saturation) typically in [0, 0.4].
     H : float or np.ndarray
         Hue in degrees [0, 360].
-        
+    clip_method : str, optional
+        Gamut mapping method:
+        - 'adaptive_chroma': Reduce chroma to fit in gamut (default, best quality)
+        - 'simple': Direct clipping (faster but may cause hue shifts)
+
     Returns
     -------
     R, G, B : tuple of np.ndarray
         RGB values in [0, 1].
-        
+
     Notes
     -----
     Based on Björn Ottosson's OkLab color space (2020).
     https://bottosson.github.io/posts/oklab/
+
+    The adaptive_chroma method performs binary search to find the maximum
+    chroma that fits within the sRGB gamut, preserving hue and lightness.
     """
     L = np.asarray(L)
     C = np.asarray(C)
     H = np.asarray(H)
-    
-    # Convert to OkLab
-    H_rad = np.deg2rad(H)
-    a = C * np.cos(H_rad)
-    b = C * np.sin(H_rad)
-    
-    # OkLab to linear RGB
-    l_ = L + 0.3963377774 * a + 0.2158037573 * b
-    m_ = L - 0.1055613458 * a - 0.0638541728 * b
-    s_ = L - 0.0894841775 * a - 1.2914855480 * b
-    
-    l = l_ * l_ * l_
-    m = m_ * m_ * m_
-    s = s_ * s_ * s_
-    
-    r_linear = +4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s
-    g_linear = -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s
-    b_linear = -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s
-    
-    # Linear to sRGB (gamma correction)
+
+    def oklch_to_linear_rgb(L_val, C_val, H_val):
+        """Helper to convert OkLCh to linear RGB."""
+        # Convert to OkLab
+        H_rad = np.deg2rad(H_val)
+        a = C_val * np.cos(H_rad)
+        b = C_val * np.sin(H_rad)
+
+        # OkLab to linear RGB
+        l_ = L_val + 0.3963377774 * a + 0.2158037573 * b
+        m_ = L_val - 0.1055613458 * a - 0.0638541728 * b
+        s_ = L_val - 0.0894841775 * a - 1.2914855480 * b
+
+        l = l_ * l_ * l_
+        m = m_ * m_ * m_
+        s = s_ * s_ * s_
+
+        r_linear = +4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s
+        g_linear = -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s
+        b_linear = -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s
+
+        return r_linear, g_linear, b_linear
+
     def linear_to_srgb(c: np.ndarray) -> np.ndarray:
-        # Handle negative values by clipping to 0 first
+        """Convert linear RGB to sRGB with gamma correction."""
         c_safe = np.maximum(c, 0)
         return np.where(c_safe <= 0.0031308,
                         12.92 * c_safe,
                         1.055 * np.power(c_safe, 1/2.4) - 0.055)
-    
-    R = linear_to_srgb(r_linear)
-    G = linear_to_srgb(g_linear)
-    B = linear_to_srgb(b_linear)
-    
-    # Clip to valid range
-    R = np.clip(R, 0, 1)
-    G = np.clip(G, 0, 1)
-    B = np.clip(B, 0, 1)
-    
+
+    if clip_method == 'adaptive_chroma':
+        # Adaptive chroma reduction for out-of-gamut colors
+        r_linear, g_linear, b_linear = oklch_to_linear_rgb(L, C, H)
+
+        # Check if color is out of gamut
+        out_of_gamut = (r_linear < 0) | (r_linear > 1) | \
+                       (g_linear < 0) | (g_linear > 1) | \
+                       (b_linear < 0) | (b_linear > 1)
+
+        # For out-of-gamut colors, reduce chroma using binary search
+        if np.any(out_of_gamut):
+            C_adjusted = C.copy()
+
+            # Binary search for maximum chroma that fits in gamut
+            C_low = np.zeros_like(C)
+            C_high = C.copy()
+
+            for _ in range(15):  # 15 iterations gives ~0.003% precision
+                C_mid = (C_low + C_high) / 2
+                r_test, g_test, b_test = oklch_to_linear_rgb(L, C_mid, H)
+
+                in_gamut = (r_test >= 0) & (r_test <= 1) & \
+                          (g_test >= 0) & (g_test <= 1) & \
+                          (b_test >= 0) & (b_test <= 1)
+
+                # Update search bounds
+                C_low = np.where(in_gamut & out_of_gamut, C_mid, C_low)
+                C_high = np.where(~in_gamut & out_of_gamut, C_mid, C_high)
+
+            # Use the adjusted chroma for out-of-gamut colors
+            C_adjusted = np.where(out_of_gamut, C_low, C)
+
+            # Recompute with adjusted chroma
+            r_linear, g_linear, b_linear = oklch_to_linear_rgb(L, C_adjusted, H)
+
+        # Convert to sRGB
+        R = linear_to_srgb(r_linear)
+        G = linear_to_srgb(g_linear)
+        B = linear_to_srgb(b_linear)
+
+        # Final safety clip (should rarely be needed)
+        R = np.clip(R, 0, 1)
+        G = np.clip(G, 0, 1)
+        B = np.clip(B, 0, 1)
+
+    elif clip_method == 'simple':
+        # Simple clipping (faster but may cause hue shifts)
+        r_linear, g_linear, b_linear = oklch_to_linear_rgb(L, C, H)
+
+        R = linear_to_srgb(r_linear)
+        G = linear_to_srgb(g_linear)
+        B = linear_to_srgb(b_linear)
+
+        R = np.clip(R, 0, 1)
+        G = np.clip(G, 0, 1)
+        B = np.clip(B, 0, 1)
+
+    else:
+        raise ValueError(f"Unknown clip_method: {clip_method}. "
+                        "Use 'adaptive_chroma' or 'simple'.")
+
     return R, G, B
 
 
