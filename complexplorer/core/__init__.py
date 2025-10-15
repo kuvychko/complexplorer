@@ -10,7 +10,7 @@ This module contains the fundamental building blocks of the library:
 from complexplorer.core.scaling import ModulusScaling, SCALING_PRESETS, get_scaling_preset
 from complexplorer.core.domain import Domain, Rectangle, Disk, Annulus, CompositeDomain
 from complexplorer.core.colormap import (
-    Colormap, Phase, Chessboard, PolarChessboard, LogRings,
+    Colormap, Phase, OklabPhase, Chessboard, PolarChessboard, LogRings,
     PerceptualPastel, AnalogousWedge, DivergingWarmCool,
     Isoluminant, CubehelixPhase, InkPaper,
     EarthTopographic, FourQuadrant,
@@ -35,6 +35,7 @@ __all__ = [
     # Colormaps
     'Colormap',
     'Phase',
+    'OklabPhase',
     'Chessboard',
     'PolarChessboard',
     'LogRings',

@@ -117,13 +117,182 @@ class Colormap(ABC):
         return mcolors.hsv_to_rgb(hsv)
 
 
-class Phase(Colormap):
+class BasePhasePortrait(Colormap):
+    """Base class for phase portrait colormaps with shared modulation logic.
+
+    This class provides common functionality for colormaps that use:
+    - Phase sector enhancement (sawtooth patterns in phase)
+    - Modulus-based modulation (linear or logarithmic contours)
+    - Auto-scaling for visually square cells
+
+    Subclasses should implement _compute_colors() to define their specific
+    color mapping strategy.
+
+    Parameters
+    ----------
+    n_phi : int, optional
+        Number of phase sectors for enhancement.
+    r_linear_step : float, optional
+        Linear modulus step for contours.
+    r_log_base : float, optional
+        Logarithmic base for modulus contours.
+    v_base : float, optional
+        Base value (brightness), in [0, 1).
+    auto_scale_r : bool, optional
+        Auto-calculate r_linear_step for square cells.
+    scale_radius : float, optional
+        Reference radius for auto-scaling.
+    out_of_domain_hsv : tuple, optional
+        Color for out-of-domain points.
+    """
+
+    def __init__(self,
+                 n_phi: Optional[int] = None,
+                 r_linear_step: Optional[float] = None,
+                 r_log_base: Optional[float] = None,
+                 v_base: float = 0.5,
+                 auto_scale_r: bool = False,
+                 scale_radius: float = 1.0,
+                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+        """Initialize base phase portrait colormap."""
+        super().__init__(out_of_domain_hsv)
+
+        # Validate v_base
+        if not 0 <= v_base < 1:
+            raise ValidationError("v_base must be in [0, 1)")
+
+        # Handle auto-scaling
+        if auto_scale_r:
+            if n_phi is None:
+                raise ValidationError("auto_scale_r=True requires n_phi to be specified")
+            if r_linear_step is not None:
+                raise ValidationError("Cannot specify both auto_scale_r=True and r_linear_step")
+            # Calculate r_linear_step for visually square cells
+            r_linear_step = 2 * np.pi / n_phi * scale_radius
+
+        self.n_phi = n_phi
+        self.phi = np.pi / n_phi if n_phi is not None else None
+        self.r_linear_step = r_linear_step
+        self.r_log_base = r_log_base
+        self.v_base = v_base
+        self.auto_scale_r = auto_scale_r
+        self.scale_radius = scale_radius
+
+    def _compute_phase_modulation(self, phi: np.ndarray, z: np.ndarray) -> np.ndarray:
+        """Compute phase-based value modulation (sawtooth sectors).
+
+        Parameters
+        ----------
+        phi : np.ndarray
+            Phase values in [0, 2π].
+        z : np.ndarray
+            Complex values (for shape).
+
+        Returns
+        -------
+        np.ndarray
+            Phase modulation in [0, 1].
+        """
+        if self.phi is not None:
+            return sawtooth(phi, self.phi)
+        else:
+            return np.ones_like(z, dtype=float)
+
+    def _compute_modulus_modulation(self, r: np.ndarray, z: np.ndarray) -> np.ndarray:
+        """Compute modulus-based value modulation.
+
+        Parameters
+        ----------
+        r : np.ndarray
+            Modulus values |z|.
+        z : np.ndarray
+            Complex values (for shape).
+
+        Returns
+        -------
+        np.ndarray
+            Modulus modulation in [0, 1].
+        """
+        if self.r_linear_step and self.r_log_base is None:
+            return sawtooth(r, self.r_linear_step)
+        elif self.r_linear_step is None and self.r_log_base:
+            return sawtooth_log(r, self.r_log_base)
+        elif self.r_linear_step and self.r_log_base:
+            return sawtooth_log(r / self.r_linear_step, self.r_log_base)
+        else:
+            return np.ones_like(z, dtype=float)
+
+    def _combine_modulations(self, V_phi: np.ndarray, V_r: np.ndarray) -> np.ndarray:
+        """Combine phase and modulus modulations into final value.
+
+        Parameters
+        ----------
+        V_phi : np.ndarray
+            Phase modulation in [0, 1].
+        V_r : np.ndarray
+            Modulus modulation in [0, 1].
+
+        Returns
+        -------
+        np.ndarray
+            Combined modulation mapped to [v_base, 1].
+        """
+        V_scaler = 1 - self.v_base
+        return (V_phi + V_r) * V_scaler / 2 + self.v_base
+
+    @abstractmethod
+    def _compute_colors(self, z: np.ndarray, phi: np.ndarray, r: np.ndarray,
+                       V_phi: np.ndarray, V_r: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Compute HSV colors from complex values and modulations.
+
+        This method must be implemented by subclasses to define their
+        specific color mapping strategy.
+
+        Parameters
+        ----------
+        z : np.ndarray
+            Complex values.
+        phi : np.ndarray
+            Phase values in [0, 2π].
+        r : np.ndarray
+            Modulus values |z|.
+        V_phi : np.ndarray
+            Phase modulation in [0, 1].
+        V_r : np.ndarray
+            Modulus modulation in [0, 1].
+
+        Returns
+        -------
+        H, S, V : tuple of np.ndarray
+            Hue, saturation, and value arrays.
+        """
+        pass
+
+    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Convert complex values to HSV components.
+
+        This method handles the shared modulation logic and delegates
+        color computation to _compute_colors().
+        """
+        # Compute phase and modulus
+        phi = phase_func(z)
+        r = np.abs(z)
+
+        # Compute modulations
+        V_phi = self._compute_phase_modulation(phi, z)
+        V_r = self._compute_modulus_modulation(r, z)
+
+        # Delegate to subclass for color computation
+        return self._compute_colors(z, phi, r, V_phi, V_r)
+
+
+class Phase(BasePhasePortrait):
     """Phase colormap with optional enhancement.
-    
+
     Maps complex phase to hue. Can create enhanced phase portraits
     by modulating saturation/value based on phase sectors and/or
     modulus contours.
-    
+
     Parameters
     ----------
     n_phi : int, optional
@@ -147,7 +316,7 @@ class Phase(Colormap):
     out_of_domain_hsv : tuple, optional
         Color for out-of-domain points.
     """
-    
+
     def __init__(self,
                  n_phi: Optional[int] = None,
                  r_linear_step: Optional[float] = None,
@@ -160,68 +329,33 @@ class Phase(Colormap):
                  unit_circle_color: Optional[Tuple[float, float, float]] = None,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize phase colormap."""
-        super().__init__(out_of_domain_hsv)
-        
-        # Validate v_base
-        if not 0 <= v_base < 1:
-            raise ValidationError("v_base must be in [0, 1)")
+        super().__init__(n_phi, r_linear_step, r_log_base, v_base,
+                        auto_scale_r, scale_radius, out_of_domain_hsv)
+
+        # Validate unit circle parameters
         if not 0 <= unit_circle_strength <= 1:
             raise ValidationError("unit_circle_strength must be in [0, 1]")
-        
-        # Handle auto-scaling
-        if auto_scale_r:
-            if n_phi is None:
-                raise ValidationError("auto_scale_r=True requires n_phi to be specified")
-            if r_linear_step is not None:
-                raise ValidationError("Cannot specify both auto_scale_r=True and r_linear_step")
-            # Calculate r_linear_step for visually square cells
-            r_linear_step = 2 * np.pi / n_phi * scale_radius
-        
-        self.n_phi = n_phi
-        self.phi = np.pi / n_phi if n_phi is not None else None
-        self.r_linear_step = r_linear_step
-        self.r_log_base = r_log_base
-        self.v_base = v_base
-        self.auto_scale_r = auto_scale_r
-        self.scale_radius = scale_radius
+
         self.emphasize_unit_circle = emphasize_unit_circle
         self.unit_circle_strength = unit_circle_strength
         self.unit_circle_color = unit_circle_color
-    
-    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Convert complex values to HSV components."""
+
+    def _compute_colors(self, z: np.ndarray, phi: np.ndarray, r: np.ndarray,
+                       V_phi: np.ndarray, V_r: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Compute HSV colors for Phase colormap."""
         # Phase determines hue
-        phi = phase_func(z)
         H = phi / (2 * np.pi)  # Map [0, 2π] to [0, 1]
-        
+
         # Full saturation by default
         S = np.ones_like(z, dtype=float)
-        
-        # Value modulation
-        if self.phi is not None:
-            # Phase-based modulation
-            V_phi = sawtooth(phi, self.phi)
-        else:
-            V_phi = np.ones_like(z, dtype=float)
-        
-        # Modulus-based modulation
-        r = np.abs(z)
-        if self.r_linear_step and self.r_log_base is None:
-            V_r = sawtooth(r, self.r_linear_step)
-        elif self.r_linear_step is None and self.r_log_base:
-            V_r = sawtooth_log(r, self.r_log_base)
-        elif self.r_linear_step and self.r_log_base:
-            V_r = sawtooth_log(r / self.r_linear_step, self.r_log_base)
-        else:
-            V_r = np.ones_like(z, dtype=float)
-        
+
         # Unit circle emphasis
         if self.emphasize_unit_circle:
             # Create emphasis near |z| = 1
             dist_from_unit = np.abs(r - 1.0)
             # Gaussian-like emphasis
             unit_emphasis = np.exp(-10 * dist_from_unit**2)
-            
+
             if self.unit_circle_color is not None:
                 # Blend towards specified color
                 H_unit, S_unit, V_unit = self.unit_circle_color
@@ -231,15 +365,14 @@ class Phase(Colormap):
                 # Just boost brightness near unit circle
                 V_r = V_r * (1 + self.unit_circle_strength * unit_emphasis)
                 V_r = np.clip(V_r, 0, 1)
-        
+
         # Combine value modulations
-        V_scaler = 1 - self.v_base
-        V = (V_phi + V_r) * V_scaler / 2 + self.v_base
-        
+        V = self._combine_modulations(V_phi, V_r)
+
         return H, S, V
 
 
-class OklabPhase(Colormap):
+class OklabPhase(BasePhasePortrait):
     """Pure OKLAB phase colormap with optional enhancement.
     
     Implements a perceptually uniform phase portrait using the OKLAB
@@ -305,37 +438,20 @@ class OklabPhase(Colormap):
                  phase_offset: float = 0.8936868 * np.pi,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize OKLAB phase colormap."""
-        super().__init__(out_of_domain_hsv)
-        
-        # Validate parameters
+        super().__init__(n_phi, r_linear_step, r_log_base, v_base,
+                        auto_scale_r, scale_radius, out_of_domain_hsv)
+
+        # Validate OklabPhase-specific parameters
         if not 0 <= L <= 1:
             raise ValidationError("L (lightness) must be in [0, 1]")
         if not 0 <= C <= 0.5:
             raise ValidationError("C (chroma) must be in [0, 0.5]")
-        if not 0 <= v_base < 1:
-            raise ValidationError("v_base must be in [0, 1)")
         if not 0 <= unit_circle_strength <= 1:
             raise ValidationError("unit_circle_strength must be in [0, 1]")
-        
-        # Handle auto-scaling
-        if auto_scale_r:
-            if n_phi is None:
-                raise ValidationError("auto_scale_r=True requires n_phi to be specified")
-            if r_linear_step is not None:
-                raise ValidationError("Cannot specify both auto_scale_r=True and r_linear_step")
-            # Calculate r_linear_step for visually square cells
-            r_linear_step = 2 * np.pi / n_phi * scale_radius
-        
-        self.n_phi = n_phi
-        self.phi = np.pi / n_phi if n_phi is not None else None
-        self.r_linear_step = r_linear_step
-        self.r_log_base = r_log_base
-        self.auto_scale_r = auto_scale_r
-        self.scale_radius = scale_radius
+
         self.enhanced = enhanced
         self.L = L
         self.C = C
-        self.v_base = v_base
         self.emphasize_unit_circle = emphasize_unit_circle
         self.unit_circle_strength = unit_circle_strength
         self.phase_offset = phase_offset
@@ -377,31 +493,12 @@ class OklabPhase(Colormap):
         
         return R, G, B
     
-    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Convert complex values to HSV components."""
-        # Get phase and modulus
-        phi = phase_func(z)
-        r = np.abs(z)
-        
+    def _compute_colors(self, z: np.ndarray, phi: np.ndarray, r: np.ndarray,
+                       V_phi: np.ndarray, V_r: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Compute HSV colors for OklabPhase colormap."""
         if self.enhanced:
             # Enhanced mode with sawtooth modulation (complexplorer style)
-            
-            # Phase-based value modulation
-            if self.phi is not None:
-                V_phi = sawtooth(phi, self.phi)
-            else:
-                V_phi = np.ones_like(z, dtype=float)
-            
-            # Modulus-based value modulation
-            if self.r_linear_step and self.r_log_base is None:
-                V_r = sawtooth(r, self.r_linear_step)
-            elif self.r_linear_step is None and self.r_log_base:
-                V_r = sawtooth_log(r, self.r_log_base)
-            elif self.r_linear_step and self.r_log_base:
-                V_r = sawtooth_log(r / self.r_linear_step, self.r_log_base)
-            else:
-                V_r = np.ones_like(z, dtype=float)
-            
+
             # Unit circle emphasis
             if self.emphasize_unit_circle:
                 # Create emphasis near |z| = 1
@@ -411,18 +508,17 @@ class OklabPhase(Colormap):
                 # Boost brightness near unit circle
                 V_r = V_r * (1 + self.unit_circle_strength * unit_emphasis)
                 V_r = np.clip(V_r, 0, 1)
-            
+
             # Combine modulations for enhanced visibility
-            V_scaler = 1 - self.v_base
-            L_modulated = (V_phi + V_r) * V_scaler / 2 + self.v_base
-            
+            L_modulated = self._combine_modulations(V_phi, V_r)
+
             # Apply to OKLAB lightness
             L_final = self.L * L_modulated
-            
+
         else:
             # Smooth mode (cplot-like)
             L_final = self.L
-        
+
         # Convert phase to OKLAB a, b components
         # OKLAB uses a cylindrical representation where:
         # a = chroma * cos(hue), b = chroma * sin(hue)
@@ -431,14 +527,14 @@ class OklabPhase(Colormap):
         phi_shifted = phi + self.phase_offset
         a = self.C * np.cos(phi_shifted)
         b = self.C * np.sin(phi_shifted)
-        
+
         # Convert OKLAB to RGB
         R, G, B = self._oklab_to_rgb(L_final, a, b)
-        
+
         # Convert RGB to HSV for compatibility with base class
         rgb_array = np.stack([R, G, B], axis=-1)
         hsv_array = mcolors.rgb_to_hsv(rgb_array)
-        
+
         return hsv_array[..., 0], hsv_array[..., 1], hsv_array[..., 2]
 
 
@@ -579,7 +675,7 @@ class LogRings(Colormap):
         return H, S, V
 
 
-class PerceptualPastel(Colormap):
+class PerceptualPastel(BasePhasePortrait):
     """Perceptually uniform pastel colormap using OkLCh color space.
     
     Creates elegant, non-fluorescent colors with uniform perceived lightness
@@ -621,67 +717,35 @@ class PerceptualPastel(Colormap):
                  scale_radius: float = 1.0,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize perceptual pastel colormap."""
-        super().__init__(out_of_domain_hsv)
-        
-        # Handle auto-scaling
-        if auto_scale_r:
-            if n_phi is None:
-                raise ValidationError("auto_scale_r=True requires n_phi to be specified")
-            if r_linear_step is not None:
-                raise ValidationError("Cannot specify both auto_scale_r=True and r_linear_step")
-            r_linear_step = 2 * np.pi / n_phi * scale_radius
-        
-        self.n_phi = n_phi
-        self.phi = np.pi / n_phi if n_phi is not None else None
-        self.r_linear_step = r_linear_step
-        self.r_log_base = r_log_base
+        super().__init__(n_phi, r_linear_step, r_log_base, v_base,
+                        auto_scale_r, scale_radius, out_of_domain_hsv)
+
         self.L_center = L_center
         self.L_range = L_range
         self.C = C
-        self.v_base = v_base
-        self.auto_scale_r = auto_scale_r
-        self.scale_radius = scale_radius
     
-    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Convert complex values to HSV components via OkLCh."""
+    def _compute_colors(self, z: np.ndarray, phi: np.ndarray, r: np.ndarray,
+                       V_phi: np.ndarray, V_r: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Compute HSV colors for PerceptualPastel colormap."""
         # Phase to hue (in degrees for OkLCh)
-        phi = phase_func(z)
         H_deg = phi * 180 / np.pi  # Convert to degrees
-        
-        # Phase-based value modulation for sharp sectors
-        if self.phi is not None:
-            V_phi = sawtooth(phi, self.phi)  # Sharp sawtooth for phase sectors
-        else:
-            V_phi = np.ones_like(z, dtype=float)
-        
-        # Modulus-based modulation
-        r = np.abs(z)
-        if self.r_linear_step and self.r_log_base is None:
-            V_r = sawtooth(r, self.r_linear_step)
-        elif self.r_linear_step is None and self.r_log_base:
-            V_r = sawtooth_log(r, self.r_log_base)
-        elif self.r_linear_step and self.r_log_base:
-            V_r = sawtooth_log(r / self.r_linear_step, self.r_log_base)
-        else:
-            V_r = np.ones_like(z, dtype=float)
-        
+
         # Combine phase sectors with modulus bands
-        V_scaler = 1 - self.v_base
-        L_mod = (V_phi + V_r) * V_scaler / 2 + self.v_base
-        # Map L_mod (which ranges 0.5 to 1.0 when v_base=0.5) to lightness range
+        L_mod = self._combine_modulations(V_phi, V_r)
+        # Map L_mod (which ranges v_base to 1.0) to lightness range
         # Normalize to [0, 1] first: (L_mod - v_base) / (1 - v_base)
         L_normalized = (L_mod - self.v_base) / (1 - self.v_base) if self.v_base < 1 else L_mod
         L = self.L_center + self.L_range * (L_normalized - 0.5)
-        
+
         # Convert OkLCh to RGB
         R, G, B = oklch_to_srgb(L, self.C, H_deg)
-        
+
         # Convert RGB to HSV for compatibility with base class
         hsv = mcolors.rgb_to_hsv(np.stack([R, G, B], axis=-1))
         return hsv[..., 0], hsv[..., 1], hsv[..., 2]
 
 
-class AnalogousWedge(Colormap):
+class AnalogousWedge(BasePhasePortrait):
     """Analogous color scheme with compressed hue range.
     
     Maps phase to a wedge of the color wheel (20-50% range) for
@@ -729,70 +793,51 @@ class AnalogousWedge(Colormap):
                  use_sigmoid: bool = True,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize analogous wedge colormap."""
-        super().__init__(out_of_domain_hsv)
-        
-        # Handle auto-scaling
-        if auto_scale_r:
-            if n_phi is None:
-                raise ValidationError("auto_scale_r=True requires n_phi to be specified")
-            if r_linear_step is not None:
-                raise ValidationError("Cannot specify both auto_scale_r=True and r_linear_step")
-            r_linear_step = 2 * np.pi / n_phi * scale_radius
-        
-        self.n_phi = n_phi
-        self.phi = np.pi / n_phi if n_phi is not None else None
-        self.r_linear_step = r_linear_step
-        self.r_log_base = r_log_base
+        # Note: V_base parameter maps to v_base in BasePhasePortrait
+        super().__init__(n_phi, r_linear_step, r_log_base, V_base,
+                        auto_scale_r, scale_radius, out_of_domain_hsv)
+
         self.H_center = H_center
         self.H_wedge = min(0.5, max(0.2, H_wedge))  # Clamp to valid range
         self.S = S
-        self.V_base = V_base
+        self.V_base = V_base  # Store original parameter for backwards compatibility
         self.V_range = V_range
-        self.auto_scale_r = auto_scale_r
-        self.scale_radius = scale_radius
         self.use_sigmoid = use_sigmoid
-    
-    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Convert complex values to HSV components."""
-        # Phase to compressed hue range
-        phi = phase_func(z)
-        H = self.H_center + self.H_wedge * (phi / (2 * np.pi) - 0.5)
-        H = np.mod(H, 1.0)  # Wrap to [0, 1]
-        
-        # Fixed saturation
-        S = np.full_like(z, self.S, dtype=float)
-        
-        # Phase-based value modulation for sharp sectors
-        if self.phi is not None:
-            V_phi = sawtooth(phi, self.phi)  # Sharp sawtooth for phase sectors
-        else:
-            V_phi = np.ones_like(z, dtype=float)
-        
-        # Modulus-based modulation
-        r = np.abs(z)
+
+    def _compute_modulus_modulation(self, r: np.ndarray, z: np.ndarray) -> np.ndarray:
+        """Compute modulus-based value modulation with sigmoid/tanh option."""
         if self.r_linear_step and self.r_log_base is None:
-            V_r = sawtooth(r, self.r_linear_step)
+            return sawtooth(r, self.r_linear_step)
         elif self.r_linear_step is None and self.r_log_base:
-            V_r = sawtooth_log(r, self.r_log_base)
+            return sawtooth_log(r, self.r_log_base)
         elif self.r_linear_step and self.r_log_base:
-            V_r = sawtooth_log(r / self.r_linear_step, self.r_log_base)
+            return sawtooth_log(r / self.r_linear_step, self.r_log_base)
         else:
             # Use sigmoid or tanh for smooth modulus mapping
             if self.use_sigmoid:
                 with np.errstate(divide='ignore', invalid='ignore'):
-                    V_r = sigmoid(np.log(r), center=0, scale=2)
+                    return sigmoid(np.log(r), center=0, scale=2)
             else:
-                V_r = np.tanh(r / 2)  # Maps [0, ∞) to [0, 1)
-        
+                return np.tanh(r / 2)  # Maps [0, ∞) to [0, 1)
+
+    def _compute_colors(self, z: np.ndarray, phi: np.ndarray, r: np.ndarray,
+                       V_phi: np.ndarray, V_r: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Compute HSV colors for AnalogousWedge colormap."""
+        # Phase to compressed hue range
+        H = self.H_center + self.H_wedge * (phi / (2 * np.pi) - 0.5)
+        H = np.mod(H, 1.0)  # Wrap to [0, 1]
+
+        # Fixed saturation
+        S = np.full_like(z, self.S, dtype=float)
+
         # Combine phase sectors with modulus
-        V_scaler = 1 - self.V_base
-        V = (V_phi + V_r) * V_scaler / 2 + self.V_base
+        V = self._combine_modulations(V_phi, V_r)
         V = np.clip(V, 0, 1)
-        
+
         return H, S, V
 
 
-class DivergingWarmCool(Colormap):
+class DivergingWarmCool(BasePhasePortrait):
     """Diverging warm-cool colormap based on phase sign.
     
     Positive phases lean toward warm colors, negative toward cool.
@@ -847,95 +892,67 @@ class DivergingWarmCool(Colormap):
                  use_oklch: bool = True,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize diverging warm-cool colormap."""
-        super().__init__(out_of_domain_hsv)
-        
-        # Validate parameters
-        if auto_scale_r and n_phi is None:
-            raise ValueError("auto_scale_r requires n_phi to be specified")
-        if auto_scale_r and r_linear_step is not None:
-            raise ValueError("Cannot specify both auto_scale_r and r_linear_step")
-        
-        self.n_phi = n_phi
-        self.phi = np.pi / n_phi if n_phi is not None else None
-        self.r_log_base = r_log_base
-        self.auto_scale_r = auto_scale_r
-        self.scale_radius = scale_radius
-        
-        # Calculate r_linear_step if auto_scale_r is True
-        if auto_scale_r and n_phi is not None:
-            self.r_linear_step = 2 * np.pi / n_phi * scale_radius
-        else:
-            self.r_linear_step = r_linear_step
-        
+        super().__init__(n_phi, r_linear_step, r_log_base, v_base,
+                        auto_scale_r, scale_radius, out_of_domain_hsv)
+
         self.H_warm = H_warm
         self.H_cool = H_cool
         self.L_center = L_center
         self.L_range = L_range
         self.C_min = C_min
         self.C_max = C_max
-        self.v_base = v_base
         self.use_oklch = use_oklch
     
-    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Convert complex values to HSV components."""
-        phi = phase_func(z)
-        r = np.abs(z)
-        
-        # Phase-based value modulation for sharp sectors
-        if self.phi is not None:
-            V_phi = sawtooth(phi, self.phi)  # Sharp sawtooth for phase sectors
-        else:
-            V_phi = np.ones_like(z, dtype=float)
-        
-        # Modulus-based value modulation
+    def _compute_modulus_modulation(self, r: np.ndarray, z: np.ndarray) -> np.ndarray:
+        """Compute modulus-based value modulation with sigmoid default."""
         if self.r_linear_step is not None:
-            V_r = sawtooth(r, self.r_linear_step)
+            return sawtooth(r, self.r_linear_step)
         elif self.r_log_base is not None:
-            V_r = sawtooth_log(r, self.r_log_base)
+            return sawtooth_log(r, self.r_log_base)
         else:
             with np.errstate(divide='ignore', invalid='ignore'):
-                V_r = sigmoid(np.log(r), center=0, scale=2)
-        
+                return sigmoid(np.log(r), center=0, scale=2)
+
+    def _compute_colors(self, z: np.ndarray, phi: np.ndarray, r: np.ndarray,
+                       V_phi: np.ndarray, V_r: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Compute HSV colors for DivergingWarmCool colormap."""
         # Map phase to warm-cool interpolation parameter
         a = np.sin(phi)  # in [-1, 1]
         t = (a + 1) / 2  # in [0, 1]
-        
+
         if self.use_oklch:
             # Interpolate hue in OkLCh space
             H_deg = (1 - t) * self.H_cool + t * self.H_warm
-            
+
             # Combine phase sectors with modulus
-            V_scaler = 1 - self.v_base
-            L_mod = (V_phi + V_r) * V_scaler / 2 + self.v_base
+            L_mod = self._combine_modulations(V_phi, V_r)
             # Map L_mod (which ranges v_base to 1.0) to lightness range
-            # Normalize to [0, 1] first
             L_normalized = (L_mod - self.v_base) / (1 - self.v_base) if self.v_base < 1 else L_mod
             L = self.L_center + self.L_range * (L_normalized - 0.5)
-            
+
             # Vary chroma based on phase extremity
             C = self.C_min + (self.C_max - self.C_min) * np.abs(a)
-            
+
             # Convert to RGB
             R, G, B = oklch_to_srgb(L, C, H_deg)
-            
+
             # Convert RGB to HSV
             hsv = mcolors.rgb_to_hsv(np.stack([R, G, B], axis=-1))
             return hsv[..., 0], hsv[..., 1], hsv[..., 2]
         else:
             # Simple HSV interpolation
             H = interpolate_hue(self.H_cool / 360, self.H_warm / 360, t)
-            
+
             # Combine phase sectors with modulus
-            V_scaler = 1 - self.v_base
-            V = (V_phi + V_r) * V_scaler / 2 + self.v_base
-            
+            V = self._combine_modulations(V_phi, V_r)
+
             # Vary saturation based on phase extremity
             S = self.C_min + (self.C_max - self.C_min) * np.abs(a)
-            
+
             return H, S, V
 
 
-class Isoluminant(Colormap):
+class Isoluminant(BasePhasePortrait):
     """Isoluminant colormap with optional contour lines.
     
     Maintains constant lightness with hue encoding phase only.
@@ -989,61 +1006,38 @@ class Isoluminant(Colormap):
                  use_oklch: bool = True,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize isoluminant colormap."""
-        super().__init__(out_of_domain_hsv)
-        
-        # Validate parameters
-        if auto_scale_r and n_phi is None:
-            raise ValueError("auto_scale_r requires n_phi to be specified")
-        if auto_scale_r and r_linear_step is not None:
-            raise ValueError("Cannot specify both auto_scale_r and r_linear_step")
-        
-        self.n_phi = n_phi
-        self.phi = np.pi / n_phi if n_phi is not None else None
-        self.r_log_base = r_log_base
-        self.auto_scale_r = auto_scale_r
-        self.scale_radius = scale_radius
-        
-        # Calculate r_linear_step if auto_scale_r is True
-        if auto_scale_r and n_phi is not None:
-            self.r_linear_step = 2 * np.pi / n_phi * scale_radius
-        else:
-            self.r_linear_step = r_linear_step
-        
+        super().__init__(n_phi, r_linear_step, r_log_base, v_base,
+                        auto_scale_r, scale_radius, out_of_domain_hsv)
+
         self.L = L
         self.C_min = C_min
         self.C_max = C_max
-        self.v_base = v_base
         self.show_contours = show_contours
         self.contour_period = contour_period
         self.contour_width = contour_width
         self.use_oklch = use_oklch
-    
-    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Convert complex values to HSV components."""
-        phi = phase_func(z)
-        r = np.abs(z)
-        
-        # Phase-based value modulation for sharp sectors
-        if self.phi is not None:
-            V_phi = sawtooth(phi, self.phi)  # Sharp sawtooth for phase sectors
-        else:
-            V_phi = np.ones_like(z, dtype=float)
-        
-        # Modulus-based value modulation (only if not using contours)
+
+    def _compute_modulus_modulation(self, r: np.ndarray, z: np.ndarray) -> np.ndarray:
+        """Compute modulus-based value modulation (special handling for show_contours)."""
+        # When show_contours is True, don't use modulus modulation
+        # (contours are applied separately in _compute_colors)
         if not self.show_contours:
             if self.r_linear_step is not None:
-                V_r = sawtooth(r, self.r_linear_step)
+                return sawtooth(r, self.r_linear_step)
             elif self.r_log_base is not None:
-                V_r = sawtooth_log(r, self.r_log_base)
+                return sawtooth_log(r, self.r_log_base)
             else:
-                V_r = np.ones_like(z, dtype=float)
+                return np.ones_like(z, dtype=float)
         else:
-            V_r = np.ones_like(z, dtype=float)
-        
+            return np.ones_like(z, dtype=float)
+
+    def _compute_colors(self, z: np.ndarray, phi: np.ndarray, r: np.ndarray,
+                       V_phi: np.ndarray, V_r: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Compute HSV colors for Isoluminant colormap."""
         if self.use_oklch:
             # Phase to hue in degrees
             H_deg = phi * 180 / np.pi
-            
+
             # Base lightness modulated by phase sectors and modulus
             V_scaler = 1 - self.v_base
             if not self.show_contours:
@@ -1055,23 +1049,21 @@ class Isoluminant(Colormap):
             else:
                 L_base = self.L + (V_phi - 0.5) * V_scaler * 0.2  # Subtle phase modulation
                 L = np.full_like(z, L_base, dtype=float)
-            
+
             if self.show_contours:
-                r = np.abs(z)
                 with np.errstate(divide='ignore', invalid='ignore'):
                     rho = np.log(r) / np.log(np.e)
                 T_rho = np.mod(rho / self.contour_period, 1.0)
                 # Gaussian-like contour lines
                 contour = 1 - np.exp(-np.power(T_rho / self.contour_width, 2))
                 L = L * (0.8 + 0.2 * contour)  # Darken at contours
-            
+
             # Vary chroma slightly with modulus
-            r = np.abs(z)
             C = self.C_min + (self.C_max - self.C_min) * np.tanh(r / 2)
-            
+
             # Convert to RGB
             R, G, B = oklch_to_srgb(L, C, H_deg)
-            
+
             # Convert RGB to HSV
             hsv = mcolors.rgb_to_hsv(np.stack([R, G, B], axis=-1))
             return hsv[..., 0], hsv[..., 1], hsv[..., 2]
@@ -1079,7 +1071,7 @@ class Isoluminant(Colormap):
             # Simple HSV version
             H = phi / (2 * np.pi)
             S = np.full_like(z, 0.5, dtype=float)
-            
+
             # Base value modulated by phase sectors and modulus
             V_scaler = 1 - self.v_base
             if not self.show_contours:
@@ -1088,19 +1080,18 @@ class Isoluminant(Colormap):
                 V = self.L + (V_mod - 0.75) * 0.2  # Subtle modulation
             else:
                 V = np.full_like(z, self.L, dtype=float)
-            
+
             if self.show_contours:
-                r = np.abs(z)
                 with np.errstate(divide='ignore', invalid='ignore'):
                     rho = np.log(r) / np.log(np.e)
                 T_rho = np.mod(rho / self.contour_period, 1.0)
                 contour = 1 - np.exp(-np.power(T_rho / self.contour_width, 2))
                 V = V * (0.8 + 0.2 * contour)
-            
+
             return H, S, V
 
 
-class CubehelixPhase(Colormap):
+class CubehelixPhase(BasePhasePortrait):
     """Cubehelix colormap driven by complex phase.
     
     Uses Dave Green's cubehelix color scheme which maintains
@@ -1154,77 +1145,52 @@ class CubehelixPhase(Colormap):
                  modulate_with_r: bool = True,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize cubehelix phase colormap."""
-        super().__init__(out_of_domain_hsv)
-        
-        # Validate parameters
-        if auto_scale_r and n_phi is None:
-            raise ValueError("auto_scale_r requires n_phi to be specified")
-        if auto_scale_r and r_linear_step is not None:
-            raise ValueError("Cannot specify both auto_scale_r and r_linear_step")
-        
-        self.n_phi = n_phi
-        self.phi = np.pi / n_phi if n_phi is not None else None
-        self.r_log_base = r_log_base
-        self.auto_scale_r = auto_scale_r
-        self.scale_radius = scale_radius
-        
-        # Calculate r_linear_step if auto_scale_r is True
-        if auto_scale_r and n_phi is not None:
-            self.r_linear_step = 2 * np.pi / n_phi * scale_radius
-        else:
-            self.r_linear_step = r_linear_step
-        
+        super().__init__(n_phi, r_linear_step, r_log_base, v_base,
+                        auto_scale_r, scale_radius, out_of_domain_hsv)
+
         self.start = start
         self.rotations = rotations
         self.saturation = saturation
         self.L_min = L_min
         self.L_max = L_max
-        self.v_base = v_base
         self.gamma = gamma
         self.modulate_with_r = modulate_with_r
-    
-    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Convert complex values to HSV components via cubehelix."""
-        # Phase determines position along helix
-        phi = phase_func(z)
-        r = np.abs(z)
-        h = phi / (2 * np.pi)  # Normalize to [0, 1]
-        
-        # Phase-based value modulation for sharp sectors
-        if self.phi is not None:
-            V_phi = sawtooth(phi, self.phi)  # Sharp sawtooth for phase sectors
-        else:
-            V_phi = np.ones_like(z, dtype=float)
-        
-        # Modulus-based value modulation
+
+    def _compute_modulus_modulation(self, r: np.ndarray, z: np.ndarray) -> np.ndarray:
+        """Compute modulus-based value modulation with sigmoid default."""
         if self.r_linear_step is not None:
-            V_r = sawtooth(r, self.r_linear_step)
+            return sawtooth(r, self.r_linear_step)
         elif self.r_log_base is not None:
-            V_r = sawtooth_log(r, self.r_log_base)
+            return sawtooth_log(r, self.r_log_base)
         else:
             with np.errstate(divide='ignore', invalid='ignore'):
-                V_r = sigmoid(np.log(r), center=0, scale=2)
-        
+                return sigmoid(np.log(r), center=0, scale=2)
+
+    def _compute_colors(self, z: np.ndarray, phi: np.ndarray, r: np.ndarray,
+                       V_phi: np.ndarray, V_r: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Compute HSV colors for CubehelixPhase colormap."""
+        # Phase determines position along helix
+        h = phi / (2 * np.pi)  # Normalize to [0, 1]
+
         if self.modulate_with_r:
             # Combine phase sectors and modulus
-            V_scaler = 1 - self.v_base
-            combined_mod = (V_phi + V_r) * V_scaler / 2 + self.v_base
+            combined_mod = self._combine_modulations(V_phi, V_r)
             h_effective = h * (self.L_min + (self.L_max - self.L_min) * combined_mod)
         else:
             # Apply phase sectors to base scaling
             V_scaler = 1 - self.v_base
             h_mod = h * ((V_phi * V_scaler) + self.v_base)
             h_effective = self.L_min + h_mod * (self.L_max - self.L_min)
-        
+
         # Generate cubehelix colors
         R, G, B = cubehelix(h_effective, s=self.saturation, r=self.rotations, gamma=self.gamma)
-        
+
         # Convert RGB to HSV
         hsv = mcolors.rgb_to_hsv(np.stack([R, G, B], axis=-1))
         return hsv[..., 0], hsv[..., 1], hsv[..., 2]
 
 
-class InkPaper(Colormap):
+class InkPaper(BasePhasePortrait):
     """Nearly monochrome colormap with subtle phase tints.
     
     Creates a classy, etching-like appearance that's almost grayscale
@@ -1281,107 +1247,80 @@ class InkPaper(Colormap):
                  use_oklch: bool = True,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize ink & paper colormap."""
-        super().__init__(out_of_domain_hsv)
-        
-        # Validate parameters
-        if auto_scale_r and n_phi is None:
-            raise ValueError("auto_scale_r requires n_phi to be specified")
-        if auto_scale_r and r_linear_step is not None:
-            raise ValueError("Cannot specify both auto_scale_r and r_linear_step")
-        
-        self.n_phi = n_phi
-        self.phi = np.pi / n_phi if n_phi is not None else None
-        self.r_log_base = r_log_base
-        self.auto_scale_r = auto_scale_r
-        self.scale_radius = scale_radius
-        
-        # Calculate r_linear_step if auto_scale_r is True
-        if auto_scale_r and n_phi is not None:
-            self.r_linear_step = 2 * np.pi / n_phi * scale_radius
-        else:
-            self.r_linear_step = r_linear_step
-        
+        super().__init__(n_phi, r_linear_step, r_log_base, v_base,
+                        auto_scale_r, scale_radius, out_of_domain_hsv)
+
         self.L_min = L_min
         self.L_max = L_max
         self.C_min = C_min
         self.C_max = C_max
-        self.v_base = v_base
         self.add_phase_stripes = add_phase_stripes
         self.stripe_count = stripe_count
         self.stripe_amplitude = stripe_amplitude
         self.use_oklch = use_oklch
-    
-    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Convert complex values to HSV components."""
-        phi = phase_func(z)
-        r = np.abs(z)
-        
-        # Phase-based value modulation for sharp sectors
-        if self.phi is not None:
-            V_phi = sawtooth(phi, self.phi)  # Sharp sawtooth for phase sectors
-        else:
-            V_phi = np.ones_like(z, dtype=float)
-        
-        # Modulus-based value modulation
+
+    def _compute_modulus_modulation(self, r: np.ndarray, z: np.ndarray) -> np.ndarray:
+        """Compute modulus-based value modulation with sigmoid default."""
         if self.r_linear_step is not None:
-            V_r = sawtooth(r, self.r_linear_step)
+            return sawtooth(r, self.r_linear_step)
         elif self.r_log_base is not None:
-            V_r = sawtooth_log(r, self.r_log_base)
+            return sawtooth_log(r, self.r_log_base)
         else:
             with np.errstate(divide='ignore', invalid='ignore'):
-                V_r = sigmoid(np.log(r), center=0, scale=2)
-        
+                return sigmoid(np.log(r), center=0, scale=2)
+
+    def _compute_colors(self, z: np.ndarray, phi: np.ndarray, r: np.ndarray,
+                       V_phi: np.ndarray, V_r: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Compute HSV colors for InkPaper colormap."""
         if self.use_oklch:
             # Phase to hue (degrees)
             H_deg = phi * 180 / np.pi
-            
+
             # Combine phase sectors and modulus for lightness modulation
             if self.phi is not None:
                 # Combine with phase sectors
-                V_scaler = 1 - self.v_base
-                combined_mod = (V_phi + V_r) * V_scaler / 2 + self.v_base
+                combined_mod = self._combine_modulations(V_phi, V_r)
             else:
                 combined_mod = V_r
             L = self.L_min + (self.L_max - self.L_min) * combined_mod
-            
+
             # Add phase stripes if requested
             if self.add_phase_stripes:
                 L = L + self.stripe_amplitude * np.cos(self.stripe_count * phi)
                 L = np.clip(L, 0, 1)
-            
+
             # Very low chroma for near-monochrome look
             C = self.C_min + (self.C_max - self.C_min) * np.tanh(r)
-            
+
             # Convert to RGB
             R, G, B = oklch_to_srgb(L, C, H_deg)
-            
+
             # Convert RGB to HSV
             hsv = mcolors.rgb_to_hsv(np.stack([R, G, B], axis=-1))
             return hsv[..., 0], hsv[..., 1], hsv[..., 2]
         else:
             # Simple HSV version
             H = phi / (2 * np.pi)
-            
+
             # Very low saturation
             S = np.full_like(z, 0.1, dtype=float)
-            
+
             # Combine phase sectors and modulus for value modulation
             if self.phi is not None:
                 # Combine with phase sectors
-                V_scaler = 1 - self.v_base
-                combined_mod = (V_phi + V_r) * V_scaler / 2 + self.v_base
+                combined_mod = self._combine_modulations(V_phi, V_r)
             else:
                 combined_mod = V_r
             V = self.L_min + (self.L_max - self.L_min) * combined_mod
-            
+
             if self.add_phase_stripes:
                 V = V + self.stripe_amplitude * np.cos(self.stripe_count * phi)
                 V = np.clip(V, 0, 1)
-            
+
             return H, S, V
 
 
-class EarthTopographic(Colormap):
+class EarthTopographic(BasePhasePortrait):
     """Earth-tone topographic colormap.
     
     Creates a terrain-inspired aesthetic where modulus appears as
@@ -1441,26 +1380,9 @@ class EarthTopographic(Colormap):
                  use_oklch: bool = True,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize earth topographic colormap."""
-        super().__init__(out_of_domain_hsv)
-        
-        # Validate parameters
-        if auto_scale_r and n_phi is None:
-            raise ValueError("auto_scale_r requires n_phi to be specified")
-        if auto_scale_r and r_linear_step is not None:
-            raise ValueError("Cannot specify both auto_scale_r and r_linear_step")
-        
-        self.n_phi = n_phi
-        self.phi = np.pi / n_phi if n_phi is not None else None
-        self.r_log_base = r_log_base
-        self.auto_scale_r = auto_scale_r
-        self.scale_radius = scale_radius
-        
-        # Calculate r_linear_step if auto_scale_r is True
-        if auto_scale_r and n_phi is not None:
-            self.r_linear_step = 2 * np.pi / n_phi * scale_radius
-        else:
-            self.r_linear_step = r_linear_step
-        
+        super().__init__(n_phi, r_linear_step, r_log_base, v_base,
+                        auto_scale_r, scale_radius, out_of_domain_hsv)
+
         self.L_min = L_min
         self.L_max = L_max
         self.H_water = H_water
@@ -1469,46 +1391,37 @@ class EarthTopographic(Colormap):
         self.C_max = C_max
         self.add_hillshade = add_hillshade
         self.hillshade_amplitude = hillshade_amplitude
-        self.v_base = v_base
         self.use_oklch = use_oklch
-    
-    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Convert complex values to HSV components."""
-        phi = phase_func(z)
-        r = np.abs(z)
-        
-        # Phase-based value modulation for sharp sectors
-        if self.phi is not None:
-            V_phi = sawtooth(phi, self.phi)  # Sharp sawtooth for phase sectors
-        else:
-            V_phi = np.ones_like(z, dtype=float)
-        
-        # Modulus-based value modulation
+
+    def _compute_modulus_modulation(self, r: np.ndarray, z: np.ndarray) -> np.ndarray:
+        """Compute modulus-based value modulation with sigmoid default."""
         if self.r_linear_step is not None:
-            V_r = sawtooth(r, self.r_linear_step)
+            return sawtooth(r, self.r_linear_step)
         elif self.r_log_base is not None:
-            V_r = sawtooth_log(r, self.r_log_base)
+            return sawtooth_log(r, self.r_log_base)
         else:
             with np.errstate(divide='ignore', invalid='ignore'):
-                V_r = sigmoid(np.log(r), center=0, scale=2)
-        
+                return sigmoid(np.log(r), center=0, scale=2)
+
+    def _compute_colors(self, z: np.ndarray, phi: np.ndarray, r: np.ndarray,
+                       V_phi: np.ndarray, V_r: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Compute HSV colors for EarthTopographic colormap."""
         if self.use_oklch:
             # Map phase to water/land hues
             t = (np.sin(phi) + 1) / 2  # Map to [0, 1]
             H_deg = (1 - t) * self.H_water + t * self.H_land
-            
+
             # Base lightness from modulus
             L_base = self.L_min + (self.L_max - self.L_min) * V_r
-            
+
             # Combine phase sectors with modulus
             if self.phi is not None:
                 # Mix phase and modulus modulation for clear phase sectors
-                V_scaler = 1 - self.v_base
-                combined_mod = (V_phi + V_r) * V_scaler / 2 + self.v_base
+                combined_mod = self._combine_modulations(V_phi, V_r)
                 L = self.L_min + (self.L_max - self.L_min) * combined_mod
             else:
                 L = L_base
-            
+
             # Add hillshade effect
             if self.add_hillshade:
                 with np.errstate(divide='ignore', invalid='ignore'):
@@ -1517,13 +1430,13 @@ class EarthTopographic(Colormap):
                 hillshade = np.cos(2 * np.pi * T_rho)
                 L = L + self.hillshade_amplitude * hillshade
                 L = np.clip(L, 0, 1)
-            
+
             # Subtle earth-tone chroma
             C = self.C_min + (self.C_max - self.C_min) * np.tanh(r / 2)
-            
+
             # Convert to RGB
             R, G, B = oklch_to_srgb(L, C, H_deg)
-            
+
             # Convert RGB to HSV
             hsv = mcolors.rgb_to_hsv(np.stack([R, G, B], axis=-1))
             return hsv[..., 0], hsv[..., 1], hsv[..., 2]
@@ -1531,21 +1444,20 @@ class EarthTopographic(Colormap):
             # Simple HSV version
             t = (np.sin(phi) + 1) / 2
             H = interpolate_hue(self.H_water / 360, self.H_land / 360, t)
-            
+
             S = np.full_like(z, 0.3, dtype=float)
-            
+
             # Base value from modulus
             V_base = self.L_min + (self.L_max - self.L_min) * V_r
-            
+
             # Combine phase sectors with modulus
             if self.phi is not None:
                 # Mix phase and modulus modulation for clear phase sectors
-                V_scaler = 1 - self.v_base
-                combined_mod = (V_phi + V_r) * V_scaler / 2 + self.v_base
+                combined_mod = self._combine_modulations(V_phi, V_r)
                 V = self.L_min + (self.L_max - self.L_min) * combined_mod
             else:
                 V = V_base
-            
+
             if self.add_hillshade:
                 with np.errstate(divide='ignore', invalid='ignore'):
                     rho = np.log(r) / np.log(np.e)
@@ -1553,11 +1465,11 @@ class EarthTopographic(Colormap):
                 hillshade = np.cos(2 * np.pi * T_rho)
                 V = V + self.hillshade_amplitude * hillshade
                 V = np.clip(V, 0, 1)
-            
+
             return H, S, V
 
 
-class FourQuadrant(Colormap):
+class FourQuadrant(BasePhasePortrait):
     """Four-quadrant colormap with smooth circular interpolation.
     
     Maps the four principal phase angles to four color anchors
@@ -1609,72 +1521,47 @@ class FourQuadrant(Colormap):
                  v_base: float = 0.5,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize four-quadrant colormap."""
-        super().__init__(out_of_domain_hsv)
-        
-        # Validate parameters
-        if auto_scale_r and n_phi is None:
-            raise ValueError("auto_scale_r requires n_phi to be specified")
-        if auto_scale_r and r_linear_step is not None:
-            raise ValueError("Cannot specify both auto_scale_r and r_linear_step")
-        
-        self.n_phi = n_phi
-        self.phi = np.pi / n_phi if n_phi is not None else None
-        self.r_log_base = r_log_base
-        self.auto_scale_r = auto_scale_r
-        self.scale_radius = scale_radius
-        
-        # Calculate r_linear_step if auto_scale_r is True
-        if auto_scale_r and n_phi is not None:
-            self.r_linear_step = 2 * np.pi / n_phi * scale_radius
-        else:
-            self.r_linear_step = r_linear_step
-        
+        super().__init__(n_phi, r_linear_step, r_log_base, v_base,
+                        auto_scale_r, scale_radius, out_of_domain_hsv)
+
         self.H_anchors = H_anchors
         self.C = C
         self.L_min = L_min
         self.L_max = L_max
         self.use_oklch = use_oklch
         self.smooth_interpolation = smooth_interpolation
-        self.v_base = v_base
-    
-    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Convert complex values to HSV components."""
-        phi = phase_func(z)
-        r = np.abs(z)
-        
-        # Phase-based value modulation for sharp sectors
-        if self.phi is not None:
-            V_phi = sawtooth(phi, self.phi)  # Sharp sawtooth for phase sectors
-        else:
-            V_phi = np.ones_like(z, dtype=float)
-        
-        # Modulus-based value modulation
+
+    def _compute_modulus_modulation(self, r: np.ndarray, z: np.ndarray) -> np.ndarray:
+        """Compute modulus-based value modulation with sigmoid default."""
         if self.r_linear_step is not None:
-            V_r = sawtooth(r, self.r_linear_step)
+            return sawtooth(r, self.r_linear_step)
         elif self.r_log_base is not None:
-            V_r = sawtooth_log(r, self.r_log_base)
+            return sawtooth_log(r, self.r_log_base)
         else:
             with np.errstate(divide='ignore', invalid='ignore'):
-                V_r = sigmoid(np.log(r), center=0, scale=2)
-        
+                return sigmoid(np.log(r), center=0, scale=2)
+
+    def _compute_colors(self, z: np.ndarray, phi: np.ndarray, r: np.ndarray,
+                       V_phi: np.ndarray, V_r: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Compute HSV colors for FourQuadrant colormap."""
         # Map phase to hue via 4-point interpolation
         phi_norm = phi / (2 * np.pi)  # Normalize to [0, 1]
-        
+
         # Find which quadrant we're in
         quadrant = np.floor(phi_norm * 4).astype(int) % 4
         t_local = (phi_norm * 4) % 1  # Local interpolation parameter
-        
+
         # Initialize hue array
         shape = np.broadcast(z).shape
         H_deg = np.zeros(shape)
-        
+
         # Interpolate within each quadrant
         for q in range(4):
             mask = (quadrant == q)
             if np.any(mask):
                 h1 = self.H_anchors[q]
                 h2 = self.H_anchors[(q + 1) % 4]
-                
+
                 if self.smooth_interpolation:
                     # Smooth interpolation using raised cosine
                     t_smooth = 0.5 - 0.5 * np.cos(np.pi * t_local[mask])
@@ -1682,23 +1569,22 @@ class FourQuadrant(Colormap):
                 else:
                     # Linear interpolation
                     H_deg[mask] = h1 + (h2 - h1) * t_local[mask]
-        
+
         if self.use_oklch:
             # Base lightness from modulus
             L_base = self.L_min + (self.L_max - self.L_min) * V_r
-            
+
             # Combine phase sectors with modulus
             if self.phi is not None:
                 # Mix phase and modulus modulation for clear phase sectors
-                V_scaler = 1 - self.v_base
-                combined_mod = (V_phi + V_r) * V_scaler / 2 + self.v_base
+                combined_mod = self._combine_modulations(V_phi, V_r)
                 L = self.L_min + (self.L_max - self.L_min) * combined_mod
             else:
                 L = L_base
-            
+
             # Convert to RGB
             R, G, B = oklch_to_srgb(L, self.C, H_deg)
-            
+
             # Convert RGB to HSV
             hsv = mcolors.rgb_to_hsv(np.stack([R, G, B], axis=-1))
             return hsv[..., 0], hsv[..., 1], hsv[..., 2]
@@ -1706,17 +1592,16 @@ class FourQuadrant(Colormap):
             # Simple HSV version
             H = H_deg / 360  # Convert to [0, 1]
             S = np.full_like(z, 0.5, dtype=float)
-            
+
             # Base value from modulus
             V_base = self.L_min + (self.L_max - self.L_min) * V_r
-            
+
             # Combine phase sectors with modulus
             if self.phi is not None:
                 # Mix phase and modulus modulation for clear phase sectors
-                V_scaler = 1 - self.v_base
-                combined_mod = (V_phi + V_r) * V_scaler / 2 + self.v_base
+                combined_mod = self._combine_modulations(V_phi, V_r)
                 V = self.L_min + (self.L_max - self.L_min) * combined_mod
             else:
                 V = V_base
-            
+
             return H, S, V
