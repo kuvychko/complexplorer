@@ -65,6 +65,14 @@ from complexplorer.utils.backend import (
     ensure_interactive_plots
 )
 
+# Logging utilities
+from complexplorer.utils.logging import (
+    setup_logging,
+    enable_debug_logging,
+    disable_logging,
+    get_logger
+)
+
 # High-level API
 from complexplorer.api import (
     show,
@@ -135,6 +143,9 @@ __all__ = [
 
     # Utilities
     'setup_matplotlib_backend', 'ensure_interactive_plots',
+
+    # Logging
+    'setup_logging', 'enable_debug_logging', 'disable_logging', 'get_logger',
 
     # High-level API
     'show', 'publication_preset', 'interactive_preset', 'high_contrast_preset',
