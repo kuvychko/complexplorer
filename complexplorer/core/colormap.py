@@ -259,18 +259,21 @@ class OklabPhase(Colormap):
     scale_radius : float, optional
         Reference radius for auto-scaling.
     enhanced : bool, optional
-        If True (default), use sawtooth modulation for better structure visibility.
-        If False, use smooth OKLAB colors similar to cplot.
+        If True, use sawtooth modulation for better structure visibility.
+        If False (default), use smooth OKLAB colors similar to cplot.
     L : float, optional
-        Base lightness in OKLAB space (0 to 1).
+        Base lightness in OKLAB space (0 to 1). Default is 0.7.
     C : float, optional
-        Chroma (saturation) in OKLAB space (typically 0 to 0.4).
+        Chroma (saturation) in OKLAB space (typically 0 to 0.4). Default is 0.35.
     v_base : float, optional
-        Base value for enhanced mode, in [0, 1).
+        Base value for enhanced mode, in [0, 1). Default is 0.5.
     emphasize_unit_circle : bool, optional
         If True, emphasize the unit circle |z|=1.
     unit_circle_strength : float, optional
         Strength of unit circle emphasis (0 to 1).
+    phase_offset : float, optional
+        Phase rotation offset in radians. Default is 0.8936868*π to match cplot's
+        color mapping (green for arg=0, blue for arg=π/2, orange for arg=-π/2, pink for arg=π).
     out_of_domain_hsv : tuple, optional
         Color for out-of-domain points.
         
@@ -292,12 +295,13 @@ class OklabPhase(Colormap):
                  r_log_base: Optional[float] = None,
                  auto_scale_r: bool = False,
                  scale_radius: float = 1.0,
-                 enhanced: bool = True,
-                 L: float = 0.65,
-                 C: float = 0.3,
+                 enhanced: bool = False,
+                 L: float = 0.7,
+                 C: float = 0.35,
                  v_base: float = 0.5,
                  emphasize_unit_circle: bool = False,
                  unit_circle_strength: float = 0.3,
+                 phase_offset: float = 0.8936868 * np.pi,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize OKLAB phase colormap."""
         super().__init__(out_of_domain_hsv)
@@ -333,6 +337,7 @@ class OklabPhase(Colormap):
         self.v_base = v_base
         self.emphasize_unit_circle = emphasize_unit_circle
         self.unit_circle_strength = unit_circle_strength
+        self.phase_offset = phase_offset
     
     def _oklab_to_rgb(self, L: np.ndarray, a: np.ndarray, b: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Convert OKLAB to RGB directly (not via OkLCh).
@@ -420,8 +425,11 @@ class OklabPhase(Colormap):
         # Convert phase to OKLAB a, b components
         # OKLAB uses a cylindrical representation where:
         # a = chroma * cos(hue), b = chroma * sin(hue)
-        a = self.C * np.cos(phi)
-        b = self.C * np.sin(phi)
+        # Apply phase offset to match cplot's color mapping
+        # (green for arg=0, blue for arg=pi/2, etc.)
+        phi_shifted = phi + self.phase_offset
+        a = self.C * np.cos(phi_shifted)
+        b = self.C * np.sin(phi_shifted)
         
         # Convert OKLAB to RGB
         R, G, B = self._oklab_to_rgb(L_final, a, b)
