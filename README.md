@@ -7,7 +7,7 @@
 
 **Transform complex mathematics into tangible art.** Complexplorer brings complex function visualization into the physical world through stunning Riemann relief maps and 3D-printable mathematical ornaments.
 
-> **🆕 Version 2.0 Released!** Major improvements include 8 new perceptually-optimized colormaps, cleaner API, and enhanced performance. See the [Migration Guide](MIGRATION_GUIDE_V2.md) if upgrading from v1.x.
+> **🆕 Version 2.0 Released!** Major improvements include 8 new perceptually-optimized colormaps, comprehensive documentation (5,571 lines), enhanced phase portraits with auto-scaling, and cleaner API. See the [CHANGELOG](CHANGELOG.md) and [Documentation](https://kuvychko.github.io/complexplorer/) for details.
 
 <p align="center">
   <img src="examples/gallery/Riemann_relief_map_20250726.png" width="50%">
@@ -67,7 +67,7 @@ Create traditional domain coloring visualizations too:
 ```python
 # Classic phase portrait with v2.0 API
 domain = cp.Rectangle(4, 4)
-cp.plot(domain, f, cmap=cp.Phase(n_phi=12, auto_scale_r=True))  # 'plot' replaces 'quick_plot'
+cp.plot(domain, f, cmap=cp.Phase(phase_sectors=12, auto_scale_r=True))
 ```
 
 ## 💫 The Magic of Complex Numbers
@@ -146,11 +146,11 @@ cp.plot(domain, f, cmap=cp.FourQuadrant(C=0.25, L_base=0.5))
 
 All new colormaps support enhanced phase portraits with automatic scaling:
 ```python
-cmap = cp.PerceptualPastel(n_phi=6, auto_scale_r=True)  # Square cells
+cmap = cp.PerceptualPastel(phase_sectors=6, auto_scale_r=True)  # Square cells
 cp.plot(domain, f, cmap=cmap)
 ```
 
-See our [Colormap Guide](docs/colormap_guide.md) for detailed comparisons and use cases.
+See our [Colormap Guide](https://kuvychko.github.io/complexplorer/user-guide/colormaps/) for detailed comparisons and use cases.
 
 ## 🎨 Gallery
 
@@ -170,20 +170,29 @@ Explore the full range of visualizations in our [**Gallery**](docs/gallery/READM
 
 ## 📚 Documentation
 
-- **[Gallery](docs/gallery/README.md)** - Visual showcase with code examples
-- **[Getting Started](examples/getting_started.ipynb)** - Beginner-friendly introduction
+**📖 [Full Documentation](https://kuvychko.github.io/complexplorer/)** - Comprehensive guide with 5,571 lines of documentation
+
+### Quick Links
+
+- **[Installation Guide](https://kuvychko.github.io/complexplorer/getting-started/installation/)** - Get up and running
+- **[Quickstart Tutorial](https://kuvychko.github.io/complexplorer/getting-started/quickstart/)** - Your first visualization in 5 minutes
+- **[User Guide](https://kuvychko.github.io/complexplorer/user-guide/domains/)** - Domains, colormaps, plotting, Riemann sphere
+- **[Gallery](https://kuvychko.github.io/complexplorer/examples/gallery/)** - Visual showcase with 50+ code examples
+- **[API Reference](https://kuvychko.github.io/complexplorer/api/core/)** - Complete API documentation
+- **[Contributing Guide](https://kuvychko.github.io/complexplorer/development/contributing/)** - How to contribute
+
+### Examples
+- **[Getting Started](examples/getting_started.ipynb)** - Jupyter notebook introduction
 - **[Advanced Features](examples/advanced_features.ipynb)** - 3D visualization and more
 - **[STL Export Demo](examples/stl_export_demo.ipynb)** - Create 3D printable models
-- **[API Cookbook](examples/api_cookbook.ipynb)** - Ready-to-use code recipes
 - **[Interactive Demo](examples/interactive_showcase.py)** - Run `python examples/interactive_showcase.py`
-- **API Reference** - Use `help()` on any function or class
 
 ## 🛠️ Advanced Example
 
 ```python
 # Create an enhanced phase portrait with auto-scaling for square cells
 domain = cp.Annulus(0.5, 2, center=1j)  # Annular domain
-cmap = cp.Phase(n_phi=6, auto_scale_r=True, v_base=0.4)  # Auto-scaled enhanced phase
+cmap = cp.Phase(phase_sectors=6, auto_scale_r=True, v_base=0.4)  # Auto-scaled enhanced phase
 
 # 2D visualization with domain and codomain side-by-side
 cp.pair_plot(domain, f, cmap=cmap, figsize=(10, 5))
@@ -268,7 +277,7 @@ ornament = OrnamentGenerator(
     func=lambda z: (z - 1) / (z**2 + z + 1),
     resolution=150,
     scaling='arctan',  # Creates beautiful topographic relief
-    cmap=cp.Phase(n_phi=12, auto_scale_r=True)
+    cmap=cp.Phase(phase_sectors=12, auto_scale_r=True)
 )
 
 # Generate print-ready STL file

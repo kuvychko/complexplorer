@@ -2,6 +2,156 @@
 
 All notable changes to complexplorer will be documented in this file.
 
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [2.0.0] - 2025-01-XX
+
+### Breaking Changes
+
+#### Parameter Renaming
+- **BREAKING**: Renamed `n_phi` → `phase_sectors` across all colormaps and functions
+  - Affects: `Phase`, `OklabPhase`, `PerceptualPastel`, `PolarChessboard`, and all related functions
+  - Migration: Replace `n_phi=6` with `phase_sectors=6`
+  - Reason: Clearer parameter naming consistent with mathematical terminology
+
+### Added
+
+#### New Colormaps (13 Total)
+- **PerceptualPastel**: OkLCh-based pastels with uniform brightness, ideal for print
+- **Isoluminant**: Constant lightness with phase encoded purely in hue
+- **CubehelixPhase**: Grayscale-safe colormap for scientific publishing
+- **AnalogousWedge**: Harmonious colors from compressed hue range (ocean/sunset themes)
+- **DivergingWarmCool**: Warm/cool divergence for cartographic style
+- **InkPaper**: Minimalist near-monochrome with subtle phase tints
+- **EarthTopographic**: Terrain-inspired with earth tones and hillshade
+- **FourQuadrant**: Bauhaus-inspired with 4 color anchors
+- **OklabPhase**: Perceptually uniform OKLAB color space phase portraits
+
+#### Enhanced Phase Portrait Features
+- **Auto-scaling**: `auto_scale_r=True` automatically calculates spacing for square cells
+- **Scale radius control**: `scale_radius` parameter to adjust cell size reference
+- **Combined enhancements**: Use phase sectors + modulus contours simultaneously
+- **Brightness control**: `v_base` parameter for contrast adjustment
+
+#### Comprehensive Documentation (5,571 lines)
+- **Getting Started Guide**: Installation and quickstart tutorials
+- **User Guide**: Complete documentation for domains, colormaps, 2D/3D plotting, Riemann sphere
+- **API Reference**: Full API documentation with mkdocstrings
+- **Gallery**: Visual showcase with 50+ code examples
+- **Development Guide**: Contributing guidelines and architecture documentation
+- **MkDocs Material**: Professional documentation site with search and navigation
+
+#### Modulus Scaling System
+- 10+ modulus scaling modes for 3D/Riemann sphere: `arctan`, `logarithmic`, `adaptive`, `sigmoid`, `power`, `linear_clamp`, `hybrid`
+- STL-specific parameter defaults for 3D printability
+- Custom parameter support for all scaling modes
+
+#### Logging Framework
+- Comprehensive logging with proper log levels (DEBUG, INFO, WARNING, ERROR)
+- Module-specific loggers for debugging
+- Performance timing for slow operations
+- Configurable log output
+
+#### Validation System
+- Centralized input validation with clear error messages
+- Custom exception hierarchy: `ValidationError`, `DomainError`, `ColormapError`, `PlottingError`
+- Immediate validation (fail-fast approach)
+
+#### Type Hints
+- Complete type hints for all public APIs
+- Return type annotations for utility functions
+- NumPy array type hints
+
+### Improved
+
+#### Colormap System Refactoring
+- **Eliminated 800+ lines of duplication** by consolidating shared enhancement logic
+- Unified handling of phase sectors, modulus contours, and auto-scaling
+- Consistent parameter validation across all colormaps
+- Better code maintainability and extensibility
+
+#### OkLCh Color Space
+- Proper gamut clipping for out-of-gamut colors
+- Improved color accuracy in perceptually uniform colormaps
+- Better handling of extreme chroma values
+
+#### Plot Validation
+- Consolidated validation into shared `plotting.validation` module
+- Consistent validation across matplotlib and PyVista backends
+- Better error messages with actionable suggestions
+
+#### Performance
+- Vectorized color space conversions
+- Optimized mesh generation for Riemann sphere
+- Reduced memory footprint in 3D plotting
+
+#### Documentation
+- Added mathematical formulas in docstrings
+- Comprehensive examples for all major features
+- Cross-referencing between related functions
+- Troubleshooting sections
+
+### Fixed
+- Riemann sphere mesh generation at poles (avoid singularities)
+- Color space conversion edge cases
+- PyVista notebook backend aliasing issues (documented workarounds)
+- UTF-8 encoding in documentation
+- Parameter validation consistency
+
+### Changed
+- Minimum Python version: 3.11+ (unchanged)
+- Dependencies: NumPy 1.26.0+, Matplotlib 3.8.0+, SciPy 1.11.0+
+- Optional dependencies: PyVista 0.45.0+, PyQt6 6.5.0+
+
+### Deprecated
+- Legacy parameter names (will be removed in v3.0)
+
+### Removed
+- Old colormap duplication code (consolidated)
+
+### Internal Refactoring
+- Modularized colormap enhancement logic
+- Separated color space utilities into `core.color_utils`
+- Created `core.scaling` module for modulus scaling
+- Better separation of concerns across modules
+
+### Migration Guide
+
+#### Updating Parameter Names
+```python
+# Before (v1.x)
+cmap = cp.Phase(n_phi=6, auto_scale_r=True)
+
+# After (v2.0)
+cmap = cp.Phase(phase_sectors=6, auto_scale_r=True)
+```
+
+#### Using New Colormaps
+```python
+# Elegant pastels for print
+cmap = cp.PerceptualPastel(phase_sectors=6, auto_scale_r=True)
+
+# Minimalist near-monochrome
+cmap = cp.InkPaper()
+
+# Terrain-inspired
+cmap = cp.EarthTopographic()
+```
+
+#### Auto-Scaling Feature
+```python
+# Automatically calculate spacing for square cells
+cmap = cp.Phase(phase_sectors=6, auto_scale_r=True, scale_radius=0.8)
+```
+
+### Contributors
+- Core development and refactoring
+- Documentation and examples
+- Testing and validation
+
+---
+
 ## [1.0.0] - 2025-07-27
 
 ### Major Refactoring
