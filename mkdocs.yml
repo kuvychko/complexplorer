@@ -40,6 +40,10 @@ plugins:
       execute: false
       include_source: true
 
+# Exclude backup documentation from build
+exclude_docs: |
+  old/
+
 markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
