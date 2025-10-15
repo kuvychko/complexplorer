@@ -18,6 +18,9 @@ from complexplorer.utils.validation import (
     validate_function, validate_colormap, validate_resolution,
     ValidationError
 )
+from complexplorer.plotting.validation import (
+    validate_margin, validate_title, validate_figure_size
+)
 class Matplotlib2DPlotter:
     """2D plotter implementation using matplotlib."""
     
@@ -348,10 +351,7 @@ def riemann_chart(func: Callable,
         The matplotlib axes used.
     """
     # Validate margin
-    if margin < 0:
-        raise ValidationError('Margin must be non-negative')
-    if margin > 0.5:
-        raise ValidationError('Margin cannot exceed 0.5')
+    validate_margin(margin)
     
     # Default colormap with better initial experience
     if cmap is None:

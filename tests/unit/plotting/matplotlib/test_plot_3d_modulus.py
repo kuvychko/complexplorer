@@ -83,18 +83,18 @@ class TestModulusScaling:
         """Test error when custom mode lacks scaling function."""
         domain = Rectangle(2, 2)
         func = lambda z: z
-        
-        with pytest.raises(ValidationError, match="Custom mode requires"):
+
+        with pytest.raises(ValidationError, match="Custom modulus mode requires"):
             plot_landscape(domain=domain, func=func,
                          modulus_mode='custom',
                          modulus_params={})
-    
+
     def test_unknown_mode(self):
         """Test error for unknown scaling mode."""
         domain = Rectangle(2, 2)
         func = lambda z: z
-        
-        with pytest.raises(ValidationError, match="Unknown scaling mode"):
+
+        with pytest.raises(ValidationError, match="Unknown modulus scaling mode"):
             plot_landscape(domain=domain, func=func,
                          modulus_mode='invalid_mode')
     

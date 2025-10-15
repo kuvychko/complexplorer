@@ -17,6 +17,9 @@ from complexplorer.core.functions import stereographic_projection
 from complexplorer.core.scaling import ModulusScaling
 from complexplorer.utils.validation import ValidationError
 from complexplorer.utils.mesh_distortion import get_default_scaling_params
+from complexplorer.plotting.validation import (
+    validate_modulus_mode, validate_z_max
+)
 
 
 class Matplotlib3DPlotter:
@@ -87,21 +90,19 @@ class Matplotlib3DPlotter:
         if modulus_mode != 'none':
             if modulus_params is None:
                 modulus_params = get_default_scaling_params(modulus_mode)
-            
+
+            # Validate modulus mode and params
+            validate_modulus_mode(modulus_mode, modulus_params)
+
             if modulus_mode == 'custom':
-                if 'scaling_func' not in modulus_params:
-                    raise ValidationError("Custom mode requires 'scaling_func' in modulus_params")
                 z_coord = modulus_params['scaling_func'](z_coord)
             else:
-                scaling_method = getattr(ModulusScaling, modulus_mode, None)
-                if scaling_method is None:
-                    raise ValidationError(f"Unknown scaling mode: {modulus_mode}")
+                scaling_method = getattr(ModulusScaling, modulus_mode)
                 z_coord = scaling_method(z_coord, **modulus_params)
-        
+
         # Apply z_max clipping after scaling
+        validate_z_max(z_max)
         if z_max is not None:
-            if z_max <= 0:
-                raise ValidationError('z_max must be positive')
             z_coord = np.clip(z_coord, 0, z_max)
         
         if zaxis_log:
@@ -229,30 +230,28 @@ def plot_landscape(domain: Optional[Domain] = None,
         f[mask] = np.nan
     
     # Validate z_max
-    if z_max is not None and z_max <= 0:
-        raise ValidationError('z_max must be positive or None')
-    
+    validate_z_max(z_max)
+
     # Get RGB colors
     rgb = cmap.rgb(f, outmask=mask)
-    
+
     # Calculate z-coordinates (moduli)
     z_coord = np.abs(f)
-    
+
     # Apply modulus scaling if requested
     if modulus_mode != 'none':
         if modulus_params is None:
             modulus_params = get_default_scaling_params(modulus_mode)
-        
+
+        # Validate modulus mode and params
+        validate_modulus_mode(modulus_mode, modulus_params)
+
         if modulus_mode == 'custom':
-            if 'scaling_func' not in modulus_params:
-                raise ValidationError("Custom mode requires 'scaling_func' in modulus_params")
             z_coord = modulus_params['scaling_func'](z_coord)
         else:
-            scaling_method = getattr(ModulusScaling, modulus_mode, None)
-            if scaling_method is None:
-                raise ValidationError(f"Unknown scaling mode: {modulus_mode}")
+            scaling_method = getattr(ModulusScaling, modulus_mode)
             z_coord = scaling_method(z_coord, **modulus_params)
-    
+
     # Apply z_max clipping after scaling
     if z_max is not None:
         z_coord = np.clip(z_coord, 0, z_max)

@@ -13,6 +13,9 @@ from complexplorer.core.colormap import Colormap, Phase
 from complexplorer.core.scaling import ModulusScaling
 from complexplorer.utils.validation import ValidationError
 from complexplorer.utils.mesh_distortion import get_default_scaling_params
+from complexplorer.plotting.validation import (
+    validate_modulus_mode, validate_z_max
+)
 from complexplorer.plotting.pyvista.utils import (
     check_pyvista_available, handle_export, add_axes_widget,
     ensure_pyvista_setup, get_camera_position
@@ -107,18 +110,18 @@ def create_complex_surface(
     if modulus_mode != 'none':
         if modulus_params is None:
             modulus_params = get_default_scaling_params(modulus_mode)
-        
+
+        # Validate modulus mode and params
+        validate_modulus_mode(modulus_mode, modulus_params)
+
         if modulus_mode == 'custom':
-            if 'scaling_func' not in modulus_params:
-                raise ValidationError("Custom mode requires 'scaling_func' in modulus_params")
             magnitude = modulus_params['scaling_func'](magnitude)
         else:
-            scaling_method = getattr(ModulusScaling, modulus_mode, None)
-            if scaling_method is None:
-                raise ValidationError(f"Unknown scaling mode: {modulus_mode}")
+            scaling_method = getattr(ModulusScaling, modulus_mode)
             magnitude = scaling_method(magnitude, **modulus_params)
-    
+
     # Apply z_max clipping after scaling
+    validate_z_max(z_max)
     if z_max is not None:
         magnitude = np.clip(magnitude, 0, z_max)
     

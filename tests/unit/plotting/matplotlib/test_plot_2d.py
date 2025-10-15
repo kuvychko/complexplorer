@@ -205,11 +205,11 @@ class TestRiemannChart:
     def test_margin_validation(self):
         """Test margin parameter validation."""
         func = lambda z: z
-        
-        with pytest.raises(ValidationError, match="non-negative"):
+
+        with pytest.raises(ValidationError, match="at least 0.0"):
             riemann_chart(func, margin=-0.1)
-        
-        with pytest.raises(ValidationError, match="exceed 0.5"):
+
+        with pytest.raises(ValidationError, match="cannot exceed 0.5"):
             riemann_chart(func, margin=0.6)
     
     def test_with_domain_mask(self):
