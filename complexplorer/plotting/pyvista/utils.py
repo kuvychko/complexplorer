@@ -16,7 +16,7 @@ except ImportError:
     pv = None
 
 
-def check_pyvista_available():
+def check_pyvista_available() -> None:
     """Check if PyVista is available and raise error if not."""
     if not HAS_PYVISTA:
         raise ImportError(
@@ -58,11 +58,11 @@ def handle_export(plotter: 'pv.Plotter', filename: str, interactive: bool) -> No
         plotter.screenshot(filename)
 
 
-def add_axes_widget(plotter: 'pv.Plotter', 
+def add_axes_widget(plotter: 'pv.Plotter',
                    labels: Tuple[str, str, str] = ('Re', 'Im', 'Z'),
-                   position: Tuple[float, float] = (0.0, 0.0), 
+                   position: Tuple[float, float] = (0.0, 0.0),
                    size: float = 0.25,
-                   label_size: Tuple[float, float] = (0.25, 0.1)) -> None:
+                   label_size: Tuple[float, float] = (0.25, 0.1)) -> 'pv.Actor':
     """Add a labeled axes widget to the plotter.
     
     Parameters
@@ -121,7 +121,7 @@ def add_axes_widget(plotter: 'pv.Plotter',
     return axes_actor
 
 
-def ensure_pyvista_setup():
+def ensure_pyvista_setup() -> None:
     """Ensure PyVista is properly configured for the current environment."""
     check_pyvista_available()
     
