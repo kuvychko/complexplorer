@@ -32,8 +32,7 @@ class Matplotlib3DPlotter:
                       z_max: Optional[float] = None,
                       antialiased: bool = False,
                       modulus_mode: str = 'none',
-                      modulus_params: Optional[dict] = None,
-                      config = None) -> Axes3D:  # config: Optional[PlotConfig] = None
+                      modulus_params: Optional[dict] = None) -> Axes3D:
         """Plot 3D landscape of complex function.
         
         Parameters
@@ -58,9 +57,7 @@ class Matplotlib3DPlotter:
             How to scale the height based on modulus.
         modulus_params : dict, optional
             Parameters for modulus scaling method.
-        config : PlotConfig, optional
-            Additional plot configuration.
-            
+
         Returns
         -------
         Axes3D

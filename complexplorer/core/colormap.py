@@ -23,6 +23,7 @@ from complexplorer.core.color_utils import (
     oklch_to_srgb, hsl_to_rgb, cubehelix,
     interpolate_hue, clip_to_gamut
 )
+from complexplorer.core import constants
 
 
 # Default color for out-of-domain points

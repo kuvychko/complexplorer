@@ -17,8 +17,8 @@ from complexplorer.utils.mesh_distortion import (
     compute_riemann_sphere_distortion,
     get_default_scaling_params
 )
-from .utils import check_pyvista_available, validate_printability, scale_to_size, center_mesh
-from .mesh_repair import repair_mesh_simple
+from complexplorer.export.stl.utils import check_pyvista_available, validate_printability, scale_to_size, center_mesh
+from complexplorer.export.stl.mesh_repair import repair_mesh_simple
 
 # Import PyVista if available
 try:

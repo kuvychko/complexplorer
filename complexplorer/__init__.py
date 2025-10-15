@@ -68,7 +68,6 @@ from complexplorer.utils.backend import (
 # High-level API
 from complexplorer.api import (
     show,
-    plot as quick_plot,  # Keep backward compat name for now
     publication_preset,
     interactive_preset,
     high_contrast_preset
@@ -120,7 +119,7 @@ __all__ = [
     'setup_matplotlib_backend', 'ensure_interactive_plots',
     
     # High-level API
-    'show', 'quick_plot', 'publication_preset', 'interactive_preset', 'high_contrast_preset',
+    'show', 'publication_preset', 'interactive_preset', 'high_contrast_preset',
     
     # Flags
     'HAS_PYVISTA', 'HAS_STL_EXPORT'

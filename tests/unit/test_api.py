@@ -188,11 +188,11 @@ class TestOklabPhase:
     def test_oklab_phase_creation(self):
         """Test creating OklabPhase colormap."""
         cmap = OklabPhase(n_phi=6, enhanced=True)
-        
+
         assert cmap.n_phi == 6
         assert cmap.enhanced == True
-        assert cmap.L == 0.65
-        assert cmap.C == 0.3
+        assert cmap.L == 0.7  # Default lightness
+        assert cmap.C == 0.35  # Default chroma
     
     def test_oklab_phase_smooth_mode(self):
         """Test OklabPhase in smooth (cplot-like) mode."""

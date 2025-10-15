@@ -13,7 +13,7 @@ from complexplorer.core.colormap import Colormap, Phase
 from complexplorer.core.scaling import ModulusScaling
 from complexplorer.utils.validation import ValidationError
 from complexplorer.utils.mesh_distortion import get_default_scaling_params
-from .utils import (
+from complexplorer.plotting.pyvista.utils import (
     check_pyvista_available, handle_export, add_axes_widget,
     ensure_pyvista_setup, get_camera_position
 )

@@ -92,8 +92,7 @@ class Matplotlib2DPlotter:
                   colormap: Colormap,
                   resolution: int,
                   figsize: Tuple[float, float] = (10, 5),
-                  title: Optional[str] = None,
-                  config = None) -> Figure:  # config: Optional[PlotConfig] = None
+                  title: Optional[str] = None) -> Figure:
         """Plot domain and codomain side by side.
         
         Parameters
@@ -110,9 +109,7 @@ class Matplotlib2DPlotter:
             Figure size (width, height).
         title : str, optional
             Overall figure title.
-        config : PlotConfig, optional
-            Additional plot configuration.
-            
+
         Returns
         -------
         Figure

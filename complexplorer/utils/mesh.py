@@ -232,8 +232,3 @@ def complex_to_sphere(w: np.ndarray, to_north: bool = True) -> Tuple[np.ndarray,
         z = (1 - w_squared) / (1 + w_squared)
         
     return x, y, z
-
-
-# Legacy API compatibility
-inverse_stereographic = complex_to_sphere
-stereographic_projection = sphere_to_complex

@@ -321,7 +321,3 @@ def circular_interpolate(theta1: float, theta2: float,
         result[mask] = 2 * np.pi + result[mask]
     
     return result
-
-
-# Backward compatibility
-stereographic = stereographic_projection
