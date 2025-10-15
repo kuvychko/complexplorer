@@ -226,7 +226,7 @@ class TestSpecialFunctionIntegration:
         
         # This should work without error
         domain = cp.Rectangle(4, 4)
-        cmap = cp.Phase(n_phi=6)
+        cmap = cp.Phase(phase_sectors=6)
         
         # Get mesh
         z = domain.mesh(50)

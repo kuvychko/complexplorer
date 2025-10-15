@@ -85,7 +85,7 @@ class TestPhase:
         """Test basic initialization."""
         cmap = Phase()
         
-        assert cmap.n_phi is None
+        assert cmap.phase_sectors is None
         assert cmap.phi is None
         assert cmap.r_linear_step is None
         assert cmap.r_log_base is None
@@ -94,9 +94,9 @@ class TestPhase:
     
     def test_init_enhanced_phase(self):
         """Test initialization with phase enhancement."""
-        cmap = Phase(n_phi=6)
+        cmap = Phase(phase_sectors=6)
         
-        assert cmap.n_phi == 6
+        assert cmap.phase_sectors == 6
         assert cmap.phi == np.pi / 6
     
     def test_init_enhanced_modulus(self):
@@ -109,20 +109,20 @@ class TestPhase:
     
     def test_init_auto_scale(self):
         """Test auto-scaling initialization."""
-        cmap = Phase(n_phi=6, auto_scale_r=True)
+        cmap = Phase(phase_sectors=6, auto_scale_r=True)
         
         expected_step = 2 * np.pi / 6  # For unit circle
         assert abs(cmap.r_linear_step - expected_step) < 1e-10
     
     def test_init_auto_scale_validation(self):
         """Test auto-scaling validation."""
-        # Need n_phi for auto_scale_r
+        # Need phase_sectors for auto_scale_r
         with pytest.raises(ValidationError):
             Phase(auto_scale_r=True)
         
         # Can't specify both auto_scale_r and r_linear_step
         with pytest.raises(ValidationError):
-            Phase(n_phi=6, auto_scale_r=True, r_linear_step=0.5)
+            Phase(phase_sectors=6, auto_scale_r=True, r_linear_step=0.5)
     
     def test_v_base_validation(self):
         """Test v_base validation."""
@@ -155,7 +155,7 @@ class TestPhase:
     
     def test_hsv_enhanced_phase(self):
         """Test enhanced phase coloring."""
-        cmap = Phase(n_phi=4, v_base=0.5)
+        cmap = Phase(phase_sectors=4, v_base=0.5)
         
         z = np.array([1+0j, np.exp(1j*np.pi/8)])
         H, S, V = cmap.hsv_tuple(z)
@@ -167,30 +167,30 @@ class TestPhase:
     
     def test_auto_scale_calculation(self):
         """Test that auto-scaling calculates correct r_linear_step."""
-        # Test with n_phi = 6
-        cmap = Phase(n_phi=6, auto_scale_r=True)
+        # Test with phase_sectors = 6
+        cmap = Phase(phase_sectors=6, auto_scale_r=True)
         expected_r_step = 2 * np.pi / 6  # ≈ 1.047
         assert np.isclose(cmap.r_linear_step, expected_r_step)
         
-        # Test with n_phi = 12
-        cmap = Phase(n_phi=12, auto_scale_r=True)
+        # Test with phase_sectors = 12
+        cmap = Phase(phase_sectors=12, auto_scale_r=True)
         expected_r_step = 2 * np.pi / 12  # ≈ 0.524
         assert np.isclose(cmap.r_linear_step, expected_r_step)
         
-        # Test with n_phi = 24
-        cmap = Phase(n_phi=24, auto_scale_r=True)
+        # Test with phase_sectors = 24
+        cmap = Phase(phase_sectors=24, auto_scale_r=True)
         expected_r_step = 2 * np.pi / 24  # ≈ 0.262
         assert np.isclose(cmap.r_linear_step, expected_r_step)
     
     def test_auto_scale_with_custom_radius(self):
         """Test auto-scaling with custom scale_radius."""
         # Test with scale_radius = 2.0
-        cmap = Phase(n_phi=6, auto_scale_r=True, scale_radius=2.0)
+        cmap = Phase(phase_sectors=6, auto_scale_r=True, scale_radius=2.0)
         expected_r_step = 2 * np.pi / 6 * 2.0  # ≈ 2.094
         assert np.isclose(cmap.r_linear_step, expected_r_step)
         
         # Test with scale_radius = 0.5
-        cmap = Phase(n_phi=12, auto_scale_r=True, scale_radius=0.5)
+        cmap = Phase(phase_sectors=12, auto_scale_r=True, scale_radius=0.5)
         expected_r_step = 2 * np.pi / 12 * 0.5  # ≈ 0.262
         assert np.isclose(cmap.r_linear_step, expected_r_step)
     
@@ -199,13 +199,13 @@ class TestPhase:
         # Create test complex values
         z = np.array([1+0j, 0+1j, -1+0j, 0-1j, 0.5+0.5j])
         
-        # Manual calculation for n_phi=6
-        n_phi = 6
-        manual_r_step = 2 * np.pi / n_phi
-        cmap_manual = Phase(n_phi=n_phi, r_linear_step=manual_r_step, v_base=0.4)
+        # Manual calculation for phase_sectors=6
+        phase_sectors = 6
+        manual_r_step = 2 * np.pi / phase_sectors
+        cmap_manual = Phase(phase_sectors=phase_sectors, r_linear_step=manual_r_step, v_base=0.4)
         
         # Auto-scaled version
-        cmap_auto = Phase(n_phi=n_phi, auto_scale_r=True, v_base=0.4)
+        cmap_auto = Phase(phase_sectors=phase_sectors, auto_scale_r=True, v_base=0.4)
         
         # Get HSV values
         hsv_manual = cmap_manual.hsv_tuple(z)
@@ -216,16 +216,16 @@ class TestPhase:
     
     def test_auto_scale_edge_cases(self):
         """Test edge cases for auto-scaling."""
-        # Very small n_phi
-        cmap1 = Phase(n_phi=2, auto_scale_r=True)
+        # Very small phase_sectors
+        cmap1 = Phase(phase_sectors=2, auto_scale_r=True)
         assert np.isclose(cmap1.r_linear_step, np.pi)
         
-        # Large n_phi
-        cmap2 = Phase(n_phi=100, auto_scale_r=True)
+        # Large phase_sectors
+        cmap2 = Phase(phase_sectors=100, auto_scale_r=True)
         assert np.isclose(cmap2.r_linear_step, 2 * np.pi / 100)
         
         # With logarithmic scaling (should still work)
-        cmap3 = Phase(n_phi=6, auto_scale_r=True, r_log_base=2.0)
+        cmap3 = Phase(phase_sectors=6, auto_scale_r=True, r_log_base=2.0)
         assert np.isclose(cmap3.r_linear_step, 2 * np.pi / 6)
         assert cmap3.r_log_base == 2.0
     
@@ -295,18 +295,18 @@ class TestPolarChessboard:
     def test_init(self):
         """Test initialization."""
         cmap = PolarChessboard()
-        assert cmap.n_phi == 6
+        assert cmap.phase_sectors == 6
         assert cmap.spacing == 1.0
         assert cmap.r_log is None
         
-        cmap2 = PolarChessboard(n_phi=8, spacing=0.5, r_log=2.0)
-        assert cmap2.n_phi == 8
+        cmap2 = PolarChessboard(phase_sectors=8, spacing=0.5, r_log=2.0)
+        assert cmap2.phase_sectors == 8
         assert cmap2.spacing == 0.5
         assert cmap2.r_log == 2.0
     
     def test_hsv_pattern(self):
         """Test polar chessboard pattern."""
-        cmap = PolarChessboard(n_phi=4, spacing=1.0)
+        cmap = PolarChessboard(phase_sectors=4, spacing=1.0)
         
         # Test points at different angles and radii
         z = np.array([
@@ -413,7 +413,7 @@ class TestPerceptualPastel:
         assert cmap.L_range == 0.3
         assert cmap.C == 0.1
         # Check phase attributes if set
-        assert cmap.n_phi is None  # Default
+        assert cmap.phase_sectors is None  # Default
         assert cmap.r_linear_step is None  # Default
         
         # Custom parameters

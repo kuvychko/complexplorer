@@ -155,7 +155,7 @@ class TestIntegrationWithColormaps:
         """Test modulus scaling with enhanced phase colormap."""
         domain = Rectangle(3, 3)
         func = lambda z: (z**3 - 1) / (z**3 + 1)
-        cmap = Phase(n_phi=6, auto_scale_r=True)
+        cmap = Phase(phase_sectors=6, auto_scale_r=True)
         
         ax = plot_landscape(domain=domain, func=func, cmap=cmap, resolution=40,
                           modulus_mode='sigmoid',

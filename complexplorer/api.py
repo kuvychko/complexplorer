@@ -86,7 +86,7 @@ def show(func: Callable[[complex], complex],
     
     # Set default colormap if not provided (with better defaults for initial experience)
     if 'cmap' not in kwargs:
-        kwargs['cmap'] = Phase(n_phi=6, auto_scale_r=True, scale_radius=0.8)
+        kwargs['cmap'] = Phase(phase_sectors=6, auto_scale_r=True, scale_radius=0.8)
     
     # Get mode (default to 2d for simplicity)
     mode = kwargs.pop('mode', '2d')
@@ -125,7 +125,7 @@ def plot(func: Callable[[complex], complex],
         domain = Rectangle(4, 4)
     
     if 'cmap' not in kwargs:
-        kwargs['cmap'] = Phase(n_phi=6, auto_scale_r=True, scale_radius=0.8)
+        kwargs['cmap'] = Phase(phase_sectors=6, auto_scale_r=True, scale_radius=0.8)
     
     if mode == '2d':
         return plot_2d(domain, func, **kwargs)
@@ -165,7 +165,7 @@ def publication_preset() -> dict:
         Configuration with high-resolution enhanced phase portrait.
     """
     return {
-        'cmap': Phase(n_phi=12, auto_scale_r=True, scale_radius=0.8),
+        'cmap': Phase(phase_sectors=12, auto_scale_r=True, scale_radius=0.8),
         'resolution': 800
     }
 
@@ -179,7 +179,7 @@ def interactive_preset() -> dict:
         Configuration optimized for speed and interactivity.
     """
     return {
-        'cmap': Phase(n_phi=6, auto_scale_r=True, scale_radius=0.8),
+        'cmap': Phase(phase_sectors=6, auto_scale_r=True, scale_radius=0.8),
         'resolution': 500
     }
 
@@ -193,7 +193,7 @@ def high_contrast_preset() -> dict:
         Configuration with many phase sectors for maximum contrast.
     """
     return {
-        'cmap': Phase(n_phi=16, auto_scale_r=True, scale_radius=0.5),
+        'cmap': Phase(phase_sectors=16, auto_scale_r=True, scale_radius=0.5),
         'resolution': 600
     }
 

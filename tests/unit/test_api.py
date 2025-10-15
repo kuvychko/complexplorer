@@ -38,7 +38,7 @@ class TestShowFunction:
             
             # Check colormap
             assert isinstance(kwargs['cmap'], Phase)
-            assert kwargs['cmap'].n_phi == 6
+            assert kwargs['cmap'].phase_sectors == 6
             assert kwargs['cmap'].auto_scale_r == True
             
             # Check resolution
@@ -95,7 +95,7 @@ class TestShowFunction:
         """Test show() passes through custom kwargs."""
         with patch('complexplorer.api.plot') as mock_plot:
             f = lambda z: z**3 - 1
-            custom_cmap = OklabPhase(n_phi=8)
+            custom_cmap = OklabPhase(phase_sectors=8)
             
             show(f, mode='3d', cmap=custom_cmap, backend='pyvista')
             
@@ -187,9 +187,9 @@ class TestOklabPhase:
     
     def test_oklab_phase_creation(self):
         """Test creating OklabPhase colormap."""
-        cmap = OklabPhase(n_phi=6, enhanced=True)
+        cmap = OklabPhase(phase_sectors=6, enhanced=True)
 
-        assert cmap.n_phi == 6
+        assert cmap.phase_sectors == 6
         assert cmap.enhanced == True
         assert cmap.L == 0.7  # Default lightness
         assert cmap.C == 0.35  # Default chroma
@@ -209,7 +209,7 @@ class TestOklabPhase:
     
     def test_oklab_phase_enhanced_mode(self):
         """Test OklabPhase in enhanced mode."""
-        cmap = OklabPhase(n_phi=8, r_linear_step=1.0, enhanced=True)
+        cmap = OklabPhase(phase_sectors=8, r_linear_step=1.0, enhanced=True)
         
         z = np.exp(1j * np.linspace(0, 2*np.pi, 100))
         hsv = cmap.hsv(z)
@@ -221,7 +221,7 @@ class TestOklabPhase:
     def test_oklab_phase_unit_circle_emphasis(self):
         """Test unit circle emphasis in OklabPhase."""
         cmap = OklabPhase(
-            n_phi=6,
+            phase_sectors=6,
             emphasize_unit_circle=True,
             unit_circle_strength=0.5,
             enhanced=True
@@ -238,7 +238,7 @@ class TestOklabPhase:
     
     def test_oklab_phase_auto_scale(self):
         """Test auto-scaling in OklabPhase."""
-        cmap = OklabPhase(n_phi=12, auto_scale_r=True, scale_radius=0.8)
+        cmap = OklabPhase(phase_sectors=12, auto_scale_r=True, scale_radius=0.8)
         
         expected_r_step = 2 * np.pi / 12 * 0.8
         assert abs(cmap.r_linear_step - expected_r_step) < 1e-10
@@ -264,7 +264,7 @@ class TestPhaseUnitCircleEmphasis:
     def test_phase_unit_circle_basic(self):
         """Test basic unit circle emphasis."""
         cmap = Phase(
-            n_phi=6,
+            phase_sectors=6,
             emphasize_unit_circle=True,
             unit_circle_strength=0.3
         )
@@ -280,7 +280,7 @@ class TestPhaseUnitCircleEmphasis:
     def test_phase_unit_circle_with_color(self):
         """Test unit circle emphasis with custom color."""
         cmap = Phase(
-            n_phi=6,
+            phase_sectors=6,
             emphasize_unit_circle=True,
             unit_circle_strength=0.5,
             unit_circle_color=(0.5, 1.0, 1.0)  # Cyan in HSV

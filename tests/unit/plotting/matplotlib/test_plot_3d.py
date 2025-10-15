@@ -236,7 +236,7 @@ class TestRiemann:
     def test_custom_colormap(self):
         """Test with custom colormap."""
         func = lambda z: np.sin(z)
-        cmap = Phase(n_phi=8, v_base=0.7)
+        cmap = Phase(phase_sectors=8, v_base=0.7)
         
         riemann(func, resolution=60, cmap=cmap)
         plt.close('all')

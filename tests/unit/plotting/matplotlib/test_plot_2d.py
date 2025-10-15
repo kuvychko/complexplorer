@@ -22,7 +22,7 @@ class TestMatplotlib2DPlotter:
         plotter = Matplotlib2DPlotter()
         domain = Rectangle(4, 4)
         func = lambda z: z**2
-        colormap = Phase(n_phi=6)
+        colormap = Phase(phase_sectors=6)
         
         ax = plotter.plot_single(domain, func, colormap, resolution=50)
         

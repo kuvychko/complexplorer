@@ -130,7 +130,7 @@ class BasePhasePortrait(Colormap):
 
     Parameters
     ----------
-    n_phi : int, optional
+    phase_sectors : int, optional
         Number of phase sectors for enhancement.
     r_linear_step : float, optional
         Linear modulus step for contours.
@@ -147,7 +147,7 @@ class BasePhasePortrait(Colormap):
     """
 
     def __init__(self,
-                 n_phi: Optional[int] = None,
+                 phase_sectors: Optional[int] = None,
                  r_linear_step: Optional[float] = None,
                  r_log_base: Optional[float] = None,
                  v_base: float = 0.5,
@@ -163,15 +163,15 @@ class BasePhasePortrait(Colormap):
 
         # Handle auto-scaling
         if auto_scale_r:
-            if n_phi is None:
-                raise ValidationError("auto_scale_r=True requires n_phi to be specified")
+            if phase_sectors is None:
+                raise ValidationError("auto_scale_r=True requires phase_sectors to be specified")
             if r_linear_step is not None:
                 raise ValidationError("Cannot specify both auto_scale_r=True and r_linear_step")
             # Calculate r_linear_step for visually square cells
-            r_linear_step = 2 * np.pi / n_phi * scale_radius
+            r_linear_step = 2 * np.pi / phase_sectors * scale_radius
 
-        self.n_phi = n_phi
-        self.phi = np.pi / n_phi if n_phi is not None else None
+        self.phase_sectors = phase_sectors
+        self.phi = np.pi / phase_sectors if phase_sectors is not None else None
         self.r_linear_step = r_linear_step
         self.r_log_base = r_log_base
         self.v_base = v_base
@@ -295,7 +295,7 @@ class Phase(BasePhasePortrait):
 
     Parameters
     ----------
-    n_phi : int, optional
+    phase_sectors : int, optional
         Number of phase sectors for enhancement.
     r_linear_step : float, optional
         Linear modulus step for contours.
@@ -318,7 +318,7 @@ class Phase(BasePhasePortrait):
     """
 
     def __init__(self,
-                 n_phi: Optional[int] = None,
+                 phase_sectors: Optional[int] = None,
                  r_linear_step: Optional[float] = None,
                  r_log_base: Optional[float] = None,
                  v_base: float = 0.5,
@@ -329,7 +329,7 @@ class Phase(BasePhasePortrait):
                  unit_circle_color: Optional[Tuple[float, float, float]] = None,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize phase colormap."""
-        super().__init__(n_phi, r_linear_step, r_log_base, v_base,
+        super().__init__(phase_sectors, r_linear_step, r_log_base, v_base,
                         auto_scale_r, scale_radius, out_of_domain_hsv)
 
         # Validate unit circle parameters
@@ -382,7 +382,7 @@ class OklabPhase(BasePhasePortrait):
     
     Parameters
     ----------
-    n_phi : int, optional
+    phase_sectors : int, optional
         Number of phase sectors for enhancement.
     r_linear_step : float, optional
         Linear modulus step for contours.
@@ -424,7 +424,7 @@ class OklabPhase(BasePhasePortrait):
     """
     
     def __init__(self,
-                 n_phi: Optional[int] = None,
+                 phase_sectors: Optional[int] = None,
                  r_linear_step: Optional[float] = None,
                  r_log_base: Optional[float] = None,
                  auto_scale_r: bool = False,
@@ -438,7 +438,7 @@ class OklabPhase(BasePhasePortrait):
                  phase_offset: float = 0.8936868 * np.pi,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize OKLAB phase colormap."""
-        super().__init__(n_phi, r_linear_step, r_log_base, v_base,
+        super().__init__(phase_sectors, r_linear_step, r_log_base, v_base,
                         auto_scale_r, scale_radius, out_of_domain_hsv)
 
         # Validate OklabPhase-specific parameters
@@ -598,7 +598,7 @@ class PolarChessboard(Colormap):
     
     Parameters
     ----------
-    n_phi : int, optional
+    phase_sectors : int, optional
         Number of phase sectors.
     spacing : float, optional
         Radial spacing between rings.
@@ -609,7 +609,7 @@ class PolarChessboard(Colormap):
     """
     
     def __init__(self,
-                 n_phi: int = 6,
+                 phase_sectors: int = 6,
                  spacing: float = 1.0,
                  r_log: Optional[float] = None,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
@@ -617,9 +617,9 @@ class PolarChessboard(Colormap):
         super().__init__(out_of_domain_hsv)
 
         # Validate parameters
-        if n_phi <= 0:
+        if phase_sectors <= 0:
             from complexplorer.exceptions import ColormapError
-            raise ColormapError("n_phi must be positive")
+            raise ColormapError("phase_sectors must be positive")
         if spacing <= 0:
             from complexplorer.exceptions import ColormapError
             raise ColormapError("spacing must be positive")
@@ -627,8 +627,8 @@ class PolarChessboard(Colormap):
             from complexplorer.exceptions import ColormapError
             raise ColormapError("r_log must be positive")
 
-        self.n_phi = n_phi
-        self.phi = np.pi / n_phi
+        self.phase_sectors = phase_sectors
+        self.phi = np.pi / phase_sectors
         self.spacing = spacing
         self.r_log = r_log
     
@@ -707,7 +707,7 @@ class PerceptualPastel(BasePhasePortrait):
     
     Parameters
     ----------
-    n_phi : int, optional
+    phase_sectors : int, optional
         Number of phase sectors for enhanced phase portrait.
     r_linear_step : float, optional
         Linear modulus step for contours.
@@ -730,7 +730,7 @@ class PerceptualPastel(BasePhasePortrait):
     """
     
     def __init__(self,
-                 n_phi: Optional[int] = None,
+                 phase_sectors: Optional[int] = None,
                  r_linear_step: Optional[float] = None,
                  r_log_base: Optional[float] = None,
                  L_center: float = 0.55,
@@ -741,7 +741,7 @@ class PerceptualPastel(BasePhasePortrait):
                  scale_radius: float = 1.0,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize perceptual pastel colormap."""
-        super().__init__(n_phi, r_linear_step, r_log_base, v_base,
+        super().__init__(phase_sectors, r_linear_step, r_log_base, v_base,
                         auto_scale_r, scale_radius, out_of_domain_hsv)
 
         # Validate parameters
@@ -788,7 +788,7 @@ class AnalogousWedge(BasePhasePortrait):
     
     Parameters
     ----------
-    n_phi : int, optional
+    phase_sectors : int, optional
         Number of phase sectors for enhanced phase portrait.
     r_linear_step : float, optional
         Linear modulus step for contours.
@@ -815,7 +815,7 @@ class AnalogousWedge(BasePhasePortrait):
     """
     
     def __init__(self,
-                 n_phi: Optional[int] = None,
+                 phase_sectors: Optional[int] = None,
                  r_linear_step: Optional[float] = None,
                  r_log_base: Optional[float] = None,
                  H_center: float = 0.55,
@@ -829,7 +829,7 @@ class AnalogousWedge(BasePhasePortrait):
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize analogous wedge colormap."""
         # Note: V_base parameter maps to v_base in BasePhasePortrait
-        super().__init__(n_phi, r_linear_step, r_log_base, V_base,
+        super().__init__(phase_sectors, r_linear_step, r_log_base, V_base,
                         auto_scale_r, scale_radius, out_of_domain_hsv)
 
         # Validate parameters
@@ -895,14 +895,14 @@ class DivergingWarmCool(BasePhasePortrait):
     
     Parameters
     ----------
-    n_phi : int, optional
+    phase_sectors : int, optional
         Number of phase sectors for enhanced phase portrait.
     r_linear_step : float, optional
         Period for linear modulus rings. Default is None (no rings).
     r_log_base : float, optional
         Base for logarithmic modulus rings. Default is None (no rings).
     auto_scale_r : bool, optional
-        Auto-calculate r_linear_step from n_phi. Default is False.
+        Auto-calculate r_linear_step from phase_sectors. Default is False.
     scale_radius : float, optional
         Scale factor for auto-calculated r_linear_step. Default is 1.0.
     H_warm : float, optional
@@ -926,7 +926,7 @@ class DivergingWarmCool(BasePhasePortrait):
     """
     
     def __init__(self,
-                 n_phi: Optional[int] = None,
+                 phase_sectors: Optional[int] = None,
                  r_linear_step: Optional[float] = None,
                  r_log_base: Optional[float] = None,
                  auto_scale_r: bool = False,
@@ -941,7 +941,7 @@ class DivergingWarmCool(BasePhasePortrait):
                  use_oklch: bool = True,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize diverging warm-cool colormap."""
-        super().__init__(n_phi, r_linear_step, r_log_base, v_base,
+        super().__init__(phase_sectors, r_linear_step, r_log_base, v_base,
                         auto_scale_r, scale_radius, out_of_domain_hsv)
 
         # Validate parameters
@@ -1026,14 +1026,14 @@ class Isoluminant(BasePhasePortrait):
     
     Parameters
     ----------
-    n_phi : int, optional
+    phase_sectors : int, optional
         Number of phase sectors for enhanced phase portrait.
     r_linear_step : float, optional
         Period for linear modulus rings. Default is None (no rings).
     r_log_base : float, optional
         Base for logarithmic modulus rings. Default is None (no rings).
     auto_scale_r : bool, optional
-        Auto-calculate r_linear_step from n_phi. Default is False.
+        Auto-calculate r_linear_step from phase_sectors. Default is False.
     scale_radius : float, optional
         Scale factor for auto-calculated r_linear_step. Default is 1.0.
     L : float, optional
@@ -1057,7 +1057,7 @@ class Isoluminant(BasePhasePortrait):
     """
     
     def __init__(self,
-                 n_phi: Optional[int] = None,
+                 phase_sectors: Optional[int] = None,
                  r_linear_step: Optional[float] = None,
                  r_log_base: Optional[float] = None,
                  auto_scale_r: bool = False,
@@ -1072,7 +1072,7 @@ class Isoluminant(BasePhasePortrait):
                  use_oklch: bool = True,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize isoluminant colormap."""
-        super().__init__(n_phi, r_linear_step, r_log_base, v_base,
+        super().__init__(phase_sectors, r_linear_step, r_log_base, v_base,
                         auto_scale_r, scale_radius, out_of_domain_hsv)
 
         # Validate parameters
@@ -1185,14 +1185,14 @@ class CubehelixPhase(BasePhasePortrait):
     
     Parameters
     ----------
-    n_phi : int, optional
+    phase_sectors : int, optional
         Number of phase sectors for enhanced phase portrait.
     r_linear_step : float, optional
         Period for linear modulus rings. Default is None (no rings).
     r_log_base : float, optional
         Base for logarithmic modulus rings. Default is None (no rings).
     auto_scale_r : bool, optional
-        Auto-calculate r_linear_step from n_phi. Default is False.
+        Auto-calculate r_linear_step from phase_sectors. Default is False.
     scale_radius : float, optional
         Scale factor for auto-calculated r_linear_step. Default is 1.0.
     start : float, optional
@@ -1216,7 +1216,7 @@ class CubehelixPhase(BasePhasePortrait):
     """
     
     def __init__(self,
-                 n_phi: Optional[int] = None,
+                 phase_sectors: Optional[int] = None,
                  r_linear_step: Optional[float] = None,
                  r_log_base: Optional[float] = None,
                  auto_scale_r: bool = False,
@@ -1231,7 +1231,7 @@ class CubehelixPhase(BasePhasePortrait):
                  modulate_with_r: bool = True,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize cubehelix phase colormap."""
-        super().__init__(n_phi, r_linear_step, r_log_base, v_base,
+        super().__init__(phase_sectors, r_linear_step, r_log_base, v_base,
                         auto_scale_r, scale_radius, out_of_domain_hsv)
 
         # Validate parameters
@@ -1301,14 +1301,14 @@ class InkPaper(BasePhasePortrait):
     
     Parameters
     ----------
-    n_phi : int, optional
+    phase_sectors : int, optional
         Number of phase sectors for enhanced phase portrait.
     r_linear_step : float, optional
         Period for linear modulus rings. Default is None (no rings).
     r_log_base : float, optional
         Base for logarithmic modulus rings. Default is None (no rings).
     auto_scale_r : bool, optional
-        Auto-calculate r_linear_step from n_phi. Default is False.
+        Auto-calculate r_linear_step from phase_sectors. Default is False.
     scale_radius : float, optional
         Scale factor for auto-calculated r_linear_step. Default is 1.0.
     L_min : float, optional
@@ -1334,7 +1334,7 @@ class InkPaper(BasePhasePortrait):
     """
     
     def __init__(self,
-                 n_phi: Optional[int] = None,
+                 phase_sectors: Optional[int] = None,
                  r_linear_step: Optional[float] = None,
                  r_log_base: Optional[float] = None,
                  auto_scale_r: bool = False,
@@ -1350,7 +1350,7 @@ class InkPaper(BasePhasePortrait):
                  use_oklch: bool = True,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize ink & paper colormap."""
-        super().__init__(n_phi, r_linear_step, r_log_base, v_base,
+        super().__init__(phase_sectors, r_linear_step, r_log_base, v_base,
                         auto_scale_r, scale_radius, out_of_domain_hsv)
 
         # Validate parameters
@@ -1457,14 +1457,14 @@ class EarthTopographic(BasePhasePortrait):
     
     Parameters
     ----------
-    n_phi : int, optional
+    phase_sectors : int, optional
         Number of phase sectors for enhanced phase portrait.
     r_linear_step : float, optional
         Period for linear modulus rings. Default is None (no rings).
     r_log_base : float, optional
         Base for logarithmic modulus rings. Default is None (no rings).
     auto_scale_r : bool, optional
-        Auto-calculate r_linear_step from n_phi. Default is False.
+        Auto-calculate r_linear_step from phase_sectors. Default is False.
     scale_radius : float, optional
         Scale factor for auto-calculated r_linear_step. Default is 1.0.
     L_min : float, optional
@@ -1492,7 +1492,7 @@ class EarthTopographic(BasePhasePortrait):
     """
     
     def __init__(self,
-                 n_phi: Optional[int] = None,
+                 phase_sectors: Optional[int] = None,
                  r_linear_step: Optional[float] = None,
                  r_log_base: Optional[float] = None,
                  auto_scale_r: bool = False,
@@ -1509,7 +1509,7 @@ class EarthTopographic(BasePhasePortrait):
                  use_oklch: bool = True,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize earth topographic colormap."""
-        super().__init__(n_phi, r_linear_step, r_log_base, v_base,
+        super().__init__(phase_sectors, r_linear_step, r_log_base, v_base,
                         auto_scale_r, scale_radius, out_of_domain_hsv)
 
         # Validate parameters
@@ -1629,14 +1629,14 @@ class FourQuadrant(BasePhasePortrait):
     
     Parameters
     ----------
-    n_phi : int, optional
+    phase_sectors : int, optional
         Number of phase sectors for enhanced phase portrait.
     r_linear_step : float, optional
         Period for linear modulus rings. Default is None (no rings).
     r_log_base : float, optional
         Base for logarithmic modulus rings. Default is None (no rings).
     auto_scale_r : bool, optional
-        Auto-calculate r_linear_step from n_phi. Default is False.
+        Auto-calculate r_linear_step from phase_sectors. Default is False.
     scale_radius : float, optional
         Scale factor for auto-calculated r_linear_step. Default is 1.0.
     H_anchors : tuple, optional
@@ -1659,7 +1659,7 @@ class FourQuadrant(BasePhasePortrait):
     """
     
     def __init__(self,
-                 n_phi: Optional[int] = None,
+                 phase_sectors: Optional[int] = None,
                  r_linear_step: Optional[float] = None,
                  r_log_base: Optional[float] = None,
                  auto_scale_r: bool = False,
@@ -1673,7 +1673,7 @@ class FourQuadrant(BasePhasePortrait):
                  v_base: float = 0.5,
                  out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize four-quadrant colormap."""
-        super().__init__(n_phi, r_linear_step, r_log_base, v_base,
+        super().__init__(phase_sectors, r_linear_step, r_log_base, v_base,
                         auto_scale_r, scale_radius, out_of_domain_hsv)
 
         # Validate parameters

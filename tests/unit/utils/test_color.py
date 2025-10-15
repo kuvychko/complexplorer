@@ -57,7 +57,7 @@ class TestGetColor:
     
     def test_get_color_custom_colormap(self):
         """Test get_color with custom colormap."""
-        cmap = OklabPhase(n_phi=8, enhanced=False)
+        cmap = OklabPhase(phase_sectors=8, enhanced=False)
         color = get_color(1 + 1j, cmap=cmap)
         
         assert isinstance(color, tuple)
@@ -97,7 +97,7 @@ class TestGetColorArray:
     def test_get_color_array_custom_cmap(self):
         """Test color array with custom colormap."""
         z = np.exp(1j * np.linspace(0, 2*np.pi, 100).reshape(10, 10))
-        cmap = Phase(n_phi=12, auto_scale_r=True)
+        cmap = Phase(phase_sectors=12, auto_scale_r=True)
         colors = get_color_array(z, cmap)
         
         assert colors.shape == (10, 10, 3)
@@ -117,8 +117,8 @@ class TestInterpolateColormap:
     def test_interpolate_t0(self):
         """Test interpolation at t=0 gives first colormap."""
         z = 1 + 1j
-        cmap1 = Phase(n_phi=6)
-        cmap2 = OklabPhase(n_phi=6)
+        cmap1 = Phase(phase_sectors=6)
+        cmap2 = OklabPhase(phase_sectors=6)
         
         color_interp = interpolate_colormap(z, cmap1, cmap2, t=0)
         color_cmap1 = cmap1.rgb(z)
@@ -128,8 +128,8 @@ class TestInterpolateColormap:
     def test_interpolate_t1(self):
         """Test interpolation at t=1 gives second colormap."""
         z = 1 + 1j
-        cmap1 = Phase(n_phi=6)
-        cmap2 = OklabPhase(n_phi=6, enhanced=False)
+        cmap1 = Phase(phase_sectors=6)
+        cmap2 = OklabPhase(phase_sectors=6, enhanced=False)
         
         color_interp = interpolate_colormap(z, cmap1, cmap2, t=1)
         color_cmap2 = cmap2.rgb(z)
@@ -139,8 +139,8 @@ class TestInterpolateColormap:
     def test_interpolate_t_half(self):
         """Test interpolation at t=0.5 gives average."""
         z = np.array([1, 1j, -1])
-        cmap1 = Phase(n_phi=6)
-        cmap2 = Phase(n_phi=12)
+        cmap1 = Phase(phase_sectors=6)
+        cmap2 = Phase(phase_sectors=12)
         
         color_interp = interpolate_colormap(z, cmap1, cmap2, t=0.5)
         color1 = cmap1.rgb(z)
@@ -164,8 +164,8 @@ class TestInterpolateColormap:
     def test_interpolate_array_input(self):
         """Test interpolation with array input."""
         z = np.ones((5, 5), dtype=complex)
-        cmap1 = Phase(n_phi=6)
-        cmap2 = OklabPhase(n_phi=6)
+        cmap1 = Phase(phase_sectors=6)
+        cmap2 = OklabPhase(phase_sectors=6)
         
         colors = interpolate_colormap(z, cmap1, cmap2, t=0.3)
         assert colors.shape == (5, 5, 3)
@@ -179,7 +179,7 @@ class TestColorConsistency:
     def test_consistency_scalar(self):
         """Test that different methods give same result for scalars."""
         z = 1 + 2j
-        cmap = Phase(n_phi=8, r_linear_step=1.0)
+        cmap = Phase(phase_sectors=8, r_linear_step=1.0)
         
         # Using get_color
         color1 = get_color(z, cmap=cmap)

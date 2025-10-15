@@ -35,7 +35,7 @@ class TestOrnamentGenerator:
     def test_init_custom(self):
         """Test initialization with custom parameters."""
         func = lambda z: z**3 - 1
-        cmap = Phase(n_phi=8)
+        cmap = Phase(phase_sectors=8)
         domain = Disk(2)
         
         gen = OrnamentGenerator(
@@ -235,7 +235,7 @@ class TestCreateOrnament:
         """Test creation with custom parameters."""
         func = lambda z: np.sin(z)
         filename = tmp_path / "custom.stl"
-        cmap = Phase(n_phi=16)
+        cmap = Phase(phase_sectors=16)
         
         saved_path = create_ornament(
             func,

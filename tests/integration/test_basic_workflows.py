@@ -33,7 +33,7 @@ class TestCoreWorkflows:
         """Test enhanced phase portrait."""
         func = lambda z: (z - 1) * (z + 1)
         domain = Rectangle(3, 3)
-        cmap = Phase(n_phi=6, auto_scale_r=True)
+        cmap = Phase(phase_sectors=6, auto_scale_r=True)
         
         ax = plot(domain, func, cmap=cmap, resolution=40)
         assert ax is not None
