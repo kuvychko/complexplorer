@@ -65,7 +65,7 @@ class OrnamentGenerator:
         self.resolution = resolution
         self.scaling = scaling
         self.scaling_params = scaling_params or get_default_scaling_params(scaling, for_stl=True)
-        self.cmap = cmap or Phase(n_phi=6, auto_scale_r=True)
+        self.cmap = cmap or Phase(phase_sectors=6, auto_scale_r=True)
         self.domain = domain
         
         self.sphere_mesh = None

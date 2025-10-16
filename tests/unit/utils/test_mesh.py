@@ -134,7 +134,7 @@ class TestRectangularSphereGenerator:
     
     def test_basic_generation(self):
         """Test basic sphere generation."""
-        gen = RectangularSphereGenerator(radius=2.0, n_theta=20, phase_sectors=30)
+        gen = RectangularSphereGenerator(radius=2.0, n_theta=20, n_phi=30)
         mesh = gen.generate()
         
         # Check mesh properties
@@ -148,7 +148,7 @@ class TestRectangularSphereGenerator:
     
     def test_pole_avoidance(self):
         """Test pole avoidance option."""
-        gen = RectangularSphereGenerator(n_theta=10, phase_sectors=10, avoid_poles=True)
+        gen = RectangularSphereGenerator(n_theta=10, n_phi=10, avoid_poles=True)
         mesh = gen.generate()
         
         # Check no points exactly at poles
@@ -160,7 +160,7 @@ class TestRectangularSphereGenerator:
         # Create a disk domain
         domain = Disk(radius=2.0)
         
-        gen = RectangularSphereGenerator(n_theta=20, phase_sectors=20, domain=domain)
+        gen = RectangularSphereGenerator(n_theta=20, n_phi=20, domain=domain)
         mesh = gen.generate()
         
         # Project all points to complex plane

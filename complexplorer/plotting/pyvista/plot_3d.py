@@ -144,7 +144,7 @@ def create_complex_surface(
     
     # Get colors from colormap
     if cmap is None:
-        cmap = Phase(n_phi=6, v_base=0.6)
+        cmap = Phase(phase_sectors=6, v_base=0.6)
     
     rgb = cmap.rgb(f, outmask=mask)
     

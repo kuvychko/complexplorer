@@ -44,7 +44,7 @@ def get_color(z: Union[complex, np.ndarray],
     >>> colors = cp.get_color(z)
     >>> 
     >>> # Use custom colormap
-    >>> cmap = cp.OklabPhase(n_phi=8, enhanced=True)
+    >>> cmap = cp.OklabPhase(phase_sectors=8, enhanced=True)
     >>> color = cp.get_color(np.exp(1j * np.pi/4), cmap=cmap)
     >>> 
     >>> # Get hex colors
@@ -53,7 +53,7 @@ def get_color(z: Union[complex, np.ndarray],
     """
     # Default colormap
     if cmap is None:
-        cmap = Phase(n_phi=6, auto_scale_r=True)
+        cmap = Phase(phase_sectors=6, auto_scale_r=True)
     
     # Convert to numpy array for uniform handling
     z_array = np.asarray(z)
@@ -123,7 +123,7 @@ def get_color_array(z: np.ndarray,
     >>> print(f"Color array shape: {colors.shape}")  # (100, 100, 3)
     """
     if cmap is None:
-        cmap = Phase(n_phi=6, auto_scale_r=True)
+        cmap = Phase(phase_sectors=6, auto_scale_r=True)
     
     return cmap.rgb(z)
 
@@ -159,8 +159,8 @@ def interpolate_colormap(z: Union[complex, np.ndarray],
     >>> import complexplorer as cp
     >>> 
     >>> # Blend between Phase and OklabPhase
-    >>> cmap1 = cp.Phase(n_phi=6)
-    >>> cmap2 = cp.OklabPhase(n_phi=6, enhanced=False)
+    >>> cmap1 = cp.Phase(phase_sectors=6)
+    >>> cmap2 = cp.OklabPhase(phase_sectors=6, enhanced=False)
     >>> 
     >>> # Get 50% blend
     >>> color = cp.interpolate_colormap(1 + 1j, cmap1, cmap2, t=0.5)

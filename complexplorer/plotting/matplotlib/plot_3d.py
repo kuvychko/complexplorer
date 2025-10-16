@@ -207,7 +207,7 @@ def plot_landscape(domain: Optional[Domain] = None,
     
     # Default colormap
     if cmap is None:
-        cmap = Phase(n_phi=6)
+        cmap = Phase(phase_sectors=6)
     
     # Get mesh and mask
     if z is None:
@@ -335,7 +335,7 @@ def pair_plot_landscape(domain: Optional[Domain] = None,
     """
     # Default colormap
     if cmap is None:
-        cmap = Phase(n_phi=6, auto_scale_r=True)
+        cmap = Phase(phase_sectors=6, auto_scale_r=True)
     
     fig = plt.figure(figsize=figsize)
     ax0 = fig.add_subplot(121, projection='3d')
@@ -407,7 +407,7 @@ def riemann(func: Callable,
     """
     # Default colormap
     if cmap is None:
-        cmap = Phase(n_phi=6, v_base=0.6)
+        cmap = Phase(phase_sectors=6, v_base=0.6)
     
     # Create sphere mesh in spherical coordinates
     tol = 1e-8

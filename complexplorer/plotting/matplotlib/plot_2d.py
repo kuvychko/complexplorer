@@ -196,7 +196,7 @@ def plot(domain: Optional[Domain] = None,
     
     # Default colormap with better initial experience
     if cmap is None:
-        cmap = Phase(n_phi=6, auto_scale_r=True, scale_radius=0.8)
+        cmap = Phase(phase_sectors=6, auto_scale_r=True, scale_radius=0.8)
     
     # Get mesh and mask
     if z is None:
@@ -287,7 +287,7 @@ def pair_plot(domain: Optional[Domain] = None,
     """
     # Default colormap with better initial experience
     if cmap is None:
-        cmap = Phase(n_phi=6, auto_scale_r=True, scale_radius=0.8)
+        cmap = Phase(phase_sectors=6, auto_scale_r=True, scale_radius=0.8)
     
     fig, (ax0, ax1) = plt.subplots(1, 2, figsize=figsize)
     
@@ -355,7 +355,7 @@ def riemann_chart(func: Callable,
     
     # Default colormap with better initial experience
     if cmap is None:
-        cmap = Phase(n_phi=6, auto_scale_r=True, scale_radius=0.8)
+        cmap = Phase(phase_sectors=6, auto_scale_r=True, scale_radius=0.8)
     
     # Create domain for unit disk with margin
     disk_radius = 1 + margin
