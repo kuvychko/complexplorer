@@ -182,10 +182,10 @@ Explore the full range of visualizations in our [**Gallery**](docs/gallery/READM
 - **[Contributing Guide](https://kuvychko.github.io/complexplorer/development/contributing/)** - How to contribute
 
 ### Examples
-- **[Getting Started](examples/getting_started.ipynb)** - Jupyter notebook introduction
-- **[Advanced Features](examples/advanced_features.ipynb)** - 3D visualization and more
-- **[STL Export Demo](examples/stl_export_demo.ipynb)** - Create 3D printable models
+- **[Tutorial Notebooks](examples/notebooks/)** - 8 comprehensive tutorials (~2.5 hours)
+- **[Application Examples](examples/applications/)** - 4 real-world applications (~1.5 hours)
 - **[Interactive Demo](examples/interactive_showcase.py)** - Run `python examples/interactive_showcase.py`
+- **[Full Examples Guide](examples/README.md)** - Complete learning path
 
 ## 🛠️ Advanced Example
 
@@ -293,7 +293,7 @@ Features for perfect mathematical ornaments:
 
 Your mathematical functions become conversation pieces - imagine gifting a physical representation of the Riemann zeta function or decorating with the beauty of elliptic functions!
 
-See `examples/stl_export_demo.ipynb` for a complete guide to creating mathematical ornaments.
+See [`examples/notebooks/08_stl_export.ipynb`](examples/notebooks/08_stl_export.ipynb) for a complete guide to creating mathematical ornaments.
 
 ## 🤝 Contributing
 
