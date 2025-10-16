@@ -19,7 +19,7 @@ def f(z):
 
 # Create domain
 domain = cp.Rectangle(4, 4)
-cmap = cp.Phase(n_phi=6, auto_scale_r=True)
+cmap = cp.Phase(phase_sectors=6, auto_scale_r=True)
 
 # Different modulus scaling modes to showcase
 modes = [
