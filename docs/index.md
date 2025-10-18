@@ -10,7 +10,7 @@
 
 Unlike other domain coloring libraries, Complexplorer offers:
 
-- **🎨 Riemann Relief Maps**: First library to offer modulus-scaled Riemann sphere visualizations that reveal the true topology of complex functions
+- **🎨 Riemann Relief Maps**: First library to offer modulus-scaled Riemann sphere visualizations of complex functions (Riemann relief maps)
 - **🖨️ Direct STL Export**: Transform any complex function into a 3D-printable mathematical ornament
 - **🚀 PyVista Integration**: 15-30x faster 3D rendering with cinema-quality output
 - **🔧 Advanced Domain Composition**: Create complex domains through set operations (union, intersection, difference)
