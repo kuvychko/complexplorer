@@ -347,14 +347,24 @@ class Rectangle(Domain):
         return cls(re_length, im_length, center=center, square=square)
     
     def contains(self, z: np.ndarray) -> np.ndarray:
-        """Check if points are inside the rectangle."""
-        re_min, re_max = self.window_real
-        im_min, im_max = self.window_imag
-        
+        """Check if points are inside the rectangle.
+
+        Note: This checks against the actual rectangle dimensions (re_length × im_length),
+        not the viewing window which may be expanded to be square.
+        """
+        # Calculate actual rectangle bounds from dimensions and center
+        half_re = self.re_length / 2
+        half_im = self.im_length / 2
+
+        re_min = self.center.real - half_re
+        re_max = self.center.real + half_re
+        im_min = self.center.imag - half_im
+        im_max = self.center.imag + half_im
+
         return (
-            (np.real(z) >= re_min) & 
+            (np.real(z) >= re_min) &
             (np.real(z) <= re_max) &
-            (np.imag(z) >= im_min) & 
+            (np.imag(z) >= im_min) &
             (np.imag(z) <= im_max)
         )
 

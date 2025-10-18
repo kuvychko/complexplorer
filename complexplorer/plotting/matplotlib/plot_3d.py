@@ -235,6 +235,10 @@ def plot_landscape(domain: Optional[Domain] = None,
     # Get RGB colors
     rgb = cmap.rgb(f, outmask=mask)
 
+    # Ensure RGB values are in valid range [0, 1]
+    # (Prevents matplotlib shading errors with extreme z-coordinates)
+    rgb = np.clip(rgb, 0.0, 1.0)
+
     # Calculate z-coordinates (moduli)
     z_coord = np.abs(f)
 
