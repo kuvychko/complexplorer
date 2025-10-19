@@ -106,7 +106,7 @@ Color vision deficiency testing:
 
 **File**: [`examples/notebooks/06_riemann_sphere.ipynb`](../../examples/notebooks/06_riemann_sphere.ipynb)
 
-Extended complex plane  * {}:
+Extended complex plane ‚ÑÇ ‚à™ {‚àû}:
 
 - Stereographic projection math
 - 2D hemisphere charts with `riemann_chart()`
@@ -167,7 +167,7 @@ The `examples/applications/` directory contains 4 real-world application example
 Discrete Fourier Transform visualization:
 
 - DFT matrix: $W_N^{jk}$ where $W_N = e^{-2\pi i/N}$
-- **2◊4 grid gallery**: N = 32, 64, 128, 256, 512, 1024, 2048, 4096
+- **2√ó4 grid gallery**: N = 32, 64, 128, 256, 512, 1024, 2048, 4096
 - Circular symmetry from roots of unity
 - Extensions: IDFT, Hadamard, Toeplitz matrices
 
@@ -181,12 +181,12 @@ Discrete Fourier Transform visualization:
 
 **File**: [`examples/applications/app_02_special_functions.ipynb`](../../examples/applications/app_02_special_functions.ipynb)
 
-Classical special functions in :
+Classical special functions in ‚ÑÇ:
 
 - **Gamma function**: Poles at 0, -1, -2, ...
 - **Riemann zeta**: Critical strip, non-trivial zeros (Riemann Hypothesis!)
 - **Bessel functions**: Entire functions, wave equations
-- **Elliptic functions**: Doubly periodic (Weierstrass )
+- **Elliptic functions**: Doubly periodic (Weierstrass ‚Ñò)
 - **Singularity classification**: Poles, zeros, essential singularities
 
 **Mathematical context**: Number theory, physics, analysis.
@@ -201,13 +201,13 @@ Classical special functions in :
 
 Angle-preserving transformations:
 
-- **Mˆbius transformations**: Linear fractional, circles í circles
-- **Joukowsky transform**: Circles í airfoils (aerodynamics!)
-- **Exponential/logarithm**: Strip î plane
+- **M√∂bius transformations**: Linear fractional, circles ‚Üí circles
+- **Joukowsky transform**: Circles ‚Üí airfoils (aerodynamics!)
+- **Exponential/logarithm**: Strip ‚Üí plane
 - **Power functions**: Angle multiplication
 - **Composition**: Build complex from simple
 
-**Uses `pair_plot()` to show domain í codomain transformation.**
+**Uses `pair_plot()` to show domain ‚Üí codomain transformation.**
 
 **Applications**: Fluid dynamics, electrostatics, cartography.
 
@@ -221,8 +221,8 @@ Angle-preserving transformations:
 
 Iterative systems and chaos:
 
-- **Newton's method**: Fractal basin boundaries (z≥-1, zu-1)
-- **Julia sets**: Iteration of z≤ + c
+- **Newton's method**: Fractal basin boundaries (z¬≥-1, z‚Åµ-1)
+- **Julia sets**: Iteration of z¬≤ + c
 - **Mandelbrot set**: Parameter space catalog
 - **Escape time coloring**: Fractal visualization
 - **Chaos theory**: Sensitive dependence, self-similarity
@@ -376,4 +376,4 @@ Found an error or have an improvement?
 
 ---
 
-**Ready to start?** Open [`01_getting_started.ipynb`](../../examples/notebooks/01_getting_started.ipynb) and begin your journey! <=–
+**Ready to start?** Open [`01_getting_started.ipynb`](../../examples/notebooks/01_getting_started.ipynb) and begin your journey!
