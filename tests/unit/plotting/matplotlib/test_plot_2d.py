@@ -22,7 +22,7 @@ class TestMatplotlib2DPlotter:
         plotter = Matplotlib2DPlotter()
         domain = Rectangle(4, 4)
         func = lambda z: z**2
-        colormap = Phase(n_phi=6)
+        colormap = Phase(phase_sectors=6)
         
         ax = plotter.plot_single(domain, func, colormap, resolution=50)
         
@@ -205,11 +205,11 @@ class TestRiemannChart:
     def test_margin_validation(self):
         """Test margin parameter validation."""
         func = lambda z: z
-        
-        with pytest.raises(ValidationError, match="non-negative"):
+
+        with pytest.raises(ValidationError, match="at least 0.0"):
             riemann_chart(func, margin=-0.1)
-        
-        with pytest.raises(ValidationError, match="exceed 0.5"):
+
+        with pytest.raises(ValidationError, match="cannot exceed 0.5"):
             riemann_chart(func, margin=0.6)
     
     def test_with_domain_mask(self):

@@ -92,7 +92,7 @@ class TestPlotLandscapePV:
         """Test plot with custom colormap."""
         domain = Disk(2)
         func = lambda z: (z - 1) / (z + 1)
-        cmap = Phase(n_phi=6, auto_scale_r=True)
+        cmap = Phase(phase_sectors=6, auto_scale_r=True)
         
         with mock.patch('pyvista.Plotter') as MockPlotter:
             plotter = MockPlotter.return_value

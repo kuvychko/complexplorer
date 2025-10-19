@@ -7,7 +7,7 @@ watertight meshes suitable for 3D printing.
 import numpy as np
 from typing import Optional
 
-from .utils import check_pyvista_available
+from complexplorer.export.stl.utils import check_pyvista_available
 
 # Import PyVista if available
 try:

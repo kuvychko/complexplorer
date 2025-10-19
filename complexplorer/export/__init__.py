@@ -1,5 +1,5 @@
 """Export modules for complexplorer."""
 
-from .base import *
+from complexplorer.export.stl import OrnamentGenerator, create_ornament
 
-__all__ = ['base']
+__all__ = ['OrnamentGenerator', 'create_ornament']

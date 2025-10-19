@@ -123,11 +123,11 @@ f = lambda z: (z - 1) / (z**2 + z + 1)
 domain = cp.Rectangle(4, 4)
 
 # Enhanced phase with auto-scaled square cells
-cmap = cp.Phase(n_phi=12, auto_scale_r=True, v_base=0.4)
+cmap = cp.Phase(phase_sectors=12, auto_scale_r=True, v_base=0.4)
 cp.plot(domain, f, cmap=cmap)"""
         
         fig, ax = plt.subplots(figsize=(6, 6))
-        cmap = cp.Phase(n_phi=12, auto_scale_r=True, v_base=0.4)
+        cmap = cp.Phase(phase_sectors=12, auto_scale_r=True, v_base=0.4)
         cp.plot(domain, f, cmap=cmap, ax=ax)
         ax.set_title(name)
         
@@ -179,14 +179,14 @@ f = lambda z: z**3 - 1
 domain = cp.Disk(2)
 
 # Polar chessboard pattern
-cmap = cp.PolarChessboard(n_phi=12, n_r=8)
+cmap = cp.PolarChessboard(phase_sectors=12, n_r=8)
 cp.plot(domain, f, cmap=cmap)"""
         
         f = lambda z: z**3 - 1
         domain = cp.Disk(2)
         
         fig, ax = plt.subplots(figsize=(6, 6))
-        cmap = cp.PolarChessboard(n_phi=12, n_r=8)
+        cmap = cp.PolarChessboard(phase_sectors=12, n_r=8)
         cp.plot(domain, f, cmap=cmap, ax=ax)
         ax.set_title(name)
         
@@ -245,7 +245,7 @@ hole2 = cp.Disk(0.5, center=-1)
 domain = rect - hole1 - hole2
 
 # Visualize with enhanced phase
-cmap = cp.Phase(n_phi=12, auto_scale_r=True)
+cmap = cp.Phase(phase_sectors=12, auto_scale_r=True)
 cp.plot(domain, f, cmap=cmap)"""
         
         f = lambda z: (z**2 - 1) / (z**2 + 1)
@@ -255,7 +255,7 @@ cp.plot(domain, f, cmap=cmap)"""
         domain = rect - hole1 - hole2
         
         fig, ax = plt.subplots(figsize=(6, 6))
-        cmap = cp.Phase(n_phi=12, auto_scale_r=True)
+        cmap = cp.Phase(phase_sectors=12, auto_scale_r=True)
         cp.plot(domain, f, cmap=cmap, ax=ax)
         ax.set_title(name)
         
@@ -286,7 +286,7 @@ domain = cp.Rectangle(4, 4)
 # Use notebook=False for high-quality window
 plotter = cp.plot_landscape_pv(
     domain, f,
-    cmap=cp.Phase(n_phi=12, auto_scale_r=True),
+    cmap=cp.Phase(phase_sectors=12, auto_scale_r=True),
     resolution=200,
     z_scale=0.4,
     notebook=False,
@@ -299,7 +299,7 @@ plotter = cp.plot_landscape_pv(
         # Create off-screen plotter
         plotter = cp.plot_landscape_pv(
             domain, f,
-            cmap=cp.Phase(n_phi=12, auto_scale_r=True),
+            cmap=cp.Phase(phase_sectors=12, auto_scale_r=True),
             resolution=200,
             z_scale=0.4,
             notebook=False,
@@ -333,7 +333,7 @@ domain = cp.Disk(2)
 # Create side-by-side 3D landscapes
 plotter = cp.pair_plot_landscape_pv(
     domain, f,
-    cmap=cp.Phase(n_phi=12, auto_scale_r=True),
+    cmap=cp.Phase(phase_sectors=12, auto_scale_r=True),
     resolution=200,
     z_scale=0.3,
     notebook=False,
@@ -346,7 +346,7 @@ plotter = cp.pair_plot_landscape_pv(
         
         plotter = cp.pair_plot_landscape_pv(
             domain, f,
-            cmap=cp.Phase(n_phi=12, auto_scale_r=True),
+            cmap=cp.Phase(phase_sectors=12, auto_scale_r=True),
             resolution=200,
             z_scale=0.3,
             notebook=False,
@@ -382,7 +382,7 @@ f = lambda z: (z**2 - 1) / (z**2 + 1)
 # Create Riemann sphere visualization
 plotter = cp.riemann_pv(
     f,
-    cmap=cp.Phase(n_phi=16),
+    cmap=cp.Phase(phase_sectors=16),
     modulus_scaling='constant',
     resolution=150,
     notebook=False,
@@ -393,7 +393,7 @@ plotter = cp.riemann_pv(
         
         plotter = cp.riemann_pv(
             f,
-            cmap=cp.Phase(n_phi=16),
+            cmap=cp.Phase(phase_sectors=16),
             modulus_scaling='constant',
             resolution=150,
             notebook=False,
@@ -425,7 +425,7 @@ f = lambda z: (z - 1) * (z + 1) / (z**2 + 0.5)
 # Riemann sphere with arctan modulus scaling
 plotter = cp.riemann_pv(
     f,
-    cmap=cp.Phase(n_phi=12, auto_scale_r=True),
+    cmap=cp.Phase(phase_sectors=12, auto_scale_r=True),
     modulus_scaling='arctan',
     scaling_params={'r_min': 0.3, 'r_max': 1.0},
     resolution=200,
@@ -437,7 +437,7 @@ plotter = cp.riemann_pv(
         
         plotter = cp.riemann_pv(
             f,
-            cmap=cp.Phase(n_phi=12, auto_scale_r=True),
+            cmap=cp.Phase(phase_sectors=12, auto_scale_r=True),
             modulus_scaling='arctan',
             scaling_params={'r_min': 0.3, 'r_max': 1.0},
             resolution=200,
@@ -475,14 +475,14 @@ domain = cp.Annulus(0.05, 0.5)
 
 # High resolution needed near singularity
 cp.plot(domain, f, 
-        cmap=cp.Phase(n_phi=24),
+        cmap=cp.Phase(phase_sectors=24),
         resolution=600)"""
         
         f = lambda z: np.exp(1/z)
         domain = cp.Annulus(0.05, 0.5)
         
         fig, ax = plt.subplots(figsize=(6, 6))
-        cp.plot(domain, f, cmap=cp.Phase(n_phi=24), resolution=600, ax=ax)
+        cp.plot(domain, f, cmap=cp.Phase(phase_sectors=24), resolution=600, ax=ax)
         ax.set_title(name)
         
         image_file = os.path.join(self.images_dir, f"{sanitize_filename(name)}.png")
@@ -507,14 +507,14 @@ domain = cp.Annulus(0.1, 3)
 
 # Phase portrait shows branch cut clearly
 cp.plot(domain, f, 
-        cmap=cp.Phase(n_phi=12),
+        cmap=cp.Phase(phase_sectors=12),
         resolution=400)"""
         
         f = lambda z: np.log(z)
         domain = cp.Annulus(0.1, 3)
         
         fig, ax = plt.subplots(figsize=(6, 6))
-        cp.plot(domain, f, cmap=cp.Phase(n_phi=12), resolution=400, ax=ax)
+        cp.plot(domain, f, cmap=cp.Phase(phase_sectors=12), resolution=400, ax=ax)
         ax.set_title(name)
         
         image_file = os.path.join(self.images_dir, f"{sanitize_filename(name)}.png")

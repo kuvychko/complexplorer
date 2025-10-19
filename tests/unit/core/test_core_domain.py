@@ -57,19 +57,72 @@ class TestRectangle:
     def test_contains(self):
         """Test point containment."""
         rect = Rectangle(2, 2)
-        
+
         # Test single points
         assert rect.contains(0+0j)
         assert rect.contains(0.9+0.9j)
         assert not rect.contains(2+0j)
         assert not rect.contains(0+2j)
-        
+
         # Test array
         z = np.array([0+0j, 1+0j, 2+0j, 0+1j, 0+2j])
         mask = rect.contains(z)
         expected = np.array([True, True, False, True, False])
         np.testing.assert_array_equal(mask, expected)
-    
+
+    def test_contains_with_square_window(self):
+        """Test that contains() uses actual domain bounds, not viewing window.
+
+        This is a regression test for a bug where Rectangle.contains()
+        incorrectly checked against the square viewing window instead of
+        the actual rectangle dimensions.
+        """
+        # Create wide rectangle: 3 wide × 0.8 tall
+        # Domain should be: -1.5 to 1.5 (real), -0.4 to 0.4 (imaginary)
+        # But square viewing window is: -1.5 to 1.5 (real), -1.5 to 1.5 (imaginary)
+        rect = Rectangle(re_length=3, im_length=0.8)
+
+        # Verify viewing window is square (expanded)
+        assert rect.window_real == (-1.5, 1.5)
+        assert rect.window_imag == (-1.5, 1.5)  # Expanded!
+
+        # Points within actual rectangle bounds should be inside
+        assert rect.contains(0+0j)          # Center
+        assert rect.contains(1.4+0.3j)      # Inside rectangle
+        assert rect.contains(-1.4-0.3j)     # Inside rectangle
+
+        # Points outside rectangle height (but inside viewing window) should be OUTSIDE
+        # These are the critical test cases that reveal the bug
+        assert not rect.contains(0+1j)      # Above rectangle (in window, not in domain)
+        assert not rect.contains(0-1j)      # Below rectangle (in window, not in domain)
+        assert not rect.contains(1+0.5j)    # Above rectangle (in window, not in domain)
+        assert not rect.contains(-1-0.5j)   # Below rectangle (in window, not in domain)
+
+        # Points outside rectangle width should also be outside
+        assert not rect.contains(2+0j)
+        assert not rect.contains(-2+0j)
+
+        # Test the notebook example case: union of cross rectangles
+        horizontal = Rectangle(re_length=3, im_length=0.8)
+        vertical = Rectangle(re_length=0.8, im_length=3)
+        cross = horizontal | vertical
+
+        # Center should be in both rectangles
+        assert cross.contains(0+0j)
+
+        # Point in horizontal bar only (not vertical)
+        assert cross.contains(1.4+0j)
+        assert not vertical.contains(1.4+0j)  # Outside vertical's width
+
+        # Point in vertical bar only (not horizontal)
+        assert cross.contains(0+1.4j)
+        assert not horizontal.contains(0+1.4j)  # Outside horizontal's height
+
+        # Point in neither bar (corner of square window)
+        assert not cross.contains(1+1j)
+        assert not horizontal.contains(1+1j)
+        assert not vertical.contains(1+1j)
+
     def test_mesh_generation(self):
         """Test mesh generation."""
         rect = Rectangle(2, 2)

@@ -83,18 +83,18 @@ class TestModulusScaling:
         """Test error when custom mode lacks scaling function."""
         domain = Rectangle(2, 2)
         func = lambda z: z
-        
-        with pytest.raises(ValidationError, match="Custom mode requires"):
+
+        with pytest.raises(ValidationError, match="Custom modulus mode requires"):
             plot_landscape(domain=domain, func=func,
                          modulus_mode='custom',
                          modulus_params={})
-    
+
     def test_unknown_mode(self):
         """Test error for unknown scaling mode."""
         domain = Rectangle(2, 2)
         func = lambda z: z
-        
-        with pytest.raises(ValidationError, match="Unknown scaling mode"):
+
+        with pytest.raises(ValidationError, match="Unknown modulus scaling mode"):
             plot_landscape(domain=domain, func=func,
                          modulus_mode='invalid_mode')
     
@@ -155,7 +155,7 @@ class TestIntegrationWithColormaps:
         """Test modulus scaling with enhanced phase colormap."""
         domain = Rectangle(3, 3)
         func = lambda z: (z**3 - 1) / (z**3 + 1)
-        cmap = Phase(n_phi=6, auto_scale_r=True)
+        cmap = Phase(phase_sectors=6, auto_scale_r=True)
         
         ax = plot_landscape(domain=domain, func=func, cmap=cmap, resolution=40,
                           modulus_mode='sigmoid',

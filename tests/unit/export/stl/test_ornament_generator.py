@@ -25,45 +25,45 @@ class TestOrnamentGenerator:
         """Test initialization with defaults."""
         func = lambda z: z**2
         gen = OrnamentGenerator(func)
-        
+
         assert gen.func is func
         assert gen.resolution == 150
-        assert gen.scaling == 'arctan'
+        assert gen.modulus_mode == 'arctan'
         assert isinstance(gen.cmap, Phase)
         assert gen.sphere_mesh is None
     
     def test_init_custom(self):
         """Test initialization with custom parameters."""
         func = lambda z: z**3 - 1
-        cmap = Phase(n_phi=8)
+        cmap = Phase(phase_sectors=8)
         domain = Disk(2)
-        
+
         gen = OrnamentGenerator(
-            func, 
+            func,
             resolution=100,
-            scaling='logarithmic',
-            scaling_params={'base': 2.0},
+            modulus_mode='logarithmic',
+            modulus_params={'base': 2.0},
             cmap=cmap,
             domain=domain
         )
-        
+
         assert gen.resolution == 100
-        assert gen.scaling == 'logarithmic'
-        assert gen.scaling_params['base'] == 2.0
+        assert gen.modulus_mode == 'logarithmic'
+        assert gen.modulus_params['base'] == 2.0
         assert gen.cmap is cmap
         assert gen.domain is domain
     
     def test_default_scaling_params(self):
-        """Test default parameters for different scaling methods."""
+        """Test default parameters for different modulus scaling methods."""
         func = lambda z: z
-        
+
         # Test each scaling method
-        scalings = ['constant', 'arctan', 'logarithmic', 'linear_clamp',
-                   'linear', 'power', 'sigmoid', 'adaptive', 'hybrid']
-        
-        for scaling in scalings:
-            gen = OrnamentGenerator(func, scaling=scaling)
-            params = gen.scaling_params
+        modulus_modes = ['constant', 'arctan', 'logarithmic', 'linear_clamp',
+                         'linear', 'power', 'sigmoid', 'adaptive', 'hybrid']
+
+        for mode in modulus_modes:
+            gen = OrnamentGenerator(func, modulus_mode=mode)
+            params = gen.modulus_params
             assert isinstance(params, dict)
             assert len(params) > 0
     
@@ -98,23 +98,23 @@ class TestOrnamentGenerator:
         assert sphere.n_points < sphere_full.n_points
     
     def test_different_scaling_methods(self):
-        """Test different scaling methods produce different results."""
+        """Test different modulus scaling methods produce different results."""
         func = lambda z: (z - 1) / (z + 1)
-        
+
         radii_by_method = {}
-        
-        for scaling in ['constant', 'arctan', 'linear', 'logarithmic']:
-            gen = OrnamentGenerator(func, resolution=30, scaling=scaling)
+
+        for mode in ['constant', 'arctan', 'linear', 'logarithmic']:
+            gen = OrnamentGenerator(func, resolution=30, modulus_mode=mode)
             sphere = gen.generate_ornament()
-            
+
             # Get actual radii
             radii = np.linalg.norm(sphere.points, axis=1)
-            radii_by_method[scaling] = radii
-        
+            radii_by_method[mode] = radii
+
         # Constant should have all same radius
-        assert np.allclose(radii_by_method['constant'], 
+        assert np.allclose(radii_by_method['constant'],
                           radii_by_method['constant'][0])
-        
+
         # Others should vary
         for method in ['arctan', 'linear', 'logarithmic']:
             assert radii_by_method[method].std() > 0.01
@@ -160,7 +160,7 @@ class TestOrnamentGenerator:
     def test_generate_and_save_pipeline(self, tmp_path):
         """Test complete pipeline."""
         func = lambda z: (z**2 - 1) / (z**2 + 1)
-        gen = OrnamentGenerator(func, resolution=40, scaling='sigmoid')
+        gen = OrnamentGenerator(func, resolution=40, modulus_mode='sigmoid')
         
         filename = tmp_path / "complete_test.stl"
         saved_path = gen.generate_and_save(
@@ -184,10 +184,10 @@ class TestOrnamentGenerator:
         assert 55 < max_dim < 65
     
     def test_invalid_scaling_method(self):
-        """Test error for invalid scaling method."""
+        """Test error for invalid modulus scaling method."""
         func = lambda z: z
-        gen = OrnamentGenerator(func, scaling='invalid_method')
-        
+        gen = OrnamentGenerator(func, modulus_mode='invalid_method')
+
         with pytest.raises(ValidationError, match="Unknown scaling mode"):
             gen.generate_ornament()
     
@@ -206,9 +206,36 @@ class TestOrnamentGenerator:
         """Test error when trying to save without generating."""
         func = lambda z: z
         gen = OrnamentGenerator(func)
-        
+
         with pytest.raises(ValueError, match="No mesh generated"):
             gen.save_stl("test.stl")
+
+    def test_deprecated_parameter_names(self):
+        """Test that deprecated parameter names still work with warnings."""
+        import warnings
+
+        func = lambda z: z**2
+
+        # Test deprecated 'scaling' parameter
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            gen = OrnamentGenerator(func, scaling='logarithmic')
+
+            assert len(w) == 1
+            assert issubclass(w[0].category, DeprecationWarning)
+            assert "scaling" in str(w[0].message).lower()
+            assert gen.modulus_mode == 'logarithmic'
+
+        # Test deprecated 'scaling_params' parameter
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            gen = OrnamentGenerator(func, modulus_mode='arctan',
+                                   scaling_params={'r_min': 0.3, 'r_max': 0.9})
+
+            assert len(w) == 1
+            assert issubclass(w[0].category, DeprecationWarning)
+            assert "scaling_params" in str(w[0].message).lower()
+            assert gen.modulus_params['r_min'] == 0.3
 
 
 @pytest.mark.skipif(not HAS_PYVISTA, reason="PyVista not installed")
@@ -235,15 +262,15 @@ class TestCreateOrnament:
         """Test creation with custom parameters."""
         func = lambda z: np.sin(z)
         filename = tmp_path / "custom.stl"
-        cmap = Phase(n_phi=16)
+        cmap = Phase(phase_sectors=16)
         
         saved_path = create_ornament(
             func,
             str(filename),
             size_mm=55,
             resolution=80,
-            scaling='adaptive',
-            scaling_params={'low_percentile': 5, 'high_percentile': 95},
+            modulus_mode='adaptive',
+            modulus_params={'low_percentile': 5, 'high_percentile': 95},
             cmap=cmap,
             verbose=False
         )
@@ -273,20 +300,20 @@ class TestComplexFunctions:
         """Test rational function with poles."""
         func = lambda z: (z**2 + 1) / (z**2 - 1)
         filename = tmp_path / "rational.stl"
-        
-        gen = OrnamentGenerator(func, resolution=40, scaling='arctan')
+
+        gen = OrnamentGenerator(func, resolution=40, modulus_mode='arctan')
         gen.generate_and_save(str(filename), size_mm=50, verbose=False)
-        
+
         assert os.path.exists(filename)
     
     def test_transcendental(self, tmp_path):
         """Test transcendental function."""
         func = lambda z: np.exp(z) / (z + 1)
         filename = tmp_path / "transcendental.stl"
-        
-        gen = OrnamentGenerator(func, resolution=40, scaling='logarithmic')
+
+        gen = OrnamentGenerator(func, resolution=40, modulus_mode='logarithmic')
         gen.generate_and_save(str(filename), size_mm=55, verbose=False)
-        
+
         assert os.path.exists(filename)
     
     def test_essential_singularity(self, tmp_path):
@@ -296,10 +323,10 @@ class TestComplexFunctions:
             with np.errstate(divide='ignore', invalid='ignore'):
                 result = np.exp(1/z)
             return np.where(np.isfinite(result), result, 0)
-        
+
         filename = tmp_path / "essential.stl"
-        
-        gen = OrnamentGenerator(func, resolution=40, scaling='adaptive')
+
+        gen = OrnamentGenerator(func, resolution=40, modulus_mode='adaptive')
         gen.generate_and_save(str(filename), size_mm=50, verbose=False)
-        
+
         assert os.path.exists(filename)

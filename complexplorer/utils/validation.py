@@ -8,10 +8,8 @@ from typing import Optional, Callable, Union, Any
 import numpy as np
 import warnings
 
-
-class ValidationError(ValueError):
-    """Custom exception for validation errors in complexplorer."""
-    pass
+# Import exceptions from the new hierarchy
+from complexplorer.exceptions import ValidationError, DomainError, ColormapError, ResolutionError
 
 
 def validate_domain_or_mesh(domain: Optional[Any], 
@@ -132,7 +130,7 @@ def validate_colormap(cmap: Optional[Any], default_class: Any = None) -> Any:
                 )
         
         # Return default colormap with standard parameters
-        return default_class(n_phi=6, auto_scale_r=True)
+        return default_class(phase_sectors=6, auto_scale_r=True)
     
     # Validate that cmap has required methods
     required_methods = ['hsv', 'rgb']

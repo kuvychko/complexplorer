@@ -15,7 +15,7 @@ from abc import ABC, abstractmethod
 from math import ceil
 from typing import Optional, Tuple, Callable, Union
 import numpy as np
-from ..utils.validation import ValidationError, validate_resolution
+from complexplorer.utils.validation import ValidationError, validate_resolution
 
 
 class Domain(ABC):
@@ -284,15 +284,87 @@ class Rectangle(Domain):
         
         super().__init__(real_bounds, imag_bounds, square)
     
-    def contains(self, z: np.ndarray) -> np.ndarray:
-        """Check if points are inside the rectangle."""
-        re_min, re_max = self.window_real
-        im_min, im_max = self.window_imag
+    @classmethod
+    def from_ranges(cls, 
+                   x_range: Union[Tuple[float, float], Tuple[float, float, int]],
+                   y_range: Optional[Union[Tuple[float, float], Tuple[float, float, int]]] = None,
+                   square: bool = False) -> 'Rectangle':
+        """Create Rectangle from range specifications.
         
+        Parameters
+        ----------
+        x_range : tuple
+            (min, max) or (min, max, resolution) for real axis.
+            Resolution is ignored for domain creation.
+        y_range : tuple, optional
+            (min, max) or (min, max, resolution) for imaginary axis.
+            If None, uses x_range.
+        square : bool, optional
+            Whether to use square viewing window.
+            
+        Returns
+        -------
+        Rectangle
+            Rectangle domain created from ranges.
+            
+        Examples
+        --------
+        >>> # Create from simple ranges
+        >>> domain = Rectangle.from_ranges((-2, 2), (-1, 1))
+        >>> 
+        >>> # Create with resolution (resolution is ignored)
+        >>> domain = Rectangle.from_ranges((-3, 3, 500), (-3, 3, 500))
+        >>> 
+        >>> # Create square domain
+        >>> domain = Rectangle.from_ranges((-2, 2))  # y_range defaults to x_range
+        """
+        # Handle y_range default
+        if y_range is None:
+            y_range = x_range
+        
+        # Extract min and max from ranges
+        if len(x_range) >= 2:
+            x_min, x_max = x_range[0], x_range[1]
+        else:
+            raise ValidationError("x_range must be at least (min, max)")
+        
+        if len(y_range) >= 2:
+            y_min, y_max = y_range[0], y_range[1]
+        else:
+            raise ValidationError("y_range must be at least (min, max)")
+        
+        # Validate ranges
+        if x_min >= x_max:
+            raise ValidationError(f"Invalid x_range: min ({x_min}) must be less than max ({x_max})")
+        if y_min >= y_max:
+            raise ValidationError(f"Invalid y_range: min ({y_min}) must be less than max ({y_max})")
+        
+        # Calculate center and dimensions
+        center = complex((x_min + x_max) / 2, (y_min + y_max) / 2)
+        re_length = abs(x_max - x_min)
+        im_length = abs(y_max - y_min)
+        
+        return cls(re_length, im_length, center=center, square=square)
+    
+    def contains(self, z: np.ndarray) -> np.ndarray:
+        """Check if points are inside the rectangle.
+
+        Note: This checks against the actual rectangle dimensions (re_length × im_length),
+        not the viewing window which may be expanded to be square.
+        """
+        # Calculate actual rectangle bounds from dimensions and center
+        half_re = self.re_length / 2
+        half_im = self.im_length / 2
+
+        re_min = self.center.real - half_re
+        re_max = self.center.real + half_re
+        im_min = self.center.imag - half_im
+        im_max = self.center.imag + half_im
+
         return (
-            (np.real(z) >= re_min) & 
+            (np.real(z) >= re_min) &
             (np.real(z) <= re_max) &
-            (np.imag(z) >= im_min) & 
+            (np.imag(z) >= im_min) &
             (np.imag(z) <= im_max)
         )
 
@@ -503,7 +575,7 @@ class CompositeDomain(Domain):
         return real_bounds, imag_bounds
     
     @property
-    def tight_bounds(self):
+    def tight_bounds(self) -> Tuple[Tuple[float, float], Tuple[float, float]]:
         """Get tight bounds, calculating if necessary."""
         if not hasattr(self, '_tight_bounds'):
             self._tight_bounds = self.calculate_tight_bounds()

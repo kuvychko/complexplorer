@@ -63,3 +63,6 @@ desktop.ini
 # Package manager
 pip-log.txt
 pip-delete-this-directory.txt
+
+# MkDocs
+site/

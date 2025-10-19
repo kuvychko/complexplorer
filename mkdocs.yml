@@ -1,0 +1,96 @@
+site_name: Complexplorer
+site_description: Beautiful visualizations of complex functions
+site_url: https://kuvychko.github.io/complexplorer/
+repo_url: https://github.com/kuvychko/complexplorer
+repo_name: kuvychko/complexplorer
+
+theme:
+  name: material
+  palette:
+    # Light mode
+    - scheme: default
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - scheme: slate
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search
+  - mkdocs-jupyter:
+      execute: false
+      include_source: true
+
+# Exclude backup documentation from build
+exclude_docs: |
+  old/
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.arithmatex:
+      generic: true
+  - admonition
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
+      title: On this page
+  - attr_list
+  - md_in_html
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: getting-started/installation.md
+      - Quick Start: getting-started/quickstart.md
+  - User Guide:
+      - Domains: user-guide/domains.md
+      - Colormaps: user-guide/colormaps.md
+      - 2D Plotting: user-guide/plotting-2d.md
+      - 3D Plotting: user-guide/plotting-3d.md
+      - Riemann Sphere: user-guide/riemann.md
+  - Examples:
+      - Gallery: examples/gallery.md
+      - Notebooks: examples/notebooks.md
+  - API Reference:
+      - Core: api/core.md
+      - Plotting: api/plotting.md
+      - Export: api/export.md
+  - Development:
+      - Contributing: development/contributing.md
+      - Architecture: development/architecture.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/kuvychko/complexplorer

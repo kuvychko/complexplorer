@@ -3,7 +3,7 @@
 This module provides convenient functions for typical use cases.
 """
 
-from typing import Callable, Optional, Union, List
+from typing import Callable, Optional, Any
 import numpy as np
 
 from complexplorer.core.domain import Domain, Rectangle
@@ -24,11 +24,86 @@ except ImportError:
     HAS_PYVISTA = False
 
 
-def quick_plot(func: Callable[[complex], complex], 
-               domain: Optional[Domain] = None,
-               mode: str = '2d',
-               **kwargs):
-    """Quick visualization of a complex function.
+def show(func: Callable[[complex], complex],
+         x_range: tuple = (-2, 2, 500),
+         y_range: Optional[tuple] = None,
+         **kwargs) -> Any:
+    """Quick plot function for simple use cases, similar to cplot.
+    
+    Parameters
+    ----------
+    func : callable
+        Complex function to visualize
+    x_range : tuple
+        (min, max) or (min, max, resolution) for real axis
+    y_range : tuple, optional
+        (min, max) or (min, max, resolution) for imaginary axis. 
+        If None, uses x_range.
+    **kwargs
+        Additional arguments passed to plot()
+    
+    Returns
+    -------
+    Any
+        Matplotlib axes or PyVista plotter depending on mode.
+        
+    Examples
+    --------
+    >>> import complexplorer as cp
+    >>> cp.show(lambda z: z**2)
+    >>> cp.show(lambda z: 1/z, (-3, 3, 500), (-3, 3, 500))
+    >>> cp.show(lambda z: np.sin(z), (-5, 5), (-5, 5))
+    """
+    # Handle y_range default
+    if y_range is None:
+        y_range = x_range
+    
+    # Parse ranges - support both (min, max) and (min, max, resolution)
+    if len(x_range) == 2:
+        x_min, x_max = x_range
+        x_res = 500
+    elif len(x_range) == 3:
+        x_min, x_max, x_res = x_range
+    else:
+        raise ValueError("x_range must be (min, max) or (min, max, resolution)")
+    
+    if len(y_range) == 2:
+        y_min, y_max = y_range
+        y_res = 500
+    elif len(y_range) == 3:
+        y_min, y_max, y_res = y_range
+    else:
+        raise ValueError("y_range must be (min, max) or (min, max, resolution)")
+    
+    # Create Rectangle domain from ranges
+    center = complex((x_min + x_max) / 2, (y_min + y_max) / 2)
+    re_length = abs(x_max - x_min)
+    im_length = abs(y_max - y_min)
+    domain = Rectangle(re_length, im_length, center=center, square=False)
+    
+    # Use the maximum resolution
+    resolution = max(x_res, y_res) if isinstance(x_res, int) and isinstance(y_res, int) else 500
+    
+    # Set default colormap if not provided (with better defaults for initial experience)
+    if 'cmap' not in kwargs:
+        kwargs['cmap'] = Phase(phase_sectors=6, auto_scale_r=True, scale_radius=0.8)
+    
+    # Get mode (default to 2d for simplicity)
+    mode = kwargs.pop('mode', '2d')
+    
+    # Pass resolution if not in kwargs
+    if 'resolution' not in kwargs:
+        kwargs['resolution'] = resolution
+    
+    # Call the main plot function
+    return plot(func, domain, mode, **kwargs)
+
+
+def plot(func: Callable[[complex], complex], 
+         domain: Optional[Domain] = None,
+         mode: str = '2d',
+         **kwargs) -> Any:
+    """Visualize a complex function.
     
     Parameters
     ----------
@@ -43,13 +118,14 @@ def quick_plot(func: Callable[[complex], complex],
         
     Returns
     -------
-    Axes or Plotter object depending on mode
+    Any
+        Matplotlib axes or PyVista plotter depending on mode and backend.
     """
     if domain is None:
         domain = Rectangle(4, 4)
     
     if 'cmap' not in kwargs:
-        kwargs['cmap'] = Phase(n_phi=6, auto_scale_r=True)
+        kwargs['cmap'] = Phase(phase_sectors=6, auto_scale_r=True, scale_radius=0.8)
     
     if mode == '2d':
         return plot_2d(domain, func, **kwargs)
@@ -67,166 +143,68 @@ def quick_plot(func: Callable[[complex], complex],
         raise ValueError(f"Unknown mode: {mode}")
 
 
-def analyze_function(func: Callable[[complex], complex],
-                    domain: Optional[Domain] = None,
-                    show_zeros: bool = True,
-                    show_poles: bool = True,
-                    **kwargs):
-    """Analyze a complex function with automatic feature detection.
-    
-    Parameters
-    ----------
-    func : callable
-        Complex function to analyze
-    domain : Domain, optional
-        Domain to analyze. Defaults to Rectangle(4, 4)
-    show_zeros : bool
-        Highlight zeros of the function
-    show_poles : bool
-        Highlight poles of the function
-    **kwargs
-        Additional plotting arguments
-        
-    Returns
-    -------
-    dict
-        Analysis results including plot object
-    """
-    if domain is None:
-        domain = Rectangle(4, 4)
-    
-    # Use enhanced phase portrait for analysis
-    cmap = Phase(n_phi=12, auto_scale_r=True, scale_radius=1.0)
-    
-    # Create the plot
-    ax = plot_2d(domain, func, cmap=cmap, **kwargs)
-    
-    # Simple feature detection (more sophisticated analysis could be added)
-    results = {
-        'plot': ax,
-        'domain': domain,
-        'function': func,
-        'colormap': cmap
-    }
-    
-    # TODO: Add automatic zero/pole detection
-    if show_zeros or show_poles:
-        print("Note: Automatic zero/pole detection not yet implemented")
-    
-    return results
+# Removed analyze_function - incomplete implementation
+# Users can use plot() directly with appropriate colormap
 
 
-def create_animation(func_family: Callable[[complex, float], complex],
-                    domain: Optional[Domain] = None,
-                    t_values: Optional[np.ndarray] = None,
-                    mode: str = '2d',
-                    filename: Optional[str] = None,
-                    **kwargs):
-    """Create an animation of a parametric family of functions.
-    
-    Parameters
-    ----------
-    func_family : callable
-        Function f(z, t) where t is the parameter
-    domain : Domain, optional
-        Domain to plot
-    t_values : array-like, optional
-        Parameter values. Defaults to linspace(0, 1, 30)
-    mode : str
-        Plot mode: '2d' or '3d'
-    filename : str, optional
-        Save animation to file
-    **kwargs
-        Additional plotting arguments
-        
-    Returns
-    -------
-    Animation object or saved filename
-    """
-    if domain is None:
-        domain = Rectangle(4, 4)
-    
-    if t_values is None:
-        t_values = np.linspace(0, 1, 30)
-    
-    # TODO: Implement animation functionality
-    raise NotImplementedError("Animation functionality coming soon!")
+# Removed create_animation - not implemented
+# Will be added in a future release when properly implemented
 
 
-def compare_functions(funcs: List[Callable[[complex], complex]],
-                     domain: Optional[Domain] = None,
-                     labels: Optional[List[str]] = None,
-                     mode: str = '2d',
-                     **kwargs):
-    """Compare multiple complex functions side by side.
-    
-    Parameters
-    ----------
-    funcs : list of callables
-        Functions to compare
-    domain : Domain, optional
-        Domain for all functions
-    labels : list of str, optional
-        Labels for each function
-    mode : str
-        Plot mode: '2d' or '3d'
-    **kwargs
-        Additional plotting arguments
-        
-    Returns
-    -------
-    Figure with subplots
-    """
-    if domain is None:
-        domain = Rectangle(4, 4)
-    
-    if labels is None:
-        labels = [f"f_{i}" for i in range(len(funcs))]
-    
-    # TODO: Implement comparison plots
-    raise NotImplementedError("Comparison functionality coming soon!")
+# Removed compare_functions - not implemented  
+# Will be added in a future release when properly implemented
 
 
 # Preset configurations for common use cases
-class Presets:
-    """Common preset configurations."""
+def publication_preset() -> dict:
+    """Get settings for publication-quality figures.
     
-    @staticmethod
-    def publication_ready():
-        """Settings for publication-quality figures."""
-        return {
-            'cmap': Phase(n_phi=12, auto_scale_r=True, scale_radius=0.8),
-            'resolution': 800
-        }
-    
-    @staticmethod
-    def interactive():
-        """Settings for interactive exploration."""
-        return {
-            'cmap': Phase(n_phi=6, auto_scale_r=True),
-            'resolution': 400
-        }
-    
-    @staticmethod
-    def high_contrast():
-        """Settings for high contrast visualization."""
-        return {
-            'cmap': Phase(n_phi=16, auto_scale_r=True, scale_radius=0.5),
-            'resolution': 600
-        }
+    Returns
+    -------
+    dict
+        Configuration with high-resolution enhanced phase portrait.
+    """
+    return {
+        'cmap': Phase(phase_sectors=12, auto_scale_r=True, scale_radius=0.8),
+        'resolution': 800
+    }
 
 
-# Export convenient aliases
-visualize = quick_plot
-explore = quick_plot
+def interactive_preset() -> dict:
+    """Get settings for interactive exploration.
+    
+    Returns
+    -------
+    dict
+        Configuration optimized for speed and interactivity.
+    """
+    return {
+        'cmap': Phase(phase_sectors=6, auto_scale_r=True, scale_radius=0.8),
+        'resolution': 500
+    }
+
+
+def high_contrast_preset() -> dict:
+    """Get settings for high contrast visualization.
+    
+    Returns
+    -------
+    dict
+        Configuration with many phase sectors for maximum contrast.
+    """
+    return {
+        'cmap': Phase(phase_sectors=16, auto_scale_r=True, scale_radius=0.5),
+        'resolution': 600
+    }
+
+
+# Removed redundant aliases - one clear function name is better
 
 
 __all__ = [
-    'quick_plot',
-    'analyze_function',
-    'create_animation',
-    'compare_functions',
-    'Presets',
-    'visualize',
-    'explore'
+    'show',
+    'plot',
+    'publication_preset',
+    'interactive_preset',
+    'high_contrast_preset'
 ]

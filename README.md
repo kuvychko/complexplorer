@@ -1,10 +1,13 @@
 # Complexplorer
 
 [![PyPI version](https://badge.fury.io/py/complexplorer.svg)](https://badge.fury.io/py/complexplorer)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/kuvychko/complexplorer/releases/tag/v2.0.0)
 [![Python](https://img.shields.io/pypi/pyversions/complexplorer.svg)](https://pypi.org/project/complexplorer/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **Transform complex mathematics into tangible art.** Complexplorer brings complex function visualization into the physical world through stunning Riemann relief maps and 3D-printable mathematical ornaments.
+
+> **🆕 Version 2.0 Released!** Major improvements include 8 new perceptually-optimized colormaps, comprehensive documentation (5,571 lines), enhanced phase portraits with auto-scaling, and cleaner API. See the [CHANGELOG](CHANGELOG.md) and [Documentation](https://kuvychko.github.io/complexplorer/) for details.
 
 <p align="center">
   <img src="examples/gallery/Riemann_relief_map_20250726.png" width="50%">
@@ -62,9 +65,9 @@ The modulus scaling creates a topographic "relief" effect - poles become mountai
 Create traditional domain coloring visualizations too:
 
 ```python
-# Classic phase portrait
+# Classic phase portrait with v2.0 API
 domain = cp.Rectangle(4, 4)
-cp.plot(domain, f, cmap=cp.Phase(n_phi=12, auto_scale_r=True))
+cp.plot(domain, f, cmap=cp.Phase(phase_sectors=12, auto_scale_r=True))
 ```
 
 ## 💫 The Magic of Complex Numbers
@@ -85,6 +88,70 @@ which, in my view, can only be referred to as 'magic'.*
 
 [Road to Reality](https://www.ams.org/notices/200606/rev-blank.pdf), Chapter 4 - Magical Complex Numbers, Sir Roger Penrose
 
+## 🎨 New in v2.0: Advanced Colormap Families
+
+Complexplorer v2.0 introduces **8 new perceptually-optimized colormap families** that go beyond traditional phase portraits, offering superior print quality, accessibility, and artistic control.
+
+### Perceptually Uniform Colormaps
+
+**PerceptualPastel** - Elegant OkLCh-based pastels with uniform perceived brightness
+```python
+# Print-friendly, non-fluorescent colors
+cp.plot(domain, f, cmap=cp.PerceptualPastel(L_center=0.55, C=0.1))
+```
+
+**Isoluminant** - Constant brightness with phase-only hue variation
+```python
+# Perfect for identifying phase structure without brightness distractions  
+cp.plot(domain, f, cmap=cp.Isoluminant(L=0.6, C=0.15))
+```
+
+**CubehelixPhase** - Scientific coloring with optimal grayscale conversion
+```python
+# CMYK-safe, perfect for academic publications
+cp.plot(domain, f, cmap=cp.CubehelixPhase(start=0.5, rotations=1.5))
+```
+
+### Artistic & Thematic Colormaps
+
+**AnalogousWedge** - Compressed hue ranges for sophisticated aesthetics
+```python
+# Ocean theme (teal to navy)
+cp.plot(domain, f, cmap=cp.AnalogousWedge(H_center=0.55, H_wedge=0.2))
+```
+
+**DivergingWarmCool** - Cartographic style emphasizing real/imaginary axes
+```python
+# Warm for positive phase, cool for negative
+cp.plot(domain, f, cmap=cp.DivergingWarmCool(warm_hue=0.08, cool_hue=0.61))
+```
+
+**InkPaper** - Nearly monochrome with subtle phase tints
+```python
+# Elegant etching aesthetic for presentations
+cp.plot(domain, f, cmap=cp.InkPaper(phase_strength=0.05))
+```
+
+**EarthTopographic** - Terrain-inspired with natural hillshade effects  
+```python
+# Zeros as valleys, poles as peaks
+cp.plot(domain, f, cmap=cp.EarthTopographic(water_hue=0.55, land_hue=0.08))
+```
+
+**FourQuadrant** - Bauhaus-inspired geometric palette
+```python
+# Clean, reduced palette for modern aesthetics
+cp.plot(domain, f, cmap=cp.FourQuadrant(C=0.25, L_base=0.5))
+```
+
+All new colormaps support enhanced phase portraits with automatic scaling:
+```python
+cmap = cp.PerceptualPastel(phase_sectors=6, auto_scale_r=True)  # Square cells
+cp.plot(domain, f, cmap=cmap)
+```
+
+See our [Colormap Guide](https://kuvychko.github.io/complexplorer/user-guide/colormaps/) for detailed comparisons and use cases.
+
 ## 🎨 Gallery
 
 Explore the full range of visualizations in our [**Gallery**](docs/gallery/README.md), featuring:
@@ -103,20 +170,29 @@ Explore the full range of visualizations in our [**Gallery**](docs/gallery/READM
 
 ## 📚 Documentation
 
-- **[Gallery](docs/gallery/README.md)** - Visual showcase with code examples
-- **[Getting Started](examples/getting_started.ipynb)** - Beginner-friendly introduction
-- **[Advanced Features](examples/advanced_features.ipynb)** - 3D visualization and more
-- **[STL Export Demo](examples/stl_export_demo.ipynb)** - Create 3D printable models
-- **[API Cookbook](examples/api_cookbook.ipynb)** - Ready-to-use code recipes
+**📖 [Full Documentation](https://kuvychko.github.io/complexplorer/)** - Comprehensive guide with 5,571 lines of documentation
+
+### Quick Links
+
+- **[Installation Guide](https://kuvychko.github.io/complexplorer/getting-started/installation/)** - Get up and running
+- **[Quickstart Tutorial](https://kuvychko.github.io/complexplorer/getting-started/quickstart/)** - Your first visualization in 5 minutes
+- **[User Guide](https://kuvychko.github.io/complexplorer/user-guide/domains/)** - Domains, colormaps, plotting, Riemann sphere
+- **[Gallery](https://kuvychko.github.io/complexplorer/examples/gallery/)** - Visual showcase with 50+ code examples
+- **[API Reference](https://kuvychko.github.io/complexplorer/api/core/)** - Complete API documentation
+- **[Contributing Guide](https://kuvychko.github.io/complexplorer/development/contributing/)** - How to contribute
+
+### Examples
+- **[Tutorial Notebooks](examples/notebooks/)** - 8 comprehensive tutorials (~2.5 hours)
+- **[Application Examples](examples/applications/)** - 4 real-world applications (~1.5 hours)
 - **[Interactive Demo](examples/interactive_showcase.py)** - Run `python examples/interactive_showcase.py`
-- **API Reference** - Use `help()` on any function or class
+- **[Full Examples Guide](examples/README.md)** - Complete learning path
 
 ## 🛠️ Advanced Example
 
 ```python
 # Create an enhanced phase portrait with auto-scaling for square cells
 domain = cp.Annulus(0.5, 2, center=1j)  # Annular domain
-cmap = cp.Phase(n_phi=6, auto_scale_r=True, v_base=0.4)  # Auto-scaled enhanced phase
+cmap = cp.Phase(phase_sectors=6, auto_scale_r=True, v_base=0.4)  # Auto-scaled enhanced phase
 
 # 2D visualization with domain and codomain side-by-side
 cp.pair_plot(domain, f, cmap=cmap, figsize=(10, 5))
@@ -201,7 +277,7 @@ ornament = OrnamentGenerator(
     func=lambda z: (z - 1) / (z**2 + z + 1),
     resolution=150,
     scaling='arctan',  # Creates beautiful topographic relief
-    cmap=cp.Phase(n_phi=12, auto_scale_r=True)
+    cmap=cp.Phase(phase_sectors=12, auto_scale_r=True)
 )
 
 # Generate print-ready STL file
@@ -217,7 +293,7 @@ Features for perfect mathematical ornaments:
 
 Your mathematical functions become conversation pieces - imagine gifting a physical representation of the Riemann zeta function or decorating with the beauty of elliptic functions!
 
-See `examples/stl_export_demo.ipynb` for a complete guide to creating mathematical ornaments.
+See [`examples/notebooks/08_stl_export.ipynb`](examples/notebooks/08_stl_export.ipynb) for a complete guide to creating mathematical ornaments.
 
 ## 🤝 Contributing
 

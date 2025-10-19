@@ -10,7 +10,7 @@ from complexplorer.core.domain import Rectangle, Disk, Annulus
 from complexplorer.core.colormap import Phase, Chessboard, PolarChessboard, LogRings
 from complexplorer.plotting.matplotlib.plot_2d import plot, pair_plot
 from complexplorer.plotting.matplotlib.plot_3d import plot_landscape, riemann
-from complexplorer.api import quick_plot, analyze_function, Presets
+from complexplorer.api import plot as api_plot, publication_preset, interactive_preset
 from complexplorer.core.scaling import ModulusScaling, get_scaling_preset
 
 # Check if optional features are available
@@ -38,7 +38,7 @@ class TestBasicWorkflows:
         domain = Rectangle(2, 2)
         
         # Create colormap
-        cmap = Phase(n_phi=6, auto_scale_r=True)
+        cmap = Phase(phase_sectors=6, auto_scale_r=True)
         
         # Create 2D plot
         ax = plot(domain, func, cmap=cmap, resolution=50)
@@ -57,7 +57,7 @@ class TestBasicWorkflows:
         domain = Annulus(0.5, 2.0)
         
         # Use enhanced phase portrait
-        cmap = Phase(n_phi=12, r_linear_step=0.5, v_base=0.4)
+        cmap = Phase(phase_sectors=12, r_linear_step=0.5, v_base=0.4)
         
         # Create plot
         ax = plot(domain, func, cmap=cmap, resolution=60)
@@ -102,9 +102,9 @@ class TestColormapVariations:
         # Test each colormap type
         colormaps = [
             Phase(),
-            Phase(n_phi=6, auto_scale_r=True),
+            Phase(phase_sectors=6, auto_scale_r=True),
             Chessboard(spacing=0.5),
-            PolarChessboard(spacing=0.5, n_phi=12),
+            PolarChessboard(spacing=0.5, phase_sectors=12),
             LogRings(log_spacing=0.3)
         ]
         
@@ -122,10 +122,10 @@ class TestColormapVariations:
         
         # Different enhanced phase configurations
         configs = [
-            {'n_phi': 4, 'r_linear_step': 1.0, 'v_base': 0.5},
-            {'n_phi': 8, 'r_linear_step': 0.5, 'v_base': 0.3},
-            {'n_phi': 12, 'auto_scale_r': True, 'v_base': 0.4},
-            {'n_phi': 6, 'r_log_base': 2.0, 'v_base': 0.5}
+            {'phase_sectors': 4, 'r_linear_step': 1.0, 'v_base': 0.5},
+            {'phase_sectors': 8, 'r_linear_step': 0.5, 'v_base': 0.3},
+            {'phase_sectors': 12, 'auto_scale_r': True, 'v_base': 0.4},
+            {'phase_sectors': 6, 'r_log_base': 2.0, 'v_base': 0.5}
         ]
         
         for config in configs:
@@ -140,31 +140,32 @@ class TestColormapVariations:
 class TestHighLevelAPI:
     """Test high-level API functions."""
     
-    def test_quick_plot(self):
-        """Test quick_plot convenience function."""
+    def test_api_plot(self):
+        """Test API plot function (formerly quick_plot)."""
         func = lambda z: z**2 - 1
         
-        # 2D quick plot
-        ax = quick_plot(func, mode='2d')
+        # 2D plot
+        ax = api_plot(func, mode='2d')
         assert ax is not None
         
-        # 3D quick plot
-        ax = quick_plot(func, mode='3d', resolution=30)
+        # 3D plot
+        ax = api_plot(func, mode='3d', resolution=30)
         assert ax is not None
         
         import matplotlib.pyplot as plt
         plt.close('all')
     
-    def test_analyze_function(self):
-        """Test analyze_function utility."""
+    def test_enhanced_phase(self):
+        """Test enhanced phase portrait (analyze_function removed)."""
         func = lambda z: (z**2 - 1) / (z**2 + 1)
+        from complexplorer.core.colormap import Phase
         
-        results = analyze_function(func)
+        # Use enhanced phase portrait directly
+        domain = Rectangle(3, 3)
+        cmap = Phase(phase_sectors=12, auto_scale_r=True)
+        ax = plot(domain, func, cmap=cmap)
         
-        assert 'plot' in results
-        assert 'domain' in results
-        assert 'function' in results
-        assert 'colormap' in results
+        assert ax is not None
         
         import matplotlib.pyplot as plt
         plt.close('all')
@@ -174,12 +175,12 @@ class TestHighLevelAPI:
         func = lambda z: np.exp(z)
         
         # Publication preset
-        preset = Presets.publication_ready()
+        preset = publication_preset()
         ax = plot(Rectangle(2, 2), func, **preset)
         assert ax is not None
         
-        # High contrast preset
-        preset = Presets.high_contrast()
+        # Interactive preset
+        preset = interactive_preset()
         ax = plot(Rectangle(2, 2), func, **preset)
         assert ax is not None
         
@@ -269,14 +270,14 @@ class TestSTLExportWorkflow:
         
         try:
             # Use custom colormap and scaling
-            cmap = Phase(n_phi=12, auto_scale_r=True)
+            cmap = Phase(phase_sectors=12, auto_scale_r=True)
             
             saved = create_ornament(
                 func,
                 filename,
                 size_mm=60,
                 resolution=40,
-                scaling='adaptive',
+                modulus_mode='adaptive',
                 cmap=cmap,
                 verbose=False
             )
@@ -309,7 +310,7 @@ class TestPyVistaIntegration:
         # Mock the plotter
         from unittest import mock
         with mock.patch('pyvista.Plotter'):
-            riemann_pv(func, n_theta=20, n_phi=20, show=False)
+            riemann_pv(func, n_theta=20, phase_sectors=20, show=False)
 
 
 class TestComplexFunctions:
@@ -325,7 +326,7 @@ class TestComplexFunctions:
         ]
         
         domain = Rectangle(2, 2)
-        cmap = Phase(n_phi=6, auto_scale_r=True)
+        cmap = Phase(phase_sectors=6, auto_scale_r=True)
         
         for func in polynomials:
             ax = plot(domain, func, cmap=cmap, resolution=30)
@@ -345,7 +346,7 @@ class TestComplexFunctions:
         
         # Use annulus to avoid poles at origin
         domain = Annulus(0.5, 2.0)
-        cmap = Phase(n_phi=8, r_linear_step=0.5, v_base=0.4)
+        cmap = Phase(phase_sectors=8, r_linear_step=0.5, v_base=0.4)
         
         for func in rationals:
             ax = plot(domain, func, cmap=cmap, resolution=40)

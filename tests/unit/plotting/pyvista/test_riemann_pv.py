@@ -20,7 +20,7 @@ class TestRiemannPV:
         
         with mock.patch('pyvista.Plotter') as MockPlotter:
             plotter = MockPlotter.return_value
-            result = riemann_pv(func, n_theta=30, n_phi=30, show=False)
+            result = riemann_pv(func, n_theta=30, phase_sectors=30, show=False)
             
             # Function doesn't return plotter when show=False
             assert result is None
@@ -30,12 +30,12 @@ class TestRiemannPV:
     def test_with_custom_colormap(self):
         """Test Riemann sphere with custom colormap."""
         func = lambda z: (z - 1) / (z + 1)
-        cmap = Phase(n_phi=12, auto_scale_r=True)
+        cmap = Phase(phase_sectors=12, auto_scale_r=True)
         
         with mock.patch('pyvista.Plotter') as MockPlotter:
             plotter = MockPlotter.return_value
             result = riemann_pv(
-                func, cmap=cmap, n_theta=40, n_phi=40, show=False
+                func, cmap=cmap, n_theta=40, phase_sectors=40, show=False
             )
             
             # Function doesn't return plotter when show=False
@@ -55,7 +55,7 @@ class TestRiemannPV:
                     func,
                     modulus_mode=mode,
                     n_theta=20,
-                    n_phi=20,
+                    phase_sectors=20,
                     show=False
                 )
                 
@@ -85,7 +85,7 @@ class TestRiemannPV:
             riemann_pv(
                 func,
                 n_theta=25,
-                n_phi=25,
+                phase_sectors=25,
                 filename="riemann_test.png",
                 show=False
             )
@@ -121,7 +121,7 @@ class TestRiemannPV:
                 func,
                 cmap=cmap,
                 n_theta=30,
-                n_phi=30,
+                phase_sectors=30,
                 show=False
             )
             
@@ -141,7 +141,7 @@ class TestRiemannPV:
                 func,
                 modulus_mode='logarithmic',
                 n_theta=20,
-                n_phi=20,
+                phase_sectors=20,
                 show=False
             )
             
@@ -153,12 +153,12 @@ class TestRiemannPV:
         
         # Test high resolution
         with mock.patch('pyvista.Plotter') as MockPlotter:
-            riemann_pv(func, n_theta=100, n_phi=100, show=False)
+            riemann_pv(func, n_theta=100, phase_sectors=100, show=False)
             assert MockPlotter.called
         
         # Test low resolution
         with mock.patch('pyvista.Plotter') as MockPlotter:
-            riemann_pv(func, n_theta=10, n_phi=10, show=False)
+            riemann_pv(func, n_theta=10, phase_sectors=10, show=False)
             assert MockPlotter.called
     
     def test_projection_from_south(self):
@@ -171,7 +171,7 @@ class TestRiemannPV:
                 func,
                 project_from_north=False,
                 n_theta=30,
-                n_phi=30,
+                phase_sectors=30,
                 show=False
             )
             

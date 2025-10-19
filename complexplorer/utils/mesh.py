@@ -8,7 +8,7 @@ from typing import Optional, Tuple, TYPE_CHECKING
 import numpy as np
 
 if TYPE_CHECKING:
-    from ..core.domain import Domain
+    from complexplorer.core.domain import Domain
 
 # Only import PyVista if available
 try:
@@ -84,8 +84,8 @@ class RectangularSphereGenerator:
         
         # If domain is specified, filter points
         if self.domain is not None:
-            # Project points to complex plane
-            w = sphere_to_complex(X.ravel(), Y.ravel(), Z.ravel())
+            # Project points to complex plane (use same projection as riemann_pv)
+            w = sphere_to_complex(X.ravel(), Y.ravel(), Z.ravel(), from_north=True)
             
             # Check which points are in domain
             in_domain = self.domain.contains(w)
@@ -151,7 +151,9 @@ def sphere_to_complex(x: np.ndarray, y: np.ndarray, z: np.ndarray,
     z = np.asarray(z)
     
     if from_north:
-        # Project from north pole
+        # Project from north pole (0, 0, 1)
+        # Points near south pole (z = -1) map to origin
+        # Points near north pole (z = 1) map to infinity
         denominator = 1 - z
         # Handle division by zero at north pole
         with np.errstate(divide='ignore', invalid='ignore'):
@@ -164,7 +166,9 @@ def sphere_to_complex(x: np.ndarray, y: np.ndarray, z: np.ndarray,
             at_pole = np.abs(denominator) < 1e-10
             w = np.where(at_pole, np.inf * (1 + 0j), w)
     else:
-        # Project from south pole  
+        # Project from south pole (0, 0, -1)
+        # Points near north pole (z = 1) map to origin
+        # Points near south pole (z = -1) map to infinity
         denominator = 1 + z
         # Handle division by zero at south pole
         with np.errstate(divide='ignore', invalid='ignore'):
@@ -214,18 +218,17 @@ def complex_to_sphere(w: np.ndarray, to_north: bool = True) -> Tuple[np.ndarray,
     
     if to_north:
         # Inverse of projection from north pole
+        # w = 0 should map to south pole (z = -1)
+        # w = ∞ should map to north pole (z = 1)
         x = 2 * u / (1 + w_squared)
         y = 2 * v / (1 + w_squared)
         z = (w_squared - 1) / (1 + w_squared)
     else:
         # Inverse of projection from south pole
+        # w = 0 should map to south pole (z = -1) 
+        # w = ∞ should map to north pole (z = 1)
         x = 2 * u / (1 + w_squared)
         y = 2 * v / (1 + w_squared)
         z = (1 - w_squared) / (1 + w_squared)
         
     return x, y, z
-
-
-# Legacy API compatibility
-inverse_stereographic = complex_to_sphere
-stereographic_projection = sphere_to_complex

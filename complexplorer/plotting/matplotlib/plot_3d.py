@@ -11,15 +11,18 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d import Axes3D
 
-from ...core.domain import Domain
-from ...core.colormap import Colormap, Phase
-from ...core.functions import stereographic_projection
-from ...core.scaling import ModulusScaling
-from ...utils.validation import ValidationError
-from ...utils.mesh_distortion import get_default_scaling_params
+from complexplorer.core.domain import Domain
+from complexplorer.core.colormap import Colormap, Phase
+from complexplorer.core.functions import stereographic_projection
+from complexplorer.core.scaling import ModulusScaling
+from complexplorer.utils.validation import ValidationError
+from complexplorer.utils.mesh_distortion import get_default_scaling_params
+from complexplorer.plotting.validation import (
+    validate_modulus_mode, validate_z_max
+)
 
 
-class Matplotlib3DPlotter:  # (Base3DPlotter):  # TODO: Add base class
+class Matplotlib3DPlotter:
     """3D plotter implementation using matplotlib."""
     
     def plot_landscape(self,
@@ -32,8 +35,7 @@ class Matplotlib3DPlotter:  # (Base3DPlotter):  # TODO: Add base class
                       z_max: Optional[float] = None,
                       antialiased: bool = False,
                       modulus_mode: str = 'none',
-                      modulus_params: Optional[dict] = None,
-                      config = None) -> Axes3D:  # config: Optional[PlotConfig] = None
+                      modulus_params: Optional[dict] = None) -> Axes3D:
         """Plot 3D landscape of complex function.
         
         Parameters
@@ -58,9 +60,7 @@ class Matplotlib3DPlotter:  # (Base3DPlotter):  # TODO: Add base class
             How to scale the height based on modulus.
         modulus_params : dict, optional
             Parameters for modulus scaling method.
-        config : PlotConfig, optional
-            Additional plot configuration.
-            
+
         Returns
         -------
         Axes3D
@@ -90,21 +90,19 @@ class Matplotlib3DPlotter:  # (Base3DPlotter):  # TODO: Add base class
         if modulus_mode != 'none':
             if modulus_params is None:
                 modulus_params = get_default_scaling_params(modulus_mode)
-            
+
+            # Validate modulus mode and params
+            validate_modulus_mode(modulus_mode, modulus_params)
+
             if modulus_mode == 'custom':
-                if 'scaling_func' not in modulus_params:
-                    raise ValidationError("Custom mode requires 'scaling_func' in modulus_params")
                 z_coord = modulus_params['scaling_func'](z_coord)
             else:
-                scaling_method = getattr(ModulusScaling, modulus_mode, None)
-                if scaling_method is None:
-                    raise ValidationError(f"Unknown scaling mode: {modulus_mode}")
+                scaling_method = getattr(ModulusScaling, modulus_mode)
                 z_coord = scaling_method(z_coord, **modulus_params)
-        
+
         # Apply z_max clipping after scaling
+        validate_z_max(z_max)
         if z_max is not None:
-            if z_max <= 0:
-                raise ValidationError('z_max must be positive')
             z_coord = np.clip(z_coord, 0, z_max)
         
         if zaxis_log:
@@ -209,7 +207,7 @@ def plot_landscape(domain: Optional[Domain] = None,
     
     # Default colormap
     if cmap is None:
-        cmap = Phase(n_phi=6)
+        cmap = Phase(phase_sectors=6)
     
     # Get mesh and mask
     if z is None:
@@ -232,30 +230,32 @@ def plot_landscape(domain: Optional[Domain] = None,
         f[mask] = np.nan
     
     # Validate z_max
-    if z_max is not None and z_max <= 0:
-        raise ValidationError('z_max must be positive or None')
-    
+    validate_z_max(z_max)
+
     # Get RGB colors
     rgb = cmap.rgb(f, outmask=mask)
-    
+
+    # Ensure RGB values are in valid range [0, 1]
+    # (Prevents matplotlib shading errors with extreme z-coordinates)
+    rgb = np.clip(rgb, 0.0, 1.0)
+
     # Calculate z-coordinates (moduli)
     z_coord = np.abs(f)
-    
+
     # Apply modulus scaling if requested
     if modulus_mode != 'none':
         if modulus_params is None:
             modulus_params = get_default_scaling_params(modulus_mode)
-        
+
+        # Validate modulus mode and params
+        validate_modulus_mode(modulus_mode, modulus_params)
+
         if modulus_mode == 'custom':
-            if 'scaling_func' not in modulus_params:
-                raise ValidationError("Custom mode requires 'scaling_func' in modulus_params")
             z_coord = modulus_params['scaling_func'](z_coord)
         else:
-            scaling_method = getattr(ModulusScaling, modulus_mode, None)
-            if scaling_method is None:
-                raise ValidationError(f"Unknown scaling mode: {modulus_mode}")
+            scaling_method = getattr(ModulusScaling, modulus_mode)
             z_coord = scaling_method(z_coord, **modulus_params)
-    
+
     # Apply z_max clipping after scaling
     if z_max is not None:
         z_coord = np.clip(z_coord, 0, z_max)
@@ -339,7 +339,7 @@ def pair_plot_landscape(domain: Optional[Domain] = None,
     """
     # Default colormap
     if cmap is None:
-        cmap = Phase(n_phi=6, auto_scale_r=True)
+        cmap = Phase(phase_sectors=6, auto_scale_r=True)
     
     fig = plt.figure(figsize=figsize)
     ax0 = fig.add_subplot(121, projection='3d')
@@ -372,13 +372,15 @@ def riemann(func: Callable,
             project_from_north: bool = False,
             ax: Optional[Axes3D] = None,
             title: Optional[str] = None,
-            filename: Optional[str] = None) -> Optional[Axes3D]:
+            filename: Optional[str] = None,
+            modulus_mode: str = 'constant',
+            modulus_params: Optional[dict] = None) -> Optional[Axes3D]:
     """Plot complex function on the Riemann sphere.
-    
+
     This function visualizes a complex function on the Riemann sphere
     using stereographic projection. The sphere is colored according to
-    the function values.
-    
+    the function values. Optionally apply modulus-based radial distortion.
+
     Parameters
     ----------
     func : callable
@@ -395,46 +397,85 @@ def riemann(func: Callable,
         Plot title.
     filename : str, optional
         If provided, save figure to this file.
-        
+    modulus_mode : str, optional
+        How to incorporate magnitude (default: 'constant' for unit sphere):
+        - 'constant': Unit sphere (phase only)
+        - 'linear': Linear scaling
+        - 'arctan': Smooth bounded scaling
+        - 'logarithmic': Log scaling
+        - 'linear_clamp': Linear with clamping
+        - 'power': Power scaling
+        - 'sigmoid': S-curve scaling
+        - 'adaptive': Percentile-based
+        - 'hybrid': Linear near zero, log for large
+        - 'custom': User-defined function
+    modulus_params : dict, optional
+        Parameters for modulus scaling method.
+
     Returns
     -------
     Axes3D or None
         The 3D axes if ax was provided, otherwise None.
-        
+
     Examples
     --------
     >>> # Rational function with poles and zeros
     >>> riemann(lambda z: (z**2 - 1) / (z**2 + 1))
-    
+
+    >>> # With modulus relief
+    >>> riemann(lambda z: z**2, modulus_mode='arctan')
+
     >>> # Essential singularity at origin
     >>> riemann(lambda z: np.exp(1/z))
     """
     # Default colormap
     if cmap is None:
-        cmap = Phase(n_phi=6, v_base=0.6)
-    
+        cmap = Phase(phase_sectors=6, v_base=0.6)
+
+    # Default modulus parameters
+    if modulus_params is None:
+        modulus_params = get_default_scaling_params(modulus_mode, for_stl=False)
+
     # Create sphere mesh in spherical coordinates
     tol = 1e-8
     psi_axis = np.linspace(tol, np.pi - tol, resolution)
     theta_axis = np.linspace(0, 2 * np.pi, resolution)
     theta_grid, psi_grid = np.meshgrid(theta_axis, psi_axis)
-    
+
     # Convert to complex plane via stereographic projection
     # Using formula: z = r * e^(i*theta) where r = sin(psi) / (1 - cos(psi))
     # Suppress divide by zero warning as we handle it with tol
     with np.errstate(divide='ignore', invalid='ignore'):
         r = np.sin(psi_grid) / (1 - np.cos(psi_grid))
         z = r * np.exp(1.0j * theta_grid)
-    
+
     # Evaluate function and get colors
     f_z = func(z)
     rgb = cmap.rgb(f_z)
-    
+
     # Ensure RGB values are in valid range [0, 1]
     rgb = np.clip(rgb, 0.0, 1.0)
-    
+
     # Convert back to sphere coordinates
-    X, Y, Z = stereographic_projection(z, project_from_north=project_from_north).T
+    sphere_points = stereographic_projection(z, project_from_north=project_from_north)
+
+    # Apply modulus scaling if requested
+    if modulus_mode != 'constant':
+        moduli = np.abs(f_z).ravel()
+
+        # Validate modulus mode
+        validate_modulus_mode(modulus_mode, modulus_params)
+
+        if modulus_mode == 'custom':
+            radii = modulus_params['scaling_func'](moduli)
+        else:
+            scaling_method = getattr(ModulusScaling, modulus_mode)
+            radii = scaling_method(moduli, **modulus_params)
+
+        # Apply radial scaling
+        sphere_points = sphere_points * radii[:, np.newaxis]
+
+    X, Y, Z = sphere_points.T
     
     # Create figure if needed
     return_ax = ax is not None

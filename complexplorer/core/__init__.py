@@ -7,15 +7,18 @@ This module contains the fundamental building blocks of the library:
 - Modulus scaling for visualization
 """
 
-from .scaling import ModulusScaling, SCALING_PRESETS, get_scaling_preset
-from .domain import Domain, Rectangle, Disk, Annulus, CompositeDomain
-from .colormap import (
-    Colormap, Phase, Chessboard, PolarChessboard, LogRings,
+from complexplorer.core.scaling import ModulusScaling, SCALING_PRESETS, get_scaling_preset
+from complexplorer.core.domain import Domain, Rectangle, Disk, Annulus, CompositeDomain
+from complexplorer.core.colormap import (
+    Colormap, Phase, OklabPhase, Chessboard, PolarChessboard, LogRings,
+    PerceptualPastel, AnalogousWedge, DivergingWarmCool,
+    Isoluminant, CubehelixPhase, InkPaper,
+    EarthTopographic, FourQuadrant,
     OUT_OF_DOMAIN_COLOR_HSV
 )
-from .functions import (
-    phase, sawtooth, sawtooth_log,
-    stereographic_projection, inverse_stereographic, stereographic
+from complexplorer.core.functions import (
+    phase, sawtooth, sawtooth_log, sigmoid, circular_interpolate,
+    stereographic_projection, inverse_stereographic
 )
 
 __all__ = [
@@ -32,15 +35,25 @@ __all__ = [
     # Colormaps
     'Colormap',
     'Phase',
+    'OklabPhase',
     'Chessboard',
     'PolarChessboard',
     'LogRings',
+    'PerceptualPastel',
+    'AnalogousWedge',
+    'DivergingWarmCool',
+    'Isoluminant',
+    'CubehelixPhase',
+    'InkPaper',
+    'EarthTopographic',
+    'FourQuadrant',
     'OUT_OF_DOMAIN_COLOR_HSV',
     # Functions
     'phase',
     'sawtooth',
     'sawtooth_log',
+    'sigmoid',
+    'circular_interpolate',
     'stereographic_projection',
     'inverse_stereographic',
-    'stereographic',
 ]

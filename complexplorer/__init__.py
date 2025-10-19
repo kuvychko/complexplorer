@@ -19,9 +19,18 @@ from complexplorer.core.domain import (
 from complexplorer.core.colormap import (
     Colormap,
     Phase,
+    OklabPhase,
     Chessboard,
     PolarChessboard,
-    LogRings
+    LogRings,
+    PerceptualPastel,
+    AnalogousWedge,
+    DivergingWarmCool,
+    Isoluminant,
+    CubehelixPhase,
+    InkPaper,
+    EarthTopographic,
+    FourQuadrant
 )
 
 from complexplorer.core.functions import (
@@ -56,13 +65,38 @@ from complexplorer.utils.backend import (
     ensure_interactive_plots
 )
 
+# Logging utilities
+from complexplorer.utils.logging import (
+    setup_logging,
+    enable_debug_logging,
+    disable_logging,
+    get_logger
+)
+
 # High-level API
 from complexplorer.api import (
-    quick_plot,
-    analyze_function,
-    visualize,
-    explore,
-    Presets
+    show,
+    publication_preset,
+    interactive_preset,
+    high_contrast_preset
+)
+
+# Exceptions
+from complexplorer.exceptions import (
+    ComplexplorerError,
+    ValidationError,
+    DomainError,
+    ColormapError,
+    ResolutionError,
+    ComputationError,
+    FunctionEvaluationError,
+    MeshGenerationError,
+    ExportError,
+    STLExportError,
+    ImageExportError,
+    DependencyError,
+    PyVistaNotAvailableError,
+    OptionalDependencyError
 )
 
 # STL export (requires PyVista)
@@ -91,25 +125,37 @@ except ImportError:
 __all__ = [
     # Version
     '__version__',
-    
+
     # Core classes
     'Domain', 'Rectangle', 'Disk', 'Annulus', 'CompositeDomain',
-    'Colormap', 'Phase', 'Chessboard', 'PolarChessboard', 'LogRings',
+    'Colormap', 'Phase', 'OklabPhase', 'Chessboard', 'PolarChessboard', 'LogRings',
+    'PerceptualPastel', 'AnalogousWedge', 'DivergingWarmCool',
+    'Isoluminant', 'CubehelixPhase', 'InkPaper',
+    'EarthTopographic', 'FourQuadrant',
     'ModulusScaling', 'get_scaling_preset',
-    
+
     # Core functions
     'phase', 'sawtooth', 'stereographic_projection', 'inverse_stereographic',
-    
+
     # Plotting functions
     'plot', 'pair_plot', 'riemann_chart', 'riemann_hemispheres',
     'plot_landscape', 'pair_plot_landscape', 'riemann',
-    
+
     # Utilities
     'setup_matplotlib_backend', 'ensure_interactive_plots',
-    
+
+    # Logging
+    'setup_logging', 'enable_debug_logging', 'disable_logging', 'get_logger',
+
     # High-level API
-    'quick_plot', 'analyze_function', 'visualize', 'explore', 'Presets',
-    
+    'show', 'publication_preset', 'interactive_preset', 'high_contrast_preset',
+
+    # Exceptions
+    'ComplexplorerError', 'ValidationError', 'DomainError', 'ColormapError',
+    'ResolutionError', 'ComputationError', 'FunctionEvaluationError',
+    'MeshGenerationError', 'ExportError', 'STLExportError', 'ImageExportError',
+    'DependencyError', 'PyVistaNotAvailableError', 'OptionalDependencyError',
+
     # Flags
     'HAS_PYVISTA', 'HAS_STL_EXPORT'
 ]

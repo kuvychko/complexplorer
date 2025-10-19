@@ -10,7 +10,7 @@ from complexplorer.core.domain import Rectangle, Disk, Annulus
 from complexplorer.core.colormap import Phase
 from complexplorer.plotting.matplotlib.plot_2d import plot
 from complexplorer.plotting.matplotlib.plot_3d import plot_landscape, riemann
-from complexplorer.api import quick_plot, analyze_function
+from complexplorer.api import plot as api_plot
 
 
 class TestCoreWorkflows:
@@ -33,7 +33,7 @@ class TestCoreWorkflows:
         """Test enhanced phase portrait."""
         func = lambda z: (z - 1) * (z + 1)
         domain = Rectangle(3, 3)
-        cmap = Phase(n_phi=6, auto_scale_r=True)
+        cmap = Phase(phase_sectors=6, auto_scale_r=True)
         
         ax = plot(domain, func, cmap=cmap, resolution=40)
         assert ax is not None
@@ -67,14 +67,9 @@ class TestCoreWorkflows:
         """Test high-level API functions."""
         func = lambda z: np.exp(z) / (z + 1)
         
-        # Quick plot
-        ax = quick_plot(func, mode='2d', resolution=30)
+        # API plot (formerly quick_plot)
+        ax = api_plot(func, mode='2d', resolution=30)
         assert ax is not None
-        
-        # Analyze function
-        results = analyze_function(func)
-        assert 'plot' in results
-        assert results['plot'] is not None
         
         import matplotlib.pyplot as plt
         plt.close('all')

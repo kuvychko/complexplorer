@@ -8,18 +8,18 @@ from typing import Optional, Callable, Union, Tuple, TYPE_CHECKING
 import numpy as np
 import warnings
 
-from ...core.colormap import Colormap, Phase
-from ...core.scaling import ModulusScaling
-from ...utils.validation import ValidationError
-from ...utils.mesh import RectangularSphereGenerator
-from ...utils.mesh_distortion import apply_modulus_distortion, get_default_scaling_params
-from .utils import (
+from complexplorer.core.colormap import Colormap, Phase
+from complexplorer.core.scaling import ModulusScaling
+from complexplorer.utils.validation import ValidationError
+from complexplorer.utils.mesh import RectangularSphereGenerator
+from complexplorer.utils.mesh_distortion import apply_modulus_distortion, get_default_scaling_params
+from complexplorer.plotting.pyvista.utils import (
     check_pyvista_available, handle_export, add_axes_widget,
     ensure_pyvista_setup, get_camera_position
 )
 
 if TYPE_CHECKING:
-    from ...core.domain import Domain
+    from complexplorer.core.domain import Domain
 
 # Import PyVista if available
 try:
@@ -53,6 +53,11 @@ def riemann_pv(
     This function provides high-performance, interactive visualization
     of complex functions on the Riemann sphere with various options
     for incorporating magnitude information.
+    
+    Uses stereographic projection from the north pole (standard convention):
+    - Origin (z=0) maps to south pole
+    - Infinity maps to north pole
+    - Unit circle maps to equator
     
     Parameters
     ----------
@@ -123,7 +128,7 @@ def riemann_pv(
     
     # Default colormap
     if cmap is None:
-        cmap = Phase(n_phi=6, v_base=0.6)
+        cmap = Phase(phase_sectors=6, v_base=0.6)
     
     # Default modulus parameters
     if modulus_params is None:
@@ -144,9 +149,9 @@ def riemann_pv(
     points = mesh.points
     X, Y, Z = points[:, 0], points[:, 1], points[:, 2]
     
-    # Project to complex plane (from south pole by default)
-    from ...utils.mesh import sphere_to_complex
-    w = sphere_to_complex(X, Y, Z, from_north=False)
+    # Project to complex plane (from north pole - standard convention)
+    from complexplorer.utils.mesh import sphere_to_complex
+    w = sphere_to_complex(X, Y, Z, from_north=True)
     
     # Evaluate function
     f_vals = func(w)
