@@ -277,7 +277,7 @@ class TestSTLExportWorkflow:
                 filename,
                 size_mm=60,
                 resolution=40,
-                scaling='adaptive',
+                modulus_mode='adaptive',
                 cmap=cmap,
                 verbose=False
             )
