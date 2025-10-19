@@ -31,43 +31,94 @@ except ImportError:
 
 class OrnamentGenerator:
     """Generate 3D-printable ornaments from complex functions.
-    
+
     This version directly uses the modulus-scaled mesh from the
     Riemann sphere visualization without complex healing steps.
-    
+
     Parameters
     ----------
     func : callable
         Complex function f(z) to visualize.
     resolution : int, default=150
         Mesh resolution (n_theta = n_phi).
-    scaling : str, default='arctan'
-        Modulus scaling method.
-    scaling_params : dict, optional
+    modulus_mode : str, default='arctan'
+        Modulus scaling method: 'constant', 'linear', 'arctan',
+        'logarithmic', 'linear_clamp', 'power', 'sigmoid', 'adaptive',
+        'hybrid', or 'custom'.
+    modulus_params : dict, optional
         Parameters for scaling method. If None, uses STL-appropriate defaults.
     cmap : Colormap, optional
         Colormap for visualization. Default is Phase colormap.
     domain : Domain, optional
         Domain to restrict evaluation. Helps avoid numerical issues.
+
+    Notes
+    -----
+    The deprecated parameters `scaling` and `scaling_params` are still supported
+    for backwards compatibility but will emit deprecation warnings.
     """
     
     def __init__(self,
                  func: Callable,
                  resolution: int = 150,
-                 scaling: str = 'arctan',
-                 scaling_params: Optional[Dict[str, Any]] = None,
+                 modulus_mode: str = 'arctan',
+                 modulus_params: Optional[Dict[str, Any]] = None,
                  cmap: Optional[Colormap] = None,
-                 domain: Optional[Domain] = None):
-        """Initialize ornament generator."""
+                 domain: Optional[Domain] = None,
+                 # Deprecated parameters (for backwards compatibility)
+                 scaling: Optional[str] = None,
+                 scaling_params: Optional[Dict[str, Any]] = None):
+        """Initialize ornament generator.
+
+        Parameters
+        ----------
+        func : callable
+            Complex function f(z) to visualize.
+        resolution : int, default=150
+            Mesh resolution (n_theta = n_phi).
+        modulus_mode : str, default='arctan'
+            Modulus scaling method: 'constant', 'linear', 'arctan',
+            'logarithmic', 'linear_clamp', 'power', 'sigmoid', 'adaptive',
+            'hybrid', or 'custom'.
+        modulus_params : dict, optional
+            Parameters for scaling method. If None, uses STL-appropriate defaults.
+        cmap : Colormap, optional
+            Colormap for visualization. Default is Phase colormap.
+        domain : Domain, optional
+            Domain to restrict evaluation. Helps avoid numerical issues.
+        scaling : str, optional
+            DEPRECATED. Use `modulus_mode` instead.
+        scaling_params : dict, optional
+            DEPRECATED. Use `modulus_params` instead.
+        """
         check_pyvista_available()
-        
+
+        # Handle deprecated parameter names
+        if scaling is not None:
+            warnings.warn(
+                "Parameter 'scaling' is deprecated and will be removed in a future version. "
+                "Use 'modulus_mode' instead.",
+                DeprecationWarning,
+                stacklevel=2
+            )
+            modulus_mode = scaling
+
+        if scaling_params is not None:
+            warnings.warn(
+                "Parameter 'scaling_params' is deprecated and will be removed in a future version. "
+                "Use 'modulus_params' instead.",
+                DeprecationWarning,
+                stacklevel=2
+            )
+            modulus_params = scaling_params
+
         self.func = func
         self.resolution = resolution
-        self.scaling = scaling
-        self.scaling_params = scaling_params or get_default_scaling_params(scaling, for_stl=True)
+        self.modulus_mode = modulus_mode
+        self.modulus_params = modulus_params or get_default_scaling_params(modulus_mode, for_stl=True)
         self.cmap = cmap or Phase(phase_sectors=6, auto_scale_r=True)
         self.domain = domain
-        
+
         self.sphere_mesh = None
     
     def generate_ornament(self, verbose: bool = False) -> 'pv.PolyData':
@@ -86,8 +137,8 @@ class OrnamentGenerator:
         if verbose:
             print(f"Generating Riemann sphere ornament:")
             print(f"  Resolution: {self.resolution}")
-            print(f"  Scaling: {self.scaling}")
-            print(f"  Parameters: {self.scaling_params}")
+            print(f"  Modulus scaling: {self.modulus_mode}")
+            print(f"  Parameters: {self.modulus_params}")
         
         # Generate base sphere
         generator = RectangularSphereGenerator(
@@ -103,8 +154,8 @@ class OrnamentGenerator:
         scaled_points, f_vals, radii = compute_riemann_sphere_distortion(
             sphere,
             self.func,
-            self.scaling,
-            self.scaling_params,
+            self.modulus_mode,
+            self.modulus_params,
             from_north=True
         )
         
@@ -272,15 +323,18 @@ def create_ornament(func: Callable,
                       filename: str,
                       size_mm: float = 50,
                       resolution: int = 150,
-                      scaling: str = 'arctan',
-                      scaling_params: Optional[Dict[str, Any]] = None,
+                      modulus_mode: str = 'arctan',
+                      modulus_params: Optional[Dict[str, Any]] = None,
                       cmap: Optional[Colormap] = None,
                       domain: Optional[Domain] = None,
-                      verbose: bool = True) -> str:
+                      verbose: bool = True,
+                      # Deprecated parameters
+                      scaling: Optional[str] = None,
+                      scaling_params: Optional[Dict[str, Any]] = None) -> str:
     """Create a 3D-printable ornament from a complex function.
-    
+
     Convenience function for creating STL files from complex functions.
-    
+
     Parameters
     ----------
     func : callable
@@ -291,9 +345,11 @@ def create_ornament(func: Callable,
         Size in millimeters.
     resolution : int, default=150
         Mesh resolution.
-    scaling : str, default='arctan'
-        Modulus scaling method.
-    scaling_params : dict, optional
+    modulus_mode : str, default='arctan'
+        Modulus scaling method: 'constant', 'linear', 'arctan',
+        'logarithmic', 'linear_clamp', 'power', 'sigmoid', 'adaptive',
+        'hybrid', or 'custom'.
+    modulus_params : dict, optional
         Scaling parameters.
     cmap : Colormap, optional
         Color mapping.
@@ -301,14 +357,37 @@ def create_ornament(func: Callable,
         Domain restriction.
     verbose : bool, default=True
         Print progress.
-        
+    scaling : str, optional
+        DEPRECATED. Use `modulus_mode` instead.
+    scaling_params : dict, optional
+        DEPRECATED. Use `modulus_params` instead.
+
     Returns
     -------
     str
         Path to saved STL file.
     """
+    # Handle deprecated parameters
+    if scaling is not None:
+        warnings.warn(
+            "Parameter 'scaling' is deprecated and will be removed in a future version. "
+            "Use 'modulus_mode' instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        modulus_mode = scaling
+
+    if scaling_params is not None:
+        warnings.warn(
+            "Parameter 'scaling_params' is deprecated and will be removed in a future version. "
+            "Use 'modulus_params' instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        modulus_params = scaling_params
+
     gen = OrnamentGenerator(
-        func, resolution, scaling, scaling_params, cmap, domain
+        func, resolution, modulus_mode, modulus_params, cmap, domain
     )
     return gen.generate_and_save(filename, size_mm, verbose=verbose)
 

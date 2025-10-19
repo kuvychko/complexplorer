@@ -372,13 +372,15 @@ def riemann(func: Callable,
             project_from_north: bool = False,
             ax: Optional[Axes3D] = None,
             title: Optional[str] = None,
-            filename: Optional[str] = None) -> Optional[Axes3D]:
+            filename: Optional[str] = None,
+            modulus_mode: str = 'constant',
+            modulus_params: Optional[dict] = None) -> Optional[Axes3D]:
     """Plot complex function on the Riemann sphere.
-    
+
     This function visualizes a complex function on the Riemann sphere
     using stereographic projection. The sphere is colored according to
-    the function values.
-    
+    the function values. Optionally apply modulus-based radial distortion.
+
     Parameters
     ----------
     func : callable
@@ -395,46 +397,85 @@ def riemann(func: Callable,
         Plot title.
     filename : str, optional
         If provided, save figure to this file.
-        
+    modulus_mode : str, optional
+        How to incorporate magnitude (default: 'constant' for unit sphere):
+        - 'constant': Unit sphere (phase only)
+        - 'linear': Linear scaling
+        - 'arctan': Smooth bounded scaling
+        - 'logarithmic': Log scaling
+        - 'linear_clamp': Linear with clamping
+        - 'power': Power scaling
+        - 'sigmoid': S-curve scaling
+        - 'adaptive': Percentile-based
+        - 'hybrid': Linear near zero, log for large
+        - 'custom': User-defined function
+    modulus_params : dict, optional
+        Parameters for modulus scaling method.
+
     Returns
     -------
     Axes3D or None
         The 3D axes if ax was provided, otherwise None.
-        
+
     Examples
     --------
     >>> # Rational function with poles and zeros
     >>> riemann(lambda z: (z**2 - 1) / (z**2 + 1))
-    
+
+    >>> # With modulus relief
+    >>> riemann(lambda z: z**2, modulus_mode='arctan')
+
     >>> # Essential singularity at origin
     >>> riemann(lambda z: np.exp(1/z))
     """
     # Default colormap
     if cmap is None:
         cmap = Phase(phase_sectors=6, v_base=0.6)
-    
+
+    # Default modulus parameters
+    if modulus_params is None:
+        modulus_params = get_default_scaling_params(modulus_mode, for_stl=False)
+
     # Create sphere mesh in spherical coordinates
     tol = 1e-8
     psi_axis = np.linspace(tol, np.pi - tol, resolution)
     theta_axis = np.linspace(0, 2 * np.pi, resolution)
     theta_grid, psi_grid = np.meshgrid(theta_axis, psi_axis)
-    
+
     # Convert to complex plane via stereographic projection
     # Using formula: z = r * e^(i*theta) where r = sin(psi) / (1 - cos(psi))
     # Suppress divide by zero warning as we handle it with tol
     with np.errstate(divide='ignore', invalid='ignore'):
         r = np.sin(psi_grid) / (1 - np.cos(psi_grid))
         z = r * np.exp(1.0j * theta_grid)
-    
+
     # Evaluate function and get colors
     f_z = func(z)
     rgb = cmap.rgb(f_z)
-    
+
     # Ensure RGB values are in valid range [0, 1]
     rgb = np.clip(rgb, 0.0, 1.0)
-    
+
     # Convert back to sphere coordinates
-    X, Y, Z = stereographic_projection(z, project_from_north=project_from_north).T
+    sphere_points = stereographic_projection(z, project_from_north=project_from_north)
+
+    # Apply modulus scaling if requested
+    if modulus_mode != 'constant':
+        moduli = np.abs(f_z).ravel()
+
+        # Validate modulus mode
+        validate_modulus_mode(modulus_mode, modulus_params)
+
+        if modulus_mode == 'custom':
+            radii = modulus_params['scaling_func'](moduli)
+        else:
+            scaling_method = getattr(ModulusScaling, modulus_mode)
+            radii = scaling_method(moduli, **modulus_params)
+
+        # Apply radial scaling
+        sphere_points = sphere_points * radii[:, np.newaxis]
+
+    X, Y, Z = sphere_points.T
     
     # Create figure if needed
     return_ax = ax is not None

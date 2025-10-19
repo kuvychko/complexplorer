@@ -35,7 +35,7 @@ f = lambda z: (z**2 - 1) / (z**2 + 1)
 gen = OrnamentGenerator(
     func=f,
     resolution=150,
-    scaling='arctan',
+    modulus_mode='arctan',
     cmap=cp.Phase(phase_sectors=6, auto_scale_r=True)
 )
 
@@ -49,15 +49,18 @@ gen.generate_and_save('ornament.stl', size_mm=80)
   - 100-150: Fast generation, lower quality
   - 150-200: Good quality (recommended)
   - 200-300: High quality (slower)
-- `scaling`: Modulus scaling method (default: 'arctan')
+- `modulus_mode`: Modulus scaling method (default: 'arctan')
   - `'arctan'`: Smooth bounded relief (recommended)
   - `'logarithmic'`: Emphasizes poles and zeros
   - `'adaptive'`: Auto-adjusts to function behavior
   - `'sigmoid'`: S-curve mapping
   - `'linear'`: Direct mapping (can be unstable)
-- `scaling_params`: Optional dict of scaling parameters
+  - `'constant'`: No relief (flat sphere)
+- `modulus_params`: Optional dict of scaling parameters
 - `cmap`: Colormap for visualization (default: Phase with 6 sectors)
 - `domain`: Optional domain restriction to avoid numerical issues
+
+**Note:** The old parameter names `scaling` and `scaling_params` are deprecated but still supported for backwards compatibility.
 
 **Methods:**
 
@@ -171,7 +174,7 @@ create_ornament(
     'rational.stl',
     size_mm=80,
     resolution=200,
-    scaling='logarithmic',
+    modulus_mode='logarithmic',
     domain=domain
 )
 ```
@@ -181,11 +184,13 @@ create_ornament(
 - `filename`: Output STL filename
 - `size_mm`: Size in millimeters (default: 50)
 - `resolution`: Mesh resolution (default: 150)
-- `scaling`: Modulus scaling method (default: 'arctan')
-- `scaling_params`: Optional scaling parameters
+- `modulus_mode`: Modulus scaling method (default: 'arctan')
+- `modulus_params`: Optional scaling parameters
 - `cmap`: Colormap (default: Phase)
 - `domain`: Optional domain restriction
 - `verbose`: Print progress (default: True)
+
+**Note:** The old parameter names `scaling` and `scaling_params` are deprecated.
 
 **Returns:** Path to saved STL file
 
@@ -305,8 +310,8 @@ cmap = cp.PerceptualPastel(phase_sectors=6, auto_scale_r=True)
 gen = OrnamentGenerator(
     func=f,
     resolution=200,
-    scaling='arctan',
-    scaling_params={'r_min': 0.3, 'r_max': 0.9},
+    modulus_mode='arctan',
+    modulus_params={'r_min': 0.3, 'r_max': 0.9},
     cmap=cmap
 )
 
@@ -329,7 +334,7 @@ create_ornament(
     'restricted_ornament.stl',
     size_mm=70,
     resolution=180,
-    scaling='logarithmic',
+    modulus_mode='logarithmic',
     domain=domain
 )
 ```
@@ -340,8 +345,8 @@ create_ornament(
 gen = OrnamentGenerator(
     func=lambda z: z**2 / (z**2 + 1),
     resolution=180,
-    scaling='arctan',
-    scaling_params={
+    modulus_mode='arctan',
+    modulus_params={
         'r_min': 0.25,  # Minimum sphere radius
         'r_max': 0.95   # Maximum sphere radius
     }
@@ -390,16 +395,16 @@ Different scaling modes create different relief patterns:
 **Recommended Settings:**
 ```python
 # General purpose (recommended)
-scaling='arctan'
-scaling_params={'r_min': 0.3, 'r_max': 0.9}
+modulus_mode='arctan'
+modulus_params={'r_min': 0.3, 'r_max': 0.9}
 
 # Emphasize features
-scaling='logarithmic'
-scaling_params={'log_base': 2.0}
+modulus_mode='logarithmic'
+modulus_params={'base': np.e, 'r_min': 0.3, 'r_max': 0.9}
 
 # Auto-adjust
-scaling='adaptive'
-scaling_params={'percentile_low': 5, 'percentile_high': 95}
+modulus_mode='adaptive'
+modulus_params={'low_percentile': 5, 'high_percentile': 95}
 ```
 
 ## Resolution Guidelines
@@ -461,7 +466,7 @@ domain = cp.Disk(radius=5)
 gen = OrnamentGenerator(
     func=f,
     domain=domain,
-    scaling='adaptive'  # Auto-adjusts to function
+    modulus_mode='adaptive'  # Auto-adjusts to function
 )
 ```
 
@@ -471,8 +476,8 @@ gen = OrnamentGenerator(
 # Adjust scaling parameters
 gen = OrnamentGenerator(
     func=f,
-    scaling='arctan',
-    scaling_params={
+    modulus_mode='arctan',
+    modulus_params={
         'r_min': 0.2,  # Lower for more relief
         'r_max': 0.95  # Higher for more variation
     }

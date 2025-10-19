@@ -50,7 +50,7 @@ create_ornament(
     "my_ornament.stl",
     size_mm=50,
     resolution=150,
-    scaling='arctan'
+    modulus_mode='arctan'
 )
 ```
 

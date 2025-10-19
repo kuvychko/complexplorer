@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Migration: Replace `n_phi=6` with `phase_sectors=6`
   - Reason: Clearer parameter naming consistent with mathematical terminology
 
+- **DEPRECATED**: STL export parameter names unified with plotting functions
+  - `OrnamentGenerator` and `create_ornament()`: `scaling` → `modulus_mode`, `scaling_params` → `modulus_params`
+  - Old names still work with deprecation warnings
+  - Migration: Replace `scaling='arctan'` with `modulus_mode='arctan'`, `scaling_params={}` with `modulus_params={}`
+  - Reason: API consistency across all 3D visualization and export functions
+
 ### Added
 
 #### New Colormaps (13 Total)
@@ -46,6 +52,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 10+ modulus scaling modes for 3D/Riemann sphere: `arctan`, `logarithmic`, `adaptive`, `sigmoid`, `power`, `linear_clamp`, `hybrid`
 - STL-specific parameter defaults for 3D printability
 - Custom parameter support for all scaling modes
+- **NEW**: Added modulus scaling to matplotlib's `riemann()` function for feature parity with PyVista backend
+  - All scaling modes now available in both matplotlib and PyVista
+  - Default remains `'constant'` (unit sphere) for backwards compatibility
 
 #### Logging Framework
 - Comprehensive logging with proper log levels (DEBUG, INFO, WARNING, ERROR)
