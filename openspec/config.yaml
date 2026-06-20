@@ -1,0 +1,46 @@
+schema: spec-driven
+
+context: |
+  Complexplorer is a Python library (>=3.11) for domain-coloring visualization of
+  complex functions f: C -> C, inspired by Wegert's "Visual Complex Functions".
+
+  Tech stack: numpy, matplotlib, scipy. Optional: PyVista (high-performance 3D + STL
+  export), PyQt6 (interactive matplotlib). Packaged with pyproject.toml; uv for env.
+
+  Package layout (current, as of v2.0.0):
+    complexplorer/
+      core/        domain.py, colormap.py, scaling.py, functions.py, color_utils.py
+      plotting/    matplotlib/{plot_2d,plot_3d}.py, pyvista/{plot_3d,riemann}.py, validation.py
+      export/stl/  ornament_generator.py, mesh_repair.py, utils.py
+      utils/       backend.py, mesh.py, logging.py, validation.py
+      api.py       high-level show()/plot()/presets
+      exceptions.py  ComplexplorerError hierarchy
+
+  Capabilities are specced in openspec/specs/: domains, colormaps, modulus-scaling,
+  core-functions, plotting-2d, plotting-3d-mpl, plotting-3d-pyvista, riemann-sphere,
+  stl-export, high-level-api. These were captured as a behavioral-contract baseline of
+  the existing v2.0.0 system.
+
+  Conventions: PEP 8, type hints, comprehensive docstrings with math where relevant.
+  Domain-specific exceptions inherit from ComplexplorerError. Tests in tests/unit/ (pytest).
+  Boundaries are inclusive in domain membership; phase is normalized to [0, 2pi);
+  colormaps return RGB/HSV channels in [0, 1].
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+# Add your tech stack, conventions, style guides, domain knowledge, etc.
+# Example:
+#   context: |
+#     Tech stack: TypeScript, React, Node.js
+#     We use conventional commits
+#     Domain: e-commerce platform
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
