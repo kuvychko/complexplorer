@@ -18,22 +18,33 @@
       must stay pure-numpy (θ/φ → Cartesian → canonical `stereographic_projection`); split
       `RectangularSphereGenerator` so PyVista `StructuredGrid` construction moves to
       `mesh/sphere.py` and only the numpy coordinates live at the field layer.
-- [ ] 2.3 Handle infinities/NaNs once, here (the logic currently duplicated in callers).
+- [ ] 2.3 Record non-finiteness (NaN/inf) in the field's mask/metadata — do NOT pre-clamp
+      moduli here. The inf→geometry mapping is topology-specific (relief clamps inf→`r_max`
+      via `apply_modulus_distortion`; landscape uses `z_max` clip / NaN-blank), so the
+      builders own clamping.
 - [ ] 2.4 Unit tests for field sampling, masking, infinity handling.
 
-## 3. mesh/ package
-- [ ] 3.1 Create `mesh/` package; move `RectangularSphereGenerator` → `mesh/sphere.py` and
-      `apply_modulus_distortion` → `mesh/distortion.py` (math unchanged). Keep import shims
-      at old paths if needed.
+## 3. mesh/ package (additive — wrap existing utilities in place, no moves)
+- [ ] 3.1 Create the `mesh/` package with NEW code only. It IMPORTS the existing
+      `RectangularSphereGenerator` (`utils/mesh.py`) and `apply_modulus_distortion`
+      (`utils/mesh_distortion.py`) unchanged — no relocation, no shims. (Extract only the
+      θ/φ→Cartesian coordinate math into a pure-numpy helper shared by `sample()` and the
+      generator, per the import-layering note.)
 - [ ] 3.2 Implement `SurfaceMesh` (`mesh/surface.py`): wraps `pv.DataSet`; `.attach_colors`
       (single decorate path: `RGB`/`magnitude`/`phase`), `.to_pyvista`, `.save_stl`
-      (triangulate first), `.screenshot`, `.validate_printability`. `.attach_colors` must
-      handle both the regular-grid case and the domain-filtered irregular-points case
-      (preserve the reshape special-casing currently in `OrnamentGenerator`).
-- [ ] 3.3 Implement `build_landscape(field, ...)` (height = `scale(|f|)`, `z_max`, `log_z`).
-- [ ] 3.4 Implement `build_relief(field, ...)` (radius = `scale(|f|)`, `r_min/r_max`).
-- [ ] 3.5 Re-home STL post-proc (`scale_to_size`, `center_mesh`, `validate_printability`,
-      `repair_mesh_simple`) so any `SurfaceMesh` can use it.
+      (triangulate first), `.screenshot`, `.validate_printability`.
+      `.attach_colors`: (a) passes `field.mask` as `outmask` to `cmap.rgb`; (b) handles
+      both the regular-grid and the domain-filtered irregular-points cases (preserve the
+      reshape special-casing currently in `OrnamentGenerator`); (c) stays **faithful** — do
+      NOT sanitize non-finite RGB (PyVista tolerates NaN scalars; sanitizing would change
+      pole pixels and break output preservation — unlike the matplotlib path).
+- [ ] 3.3 Implement `build_landscape(field, ...)` (height = `scale(|f|)`, `z_max`, `log_z`;
+      preserves landscape's NaN-blank masking).
+- [ ] 3.4 Implement `build_relief(field, ...)` (radius = `scale(|f|)`, `r_min/r_max`;
+      preserves relief's cell-removal masking; canonical south-pole projection per D2).
+- [ ] 3.5 `SurfaceMesh.save_stl()` imports and calls the existing `export/stl` post-proc
+      (`scale_to_size`, `center_mesh`, `validate_printability`, `repair_mesh_simple`) — no
+      move — and drops NaN vertices so landscape→STL exports are watertight-capable.
 - [ ] 3.6 Unit tests: builders produce finite vertices + faces, correct scalar lengths,
       STL export non-empty, no NaNs in exported mesh.
 

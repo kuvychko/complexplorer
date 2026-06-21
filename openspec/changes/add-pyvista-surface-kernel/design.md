@@ -95,35 +95,60 @@ Outcome: the 3× decorate-block collapses to one `SurfaceMesh.attach_colors()`; 
 post-processing becomes reachable from any `SurfaceMesh` (landscapes can export STL for
 free); `apply_modulus_distortion` + `ModulusScaling` remain the geometry kernel unchanged.
 
-## Proposed module layout
+## Proposed module layout — additive, wrap in place (decision from deep review)
+
+Do **not** relocate existing utilities. Moving `RectangularSphereGenerator`,
+`apply_modulus_distortion`, and the STL post-proc would break `tests/unit/utils/test_mesh.py`
+and `tests/unit/export/stl/test_utils.py`, churn three import sites, and need shims — all
+for a cosmetic layout gain. The kernel only needs to *wrap* these, not move them.
 
 ```
-core/field.py            ComplexField, sample()          numpy-only, no PyVista import
-mesh/__init__.py
-mesh/surface.py          SurfaceMesh
-mesh/builders.py         build_landscape, build_relief
-mesh/sphere.py           (absorbed RectangularSphereGenerator)
-mesh/distortion.py       (re-homed apply_modulus_distortion — unchanged math)
-mesh/repair.py, mesh/io.py   (re-homed STL post-proc: scale/center/validate/repair/save)
+core/field.py            ComplexField, sample()       numpy-only, no PyVista import  (NEW)
+mesh/__init__.py                                                                       (NEW)
+mesh/surface.py          SurfaceMesh                                                   (NEW)
+mesh/builders.py         build_landscape, build_relief                                 (NEW)
+
+  imported and orchestrated, UNCHANGED in place:
+    utils/mesh.py              RectangularSphereGenerator (PyVista StructuredGrid wrap)
+    utils/mesh_distortion.py   apply_modulus_distortion (geometry kernel)
+    export/stl/utils.py        scale_to_size, center_mesh, validate_printability
+    export/stl/mesh_repair.py  repair_mesh_simple
 ```
 
 `SurfaceMesh` wraps a `pv.DataSet`; `.save_stl()` triangulates (`extract_surface` /
-`triangulate`) before writing. `ComplexField` must not import PyVista (keeps 2D/core
-importable without the 3D backend until 3.0).
+`triangulate`), then calls the existing `export/stl` post-proc (no move). `ComplexField`
+must not import PyVista (keeps 2D/core importable without the 3D backend until 3.0).
 
 **Import-layering note (sphere sampling).** The sphere-sampling path in `sample()` must
 stay pure-numpy: the θ/φ → Cartesian sphere coordinates are plain numpy, and the canonical
-`stereographic_projection` (south-pole convention) maps them to `w`. PyVista enters *only*
-in the `mesh/` builder when those coordinates are wrapped into a `pv.StructuredGrid` /
-distorted. The current `RectangularSphereGenerator` couples coordinate generation with
-`pv.StructuredGrid` construction — split it so the numpy coordinate generation lives at the
-field/core layer and the PyVista wrapping lives in `mesh/sphere.py`.
+`stereographic_projection` (south-pole convention) maps them to `w`. To keep `ComplexField`
+PyVista-free *without* moving `RectangularSphereGenerator`, extract just the θ/φ→Cartesian
+coordinate math into a small pure-numpy helper that both `sample()` and the existing
+generator can call. PyVista enters only when `mesh/builders.py` wraps coordinates into a
+`pv.StructuredGrid`.
+
+## Refinements from the deep review
+
+- **Infinity-handling ownership.** `ComplexField` records non-finiteness (in its mask /
+  metadata) but does **not** pre-clamp moduli — the inf→geometry mapping is
+  topology-specific (relief clamps inf→`r_max` via `apply_modulus_distortion`; landscape
+  uses `z_max` clip / NaN-blanking). The builders own that clamping. ("Handled once in the
+  field" was wrong.)
+- **Masking is topology-specific too.** Landscape *blanks* masked cells to NaN; relief
+  *removes* out-of-domain cells (domain filtering). Each builder preserves its own
+  strategy. STL export from a landscape must additionally drop NaN vertices.
+- **`attach_colors` stays faithful — no color sanitization.** The non-finite-RGB crash
+  fixed in Phase 0 was matplotlib-specific (it validates facecolors); PyVista tolerates
+  NaN scalars. Sanitizing here would change `plot_landscape_pv` pole pixels and break the
+  output-preservation guarantee (D3). Keep colors verbatim; verify pyvista's NaN tolerance
+  during implementation.
+- **`attach_colors` threads the mask.** It must pass `field.mask` as `outmask` to
+  `cmap.rgb(...)` (the landscape path relies on this today).
 
 ## Open questions
 
-- Exact home of the STL post-proc (`export/stl/` vs `mesh/io.py`). Leaning `mesh/` so it
-  serves any surface, with `export/stl/` keeping the user-facing `OrnamentGenerator`
-  facade. Resolve during implementation.
+- STL post-proc home: **resolved** — stays in `export/stl/` (keeps its tests green);
+  `SurfaceMesh.save_stl()` imports and calls those helpers so any surface can use them.
 - Whether `pair_plot_landscape_pv`'s two-viewport plumbing stays in the facade or moves
   into a small `SurfaceMesh` multi-mesh plot helper. Facade is fine for now.
 
@@ -132,5 +157,5 @@ field/core layer and the PyVista wrapping lives in `mesh/sphere.py`.
 | Risk | Mitigation |
 |---|---|
 | Refactor silently changes a rendered/exported output | Output-pinning regression tests for all 5 entry points before refactor (D3) |
-| Projection flip surprises existing STL users | Documented intentional change; note in release notes + docstring |
-| `mesh/` vs `utils/mesh.py` import churn | Single move commit; keep old import paths as shims if anything external depends on them |
+| Projection flip surprises existing `riemann_pv` users (the rendered sphere flips; STL is unchanged) | Documented intentional change; release-notes + docstring note. Existing STL files stay valid |
+| Unintended color/output change from "helpful" sanitization in the unified decorate path | `attach_colors` stays faithful (see refinements); regression tests catch any drift |

@@ -15,11 +15,12 @@ metadata. It SHALL NOT require PyVista to be importable.
 - **THEN** a `ComplexField` is returned whose values equal `f` evaluated on the domain
   mesh, with modulus, phase, and the domain mask populated
 
-#### Scenario: Infinities and NaNs are handled once
+#### Scenario: Infinities and NaNs are recorded for downstream handling
 
 - **WHEN** the sampled function produces infinite or NaN values
-- **THEN** the field resolves them consistently (finite substitution / masking) so that
-  downstream mesh builders receive well-defined moduli
+- **THEN** the field records their locations (in its mask/metadata) and preserves the raw
+  values, so each mesh builder can apply its own topology-appropriate clamping (relief
+  bounds radius; landscape clips/blanks height)
 
 ### Requirement: Unified surface mesh object
 
