@@ -47,22 +47,50 @@ as 2.x minors so momentum and releases never stall behind one big branch ("thin 
 
 ---
 
+## Games boundary: complexplorer is not a game engine
+
+Complexplorer is used for **game prototyping only**. Actual games are built in **Godot**,
+which reimplements the math **natively** (mobile platforms are the target). Complexplorer's
+role is therefore to **produce, not run**:
+
+- reference imagery (PNG) — what the phase portrait / relief *should* look like,
+- machine-readable **answer keys / level data** (JSON: zeros/poles with orders, branch
+  points, expected monodromy, recommended domain) — the *ground truth* Godot is validated
+  against,
+- STL / object cards.
+
+Consequence: the "games" are **curated preset sets + a JSON level-export profile**, not
+Python engine code. They ride on the Phase 2 preset/gallery/export infrastructure. No
+interactive loops, scoring, or UI live in complexplorer.
+
+**Parametrized families (Möbius, later Julia / `z^(1/n)` / resonators).** The Phase 2 base
+`FunctionPreset` is **static** (one callable + expression + a fixed answer key). A
+parametrized "playground" is a Phase-3 extension, `FunctionFamily`: a parameter schema
+(names, types, defaults, ranges, constraint), a `make_callable`/expression template, and
+`singularities(**params)`. `family.bind(**params)` emits an ordinary static
+`FunctionPreset` snapshot — so the base model needs no change, and snapshot answer keys
+become the validation oracle for Godot's native math. (A path through a family's parameter
+space is exactly `create_animation`'s `f(z, t)`.)
+
+---
+
 ## Release map
 
 ```
             CHANGE (OpenSpec proposal)                 VER     BREAKING?  STATUS
 ────────────────────────────────────────────────────────────────────────────────
-Phase 0  reconcile-versioning-and-license              2.1     no         in-progress
+Phase 0  reconcile-versioning-and-license              2.1     no         archived
          establish-backend-and-release-policy          2.1     no         archived
          add-tooling-and-ci                            2.1     no         archived
 Phase 1  add-pyvista-surface-kernel                    2.2     no         archived
-Phase 2  add-function-preset-registry                  2.3     no         planned
+Phase 2  add-function-preset-registry                  2.3     no         proposed
          add-cli                                        2.3     no         planned
          add-gallery-generator                          2.3     no         planned
-Phase 3  add-singularity-detective                      2.4     no         planned
-         add-branch-cut-zoo                             2.4     no         planned
-         add-function-guessr                            2.5     no         planned
-         add-mobius-playground                          2.5     no         planned
+Phase 3  add-level-export                               2.4     no         planned
+         (game PROTOTYPING assets — see "Games boundary" below)
+         curated preset SETS (data, not code): singularity-detective,
+         branch-cut-zoo, function-guessr, mobius — tagged collections +
+         export profiles, NOT engine code
 Phase 5  add-transfer-function-explorer                 2.5     no         planned
          (EE pulled early — additive, not gated on 3.0)
 ────────────────────────────────────────────────────────────────────────────────
@@ -96,9 +124,14 @@ Phase 5  add-transfer-function-explorer                 2.5     no         plann
    abstraction + shared mesh pipeline) underpins relief maps, Riemann surfaces, and STL
    export. Build it once so later phases are cheap. It must reconcile with the existing
    `export/stl/OrnamentGenerator` and `utils/mesh.py` rather than duplicate them.
-3. **Presets are leverage.** A metadata-rich function preset registry powers gallery
-   pages, game levels, CLI rendering, and object cards from one source — so it lands
-   before games and EE that consume it.
+3. **Presets are leverage — and the Godot interchange.** A metadata-rich function preset
+   registry powers gallery pages, CLI rendering, object cards, AND the game level data
+   from one source — so it lands before everything that consumes it. Under the games
+   boundary above, the preset is the serializable record handed to Godot: it carries a
+   `callable` (complexplorer renders with it) + an `expression` string (Godot reimplements
+   from it) + plain-dict `domain_spec`/`cmap_spec`/`scaling_spec` (no live objects) +
+   hand-authored `singularities` (the exact answer key). Serialization is a design center,
+   not an afterthought; `core/presets.py` stays PyVista-free.
 4. **3.0 is anchored on the breaking change**, not on feature volume. It contains exactly
    two changes: the dependency/removal change and the headline feature.
 
