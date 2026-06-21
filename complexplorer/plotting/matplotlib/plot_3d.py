@@ -82,8 +82,10 @@ class Matplotlib3DPlotter:  # (Base3DPlotter):  # TODO: Add base class
         if mask is not None:
             f_z[mask] = np.nan
 
-        # Get RGB colors
+        # Get RGB colors (sanitize: non-finite f -> non-finite RGB, which matplotlib
+        # 3D shading rejects; map non-finite -> black and clip to [0, 1]).
         rgb = colormap.rgb(f_z, outmask=mask)
+        rgb = np.clip(np.nan_to_num(rgb, nan=0.0, posinf=1.0, neginf=0.0), 0.0, 1.0)
 
         # Calculate z-coordinates (moduli)
         z_coord = np.abs(f_z)
@@ -243,8 +245,11 @@ def plot_landscape(
     if z_max is not None and z_max <= 0:
         raise ValidationError("z_max must be positive or None")
 
-    # Get RGB colors
+    # Get RGB colors. Non-finite f (e.g. a pole inside the domain) yields non-finite
+    # RGB from the colormap; matplotlib's 3D shading rejects out-of-[0,1] facecolors,
+    # so sanitize to valid colors (non-finite -> black) before plotting.
     rgb = cmap.rgb(f, outmask=mask)
+    rgb = np.clip(np.nan_to_num(rgb, nan=0.0, posinf=1.0, neginf=0.0), 0.0, 1.0)
 
     # Calculate z-coordinates (moduli)
     z_coord = np.abs(f)
@@ -467,8 +472,9 @@ def riemann(
     f_z = func(z)
     rgb = cmap.rgb(f_z)
 
-    # Ensure RGB values are in valid range [0, 1]
-    rgb = np.clip(rgb, 0.0, 1.0)
+    # Ensure RGB values are valid: matplotlib 3D rejects non-finite/out-of-range
+    # facecolors (a pole yields non-finite colors). Map non-finite -> black, clip [0, 1].
+    rgb = np.clip(np.nan_to_num(rgb, nan=0.0, posinf=1.0, neginf=0.0), 0.0, 1.0)
 
     # Convert back to sphere coordinates
     X, Y, Z = stereographic_projection(z, project_from_north=project_from_north).T
