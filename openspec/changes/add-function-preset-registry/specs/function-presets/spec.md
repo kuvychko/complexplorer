@@ -73,14 +73,14 @@ live objects through the provided factories.
 
 The library SHALL provide `domain_from_spec` and `cmap_from_spec` factories that map a
 spec dict's `type` to the corresponding `Domain` / `Colormap` subclass and instantiate it.
-The factories SHALL cover the subclasses used by the curated presets and SHALL raise a
-domain-specific error for an unknown `type`. The core `Domain` / `Colormap` classes SHALL
-NOT be modified.
+The factories SHALL cover the subclasses used by the curated presets and SHALL raise the
+library's domain exception (`ValidationError`) for an unknown `type`. The core `Domain` /
+`Colormap` classes SHALL NOT be modified.
 
 #### Scenario: Unknown spec type is rejected
 
 - **WHEN** a spec with an unrecognized `type` is passed to a factory
-- **THEN** a `ComplexplorerError` is raised naming the unsupported type
+- **THEN** a `ValidationError` is raised naming the unsupported type and the supported ones
 
 ### Requirement: Registry access and tag filtering
 

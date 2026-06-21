@@ -19,6 +19,7 @@ from complexplorer.core.functions import (
     sawtooth,
     stereographic_projection,
 )
+from complexplorer.core.presets import FunctionPreset, catalog
 from complexplorer.core.scaling import ModulusScaling, get_scaling_preset
 
 # Plotting functions (matplotlib)
@@ -73,6 +74,9 @@ __all__ = [
     "LogRings",
     "ModulusScaling",
     "get_scaling_preset",
+    # Function preset registry (distinct from api.Presets / plot configs)
+    "catalog",
+    "FunctionPreset",
     # Core functions
     "phase",
     "sawtooth",
