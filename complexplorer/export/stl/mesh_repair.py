@@ -167,7 +167,7 @@ def ensure_consistent_normals(mesh: "pv.PolyData", verbose: bool = False) -> "pv
 
     # Compute normals
     mesh_with_normals = mesh.compute_normals(
-        cell_normals=True, point_normals=False, consistency=True, auto_orient_normals=True
+        cell_normals=True, point_normals=False, consistent_normals=True, auto_orient_normals=True
     )
 
     return mesh_with_normals

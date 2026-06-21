@@ -81,10 +81,3 @@ ignore = [
 # Tests: E402 is the required `pytest.importorskip(...)`-before-imports idiom; F841
 # unused locals are common, intentional test scaffolding.
 "tests/**" = ["E402", "F841"]
-
-[tool.mypy]
-# Advisory only (CI runs it non-blocking). Lenient to start; tighten over time.
-python_version = "3.11"
-ignore_missing_imports = true
-warn_unused_ignores = false
-check_untyped_defs = false

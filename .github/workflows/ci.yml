@@ -69,20 +69,3 @@ jobs:
 
       - name: Run tests
         run: uv run --no-sync pytest tests/ -q
-
-  typecheck:
-    name: Type check (advisory)
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
-        with:
-          python-version: "3.12"
-          enable-cache: true
-      - name: Install
-        run: |
-          uv venv
-          uv pip install -e ".[pyvista,dev]" mypy
-      - name: mypy
-        run: uv run --no-sync mypy complexplorer/

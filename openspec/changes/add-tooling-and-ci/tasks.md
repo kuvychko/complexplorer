@@ -33,9 +33,15 @@
 - [x] 2.5 Install from `pyproject.toml` dependency ranges, **not** `uv.lock`, so CI catches
       upstream dependency breakage (a library should test against unpinned ranges).
 
-## 3. Optional type checking
-- [x] 3.1 Add `mypy` or `pyright` config; run advisory (`continue-on-error`, non-blocking)
-      on ubuntu only to start. → lenient `[tool.mypy]` + advisory `typecheck` job.
+## 3. Type checking — deferred (decision)
+- [x] 3.1 Type checking deferred. An advisory mypy run surfaced ~101 errors on the
+      untyped, numpy/pyvista-heavy codebase — almost all noise (optional-import
+      `module = None` patterns, missing third-party stubs, numpy generics). A perpetually
+      red non-blocking job provides no signal, so the job + `[tool.mypy]` config were
+      removed. Gradual typing should be a dedicated future change. The one-off run did
+      surface two genuine bugs, now fixed: `dict[str, any]` → `dict[str, Any]`
+      (`export/stl/utils.py`) and a no-op `compute_normals(consistency=...)` →
+      `consistent_normals=...` (`export/stl/mesh_repair.py`).
 
 ## 4. Close out
 - [ ] 4.1 Confirm CI is green on a trial PR (note: base lane should show PyVista tests as

@@ -4,6 +4,7 @@ This module provides validation and helper functions for 3D printing.
 """
 
 import warnings
+from typing import Any
 
 # Import PyVista if available
 try:
@@ -25,7 +26,7 @@ def check_pyvista_available():
 
 def validate_printability(
     mesh: "pv.PolyData", size_mm: float | None = None, verbose: bool = True
-) -> dict[str, any]:
+) -> dict[str, Any]:
     """Validate mesh for 3D printing requirements.
 
     Parameters
