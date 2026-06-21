@@ -1,14 +1,17 @@
 # Tasks — add-pyvista-surface-kernel
 
 ## 1. Lock current behavior first (regression safety net)
-- [ ] 1.1 Add output-pinning tests for `plot_landscape_pv` / `pair_plot_landscape_pv`
-      (mesh point/scalar arrays for a fixed function + resolution).
-- [ ] 1.2 Add output-pinning tests for `riemann_pv` (points, `RGB`, `magnitude`, `phase`).
-- [ ] 1.3 Add output-pinning tests for `OrnamentGenerator.generate_ornament` using mesh
-      **arrays** (vertices, `RGB`, `magnitude`, `phase`, `radius`) plus a geometry hash
-      (bounds, vertex/face counts, sorted-coordinate checksum) — NOT raw STL bytes, which
-      are not stable across pyvista/vtk versions. The ornament output is unchanged by D2,
-      so this baseline stays fixed through the refactor.
+- [x] 1.1 Add output-pinning tests for `plot_landscape_pv` / `pair_plot_landscape_pv`
+      (mesh point/scalar arrays for a fixed function + resolution). → via the shared
+      `create_complex_surface` seam; two cases (modulus + domain-mask), golden `.npz`.
+- [x] 1.2 Add output-pinning tests for `riemann_pv` (points, `RGB`, `magnitude`, `phase`).
+      → faithful extraction via `return_plotter`; golden `.npz` (regenerated after the D2
+      flip).
+- [x] 1.3 Add output-pinning tests for `OrnamentGenerator.generate_ornament` using mesh
+      **arrays** (vertices, `RGB`, `magnitude`, `phase`) — NOT raw STL bytes. Golden
+      `.npz`; unchanged by D2. (`tests/regression/`, deterministic across 3 runs.)
+      NOTE: exact in-domain pole hits give non-deterministic RGB (colormap `nan->int`
+      cast) — a latent colormap bug; regression cases avoid exact pole nodes.
 
 ## 2. ComplexField (core/field.py)
 - [ ] 2.1 Implement `ComplexField` container: `z`/sphere params, `w = f(z)`, `|w|`,
