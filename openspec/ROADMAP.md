@@ -83,7 +83,7 @@ Phase 0  reconcile-versioning-and-license              2.1     no         archiv
          establish-backend-and-release-policy          2.1     no         archived
          add-tooling-and-ci                            2.1     no         archived
 Phase 1  add-pyvista-surface-kernel                    2.2     no         archived
-Phase 2  add-function-preset-registry                  2.3     no         in-progress
+Phase 2  add-function-preset-registry                  2.3     no         archived
          add-cli                                        2.3     no         planned
          add-gallery-generator                          2.3     no         planned
 Phase 3  add-level-export                               2.4     no         planned
