@@ -44,8 +44,8 @@
       `consistent_normals=...` (`export/stl/mesh_repair.py`).
 
 ## 4. Close out
-- [ ] 4.1 Confirm CI is green on a trial PR (note: base lane should show PyVista tests as
-      skipped, pyvista lane as run). → **requires push**; YAML validated locally, lint +
-      339 tests green locally, but the actual GitHub Actions run can only be confirmed
-      after pushing.
+- [x] 4.1 Confirm CI is green on a trial PR (note: base lane should show PyVista tests as
+      skipped, pyvista lane as run). → **green**. Surfaced and fixed four real bugs en
+      route (uv `--system`/PEP 668, `HAS_STL_EXPORT` detection, non-finite matplotlib
+      facecolors, `consistent_normals` no-op).
 - [x] 4.2 Update `openspec/ROADMAP.md` STATUS for this change.

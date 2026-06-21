@@ -54,7 +54,7 @@ as 2.x minors so momentum and releases never stall behind one big branch ("thin 
 ────────────────────────────────────────────────────────────────────────────────
 Phase 0  reconcile-versioning-and-license              2.1     no         in-progress
          establish-backend-and-release-policy          2.1     no         proposed
-         add-tooling-and-ci                            2.1     no         in-progress
+         add-tooling-and-ci                            2.1     no         archived
 Phase 1  add-pyvista-surface-kernel                    2.2     no         proposed
 Phase 2  add-function-preset-registry                  2.3     no         planned
          add-cli                                        2.3     no         planned
