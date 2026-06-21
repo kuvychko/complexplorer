@@ -6,6 +6,10 @@ import tempfile
 import numpy as np
 import pytest
 
+# Optional-feature availability is authoritative from the package flags. The wrapper
+# imports below succeed even without PyVista (the modules guard their own import), so
+# they must NOT be used to infer availability.
+from complexplorer import HAS_PYVISTA, HAS_STL_EXPORT
 from complexplorer.api import Presets, analyze_function, quick_plot
 from complexplorer.core.colormap import Chessboard, LogRings, Phase, PolarChessboard
 
@@ -15,21 +19,12 @@ from complexplorer.core.scaling import ModulusScaling, get_scaling_preset
 from complexplorer.plotting.matplotlib.plot_2d import plot
 from complexplorer.plotting.matplotlib.plot_3d import plot_landscape, riemann
 
-# Check if optional features are available
 try:
     from complexplorer.export.stl import create_ornament
-
-    HAS_STL_EXPORT = True
-except ImportError:
-    HAS_STL_EXPORT = False
-
-try:
     from complexplorer.plotting.pyvista.plot_3d import plot_landscape_pv
     from complexplorer.plotting.pyvista.riemann import riemann_pv
-
-    HAS_PYVISTA = True
 except ImportError:
-    HAS_PYVISTA = False
+    create_ornament = plot_landscape_pv = riemann_pv = None
 
 
 class TestBasicWorkflows:

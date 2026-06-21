@@ -33,8 +33,12 @@ from complexplorer.plotting.matplotlib.plot_3d import pair_plot_landscape, plot_
 # Utility functions
 from complexplorer.utils.backend import ensure_interactive_plots, setup_matplotlib_backend
 
-# STL export (requires PyVista)
+# STL export (requires PyVista). Import pyvista explicitly so the flag reflects real
+# backend availability: the export.stl wrappers import fine without PyVista (they guard
+# their own import), so importing them is not a valid availability probe.
 try:
+    import pyvista  # noqa: F401
+
     from complexplorer.export.stl import OrnamentGenerator, create_ornament
 
     HAS_STL_EXPORT = True

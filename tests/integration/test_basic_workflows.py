@@ -168,13 +168,15 @@ class TestFunctionTypes:
         plt.close("all")
 
 
-# Check if PyVista is available for optional tests
+# PyVista availability is authoritative from the package flag. The wrapper import
+# below succeeds even without PyVista (the module guards its own import), so it must
+# NOT be used to infer availability.
+from complexplorer import HAS_STL_EXPORT as HAS_STL
+
 try:
     from complexplorer.export.stl import create_ornament
-
-    HAS_STL = True
 except ImportError:
-    HAS_STL = False
+    create_ornament = None
 
 
 @pytest.mark.skipif(not HAS_STL, reason="PyVista not installed")
