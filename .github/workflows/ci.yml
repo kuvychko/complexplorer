@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+# Cancel superseded runs on the same ref.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint (ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Install ruff
+        run: uv pip install --system "ruff>=0.6"
+      - name: ruff check
+        run: ruff check complexplorer/ tests/
+      - name: ruff format --check
+        run: ruff format --check complexplorer/ tests/
+
+  test:
+    name: Test (${{ matrix.os }}, py${{ matrix.python }}, ${{ matrix.config }})
+    runs-on: ${{ matrix.os }}
+    # vtk wheels for new Python releases often lag; do not let the PyVista lane on
+    # 3.13 block the matrix until those wheels are confirmed available.
+    continue-on-error: ${{ matrix.config == 'pyvista' && matrix.python == '3.13' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.11", "3.12", "3.13"]
+        config: [base, pyvista]
+    env:
+      # Harmless for the base config (no PyVista); required for the PyVista lane.
+      PYVISTA_OFF_SCREEN: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python }}
+          enable-cache: true
+
+      # Install from pyproject ranges (not uv.lock) so CI catches upstream breakage.
+      - name: Install (base — no PyVista)
+        if: matrix.config == 'base'
+        run: uv pip install --system -e ".[dev]"
+      - name: Install (with PyVista)
+        if: matrix.config == 'pyvista'
+        run: uv pip install --system -e ".[pyvista,dev]"
+
+      # xvfb for real offscreen rendering on Linux; Windows renders offscreen natively.
+      - name: Headless display (Linux + PyVista)
+        if: matrix.config == 'pyvista' && runner.os == 'Linux'
+        uses: pyvista/setup-headless-display-action@v3
+
+      - name: Run tests
+        run: pytest tests/ -q
+
+  typecheck:
+    name: Type check (advisory)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - name: Install
+        run: uv pip install --system -e ".[pyvista,dev]" mypy
+      - name: mypy
+        run: mypy complexplorer/
