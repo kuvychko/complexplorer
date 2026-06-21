@@ -26,6 +26,7 @@ dependencies = [
     "numpy>=1.26.0",
     "matplotlib>=3.8.0",
     "scipy>=1.11.0",
+    "asteval>=1.0",
 ]
 classifiers = [
     "Intended Audience :: Science/Research",
@@ -60,6 +61,9 @@ qt = [
 all = [
     "complexplorer[dev,pyvista,qt]",
 ]
+
+[project.scripts]
+complexplorer = "complexplorer.cli.main:main"
 
 [project.urls]
 "Homepage" = "https://github.com/kuvychko/complexplorer"
