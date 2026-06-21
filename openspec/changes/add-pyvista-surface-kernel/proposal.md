@@ -16,9 +16,11 @@ logic. This change builds the kernel once, so later phases are cheap. It is the
 foundation called for in `openspec/ROADMAP.md` Phase 1 (v2.2).
 
 Two latent inconsistencies are also resolved (see `design.md`):
-- the Riemann **relief is mirrored between viz and STL** (south-pole vs north-pole
-  projection) — the printed object does not match the rendered sphere;
-- there are **two `inverse_stereographic` definitions** with different signatures.
+- the **`riemann_pv` sphere is rendered mirrored** relative to the documented core
+  projection convention, the matplotlib sphere, and the STL ornament (it is the lone path
+  using a divergent `(1+z)` projection);
+- there are **two `inverse_stereographic` definitions** with different signatures, which is
+  the root of that divergence.
 
 ## What changes
 
@@ -32,9 +34,10 @@ Two latent inconsistencies are also resolved (see `design.md`):
 - Refactor the five public entry points (`plot_landscape_pv`, `pair_plot_landscape_pv`,
   `riemann_pv`, `OrnamentGenerator`, `create_ornament`) into thin facades over the kernel,
   preserving their signatures.
-- **Unify the projection convention** on the visualization convention (the one
-  `riemann_pv` uses); the STL ornament orientation flips to match the rendered sphere.
-  Collapse the duplicate `inverse_stereographic`.
+- **Unify the projection convention** on the documented core convention (`z=0` at south
+  pole), which the matplotlib sphere and STL ornament already follow; `riemann_pv`'s
+  rendered sphere flips to match (it is the outlier). Existing STL files stay valid.
+  Collapse the duplicate `inverse_stereographic` into one canonical function.
 
 ## Non-goals
 
@@ -49,9 +52,12 @@ Two latent inconsistencies are also resolved (see `design.md`):
 - Refactored (signatures preserved): `plotting/pyvista/plot_3d.py`,
   `plotting/pyvista/riemann.py`, `export/stl/ornament_generator.py`.
 - Re-homed: `utils/mesh.py`, `utils/mesh_distortion.py`, `export/stl/utils.py` helpers.
-- **Behavior change (intentional, documented):** STL ornament orientation now matches the
-  on-screen Riemann sphere (previously mirrored).
-- Affected specs: new `surface-mesh` capability; `stl-export` gains an orientation-
-  consistency requirement.
+- **Behavior change (intentional, documented):** the `riemann_pv` rendered sphere
+  orientation flips to match the documented core convention, the matplotlib sphere, and
+  the STL ornament (it was previously mirrored). The STL ornament does **not** change, so
+  existing exported files stay valid.
+- Affected specs: new `surface-mesh` capability; `riemann-sphere` gains a canonical-
+  projection requirement and tightens the backend-parity requirement (projection pole is
+  no longer an allowed difference).
 - Risk: medium. Mitigated by writing output-pinning regression tests for all five entry
-  points *before* refactoring (the orientation flip is the one expected diff).
+  points *before* refactoring (the `riemann_pv` orientation flip is the one expected diff).

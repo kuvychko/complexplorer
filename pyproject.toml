@@ -10,9 +10,12 @@ where = ["."]
 include = ["complexplorer", "complexplorer.*"]
 exclude = ["examples*", "tests*", "docs*", "build*", "*.egg-info"]
 
+[tool.setuptools.dynamic]
+version = {attr = "complexplorer._version.__version__"}
+
 [project]
 name = "complexplorer"
-version = "1.0.1"
+dynamic = ["version"]
 authors = [
   { name="Igor Kuvychko", email="igor.kuvychko@gmail.com" },
 ]
@@ -29,7 +32,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
-    "License :: OSI Approved :: BSD License",
+    "License :: OSI Approved :: MIT License",
     "Topic :: Scientific/Engineering :: Visualization",
     "Topic :: Multimedia :: Graphics",
     "Operating System :: OS Independent",

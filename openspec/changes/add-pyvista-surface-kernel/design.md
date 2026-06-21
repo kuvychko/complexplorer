@@ -29,13 +29,20 @@ The real duplication is narrow: each of the three builders re-does, inline:
 
 ### Two latent inconsistencies (must be pinned, or unification silently changes output)
 
-1. **Projection mirror.** `riemann_pv` projects from the *south* pole
-   (`sphere_to_complex(..., from_north=False)`, `z=0` at top). `OrnamentGenerator`
-   projects from the *north* (`compute_riemann_sphere_distortion(..., from_north=True)`).
-   The printed ornament is an upside-down mirror of the rendered sphere.
+1. **Projection mirror — `riemann_pv` is the lone outlier.** The documented canonical
+   convention is `core.functions.stereographic_projection`, whose default maps `z=0` to
+   the **south** pole (`stereographic_projection(0+0j) == [0,0,-1]`, "for consistent
+   zero/pole visualization"). Tracing all paths:
+   - matplotlib `riemann()` — `stereographic_projection(project_from_north=False)` → `z=0`
+     at south. **Follows core.**
+   - STL `OrnamentGenerator` — `inverse_stereographic(project_from_north=True)`, denom
+     `(1-z)` → `z=0` at south. **Follows core.**
+   - `riemann_pv` — `utils.mesh.sphere_to_complex(from_north=False)`, denom `(1+z)` →
+     `z=0` at **north**. **Diverges** from the core convention, the matplotlib sphere, and
+     the STL ornament — it renders the sphere mirrored.
 2. **Duplicate function.** `core.functions.inverse_stereographic` and a different
    `utils.mesh.inverse_stereographic` (aliased to `complex_to_sphere`) coexist with
-   different signatures; the two sphere paths use different ones.
+   different signatures; `riemann_pv`'s divergence traces directly to using the latter.
 
 ## Decisions
 
@@ -46,14 +53,19 @@ Introduce a lightweight `ComplexField` AND `SurfaceMesh`. Defer `FieldOnSurface`
 presets/gallery, Phase 4 surfaces, and Phase 5 EE all consume; building it now avoids a
 retrofit, while `FieldOnSurface` would be guessed-at blind before the surface work.
 
-### D2 — Unify the projection on the visualization convention; flip STL to match
+### D2 — Unify on the canonical core convention; fix `riemann_pv` (the outlier)
 
-Standardize all relief on the convention `riemann_pv` currently uses; the STL ornament
-orientation flips to match the rendered sphere. Rationale: the roadmap's "math → matter"
-thesis means **the object you print should match the sphere you saw**. Viz is the
-more-seen, screenshotted artifact; the STL is regenerated on demand, so the shift is
-cheap. Collapse the two `inverse_stereographic` into one while here. This is the **only**
-intentional behavior change in the refactor; everything else is output-preserving.
+Standardize all relief on the documented core convention (`z=0` at the **south** pole),
+which the matplotlib sphere and the STL ornament already follow. `riemann_pv` is the lone
+divergent path, so **it is the one that changes** — its rendered sphere flips to agree
+with the rest of the library. Rationale: this is a bugfix (the PyVista sphere has been
+mirrored relative to core + matplotlib + STL), it honors the documented "consistent
+zero/pole visualization" intent, and — importantly — **existing STL files stay valid**
+(the ornament does not move). The roadmap's "math → matter" goal (print matches screen) is
+satisfied either way once unified; converging on the majority/documented convention is the
+lower-risk direction. Collapse the two `inverse_stereographic` into one canonical function
+while here. The `riemann_pv` orientation flip is the **only** intentional behavior change;
+everything else is output-preserving.
 
 ### D3 — Facade the five public functions, output-preserving, regression-locked
 
@@ -98,6 +110,14 @@ mesh/repair.py, mesh/io.py   (re-homed STL post-proc: scale/center/validate/repa
 `SurfaceMesh` wraps a `pv.DataSet`; `.save_stl()` triangulates (`extract_surface` /
 `triangulate`) before writing. `ComplexField` must not import PyVista (keeps 2D/core
 importable without the 3D backend until 3.0).
+
+**Import-layering note (sphere sampling).** The sphere-sampling path in `sample()` must
+stay pure-numpy: the θ/φ → Cartesian sphere coordinates are plain numpy, and the canonical
+`stereographic_projection` (south-pole convention) maps them to `w`. PyVista enters *only*
+in the `mesh/` builder when those coordinates are wrapped into a `pv.StructuredGrid` /
+distorted. The current `RectangularSphereGenerator` couples coordinate generation with
+`pv.StructuredGrid` construction — split it so the numpy coordinate generation lives at the
+field/core layer and the PyVista wrapping lives in `mesh/sphere.py`.
 
 ## Open questions
 

@@ -65,11 +65,16 @@ scaling kernel, and returning `SurfaceMesh` objects that share one decoration/ex
 ### Requirement: Existing PyVista entry points preserved
 
 The existing public PyVista functions SHALL keep their signatures and behavior (delegating
-to the kernel), with the sole intentional exception of the Riemann relief orientation
-unification.
+to the kernel), with the sole intentional exception that `riemann_pv`'s sphere orientation
+is corrected to the canonical projection convention (see the `riemann-sphere` capability).
 
-#### Scenario: Landscape and sphere outputs unchanged
+#### Scenario: Landscape outputs unchanged
 
-- **WHEN** `plot_landscape_pv`, `pair_plot_landscape_pv`, or `riemann_pv` is called as
-  before
+- **WHEN** `plot_landscape_pv` or `pair_plot_landscape_pv` is called as before
 - **THEN** the produced mesh geometry, colors, and scalars match the pre-refactor output
+
+#### Scenario: Riemann sphere output changes only in orientation
+
+- **WHEN** `riemann_pv` is called as before
+- **THEN** its mesh colors, scalars, and modulus relief match the pre-refactor output,
+  differing only by the corrected projection orientation (`z = 0` now at the south pole)
