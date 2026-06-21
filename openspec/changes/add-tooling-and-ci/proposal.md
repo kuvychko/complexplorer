@@ -12,10 +12,11 @@ establishes that lane (and basic lint/format) so later phases land on green CI.
 ## What changes
 
 - Add `ruff` (lint + format) configuration and bring the tree to a clean baseline.
-- Add a GitHub Actions workflow running, on push/PR: lint, then tests in **two
-  configurations** — base (no PyVista) and with PyVista (`complexplorer[pyvista]`), the
-  latter with offscreen rendering enabled (e.g. `PYVISTA_OFF_SCREEN`, a virtual
-  framebuffer if needed).
+- Add a `uv`-based GitHub Actions workflow (matching the project's local toolchain) running,
+  on push/PR: lint, then tests on **Linux + Windows** in **two configurations** — base (no
+  PyVista) and with PyVista (`complexplorer[pyvista]`, `PYVISTA_OFF_SCREEN`). The base lane
+  passes by skipping PyVista tests (they use `pytest.importorskip`). Dependencies install
+  from `pyproject` ranges (not `uv.lock`) so CI catches upstream breakage.
 - Optionally add a lightweight type check (`mypy`/`pyright`) — non-blocking to start.
 
 ## Non-goals
@@ -26,8 +27,9 @@ establishes that lane (and basic lint/format) so later phases land on green CI.
 
 ## Impact
 
-- New: `.github/workflows/ci.yml`, `[tool.ruff]` config (and dev extras additions).
+- New: `.github/workflows/ci.yml`, `[tool.ruff]` config (and `ruff` in the dev extra).
 - Touches: formatting across the tree (ruff format), `pyproject.toml` dev dependencies.
 - Affected specs (additive): `packaging` gains CI and lint requirements.
-- Risk: low, but the first `ruff format` pass produces a large diff — land it as its own
-  commit, separate from logic changes.
+- Risk: low. Two watch-items: the first `ruff format` pass produces a large diff (land it
+  as its own commit), and `vtk` may lack 3.13 wheels (PyVista lane treats 3.13 as
+  `continue-on-error`).
