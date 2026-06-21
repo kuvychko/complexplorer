@@ -67,9 +67,10 @@
       passes against the regenerated baseline. Full suite 367 passed.
 
 ## 6. Docs & close out
-- [ ] 6.1 Document the STL orientation change in release notes and `OrnamentGenerator`
-      docstring.
-- [ ] 6.2 Add a short "3D surface kernel" architecture note (feeds the Phase 0
-      backend-policy doc / `docs/development/`).
-- [ ] 6.3 Run `pytest tests/` green; `openspec validate --specs`.
-- [ ] 6.4 Update `openspec/ROADMAP.md` STATUS for this change.
+- [x] 6.1 Document the orientation change. → `.. versionchanged:: 2.2` note in the
+      `riemann_pv` docstring (the STL ornament did NOT change; `riemann_pv` is the path
+      that flipped, per the corrected D2).
+- [x] 6.2 Add a short "3D surface kernel" architecture note. →
+      `docs/development/surface-kernel.md`.
+- [x] 6.3 Run `pytest tests/` green; `openspec validate --specs`.
+- [x] 6.4 Update `openspec/ROADMAP.md` STATUS for this change.

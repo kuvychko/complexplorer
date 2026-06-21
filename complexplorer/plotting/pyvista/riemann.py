@@ -54,6 +54,12 @@ def riemann_pv(
 ) -> Optional["pv.Plotter"]:
     """Plot complex function on the Riemann sphere using PyVista.
 
+    .. versionchanged:: 2.2
+        The sphere orientation is corrected to the canonical convention (``z = 0`` at the
+        south pole), matching the matplotlib ``riemann`` renderer and the STL ornament.
+        Previously this renderer was vertically mirrored relative to the rest of the
+        library.
+
     This function provides high-performance, interactive visualization
     of complex functions on the Riemann sphere with various options
     for incorporating magnitude information.
