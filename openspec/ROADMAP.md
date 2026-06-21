@@ -104,6 +104,18 @@ Phase 5  add-transfer-function-explorer                 2.5     no         plann
 
 ---
 
+## Known bugs (backlog — fix as dedicated changes)
+
+- **Colormaps emit invalid / non-deterministic RGB at in-domain poles.** `Colormap.rgb()`
+  feeds a NaN hue (non-finite `f` on a grid node) to matplotlib's `hsv_to_rgb`, whose
+  `(h*6).astype(int)` produces run-varying garbage. The `outmask` path only covers
+  out-of-*domain* points, not in-domain singularities. Surfaced 3×: matplotlib 3D raises
+  on it (band-aided by clipping facecolors in `plotting/matplotlib/plot_3d.py`), PyVista
+  renders garbage, and it makes pole-node pinning tests flaky. Real fix: sanitize
+  non-finite `f` in the base colormap (then drop the facecolor band-aid). Own change.
+
+---
+
 ## Design principles (carried from the plan)
 
 - **Make mathematical structure explicit** — preserve concepts (zero, pole, branch point,
