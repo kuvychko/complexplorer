@@ -14,42 +14,36 @@
       cast) — a latent colormap bug; regression cases avoid exact pole nodes.
 
 ## 2. ComplexField (core/field.py)
-- [ ] 2.1 Implement `ComplexField` container: `z`/sphere params, `w = f(z)`, `|w|`,
-      `arg w`, mask, metadata. Must not import PyVista.
-- [ ] 2.2 Implement `sample(func, domain=..., resolution=...)` for the planar case
-      (reuse `Domain.mesh` / `Domain.outmask`) and a sphere-sampling path. The sphere path
-      must stay pure-numpy (θ/φ → Cartesian → canonical `stereographic_projection`); split
-      `RectangularSphereGenerator` so PyVista `StructuredGrid` construction moves to
-      `mesh/sphere.py` and only the numpy coordinates live at the field layer.
-- [ ] 2.3 Record non-finiteness (NaN/inf) in the field's mask/metadata — do NOT pre-clamp
-      moduli here. The inf→geometry mapping is topology-specific (relief clamps inf→`r_max`
-      via `apply_modulus_distortion`; landscape uses `z_max` clip / NaN-blank), so the
-      builders own clamping.
-- [ ] 2.4 Unit tests for field sampling, masking, infinity handling.
+- [x] 2.1 Implement `ComplexField` container: `z`/sphere params, `w = f(z)`, `|w|`,
+      `arg w`, mask, metadata. Must not import PyVista. → dataclass; `test_field_is_pyvista_free`
+      guards the import boundary.
+- [x] 2.2 Implement `sample(func, domain=..., resolution=...)` for the planar case
+      (reuse `Domain.mesh` / `Domain.outmask`) and a sphere-sampling path. → `sample()` +
+      `sample_sphere()`; sphere stays pure-numpy via `sphere_coordinates()` +
+      canonical `inverse_stereographic(project_from_north=True)` (z=0 at south).
+- [x] 2.3 Record non-finiteness (NaN/inf) in the field's mask/metadata — do NOT pre-clamp
+      moduli here. → `ComplexField.nonfinite` property; raw `w`/`modulus` preserved.
+- [x] 2.4 Unit tests for field sampling, masking, infinity handling. → `test_field.py`,
+      10 tests incl. canonical-projection (south-pole→0) and pyvista-free guard.
 
 ## 3. mesh/ package (additive — wrap existing utilities in place, no moves)
-- [ ] 3.1 Create the `mesh/` package with NEW code only. It IMPORTS the existing
-      `RectangularSphereGenerator` (`utils/mesh.py`) and `apply_modulus_distortion`
-      (`utils/mesh_distortion.py`) unchanged — no relocation, no shims. (Extract only the
-      θ/φ→Cartesian coordinate math into a pure-numpy helper shared by `sample()` and the
-      generator, per the import-layering note.)
-- [ ] 3.2 Implement `SurfaceMesh` (`mesh/surface.py`): wraps `pv.DataSet`; `.attach_colors`
-      (single decorate path: `RGB`/`magnitude`/`phase`), `.to_pyvista`, `.save_stl`
-      (triangulate first), `.screenshot`, `.validate_printability`.
-      `.attach_colors`: (a) passes `field.mask` as `outmask` to `cmap.rgb`; (b) handles
-      both the regular-grid and the domain-filtered irregular-points cases (preserve the
-      reshape special-casing currently in `OrnamentGenerator`); (c) stays **faithful** — do
-      NOT sanitize non-finite RGB (PyVista tolerates NaN scalars; sanitizing would change
-      pole pixels and break output preservation — unlike the matplotlib path).
-- [ ] 3.3 Implement `build_landscape(field, ...)` (height = `scale(|f|)`, `z_max`, `log_z`;
-      preserves landscape's NaN-blank masking).
-- [ ] 3.4 Implement `build_relief(field, ...)` (radius = `scale(|f|)`, `r_min/r_max`;
-      preserves relief's cell-removal masking; canonical south-pole projection per D2).
-- [ ] 3.5 `SurfaceMesh.save_stl()` imports and calls the existing `export/stl` post-proc
-      (`scale_to_size`, `center_mesh`, `validate_printability`, `repair_mesh_simple`) — no
-      move — and drops NaN vertices so landscape→STL exports are watertight-capable.
-- [ ] 3.6 Unit tests: builders produce finite vertices + faces, correct scalar lengths,
-      STL export non-empty, no NaNs in exported mesh.
+- [x] 3.1 Create the `mesh/` package with NEW code only, importing existing utilities
+      unchanged. → θ/φ→Cartesian extracted to `core.field.sphere_coordinates` (pure-numpy);
+      `apply_modulus_distortion` imported in place.
+- [x] 3.2 Implement `SurfaceMesh` (`mesh/surface.py`): `.attach_colors` (single
+      `RGB`/`phase` path, threads `outmask`, faithful — no NaN sanitization), `.attach_scalar`,
+      `.to_pyvista`, `.save_stl`, `.screenshot`, `.validate_printability`. Domain-filtered
+      irregular case handled in `build_relief` via carry-through cell removal.
+- [x] 3.3 Implement `build_landscape(field, ...)` — reproduces `create_complex_surface`
+      exactly (verified, incl. NaN-blank masking).
+- [x] 3.4 Implement `build_relief(field, ...)` — reproduces the ornament exactly for both
+      no-domain and domain (cell-removal) cases; canonical south-pole projection via the
+      field. KEY FIX: attach arrays AFTER `extract_surface` (C-order), not on the
+      StructuredGrid (VTK-native order).
+- [x] 3.5 `SurfaceMesh.save_stl()` calls the existing `export/stl` post-proc in place and
+      drops non-finite vertices (landscape→STL works).
+- [x] 3.6 Unit tests: `tests/unit/mesh/test_kernel.py` (faces/scalars, faithfulness vs
+      `create_complex_surface` + ornament, STL non-empty & finite). 11 tests.
 
 ## 4. Projection unification (D2 — fix the outlier `riemann_pv`)
 - [ ] 4.1 Collapse the two `inverse_stereographic` definitions into one canonical function
