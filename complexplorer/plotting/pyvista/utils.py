@@ -4,12 +4,11 @@ This module provides helper functions for PyVista-based visualizations.
 """
 
 import warnings
-from typing import Optional, Tuple, Union
-import numpy as np
 
 # Only import PyVista if available
 try:
     import pyvista as pv
+
     HAS_PYVISTA = True
 except ImportError:
     HAS_PYVISTA = False
@@ -20,14 +19,13 @@ def check_pyvista_available():
     """Check if PyVista is available and raise error if not."""
     if not HAS_PYVISTA:
         raise ImportError(
-            "PyVista is required for this functionality. "
-            "Install with: pip install pyvista"
+            "PyVista is required for this functionality. Install with: pip install pyvista"
         )
 
 
-def handle_export(plotter: 'pv.Plotter', filename: str, interactive: bool) -> None:
+def handle_export(plotter: "pv.Plotter", filename: str, interactive: bool) -> None:
     """Handle file export based on extension.
-    
+
     Parameters
     ----------
     plotter : pv.Plotter
@@ -37,34 +35,36 @@ def handle_export(plotter: 'pv.Plotter', filename: str, interactive: bool) -> No
     interactive : bool
         Whether in interactive mode.
     """
-    if filename.endswith('.html'):
+    if filename.endswith(".html"):
         # HTML export works differently with interactive mode
         if not interactive:
             warnings.warn(
                 "HTML export works best with interactive=True. "
-                "The file will be created but may not display properly."
+                "The file will be created but may not display properly.",
+                stacklevel=2,
             )
         try:
             plotter.export_html(filename)
             print(f"Interactive HTML saved to: {filename}")
-        except ImportError:
+        except ImportError as err:
             raise ImportError(
-                "HTML export requires 'trame'. "
-                "Install with: pip install trame"
-            )
-    elif filename.endswith(('.pdf', '.svg', '.eps')):
+                "HTML export requires 'trame'. Install with: pip install trame"
+            ) from err
+    elif filename.endswith((".pdf", ".svg", ".eps")):
         plotter.save_graphic(filename)
     else:
         plotter.screenshot(filename)
 
 
-def add_axes_widget(plotter: 'pv.Plotter', 
-                   labels: Tuple[str, str, str] = ('Re', 'Im', 'Z'),
-                   position: Tuple[float, float] = (0.0, 0.0), 
-                   size: float = 0.25,
-                   label_size: Tuple[float, float] = (0.25, 0.1)) -> None:
+def add_axes_widget(
+    plotter: "pv.Plotter",
+    labels: tuple[str, str, str] = ("Re", "Im", "Z"),
+    position: tuple[float, float] = (0.0, 0.0),
+    size: float = 0.25,
+    label_size: tuple[float, float] = (0.25, 0.1),
+) -> None:
     """Add a labeled axes widget to the plotter.
-    
+
     Parameters
     ----------
     plotter : pv.Plotter
@@ -80,7 +80,7 @@ def add_axes_widget(plotter: 'pv.Plotter',
     """
     # Check if we're in off-screen mode (static rendering)
     is_static = plotter.off_screen
-    
+
     if is_static:
         # For static rendering, use viewport-based approach
         axes_actor = plotter.add_axes(
@@ -97,7 +97,7 @@ def add_axes_widget(plotter: 'pv.Plotter',
             shaft_length=0.8,
             tip_length=0.2,
             ambient=0.5,
-            color='black',
+            color="black",
         )
     else:
         # For interactive mode, use the standard add_axes without viewport
@@ -115,56 +115,56 @@ def add_axes_widget(plotter: 'pv.Plotter',
             shaft_length=0.8,
             tip_length=0.2,
             ambient=0.5,
-            color='black',
+            color="black",
         )
-    
+
     return axes_actor
 
 
 def ensure_pyvista_setup():
     """Ensure PyVista is properly configured for the current environment."""
     check_pyvista_available()
-    
+
     # Set conservative defaults for better compatibility
     # Users can increase these if their system supports it
     if pv.global_theme.multi_samples is None:
         pv.global_theme.multi_samples = 2  # Conservative default
     pv.global_theme.smooth_shading = True
-    
+
     backend = pv.global_theme.jupyter_backend
     if backend is None:
         # Not in Jupyter, use default
         pass
-    elif backend != 'trame' and not str(backend).startswith('<MagicMock'):
+    elif backend != "trame" and not str(backend).startswith("<MagicMock"):
         # Only warn for real backends, not mocked ones in tests
         warnings.warn(
             f"PyVista backend is '{backend}', but 'trame' is recommended for "
-            "interactive Jupyter visualizations. Set with: pv.set_jupyter_backend('trame')"
+            "interactive Jupyter visualizations. Set with: pv.set_jupyter_backend('trame')",
+            stacklevel=2,
         )
 
 
-def get_camera_position(position: Union[str, tuple]) -> Union[str, tuple]:
+def get_camera_position(position: str | tuple) -> str | tuple:
     """Validate and return camera position.
-    
+
     Parameters
     ----------
     position : str or tuple
         Camera position specification.
-        
+
     Returns
     -------
     str or tuple
         Validated camera position.
     """
-    valid_strings = ['iso', 'xy', 'xz', 'yz']
-    
+    valid_strings = ["iso", "xy", "xz", "yz"]
+
     if isinstance(position, str):
         if position not in valid_strings:
             raise ValueError(
-                f"Invalid camera position '{position}'. "
-                f"Must be one of: {valid_strings}"
+                f"Invalid camera position '{position}'. Must be one of: {valid_strings}"
             )
         return position
-    
+
     # Assume it's a tuple/list of camera parameters
     return position

@@ -7,40 +7,48 @@ This module contains the fundamental building blocks of the library:
 - Modulus scaling for visualization
 """
 
-from .scaling import ModulusScaling, SCALING_PRESETS, get_scaling_preset
-from .domain import Domain, Rectangle, Disk, Annulus, CompositeDomain
 from .colormap import (
-    Colormap, Phase, Chessboard, PolarChessboard, LogRings,
-    OUT_OF_DOMAIN_COLOR_HSV
+    OUT_OF_DOMAIN_COLOR_HSV,
+    Chessboard,
+    Colormap,
+    LogRings,
+    Phase,
+    PolarChessboard,
 )
+from .domain import Annulus, CompositeDomain, Disk, Domain, Rectangle
 from .functions import (
-    phase, sawtooth, sawtooth_log,
-    stereographic_projection, inverse_stereographic, stereographic
+    inverse_stereographic,
+    phase,
+    sawtooth,
+    sawtooth_log,
+    stereographic,
+    stereographic_projection,
 )
+from .scaling import SCALING_PRESETS, ModulusScaling, get_scaling_preset
 
 __all__ = [
     # Scaling
-    'ModulusScaling',
-    'SCALING_PRESETS',
-    'get_scaling_preset',
+    "ModulusScaling",
+    "SCALING_PRESETS",
+    "get_scaling_preset",
     # Domains
-    'Domain',
-    'Rectangle', 
-    'Disk',
-    'Annulus',
-    'CompositeDomain',
+    "Domain",
+    "Rectangle",
+    "Disk",
+    "Annulus",
+    "CompositeDomain",
     # Colormaps
-    'Colormap',
-    'Phase',
-    'Chessboard',
-    'PolarChessboard',
-    'LogRings',
-    'OUT_OF_DOMAIN_COLOR_HSV',
+    "Colormap",
+    "Phase",
+    "Chessboard",
+    "PolarChessboard",
+    "LogRings",
+    "OUT_OF_DOMAIN_COLOR_HSV",
     # Functions
-    'phase',
-    'sawtooth',
-    'sawtooth_log',
-    'stereographic_projection',
-    'inverse_stereographic',
-    'stereographic',
+    "phase",
+    "sawtooth",
+    "sawtooth_log",
+    "stereographic_projection",
+    "inverse_stereographic",
+    "stereographic",
 ]

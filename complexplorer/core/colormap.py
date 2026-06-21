@@ -11,12 +11,13 @@ The module includes:
 """
 
 from abc import ABC, abstractmethod
-from typing import Optional, Tuple, Union
-import numpy as np
-import matplotlib.colors as mcolors
-from ..utils.validation import ValidationError
-from .functions import phase as phase_func, sawtooth, sawtooth_log
 
+import matplotlib.colors as mcolors
+import numpy as np
+
+from ..utils.validation import ValidationError
+from .functions import phase as phase_func
+from .functions import sawtooth, sawtooth_log
 
 # Default color for out-of-domain points
 OUT_OF_DOMAIN_COLOR_HSV = (0.0, 0.01, 0.9)  # Light gray
@@ -24,47 +25,46 @@ OUT_OF_DOMAIN_COLOR_HSV = (0.0, 0.01, 0.9)  # Light gray
 
 class Colormap(ABC):
     """Abstract base class for complex-to-color mappings.
-    
+
     A colormap defines how complex values are mapped to colors.
     Subclasses must implement the hsv_tuple method.
-    
+
     Parameters
     ----------
     out_of_domain_hsv : tuple[float, float, float], optional
         HSV color for points outside the domain.
     """
-    
-    def __init__(self, 
-                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+
+    def __init__(self, out_of_domain_hsv: tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize colormap with out-of-domain color."""
         self.out_of_domain_hsv = out_of_domain_hsv
-    
+
     @abstractmethod
-    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def hsv_tuple(self, z: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Convert complex values to HSV components.
-        
+
         Parameters
         ----------
         z : np.ndarray
             Complex values.
-            
+
         Returns
         -------
         H, S, V : tuple of np.ndarray
             Hue, saturation, and value arrays (each in [0, 1]).
         """
         pass
-    
-    def hsv(self, z: np.ndarray, outmask: Optional[np.ndarray] = None) -> np.ndarray:
+
+    def hsv(self, z: np.ndarray, outmask: np.ndarray | None = None) -> np.ndarray:
         """Convert complex values to HSV array.
-        
+
         Parameters
         ----------
         z : np.ndarray
             Complex values.
         outmask : np.ndarray, optional
             Boolean mask (True for out-of-domain points).
-            
+
         Returns
         -------
         np.ndarray
@@ -72,7 +72,7 @@ class Colormap(ABC):
         """
         z = np.asarray(z)
         H, S, V = self.hsv_tuple(z)
-        
+
         # Apply out-of-domain coloring
         if outmask is not None and z.ndim > 0:
             H = H.copy()
@@ -81,7 +81,7 @@ class Colormap(ABC):
             H[outmask] = self.out_of_domain_hsv[0]
             S[outmask] = self.out_of_domain_hsv[1]
             V[outmask] = self.out_of_domain_hsv[2]
-        
+
         # Stack along last axis
         if z.ndim == 0:
             # Scalar case
@@ -89,17 +89,17 @@ class Colormap(ABC):
         else:
             # Use stack instead of dstack to preserve shape
             return np.stack((H, S, V), axis=-1)
-    
-    def rgb(self, z: np.ndarray, outmask: Optional[np.ndarray] = None) -> np.ndarray:
+
+    def rgb(self, z: np.ndarray, outmask: np.ndarray | None = None) -> np.ndarray:
         """Convert complex values to RGB array.
-        
+
         Parameters
         ----------
         z : np.ndarray
             Complex values.
         outmask : np.ndarray, optional
             Boolean mask (True for out-of-domain points).
-            
+
         Returns
         -------
         np.ndarray
@@ -111,11 +111,11 @@ class Colormap(ABC):
 
 class Phase(Colormap):
     """Phase colormap with optional enhancement.
-    
+
     Maps complex phase to hue. Can create enhanced phase portraits
     by modulating saturation/value based on phase sectors and/or
     modulus contours.
-    
+
     Parameters
     ----------
     n_phi : int, optional
@@ -133,22 +133,24 @@ class Phase(Colormap):
     out_of_domain_hsv : tuple, optional
         Color for out-of-domain points.
     """
-    
-    def __init__(self,
-                 n_phi: Optional[int] = None,
-                 r_linear_step: Optional[float] = None,
-                 r_log_base: Optional[float] = None,
-                 v_base: float = 0.5,
-                 auto_scale_r: bool = False,
-                 scale_radius: float = 1.0,
-                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+
+    def __init__(
+        self,
+        n_phi: int | None = None,
+        r_linear_step: float | None = None,
+        r_log_base: float | None = None,
+        v_base: float = 0.5,
+        auto_scale_r: bool = False,
+        scale_radius: float = 1.0,
+        out_of_domain_hsv: tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV,
+    ):
         """Initialize phase colormap."""
         super().__init__(out_of_domain_hsv)
-        
+
         # Validate v_base
         if not 0 <= v_base < 1:
             raise ValidationError("v_base must be in [0, 1)")
-        
+
         # Handle auto-scaling
         if auto_scale_r:
             if n_phi is None:
@@ -157,7 +159,7 @@ class Phase(Colormap):
                 raise ValidationError("Cannot specify both auto_scale_r=True and r_linear_step")
             # Calculate r_linear_step for visually square cells
             r_linear_step = 2 * np.pi / n_phi * scale_radius
-        
+
         self.n_phi = n_phi
         self.phi = np.pi / n_phi if n_phi is not None else None
         self.r_linear_step = r_linear_step
@@ -165,23 +167,23 @@ class Phase(Colormap):
         self.v_base = v_base
         self.auto_scale_r = auto_scale_r
         self.scale_radius = scale_radius
-    
-    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+
+    def hsv_tuple(self, z: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Convert complex values to HSV components."""
         # Phase determines hue
         phi = phase_func(z)
         H = phi / (2 * np.pi)  # Map [0, 2π] to [0, 1]
-        
+
         # Full saturation by default
         S = np.ones_like(z, dtype=float)
-        
+
         # Value modulation
         if self.phi is not None:
             # Phase-based modulation
             V_phi = sawtooth(phi, self.phi)
         else:
             V_phi = np.ones_like(z, dtype=float)
-        
+
         # Modulus-based modulation
         r = np.abs(z)
         if self.r_linear_step and self.r_log_base is None:
@@ -192,20 +194,20 @@ class Phase(Colormap):
             V_r = sawtooth_log(r / self.r_linear_step, self.r_log_base)
         else:
             V_r = np.ones_like(z, dtype=float)
-        
+
         # Combine value modulations
         V_scaler = 1 - self.v_base
         V = (V_phi + V_r) * V_scaler / 2 + self.v_base
-        
+
         return H, S, V
 
 
 class Chessboard(Colormap):
     """Cartesian chessboard pattern.
-    
+
     Creates a black and white chessboard pattern aligned with
     real and imaginary axes.
-    
+
     Parameters
     ----------
     spacing : float, optional
@@ -215,43 +217,45 @@ class Chessboard(Colormap):
     out_of_domain_hsv : tuple, optional
         Color for out-of-domain points.
     """
-    
-    def __init__(self,
-                 spacing: float = 1.0,
-                 center: complex = 0+0j,
-                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+
+    def __init__(
+        self,
+        spacing: float = 1.0,
+        center: complex = 0 + 0j,
+        out_of_domain_hsv: tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV,
+    ):
         """Initialize chessboard colormap."""
         super().__init__(out_of_domain_hsv)
         self.spacing = spacing
         self.center = center
-    
-    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+
+    def hsv_tuple(self, z: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Convert complex values to HSV components."""
         # No hue or saturation (grayscale)
         H = np.zeros_like(z, dtype=float)
         S = np.zeros_like(z, dtype=float)
-        
+
         # Shift and scale
         z_shifted = (z - self.center) / self.spacing
-        
+
         # Check which square each point is in
         # Suppress warnings for NaN/inf values
-        with np.errstate(invalid='ignore'):
+        with np.errstate(invalid="ignore"):
             real_idx = np.floor(np.real(z_shifted)).astype(int)
             imag_idx = np.floor(np.imag(z_shifted)).astype(int)
-        
+
         # Chessboard pattern: white if indices have same parity
         V = ((real_idx + imag_idx) % 2 == 0).astype(float)
-        
+
         return H, S, V
 
 
 class PolarChessboard(Colormap):
     """Polar chessboard pattern.
-    
+
     Creates a black and white pattern in polar coordinates,
     with sectors in phase and rings in modulus.
-    
+
     Parameters
     ----------
     n_phi : int, optional
@@ -263,47 +267,49 @@ class PolarChessboard(Colormap):
     out_of_domain_hsv : tuple, optional
         Color for out-of-domain points.
     """
-    
-    def __init__(self,
-                 n_phi: int = 6,
-                 spacing: float = 1.0,
-                 r_log: Optional[float] = None,
-                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+
+    def __init__(
+        self,
+        n_phi: int = 6,
+        spacing: float = 1.0,
+        r_log: float | None = None,
+        out_of_domain_hsv: tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV,
+    ):
         """Initialize polar chessboard."""
         super().__init__(out_of_domain_hsv)
         self.n_phi = n_phi
         self.phi = np.pi / n_phi
         self.spacing = spacing
         self.r_log = r_log
-    
-    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+
+    def hsv_tuple(self, z: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Convert complex values to HSV components."""
         # No hue or saturation (grayscale)
         H = np.zeros_like(z, dtype=float)
         S = np.zeros_like(z, dtype=float)
-        
+
         # Phase sectors
         angle = np.angle(z)
         angle_idx = np.floor((angle + np.pi) / self.phi).astype(int)
-        
+
         # Radial rings
         r = np.abs(z) / self.spacing
         if self.r_log is not None:
-            with np.errstate(divide='ignore', invalid='ignore'):
+            with np.errstate(divide="ignore", invalid="ignore"):
                 r = np.log(r) / np.log(self.r_log)
         r_idx = np.floor(r).astype(int)
-        
+
         # Chessboard pattern
         V = ((angle_idx + r_idx) % 2 == 0).astype(float)
-        
+
         return H, S, V
 
 
 class LogRings(Colormap):
     """Logarithmic black and white rings.
-    
+
     Creates concentric rings with logarithmic spacing.
-    
+
     Parameters
     ----------
     log_spacing : float, optional
@@ -311,27 +317,29 @@ class LogRings(Colormap):
     out_of_domain_hsv : tuple, optional
         Color for out-of-domain points.
     """
-    
-    def __init__(self,
-                 log_spacing: float = 0.2,
-                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+
+    def __init__(
+        self,
+        log_spacing: float = 0.2,
+        out_of_domain_hsv: tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV,
+    ):
         """Initialize logarithmic rings."""
         super().__init__(out_of_domain_hsv)
         self.log_spacing = log_spacing
-    
-    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+
+    def hsv_tuple(self, z: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Convert complex values to HSV components."""
         # No hue or saturation (grayscale)
         H = np.zeros_like(z, dtype=float)
         S = np.zeros_like(z, dtype=float)
-        
+
         # Logarithmic rings
-        with np.errstate(divide='ignore', invalid='ignore'):
+        with np.errstate(divide="ignore", invalid="ignore"):
             r_log = np.log(np.abs(z)) / self.log_spacing
             # Alternate black and white
             V = (np.floor(r_log) % 2 == 0).astype(float)
-        
+
         # Handle r=0 (log undefined)
         V[np.abs(z) == 0] = 1.0  # White at origin
-        
+
         return H, S, V

@@ -44,6 +44,7 @@ dev = [
     "pytest>=7.0.0",
     "pytest-cov>=3.0.0",
     "pytest-timeout>=2.1.0",
+    "ruff>=0.6",
 ]
 pyvista = [
     "pyvista>=0.45.0",
@@ -58,3 +59,32 @@ all = [
 [project.urls]
 "Homepage" = "https://github.com/kuvychko/complexplorer"
 "Bug Tracker" = "https://github.com/kuvychko/complexplorer/issues"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["site", "docs", "examples"]
+
+[tool.ruff.lint]
+# Start conservative: pyflakes (F), pycodestyle errors (E), import sorting (I),
+# pyupgrade (UP), flake8-bugbear (B). Expand over time.
+select = ["E", "F", "I", "UP", "B"]
+ignore = [
+    "E501",  # line length handled by the formatter
+    "E731",  # `f = lambda z: ...` is idiomatic for this complex-function domain
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Package __init__ files re-export the public API surface (and use star imports);
+# "unused"/star-import findings there are intentional.
+"**/__init__.py" = ["F401", "F403", "F405"]
+# Tests: E402 is the required `pytest.importorskip(...)`-before-imports idiom; F841
+# unused locals are common, intentional test scaffolding.
+"tests/**" = ["E402", "F841"]
+
+[tool.mypy]
+# Advisory only (CI runs it non-blocking). Lenient to start; tighten over time.
+python_version = "3.11"
+ignore_missing_imports = true
+warn_unused_ignores = false
+check_untyped_defs = false

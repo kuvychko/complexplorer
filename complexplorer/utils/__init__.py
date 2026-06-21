@@ -1,6 +1,6 @@
 """Utility modules for complexplorer."""
 
-from .validation import *
 from .mesh import *
+from .validation import *
 
-__all__ = ['validation', 'mesh']
+__all__ = ["validation", "mesh"]
