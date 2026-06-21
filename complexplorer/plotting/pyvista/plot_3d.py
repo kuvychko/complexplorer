@@ -11,8 +11,8 @@ import numpy as np
 
 from ...core.colormap import Colormap, Phase
 from ...core.domain import Domain
-from ...core.scaling import ModulusScaling
-from ...utils.mesh_distortion import get_default_scaling_params
+from ...core.field import ComplexField
+from ...mesh import build_landscape
 from ...utils.validation import ValidationError
 from .utils import (
     add_axes_widget,
@@ -84,79 +84,40 @@ def create_complex_surface(
         raise ValidationError("Either domain or z must be provided")
     if f is None and func is None:
         raise ValidationError("Either f or func must be provided")
+    if cmap is None:
+        cmap = Phase(n_phi=6, v_base=0.6)
 
-    # Get domain mesh
+    # Resolve the sampling grid + out-of-domain mask (mask only when derived from a domain).
     if z is None:
         z = domain.mesh(resolution)
         mask = domain.outmask(resolution)
     else:
+        z = np.asarray(z)
         mask = None
 
-    # Evaluate function
+    # Resolve the function values.
     if f is None:
-        f = func(z)
-
-    # Ensure f is array
-    f = np.asarray(f)
+        with np.errstate(all="ignore"):
+            f = np.asarray(func(z))
+    else:
+        f = np.asarray(f)
     if f.ndim == 0:  # scalar case
         f = np.full_like(z, f)
 
-    # Apply mask
-    if mask is not None:
-        f[mask] = np.nan
-
-    # Calculate height (magnitude)
-    magnitude = np.abs(f)
-
-    # Apply modulus scaling if requested
-    if modulus_mode != "none":
-        if modulus_params is None:
-            modulus_params = get_default_scaling_params(modulus_mode)
-
-        if modulus_mode == "custom":
-            if "scaling_func" not in modulus_params:
-                raise ValidationError("Custom mode requires 'scaling_func' in modulus_params")
-            magnitude = modulus_params["scaling_func"](magnitude)
-        else:
-            scaling_method = getattr(ModulusScaling, modulus_mode, None)
-            if scaling_method is None:
-                raise ValidationError(f"Unknown scaling mode: {modulus_mode}")
-            magnitude = scaling_method(magnitude, **modulus_params)
-
-    # Apply z_max clipping after scaling
-    if z_max is not None:
-        magnitude = np.clip(magnitude, 0, z_max)
-
-    if log_z:
-        with np.errstate(divide="ignore", invalid="ignore"):
-            height = np.log1p(magnitude) * z_scale
-    else:
-        height = magnitude * z_scale
-
-    # Create structured grid
-    X = np.real(z)
-    Y = np.imag(z)
-    Z = height
-
-    # Handle NaN values for masked regions
-    if mask is not None:
-        Z[mask] = np.nan
-
-    grid = pv.StructuredGrid(X, Y, Z)
-
-    # Get colors from colormap
-    if cmap is None:
-        cmap = Phase(n_phi=6, v_base=0.6)
-
-    rgb = cmap.rgb(f, outmask=mask)
-
-    # Flatten and add to grid
-    rgb_flat = rgb.reshape(-1, 3)
-    grid["RGB"] = rgb_flat
-
-    # Also store magnitude and phase as scalars
-    grid["magnitude"] = magnitude.ravel()
-    grid["phase"] = np.angle(f).ravel()
+    # Delegate geometry + decoration to the surface kernel (output-preserving).
+    with np.errstate(all="ignore"):
+        field = ComplexField("planar", w=f, modulus=np.abs(f), phase=np.angle(f), mask=mask, z=z)
+    sm = build_landscape(
+        field,
+        cmap=cmap,
+        z_scale=z_scale,
+        log_z=log_z,
+        z_max=z_max,
+        modulus_mode=modulus_mode,
+        modulus_params=modulus_params,
+    )
+    grid = sm.to_pyvista()
+    rgb = np.asarray(grid["RGB"]).reshape(*np.shape(z), 3)
 
     return grid, rgb
 

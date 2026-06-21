@@ -46,22 +46,25 @@
       `create_complex_surface` + ornament, STL non-empty & finite). 11 tests.
 
 ## 4. Projection unification (D2 — fix the outlier `riemann_pv`)
-- [ ] 4.1 Collapse the two `inverse_stereographic` definitions into one canonical function
-      using the documented core convention (`z = 0` at south pole).
-- [ ] 4.2 Make sphere sampling + `build_relief` use that canonical convention everywhere.
-      `riemann_pv` (the outlier) flips to match; the STL ornament and matplotlib `riemann`
-      are already on this convention and do **not** change.
-- [ ] 4.3 Update the `riemann_pv` regression baseline (1.2) to the corrected orientation;
-      confirm `riemann_pv`, matplotlib `riemann`, and the STL ornament now share one
-      orientation. The ornament baseline (1.3) stays unchanged.
+- [x] 4.1 Active paths unified on the canonical `core.functions.inverse_stereographic`
+      (`z = 0` at south pole) via `sample_sphere`. The legacy `utils.mesh` projection
+      helpers + `RectangularSphereGenerator` + `compute_riemann_sphere_distortion` are now
+      unused by the kernel (only their own tests reference them); retained per the additive
+      principle, slated for removal at 3.0 with the rest of the legacy mesh layer.
+- [x] 4.2 Sphere sampling + `build_relief` use the canonical convention; `riemann_pv`
+      flips to match (verified: |w|≈0 at south, large at north); ornament + matplotlib
+      `riemann` unchanged.
+- [x] 4.3 Regenerated the `riemann_pv` regression baseline to the corrected orientation;
+      all 4 baselines pass. Ornament baseline unchanged (build_relief reproduces it).
 
 ## 5. Facade the public entry points (D3)
-- [ ] 5.1 Reimplement `plot_landscape_pv` / `pair_plot_landscape_pv` over
-      `sample` + `build_landscape` + `SurfaceMesh`; signatures unchanged.
-- [ ] 5.2 Reimplement `riemann_pv` over `sample` + `build_relief` + `SurfaceMesh`.
-- [ ] 5.3 Reimplement `OrnamentGenerator` / `create_ornament` as facades over
-      `build_relief` + `SurfaceMesh.save_stl`; signatures unchanged.
-- [ ] 5.4 Confirm regression tests 1.1–1.2 pass unchanged; 1.3 passes against new baseline.
+- [x] 5.1 `create_complex_surface` (backing `plot_landscape_pv` / `pair_plot_landscape_pv`)
+      delegates to `sample` + `build_landscape`; signatures unchanged; regression holds.
+- [x] 5.2 `riemann_pv` reimplemented over `sample_sphere` + `build_relief`.
+- [x] 5.3 `OrnamentGenerator.generate_ornament` reimplemented over `sample_sphere` +
+      `build_relief`; `save_stl` unchanged (already uses the shared `export/stl` post-proc).
+- [x] 5.4 Regression 1.1 (landscape) + 1.3 (ornament) pass unchanged; 1.2 (riemann_pv)
+      passes against the regenerated baseline. Full suite 367 passed.
 
 ## 6. Docs & close out
 - [ ] 6.1 Document the STL orientation change in release notes and `OrnamentGenerator`

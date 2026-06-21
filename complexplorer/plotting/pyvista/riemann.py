@@ -10,8 +10,9 @@ from typing import TYPE_CHECKING, Optional
 import numpy as np
 
 from ...core.colormap import Colormap, Phase
-from ...utils.mesh import RectangularSphereGenerator
-from ...utils.mesh_distortion import apply_modulus_distortion, get_default_scaling_params
+from ...core.field import sample_sphere
+from ...mesh import build_relief
+from ...utils.mesh_distortion import get_default_scaling_params
 from .utils import (
     add_axes_widget,
     check_pyvista_available,
@@ -132,44 +133,17 @@ def riemann_pv(
     if modulus_params is None:
         modulus_params = get_default_scaling_params(modulus_mode, for_stl=False)
 
-    # Create sphere mesh generator
-    gen = RectangularSphereGenerator(
-        n_theta=resolution, n_phi=resolution, avoid_poles=True, domain=domain
-    )
+    # Sample on the unit sphere and build the relief via the surface kernel. The kernel
+    # uses the canonical projection (z=0 at the south pole), which corrects riemann_pv's
+    # previously mirrored orientation to agree with matplotlib `riemann` and the STL
+    # ornament. See docs/development/backend-policy.md and the riemann-sphere capability.
+    field = sample_sphere(func, resolution=resolution, domain=domain)
+    sm = build_relief(field, cmap=cmap, scaling=modulus_mode, scaling_params=modulus_params)
+    mesh = sm.to_pyvista()
 
-    # Generate base sphere
-    mesh = gen.generate()
-
-    # Get sphere points and convert to complex plane
-    points = mesh.points
-    X, Y, Z = points[:, 0], points[:, 1], points[:, 2]
-
-    # Project to complex plane (from south pole by default)
-    from ...utils.mesh import sphere_to_complex
-
-    w = sphere_to_complex(X, Y, Z, from_north=False)
-
-    # Evaluate function
-    f_vals = func(w)
-    f_vals = np.asarray(f_vals)
-
-    # Get colors
-    rgb = cmap.rgb(f_vals)
-    mesh["RGB"] = rgb
-
-    # Apply modulus scaling
-    moduli = np.abs(f_vals)
-
-    # Use shared distortion function
-    scaled_points, radii = apply_modulus_distortion(points, moduli, modulus_mode, modulus_params)
-    mesh.points = scaled_points
-
-    # Store original points for grid generation if needed
-    original_points = points.copy()
-
-    # Store additional scalars
-    mesh["magnitude"] = np.abs(f_vals)
-    mesh["phase"] = np.angle(f_vals)
+    # Unit-sphere points for the optional lat/long grid overlay.
+    original_points = field.sphere_xyz.reshape(-1, 3)
+    scaled_points = mesh.points
 
     # Create plotter
     plotter_kwargs = {

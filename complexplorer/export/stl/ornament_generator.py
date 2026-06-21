@@ -13,8 +13,9 @@ import numpy as np
 
 from ...core.colormap import Colormap, Phase
 from ...core.domain import Domain
-from ...utils.mesh import RectangularSphereGenerator
-from ...utils.mesh_distortion import compute_riemann_sphere_distortion, get_default_scaling_params
+from ...core.field import sample_sphere
+from ...mesh import build_relief
+from ...utils.mesh_distortion import get_default_scaling_params
 from .mesh_repair import repair_mesh_simple
 from .utils import center_mesh, check_pyvista_available, scale_to_size, validate_printability
 
@@ -90,46 +91,12 @@ class OrnamentGenerator:
             print(f"  Scaling: {self.scaling}")
             print(f"  Parameters: {self.scaling_params}")
 
-        # Generate base sphere
-        generator = RectangularSphereGenerator(
-            radius=1.0,
-            n_theta=self.resolution,
-            n_phi=self.resolution,
-            avoid_poles=True,
-            domain=self.domain,
+        # Sample on the sphere (canonical projection) and build the relief via the kernel.
+        field = sample_sphere(self.func, resolution=self.resolution, domain=self.domain)
+        sm = build_relief(
+            field, cmap=self.cmap, scaling=self.scaling, scaling_params=self.scaling_params
         )
-        sphere = generator.generate()
-
-        # Compute distortion
-        scaled_points, f_vals, radii = compute_riemann_sphere_distortion(
-            sphere, self.func, self.scaling, self.scaling_params, from_north=True
-        )
-
-        # Update mesh
-        sphere.points = scaled_points
-
-        # Add colors
-        if self.domain is None:
-            # Regular grid - can reshape
-            f_vals_reshaped = f_vals.reshape((self.resolution, self.resolution))
-            rgb = self.cmap.rgb(f_vals_reshaped)
-            rgb_flat = rgb.reshape(-1, 3)
-        else:
-            # Irregular points due to domain filtering
-            if f_vals.ndim == 1:
-                f_vals_2d = f_vals.reshape(-1, 1)
-            else:
-                f_vals_2d = f_vals
-            rgb = self.cmap.rgb(f_vals_2d)
-            if rgb.ndim == 3 and rgb.shape[2] == 3:
-                rgb_flat = rgb.reshape(-1, 3)
-            else:
-                rgb_flat = rgb.squeeze()
-
-        sphere["RGB"] = rgb_flat
-        sphere["magnitude"] = np.abs(f_vals)
-        sphere["phase"] = np.angle(f_vals)
-        sphere["radius"] = radii
+        sphere = sm.to_pyvista()
 
         self.sphere_mesh = sphere
 
