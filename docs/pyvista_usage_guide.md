@@ -4,6 +4,13 @@
 
 Complexplorer includes high-performance 3D visualization functions powered by PyVista. These functions provide 15-30x faster rendering than matplotlib with superior visual quality.
 
+> **Backend policy:** PyVista is the 3D backend for Complexplorer (matplotlib remains the 2D
+> backend). New 3D features are PyVista-only. The legacy matplotlib 3D functions
+> (`plot_landscape`, `pair_plot_landscape`, 3D `riemann`) are **deprecated since 2.1** and
+> **removed in 3.0**, when PyVista becomes a required dependency. Install via
+> `complexplorer[pyvista]` (or its alias `complexplorer[3d]`). See
+> [development/backend-policy.md](development/backend-policy.md).
+
 ## ⚠️ Critical Quality Note
 
 **For production-quality visualizations, always use PyVista via command-line scripts, not Jupyter notebooks.**

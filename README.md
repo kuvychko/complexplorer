@@ -32,12 +32,18 @@ pip install complexplorer
 # Optional: For interactive matplotlib plots in CLI scripts
 pip install "complexplorer[qt]"
 
-# Optional: For high-performance 3D visualizations
+# Optional: For high-performance 3D visualizations (alias: [3d])
 pip install "complexplorer[pyvista]"
 
 # Optional: Install everything
 pip install "complexplorer[all]"
 ```
+
+> **Backend policy:** matplotlib powers 2D plots; **PyVista powers all 3D** (landscapes,
+> Riemann relief/sphere, STL export). New 3D features are PyVista-only, and PyVista becomes
+> a **required** dependency at 3.0, when the legacy matplotlib 3D functions
+> (`plot_landscape`, `pair_plot_landscape`, 3D `riemann`) are removed. See
+> [docs/development/backend-policy.md](docs/development/backend-policy.md).
 
 ## 🚀 Quick Start - From Math to Matter
 

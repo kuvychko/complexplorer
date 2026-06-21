@@ -4,6 +4,7 @@ This module provides functions for visualizing complex functions
 as 3D landscapes and on the Riemann sphere.
 """
 
+import warnings
 from collections.abc import Callable
 
 import matplotlib.pyplot as plt
@@ -17,6 +18,20 @@ from ...core.functions import stereographic_projection
 from ...core.scaling import ModulusScaling
 from ...utils.mesh_distortion import get_default_scaling_params
 from ...utils.validation import ValidationError
+
+
+def _warn_mpl3d_deprecated(name: str, replacement: str) -> None:
+    """Emit the matplotlib-3D deprecation warning (PyVista is the 3D backend; removed 3.0).
+
+    See ``docs/development/backend-policy.md``. The 2D stereographic charts
+    (``riemann_chart`` / ``riemann_hemispheres``) are matplotlib 2D and are NOT deprecated.
+    """
+    warnings.warn(
+        f"{name}() is the matplotlib 3D backend, deprecated since 2.1 and scheduled for "
+        f"removal in 3.0. Use {replacement}() (PyVista) instead.",
+        DeprecationWarning,
+        stacklevel=3,
+    )
 
 
 class Matplotlib3DPlotter:  # (Base3DPlotter):  # TODO: Add base class
@@ -155,6 +170,10 @@ def plot_landscape(
 ) -> Axes3D | None:
     """Plot complex function as 3D landscape.
 
+    .. deprecated:: 2.1
+        The matplotlib 3D backend is deprecated; use ``plot_landscape_pv`` (PyVista).
+        Removed in 3.0. See ``docs/development/backend-policy.md``.
+
     The height represents |f(z)| and color represents the phase or
     other colormap encoding.
 
@@ -210,6 +229,8 @@ def plot_landscape(
     >>> # With logarithmic scale for poles/zeros
     >>> plot_landscape(domain, func=lambda z: 1/z, zaxis_log=True)
     """
+    _warn_mpl3d_deprecated("plot_landscape", "plot_landscape_pv")
+
     # Validate inputs
     if domain is None and z is None:
         raise ValidationError("Either domain or z must be provided")
@@ -322,6 +343,10 @@ def pair_plot_landscape(
 ) -> Figure:
     """Plot domain and codomain landscapes side by side.
 
+    .. deprecated:: 2.1
+        The matplotlib 3D backend is deprecated; use ``pair_plot_landscape_pv`` (PyVista).
+        Removed in 3.0. See ``docs/development/backend-policy.md``.
+
     Parameters
     ----------
     domain : Domain, optional
@@ -357,6 +382,8 @@ def pair_plot_landscape(
     Figure
         The matplotlib figure.
     """
+    _warn_mpl3d_deprecated("pair_plot_landscape", "pair_plot_landscape_pv")
+
     # Default colormap
     if cmap is None:
         cmap = Phase(n_phi=6, auto_scale_r=True)
@@ -417,6 +444,11 @@ def riemann(
 ) -> Axes3D | None:
     """Plot complex function on the Riemann sphere.
 
+    .. deprecated:: 2.1
+        The matplotlib 3D Riemann sphere is deprecated; use ``riemann_pv`` (PyVista).
+        Removed in 3.0. See ``docs/development/backend-policy.md``. (The 2D stereographic
+        charts ``riemann_chart`` / ``riemann_hemispheres`` are not affected.)
+
     This function visualizes a complex function on the Riemann sphere
     using stereographic projection. The sphere is colored according to
     the function values.
@@ -451,6 +483,8 @@ def riemann(
     >>> # Essential singularity at origin
     >>> riemann(lambda z: np.exp(1/z))
     """
+    _warn_mpl3d_deprecated("riemann", "riemann_pv")
+
     # Default colormap
     if cmap is None:
         cmap = Phase(n_phi=6, v_base=0.6)

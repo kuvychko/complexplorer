@@ -49,6 +49,11 @@ dev = [
 pyvista = [
     "pyvista>=0.45.0",
 ]
+# Alias for the PyVista 3D backend. New 3D features are PyVista-only; PyVista becomes a
+# required dependency at 3.0 (see docs/development/backend-policy.md).
+"3d" = [
+    "complexplorer[pyvista]",
+]
 qt = [
     "PyQt6>=6.5.0",
 ]
