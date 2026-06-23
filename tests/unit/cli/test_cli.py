@@ -1,11 +1,18 @@
 """Tests for the Complexplorer CLI (driven via main([...]))."""
 
+import os
+import sys
 import warnings
 
 import pytest
 
 from complexplorer.cli.main import _parse_cmap, _parse_domain, main
 from complexplorer.utils.validation import ValidationError
+
+# Real offscreen VTK screenshot rendering crashes (access violation) on the headless
+# Windows CI runner (no GPU / no reliable offscreen GL). Linux CI exercises it via the
+# headless-display action; local Windows with a GPU runs it fine.
+_NO_OFFSCREEN_RENDER = sys.platform == "win32" and os.environ.get("CI") == "true"
 
 
 class TestShorthandParsers:
@@ -96,6 +103,9 @@ class TestPyVistaAbsent:
 class TestPyVistaCommands:
     """3D/STL paths require PyVista."""
 
+    @pytest.mark.skipif(
+        _NO_OFFSCREEN_RENDER, reason="offscreen VTK screenshot crashes on headless Windows CI"
+    )
     def test_render_riemann(self, tmp_path):
         pytest.importorskip("pyvista")
         warnings.simplefilter("ignore")
