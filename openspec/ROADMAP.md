@@ -139,6 +139,9 @@ Phase 5  add-transfer-function-explorer                 2.5     no         plann
 
 ## Known bugs (backlog — fix as dedicated changes)
 
+- **`quick_plot` defaults 3D/Riemann to the deprecated matplotlib backend and leaks the
+  `backend` kwarg.** Against the backend policy; `mode="riemann"` + `modulus_mode` raises
+  `TypeError`. → `fix-quick-plot-backend` (proposed).
 - **Colormaps emit invalid / non-deterministic RGB at in-domain poles.** `Colormap.rgb()`
   feeds a NaN hue (non-finite `f` on a grid node) to matplotlib's `hsv_to_rgb`, whose
   `(h*6).astype(int)` produces run-varying garbage. The `outmask` path only covers
