@@ -85,7 +85,11 @@ Phase 0  reconcile-versioning-and-license              2.1     no         archiv
 Phase 1  add-pyvista-surface-kernel                    2.2     no         archived
 Phase 2  add-function-preset-registry                  2.3     no         archived
          add-cli                                        2.3     no         archived
+         fix-colormap-nonfinite                         2.3     no         proposed
          add-gallery-generator                          2.3     no         planned
+         · gallery: 2D portraits + a BYTE-STABLE JSON manifest (the
+           deterministic contract + Godot/web interchange); images are
+           best-effort. Gated on the colormap fix (clean, deterministic RGB).
 Phase 3  add-level-export                               2.4     no         planned
          (game PROTOTYPING assets — see "Games boundary" below)
          curated preset SETS (data, not code): singularity-detective,
@@ -152,7 +156,8 @@ ranges, so breaks surface early. Notes:
 
 ## Known bugs (backlog — fix as dedicated changes)
 
-- **Colormaps emit invalid / non-deterministic RGB at in-domain poles.** `Colormap.rgb()`
+- **Colormaps emit invalid / non-deterministic RGB at in-domain poles.** → promoted to
+  `fix-colormap-nonfinite` (Phase 2, gates the gallery). `Colormap.rgb()`
   feeds a NaN hue (non-finite `f` on a grid node) to matplotlib's `hsv_to_rgb`, whose
   `(h*6).astype(int)` produces run-varying garbage. The `outmask` path only covers
   out-of-*domain* points, not in-domain singularities. Surfaced 3×: matplotlib 3D raises
