@@ -153,8 +153,9 @@ class TestHighLevelAPI:
         ax = quick_plot(func, mode="2d")
         assert ax is not None
 
-        # 3D quick plot
-        ax = quick_plot(func, mode="3d", resolution=30)
+        # 3D quick plot (matplotlib path explicitly; the PyVista default is exercised in
+        # the dedicated quick_plot backend tests)
+        ax = quick_plot(func, mode="3d", resolution=30, backend="matplotlib")
         assert ax is not None
 
         import matplotlib.pyplot as plt

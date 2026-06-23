@@ -16,6 +16,12 @@ elif mode == "riemann":
    unless the caller explicitly passes `backend="pyvista"`. Against the backend policy, and
    the matplotlib `riemann()` doesn't accept `modulus_mode` (→ `TypeError`).
 2. `backend` is never popped from `kwargs`, so it leaks into the renderer call.
+3. **(Discovered during implementation — the deeper root cause.)** `api.HAS_PYVISTA` was
+   `False` even with PyVista installed: `api.py` detected PyVista by importing the *wrapper
+   functions* at module load, which fails with a **circular import** during package init
+   (the PyVista renderers now pull in the mesh/STL layer via the surface kernel). So
+   `quick_plot` could *never* use PyVista regardless of the backend arg. Fix: detect via a
+   direct `import pyvista` and import the wrappers lazily inside `quick_plot`.
 
 ## The fix
 
