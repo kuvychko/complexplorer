@@ -48,7 +48,7 @@ dev = [
     "ruff>=0.6",
 ]
 pyvista = [
-    "pyvista>=0.45.0",
+    "pyvista>=0.47",
 ]
 # Alias for the PyVista 3D backend. New 3D features are PyVista-only; PyVista becomes a
 # required dependency at 3.0 (see docs/development/backend-policy.md).

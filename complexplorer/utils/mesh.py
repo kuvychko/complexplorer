@@ -109,7 +109,7 @@ class RectangularSphereGenerator:
         grid = pv.StructuredGrid(X, Y, Z)
 
         # Convert to PolyData
-        mesh = grid.extract_surface()
+        mesh = grid.extract_surface(algorithm="dataset_surface")
 
         # Remove any cells with NaN vertices if domain filtering was applied
         if self.domain is not None:

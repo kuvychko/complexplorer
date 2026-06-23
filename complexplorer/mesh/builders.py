@@ -131,7 +131,7 @@ def build_relief(
 
     # Extract the surface FIRST: its point order is the C-order ravel of the grid, which
     # matches the field's (meshgrid) order — unlike the StructuredGrid's native VTK order.
-    surf = pv.StructuredGrid(X, Y, Z).extract_surface()
+    surf = pv.StructuredGrid(X, Y, Z).extract_surface(algorithm="dataset_surface")
 
     sm = SurfaceMesh(surf, field, metadata={"topology": "relief"})
     sm.attach_colors(cmap, np.asarray(field.w), outmask=None)

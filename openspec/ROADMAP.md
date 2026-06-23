@@ -137,6 +137,19 @@ Phase 5  add-transfer-function-explorer                 2.5     no         plann
 
 ---
 
+## PyVista compatibility
+
+PyVista churns its API across minor releases; CI tests against the latest via unpinned
+ranges, so breaks surface early. Notes:
+
+- **Floor: `pyvista>=0.47`** (the release that dropped the `box` kwarg from `add_axes`;
+  our orientation widget is box-free, validated on 0.47 and 0.48).
+- **`extract_surface(algorithm="dataset_surface")` is pinned explicitly** everywhere — 0.48
+  warned that the default will change to `None`; pinning locks current mesh behavior and is
+  forward-compatible.
+
+---
+
 ## Known bugs (backlog — fix as dedicated changes)
 
 - **`quick_plot` defaults 3D/Riemann to the deprecated matplotlib backend and leaks the

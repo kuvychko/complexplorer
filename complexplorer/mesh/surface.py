@@ -87,7 +87,7 @@ class SurfaceMesh:
         """A triangulated surface suitable for STL export."""
         surf = self.mesh
         if not hasattr(surf, "faces"):  # e.g. StructuredGrid -> surface
-            surf = surf.extract_surface()
+            surf = surf.extract_surface(algorithm="dataset_surface")
         return surf.triangulate()
 
     def validate_printability(self, size_mm: float = 50, verbose: bool = False) -> dict:
@@ -111,7 +111,11 @@ class SurfaceMesh:
         # Drop non-finite vertices so a landscape (or masked) surface stays printable.
         if not np.all(np.isfinite(mesh.points)):
             finite = np.all(np.isfinite(mesh.points), axis=1)
-            mesh = mesh.extract_points(finite, adjacent_cells=False).extract_surface().triangulate()
+            mesh = (
+                mesh.extract_points(finite, adjacent_cells=False)
+                .extract_surface(algorithm="dataset_surface")
+                .triangulate()
+            )
 
         if repair:
             mesh = repair_mesh_simple(mesh, fill_holes=True, verbose=verbose)
