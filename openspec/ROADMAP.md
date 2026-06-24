@@ -85,7 +85,7 @@ Phase 0  reconcile-versioning-and-license              2.1     no         archiv
 Phase 1  add-pyvista-surface-kernel                    2.2     no         archived
 Phase 2  add-function-preset-registry                  2.3     no         archived
          add-cli                                        2.3     no         archived
-         fix-colormap-nonfinite                         2.3     no         proposed
+         fix-colormap-nonfinite                         2.3     no         in-progress
          add-gallery-generator                          2.3     no         planned
          · gallery: 2D portraits + a BYTE-STABLE JSON manifest (the
            deterministic contract + Godot/web interchange); images are

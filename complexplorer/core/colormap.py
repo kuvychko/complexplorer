@@ -71,24 +71,34 @@ class Colormap(ABC):
             HSV values with shape (*z.shape, 3).
         """
         z = np.asarray(z)
-        H, S, V = self.hsv_tuple(z)
 
-        # Apply out-of-domain coloring
-        if outmask is not None and z.ndim > 0:
+        # Substitute non-finite z (in-domain poles / essential singularities) with a
+        # placeholder before computing colors, so subclass index math never sees NaN/inf.
+        # These points are recolored with the out-of-domain color below, which keeps rgb()
+        # finite, within [0, 1], and deterministic for any input (a NaN hue would otherwise
+        # cast to run-varying garbage in hsv_to_rgb).
+        nonfinite = ~np.isfinite(z)
+        z_safe = np.where(nonfinite, 0, z) if nonfinite.any() else z
+        H, S, V = self.hsv_tuple(z_safe)
+
+        # Scalar case
+        if z.ndim == 0:
+            if bool(nonfinite) or (outmask is not None and bool(outmask)):
+                H, S, V = self.out_of_domain_hsv
+            return np.array([H, S, V])
+
+        # Paint non-finite points and out-of-domain points with the out-of-domain color.
+        mask = nonfinite if outmask is None else (nonfinite | outmask)
+        if mask.any():
             H = H.copy()
             S = S.copy()
             V = V.copy()
-            H[outmask] = self.out_of_domain_hsv[0]
-            S[outmask] = self.out_of_domain_hsv[1]
-            V[outmask] = self.out_of_domain_hsv[2]
+            H[mask] = self.out_of_domain_hsv[0]
+            S[mask] = self.out_of_domain_hsv[1]
+            V[mask] = self.out_of_domain_hsv[2]
 
-        # Stack along last axis
-        if z.ndim == 0:
-            # Scalar case
-            return np.array([H, S, V])
-        else:
-            # Use stack instead of dstack to preserve shape
-            return np.stack((H, S, V), axis=-1)
+        # Use stack instead of dstack to preserve shape
+        return np.stack((H, S, V), axis=-1)
 
     def rgb(self, z: np.ndarray, outmask: np.ndarray | None = None) -> np.ndarray:
         """Convert complex values to RGB array.
