@@ -1,9 +1,10 @@
 # Tasks — add-gallery-generator
 
-## 1. Spike: PNG metadata determinism
-- [ ] 1.1 Render one preset twice with `fig.savefig(path, metadata={"Software": None})` and
-      diff the PNG bytes. If they differ, add the offending metadata key and retry; record the
-      finding (byte-stable vs best-effort-only) in design.md.
+## 1. Spike: PNG metadata determinism  (DONE during review — see design.md "Spike result")
+- [x] 1.1 Verified: with the figure-owning path + `metadata={"Software": None}` (Agg), two
+      renders of `pole_flower_10` are byte-identical (no `Software`/`tIME`); `to_dict()` is
+      JSON-stable and all-builtin. Within-env portraits are byte-stable; manifest is the
+      cross-version guarantee.
 
 ## 2. Gallery module
 - [ ] 2.1 New `complexplorer/gallery.py` (matplotlib-only, PyVista-free): `generate_gallery(
@@ -21,16 +22,18 @@
 
 ## 3. CLI subcommand
 - [ ] 3.1 Add a `gallery` subcommand to `cli/main.py` (`--tag` | `--preset ID…`, `-o/--output`
-      required) that calls `generate_gallery`; missing output → exit 2 (reuse the error path).
+      required) that calls `generate_gallery`; missing output → exit 2 (reuse the error path);
+      a selection matching 0 presets → exit 2 with a "0 presets matched" message.
 
 ## 4. Tests
-- [ ] 4.1 Determinism: run `generate_gallery` twice into two dirs; assert `index.json` and
-      every `card.json` are byte-identical.
+- [ ] 4.1 Determinism: run `generate_gallery` twice into two dirs; assert `index.json`, every
+      `card.json`, and every `portrait.png` are byte-identical (within-env).
 - [ ] 4.2 Structure: each selected preset has a non-empty `portrait.png` + a `card.json`;
       `index.json.presets` is id-sorted; `files.portrait` is relative and exists; record keys
       == `to_dict()` keys + `files`.
 - [ ] 4.3 No timestamp/software tag in a written portrait PNG (per the spike outcome).
-- [ ] 4.4 CLI: `gallery --tag <t> -o tmp` exits 0 and writes `index.json`; missing `-o` exits 2.
+- [ ] 4.4 CLI: `gallery --tag <t> -o tmp` exits 0 and writes `index.json`; missing `-o` exits 2;
+      an unmatched tag exits 2 with a "0 presets matched" message.
 
 ## 5. Close out
 - [ ] 5.1 Run `pytest tests/` green; `ruff` clean; `openspec validate --specs`.

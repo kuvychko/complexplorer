@@ -63,3 +63,8 @@ or explicit preset ids and an output directory.
 
 - **WHEN** `complexplorer gallery` is run without an output directory
 - **THEN** it exits with an error rather than writing anywhere implicit
+
+#### Scenario: Unmatched selection is an error
+
+- **WHEN** `complexplorer gallery` is run with a tag (or ids) that matches no presets
+- **THEN** it exits non-zero with a "0 presets matched" message rather than writing an empty bundle
