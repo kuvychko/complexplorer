@@ -21,6 +21,7 @@ from complexplorer.core.functions import (
 )
 from complexplorer.core.presets import FunctionPreset, catalog
 from complexplorer.core.scaling import ModulusScaling, get_scaling_preset
+from complexplorer.gallery import generate_gallery
 
 # Plotting functions (matplotlib)
 from complexplorer.plotting.matplotlib.plot_2d import (
@@ -77,6 +78,8 @@ __all__ = [
     # Function preset registry (distinct from api.Presets / plot configs)
     "catalog",
     "FunctionPreset",
+    # Gallery generator
+    "generate_gallery",
     # Core functions
     "phase",
     "sawtooth",

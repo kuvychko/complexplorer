@@ -1,4 +1,4 @@
-"""Complexplorer CLI: ``render``, ``stl``, ``list``.
+"""Complexplorer CLI: ``render``, ``stl``, ``list``, ``gallery``.
 
 Thin orchestration over the existing machinery — it resolves a function
 (``preset:<id>`` via the catalog, or an expression via ``core.expression``), resolves a
@@ -128,6 +128,19 @@ def cmd_stl(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_gallery(args: argparse.Namespace) -> int:
+    from ..gallery import _resolve, generate_gallery
+
+    if not args.output:
+        raise ValidationError("provide --output DIR")
+    selection: str | list[str] | None = args.preset or args.tag or None
+    if not _resolve(selection):
+        raise ValidationError(f"0 presets matched selection {selection!r}")
+    manifest = generate_gallery(args.output, selection=selection)
+    print(f"Wrote {len(manifest['presets'])} preset(s) to {args.output}")
+    return 0
+
+
 def cmd_list(args: argparse.Namespace) -> int:
     presets = catalog.filter(tag=args.tag) if args.tag else [catalog.get(i) for i in catalog.list()]
     for p in presets:
@@ -172,6 +185,12 @@ def build_parser() -> argparse.ArgumentParser:
     pl = sub.add_parser("list", help="list catalog presets")
     pl.add_argument("--tag", help="only presets carrying this tag")
     pl.set_defaults(handler=cmd_list)
+
+    pg = sub.add_parser("gallery", help="render a preset set into a reproducible asset bundle")
+    pg.add_argument("--tag", help="render presets carrying this tag")
+    pg.add_argument("--preset", nargs="+", metavar="ID", help="explicit preset ids to render")
+    pg.add_argument("--output", "-o", help="output directory")
+    pg.set_defaults(handler=cmd_gallery)
 
     return parser
 
