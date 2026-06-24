@@ -86,7 +86,7 @@ Phase 1  add-pyvista-surface-kernel                    2.2     no         archiv
 Phase 2  add-function-preset-registry                  2.3     no         archived
          add-cli                                        2.3     no         archived
          fix-colormap-nonfinite                         2.3     no         archived
-         add-gallery-generator                          2.3     no         planned
+         add-gallery-generator                          2.3     no         proposed
          · gallery: 2D portraits + a BYTE-STABLE JSON manifest (the
            deterministic contract + Godot/web interchange); images are
            best-effort. Gated on the colormap fix (clean, deterministic RGB).
