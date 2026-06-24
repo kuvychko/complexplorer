@@ -85,7 +85,7 @@ Phase 0  reconcile-versioning-and-license              2.1     no         archiv
 Phase 1  add-pyvista-surface-kernel                    2.2     no         archived
 Phase 2  add-function-preset-registry                  2.3     no         archived
          add-cli                                        2.3     no         archived
-         fix-colormap-nonfinite                         2.3     no         in-progress
+         fix-colormap-nonfinite                         2.3     no         archived
          add-gallery-generator                          2.3     no         planned
          · gallery: 2D portraits + a BYTE-STABLE JSON manifest (the
            deterministic contract + Godot/web interchange); images are
@@ -156,14 +156,8 @@ ranges, so breaks surface early. Notes:
 
 ## Known bugs (backlog — fix as dedicated changes)
 
-- **Colormaps emit invalid / non-deterministic RGB at in-domain poles.** → promoted to
-  `fix-colormap-nonfinite` (Phase 2, gates the gallery). `Colormap.rgb()`
-  feeds a NaN hue (non-finite `f` on a grid node) to matplotlib's `hsv_to_rgb`, whose
-  `(h*6).astype(int)` produces run-varying garbage. The `outmask` path only covers
-  out-of-*domain* points, not in-domain singularities. Surfaced 3×: matplotlib 3D raises
-  on it (band-aided by clipping facecolors in `plotting/matplotlib/plot_3d.py`), PyVista
-  renders garbage, and it makes pole-node pinning tests flaky. Real fix: sanitize
-  non-finite `f` in the base colormap (then drop the facecolor band-aid). Own change.
+_None currently tracked. Fixed bugs become archived changes (e.g.
+`fix-colormap-nonfinite`, `fix-quick-plot-backend`)._
 
 ---
 
