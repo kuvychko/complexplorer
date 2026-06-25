@@ -21,7 +21,7 @@ from ._version import __version__
 from .core.presets import FunctionPreset, catalog
 from .plotting.matplotlib.plot_2d import plot as plot_2d
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2  # v2: card records carry answer_key_stats (enrich-answer-key-stats)
 _FIGSIZE = (4.0, 4.0)
 
 

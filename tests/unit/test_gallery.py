@@ -33,7 +33,7 @@ def test_index_is_self_contained(tmp_path):
     warnings.simplefilter("ignore")
     generate_gallery(tmp_path, selection=_TAG, dpi=60)
     index = json.loads((tmp_path / "index.json").read_text(encoding="utf-8"))
-    assert index["schema_version"] == 1
+    assert index["schema_version"] == 2
     assert "complexplorer_version" in index and "generator" in index
     # each index record equals the corresponding card.json
     for rec in index["presets"]:

@@ -20,6 +20,8 @@ A preset carries:
 
 from __future__ import annotations
 
+import itertools
+import math
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
@@ -174,6 +176,31 @@ class FunctionPreset:
     def scaling(self) -> dict:
         return scaling_from_spec(self.scaling_spec)
 
+    # -- derived geometry (pure function of the authored answer key) --
+    def answer_key_stats(self) -> dict:
+        """Derived geometry of the singularity answer key.
+
+        Returns ``count``, ``count_by_type`` (sorted by type), and ``min_separation`` — the
+        smallest Euclidean distance in the z-plane between any two singularity locations, or
+        ``None`` when there are fewer than two. Computed from the hand-authored records only,
+        never by analyzing ``func``.
+        """
+        by_type: dict[str, int] = {}
+        for record in self.singularities:
+            by_type[record["type"]] = by_type.get(record["type"], 0) + 1
+        points = [s["at"] for s in self.singularities]
+        if len(points) < 2:
+            min_separation: float | None = None
+        else:
+            min_separation = min(
+                math.hypot(a[0] - b[0], a[1] - b[1]) for a, b in itertools.combinations(points, 2)
+            )
+        return {
+            "count": len(self.singularities),
+            "count_by_type": dict(sorted(by_type.items())),
+            "min_separation": min_separation,
+        }
+
     # -- serialization (Godot interchange record) --
     def to_dict(self) -> dict:
         """JSON-ready record of everything EXCEPT the live ``func``."""
@@ -185,6 +212,7 @@ class FunctionPreset:
             "cmap_spec": dict(self.cmap_spec),
             "scaling_spec": self.scaling_spec,
             "singularities": [dict(s) for s in self.singularities],
+            "answer_key_stats": self.answer_key_stats(),
             "story": self.story,
             "tags": list(self.tags),
         }
