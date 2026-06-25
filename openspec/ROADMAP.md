@@ -59,9 +59,24 @@ role is therefore to **produce, not run**:
   against,
 - STL / object cards.
 
-Consequence: the "games" are **curated preset sets + a JSON level-export profile**, not
-Python engine code. They ride on the Phase 2 preset/gallery/export infrastructure. No
-interactive loops, scoring, or UI live in complexplorer.
+**The decisive test (settled 2026-06-24): does it export _math_ or _game_?** complexplorer
+exports mathematical/geometric *truth*; everything about *playing* belongs to Godot.
+
+| MATH — complexplorer exports it | GAME — lives in Godot |
+|---|---|
+| expression, singularities `{type, at, order}` | task verb ("tap the poles") |
+| derived geometry (counts, min separation) | scoring rule / partial credit |
+| domain / cmap / scaling spec, portrait | position *tolerance* (a game knob) |
+| behavior facts (has-∞, has-essential) | difficulty rank/tier, progression, packs, UI |
+
+Consequence — **the gallery manifest already _is_ the Godot interchange.** `index.json`
+carries expression + domain/cmap/scaling + the full singularity answer key + portrait, in a
+byte-stable contract Godot can consume today. A separate "level-export" profile that added
+difficulty/scoring/tolerance/task would import *game design* into a numerical library — the
+exact boundary erosion this section exists to prevent — so it is **cut**. The only surviving
+"games" work is `enrich-answer-key-stats`: pure derived geometry on the card. Curated SETS
+already exist as **tags** (`singularity-detective`, `branch-cut-zoo`, …). No interactive
+loops, scoring, difficulty, or UI live in complexplorer.
 
 **Parametrized families (Möbius, later Julia / `z^(1/n)` / resonators).** The Phase 2 base
 `FunctionPreset` is **static** (one callable + expression + a fixed answer key). A
@@ -90,11 +105,13 @@ Phase 2  add-function-preset-registry                  2.3     no         archiv
          · gallery: 2D portraits + a BYTE-STABLE JSON manifest (the
            deterministic contract + Godot/web interchange); images are
            best-effort. Gated on the colormap fix (clean, deterministic RGB).
-Phase 3  add-level-export                               2.4     no         planned
-         (game PROTOTYPING assets — see "Games boundary" below)
-         curated preset SETS (data, not code): singularity-detective,
-         branch-cut-zoo, function-guessr, mobius — tagged collections +
-         export profiles, NOT engine code
+Phase 3  enrich-answer-key-stats                        2.4     no         planned
+         · the ONLY surviving "games" work — see "Games boundary" below.
+           Adds DERIVED geometry to the catalog card (count_by_type,
+           min_separation) so the answer key is a sharper oracle. Pure math.
+         · DISSOLVED: add-level-export. The gallery manifest already IS the
+           Godot interchange; task/scoring/difficulty are game design and live
+           in Godot, not here. Curated SETS already exist as tags.
 Phase 5  add-transfer-function-explorer                 2.5     no         planned
          (EE pulled early — additive, not gated on 3.0)
 ────────────────────────────────────────────────────────────────────────────────
