@@ -11,6 +11,7 @@ It imports — and does not relocate — ``utils.mesh``, ``utils.mesh_distortion
 """
 
 from .builders import build_landscape, build_relief
+from .riemann_surface import build_riemann_surface
 from .surface import SurfaceMesh
 
-__all__ = ["SurfaceMesh", "build_landscape", "build_relief"]
+__all__ = ["SurfaceMesh", "build_landscape", "build_relief", "build_riemann_surface"]

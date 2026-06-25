@@ -214,7 +214,8 @@ cp.plot(lambda z: 1/z, **cp.publication_preset())
 #### PyVista-based (all 3D; the matplotlib 3D functions were removed in 3.0):
 - `plot_landscape_pv()`: 3D analytic landscape
 - `pair_plot_landscape_pv()`: Side-by-side domain/codomain 3D
-- `riemann_pv()`: Interactive Riemann sphere with modulus scaling
+- `riemann_pv()`: Interactive Riemann **sphere** (a single-valued function on the compactified plane)
+- `riemann_surface_pv()`: Riemann **surface** of a multivalued family — the multi-sheeted cover (`power` roots `z^(1/n)`, or `log`). Distinct from the sphere: this is the surface on which a multivalued function becomes single-valued.
 
 ### STL Export (3D printing)
 

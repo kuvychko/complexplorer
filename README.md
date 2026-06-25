@@ -147,7 +147,16 @@ cp.plot_landscape_pv(domain, f, cmap=cmap, notebook=False)
 
 # Side-by-side domain and codomain relief maps
 cp.pair_plot_landscape_pv(domain, f, cmap=cmap, window_size=(1600, 800))
+
+# Riemann SURFACE of a multivalued function — the multi-sheeted cover
+cp.riemann_surface_pv('power', n=2)        # sqrt: a 2-sheeted self-intersecting surface
+cp.riemann_surface_pv('power', n=3)        # cbrt: 3 sheets
+cp.riemann_surface_pv('log', turns=3)      # log: the helicoid
 ```
+
+> The Riemann **surface** (`riemann_surface_pv`, the cover of a *multivalued* function) is
+> distinct from the Riemann **sphere** (`riemann_pv`, a *single-valued* function on the
+> compactified plane).
 
 **⚠️ Pro Tip:** For cinema-quality Riemann relief maps, use PyVista via command-line scripts rather than Jupyter notebooks. The CLI experience offers superior antialiasing and interactivity. Try `python examples/interactive_showcase.py` for the ultimate visualization experience!
 
