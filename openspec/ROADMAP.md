@@ -54,10 +54,10 @@ which reimplements the math **natively** (mobile platforms are the target). Comp
 role is therefore to **produce, not run**:
 
 - reference imagery (PNG) — what the phase portrait / relief *should* look like,
-- machine-readable **answer keys / level data** (JSON: zeros/poles with orders, branch
-  points, expected monodromy, recommended domain) — the *ground truth* Godot is validated
-  against,
-- STL / object cards.
+- machine-readable **answer keys** (the gallery manifest JSON: expression, domain/cmap/
+  scaling specs, exact zeros/poles/essential/branch points with orders, plus derived
+  geometry) — the *ground truth* Godot is validated against,
+- STL ornaments.
 
 **The decisive test (settled 2026-06-24): does it export _math_ or _game_?** complexplorer
 exports mathematical/geometric *truth*; everything about *playing* belongs to Godot.
@@ -104,7 +104,7 @@ Phase 2  add-function-preset-registry                  2.3     no         archiv
          · gallery: 2D portraits + a BYTE-STABLE JSON manifest (the
            deterministic contract + Godot/web interchange); images are
            best-effort. Gated on the colormap fix (clean, deterministic RGB).
-Phase 3  enrich-answer-key-stats                        2.4     no         planned
+Phase 3  enrich-answer-key-stats                        2.4     no         proposed
          · the ONLY surviving "games" work — see "Games boundary" below.
            Adds DERIVED geometry to the catalog card (count_by_type,
            min_separation) so the answer key is a sharper oracle. Pure math.
