@@ -121,7 +121,7 @@ Phase 5  add-transfer-function-explorer                 2.5     no         plann
            pair_plot_landscape, 3D riemann); plotting-3d-mpl retired
          · _version bumped to 3.0.0; PyPI 3.0.0 RELEASE held until
            add-riemann-surfaces lands (bundled 3.0)
-         add-riemann-surfaces                           3.0     no         in-progress
+         add-riemann-surfaces                           3.0     no         archived
          · sqrt(z), z^(1/n), branch points/cuts, monodromy
          migrate-examples-and-docs                      3.0     no         planned
          · review/migrate examples/ notebooks + *.py scripts (they call
