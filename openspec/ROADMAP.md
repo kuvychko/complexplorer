@@ -104,7 +104,7 @@ Phase 2  add-function-preset-registry                  2.3     no         archiv
          · gallery: 2D portraits + a BYTE-STABLE JSON manifest (the
            deterministic contract + Godot/web interchange); images are
            best-effort. Gated on the colormap fix (clean, deterministic RGB).
-Phase 3  enrich-answer-key-stats                        2.4     no         in-progress
+Phase 3  enrich-answer-key-stats                        2.4     no         archived
          · the ONLY surviving "games" work — see "Games boundary" below.
            Adds DERIVED geometry to the catalog card (count_by_type,
            min_separation) so the answer key is a sharper oracle. Pure math.
