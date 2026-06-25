@@ -114,7 +114,7 @@ Phase 3  enrich-answer-key-stats                        2.4     no         archi
 Phase 5  add-transfer-function-explorer                 2.5     no         planned
          (EE pulled early — additive, not gated on 3.0)
 ────────────────────────────────────────────────────────────────────────────────
-★ 3.0    require-pyvista-3d-backend                     3.0     YES        in-progress
+★ 3.0    require-pyvista-3d-backend                     3.0     YES        archived
          · PyVista is now a required core dependency; HAS_PYVISTA /
            HAS_STL_EXPORT flags removed; CI collapsed to one config
          · removed matplotlib 3D paths (plot_landscape,

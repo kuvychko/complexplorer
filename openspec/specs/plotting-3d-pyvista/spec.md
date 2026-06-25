@@ -3,26 +3,11 @@
 ## Purpose
 
 The plotting-3d-pyvista capability provides high-performance, interactive 3D landscapes using
-PyVista as an optional backend, mirroring the matplotlib 3D landscape functions but with
-per-vertex coloring, smooth shading, and live camera interaction. It degrades cleanly when PyVista
-is not installed.
+PyVista, the required 3D backend, mirroring the (now-removed) matplotlib 3D landscape functions
+but with per-vertex coloring, smooth shading, and live camera interaction. As of 3.0 PyVista is a
+required core dependency, so these functions are always available.
 
 ## Requirements
-
-### Requirement: Optional-dependency gating
-
-PyVista-backed plotting SHALL be available only when PyVista is installed and SHALL fail with a
-clear error otherwise, without breaking import of the rest of the library.
-
-#### Scenario: Missing PyVista raises a clear error
-
-- **WHEN** a PyVista plotting function is called and PyVista is not installed
-- **THEN** an `ImportError` explaining that PyVista is required (with install guidance) is raised
-
-#### Scenario: Library imports without PyVista
-
-- **WHEN** the package is imported without PyVista present
-- **THEN** the core and matplotlib functionality remains usable and a capability flag reports PyVista as unavailable
 
 ### Requirement: Interactive landscape surface
 
