@@ -6,11 +6,14 @@
       existing install commands).
 
 ## 2. Remove matplotlib 3D
-- [ ] 2.1 Delete `plot_landscape`, `pair_plot_landscape`, `riemann` (and the
-      `_warn_mpl3d_deprecated` helper / deprecated wrapper class) from
-      `plotting/matplotlib/plot_3d.py`.
-- [ ] 2.2 Remove them from `plotting/matplotlib/__init__.py` and from `complexplorer/__init__.py`
-      (imports + `__all__`). KEEP `riemann_chart` / `riemann_hemispheres`.
+- [ ] 2.1 DELETE the whole file `plotting/matplotlib/plot_3d.py` (it is 100% 3D:
+      `_warn_mpl3d_deprecated`, class `Matplotlib3DPlotter`, `plot_landscape`,
+      `pair_plot_landscape`, `riemann`). Do NOT touch `utils/mesh_distortion`
+      (`get_default_scaling_params`) — it is shared by STL / mesh / PyVista, not dead.
+- [ ] 2.2 `plotting/matplotlib/__init__.py`: remove `from .plot_3d import *` and drop
+      `"plot_3d"` from `__all__`. `complexplorer/__init__.py`: remove `plot_landscape` /
+      `pair_plot_landscape` / `riemann` from imports + `__all__`. KEEP `riemann_chart` /
+      `riemann_hemispheres` (they live in `plot_2d.py`).
 
 ## 3. Remove the capability flags
 - [ ] 3.1 `__init__.py`: delete `HAS_PYVISTA` / `HAS_STL_EXPORT`; make the STL + PyVista
