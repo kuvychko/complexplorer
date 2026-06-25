@@ -123,10 +123,21 @@ Phase 5  add-transfer-function-explorer                 2.5     no         plann
            add-riemann-surfaces lands (bundled 3.0)
          add-riemann-surfaces                           3.0     no         archived
          · sqrt(z), z^(1/n), branch points/cuts, monodromy
-         migrate-examples-and-docs                      3.0     no         planned
-         · review/migrate examples/ notebooks + *.py scripts (they call
-           removed mpl-3D funcs); ensure notebooks run on the 3.0 surface.
-           Separate proposal, after the 3.0 library work.
+         EXAMPLES & DOCS REWORK (migrate-examples-and-docs, phased 3-change sub-block,
+         gallery-first M1→M2→M3 — see "Examples & docs rework" section below):
+         M1 restructure-examples                        3.0     no         planned
+            · new examples/ layout (notebooks/, scripts/, gallery/); retire the
+              TWO legacy hand-rolled generators (examples/generate_gallery.py +
+              gallery/generate_gallery_images.py); cull archive/+old/; rewrite README
+         M2 rebuild-gallery-from-registry               3.0     no         planned
+            · examples/showcase.py (Option B): cp.catalog → hi-res 2D + PyVista
+              3D/riemann/surface/STL screenshots; regenerate COMMITTED-but-
+              regenerable images; rewire README + docs/gallery from the manifest.
+              Library cp.gallery stays PyVista-free + deterministic (untouched)
+         M3 migrate-and-verify-notebooks                3.0     no         planned
+            · modernize the 4 notebooks onto the 3.0 surface (fix cp.plot_landscape
+              + HAS_PYVISTA breakage); add Riemann-surface + perceptual-family
+              coverage; DoD = each notebook runs top-to-bottom via nbconvert (local)
 ────────────────────────────────────────────────────────────────────────────────
 3.1+     OUT OF UMBRELLA SCOPE (future backlog)
          full EE (filters, resonators, QCM, RF bridge),
@@ -160,6 +171,39 @@ Phase 5  add-transfer-function-explorer                 2.5     no         plann
    not an afterthought; `core/presets.py` stays PyVista-free.
 4. **3.0 is anchored on the breaking change**, not on feature volume. It contains exactly
    two changes: the dependency/removal change and the headline feature.
+
+---
+
+## Examples & docs rework
+
+After the 3.0 *library* work landed (`require-pyvista-3d-backend` + `add-riemann-surfaces`),
+`examples/` is stale: 2 of 4 notebooks call removed mpl-3D functions, and **two** legacy
+hand-rolled gallery generators predate — and now duplicate — the canonical registry-driven
+`cp.gallery`. Rather than a mechanical fix, this is a full rework, **phased into 3 sequenced
+changes** under the umbrella name `migrate-examples-and-docs`. Run **gallery-first**:
+
+```
+ M1 restructure-examples ──► M2 rebuild-gallery-from-registry ──► M3 migrate-and-verify-notebooks
+    (teardown + skeleton)      (the producer, Option B)            (the tutorials)
+```
+
+- **Single source of truth = the registry.** `cp.catalog` (17 curated presets) is canonical.
+  The two hand-rolled generators are retired; `examples/` becomes a *consumer* of the
+  registry, never a parallel catalog.
+- **Option B — the deterministic/pretty split.** The library `cp.gallery` stays
+  **PyVista-free and byte-deterministic** (it is the Godot/web interchange contract and must
+  not drift). The new `examples/showcase.py` is the *presentation* layer on top: it reads the
+  same registry but adds the nondeterministic high-res 3D / Riemann sphere / Riemann surface
+  / STL screenshots the manifest deliberately omits. Two consumers, two jobs.
+- **Committed but regenerable.** Gallery images stay committed (PyPI/GitHub render them) yet
+  must reproduce exactly from `python examples/showcase.py` — no orphaned hand-named PNGs.
+- **DoD for notebooks is execution.** "Migrated" means each notebook runs top-to-bottom via
+  `nbconvert --execute` on the 3.0 surface (local bar). Whether notebook execution ever
+  becomes a *CI* gate (nbmake/papermill) is a deliberately deferred, separate decision —
+  examples are outside CI today, and gating on heavy PyVista-screenshot notebooks is its own
+  problem. Keep it local for M3; revisit later.
+- **Dependencies.** M2 and M3 both need M1's clean layout; M3 is otherwise independent of M2.
+  Gallery-first is chosen because the README/PyPI images are the most public surface.
 
 ---
 
