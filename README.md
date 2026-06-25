@@ -32,17 +32,14 @@ pip install complexplorer
 # Optional: For interactive matplotlib plots in CLI scripts
 pip install "complexplorer[qt]"
 
-# Optional: For high-performance 3D visualizations (alias: [3d])
-pip install "complexplorer[pyvista]"
-
-# Optional: Install everything
+# Optional: Install everything (adds PyQt6)
 pip install "complexplorer[all]"
 ```
 
 > **Backend policy:** matplotlib powers 2D plots; **PyVista powers all 3D** (landscapes,
-> Riemann relief/sphere, STL export). New 3D features are PyVista-only, and PyVista becomes
-> a **required** dependency at 3.0, when the legacy matplotlib 3D functions
-> (`plot_landscape`, `pair_plot_landscape`, 3D `riemann`) are removed. See
+> Riemann relief/sphere, STL export). As of 3.0 PyVista is a **required** dependency and the
+> legacy matplotlib 3D functions (`plot_landscape`, `pair_plot_landscape`, 3D `riemann`) have
+> been removed — use `plot_landscape_pv`, `pair_plot_landscape_pv`, and `riemann_pv`. See
 > [docs/development/backend-policy.md](docs/development/backend-policy.md).
 
 ## 🚀 Quick Start - From Math to Matter
@@ -127,14 +124,14 @@ cmap = cp.Phase(n_phi=6, auto_scale_r=True, v_base=0.4)  # Auto-scaled enhanced 
 # 2D visualization with domain and codomain side-by-side
 cp.pair_plot(domain, f, cmap=cmap, figsize=(10, 5))
 
-# 3D analytic landscape
-cp.plot_landscape(domain, f, cmap=cmap, z_scale=0.3)
+# 3D analytic landscape (PyVista)
+cp.plot_landscape_pv(domain, f, cmap=cmap, z_scale=0.3)
 
 # 3D landscape with modulus scaling for better visualization
-cp.plot_landscape(domain, f, cmap=cmap, modulus_mode='arctan')
+cp.plot_landscape_pv(domain, f, cmap=cmap, modulus_mode='arctan')
 
 # Riemann sphere projection
-cp.riemann(f, resolution=800, cmap=cmap)
+cp.riemann_pv(f, resolution=800, cmap=cmap)
 ```
 
 ### 🚀 High-Performance Riemann Relief Maps with PyVista
@@ -160,17 +157,17 @@ Control how the magnitude (modulus) of complex values creates the topography of 
 
 ```python
 # Different scaling modes for various visualization needs
-cp.plot_landscape(domain, f, modulus_mode='constant')     # Phase only (flat)
-cp.plot_landscape(domain, f, modulus_mode='arctan')       # Smooth bounded scaling
-cp.plot_landscape(domain, f, modulus_mode='logarithmic')  # Emphasize poles/zeros
-cp.plot_landscape(domain, f, modulus_mode='adaptive')     # Auto-adjust to data
+cp.plot_landscape_pv(domain, f, modulus_mode='constant')     # Phase only (flat)
+cp.plot_landscape_pv(domain, f, modulus_mode='arctan')       # Smooth bounded scaling
+cp.plot_landscape_pv(domain, f, modulus_mode='logarithmic')  # Emphasize poles/zeros
+cp.plot_landscape_pv(domain, f, modulus_mode='adaptive')     # Auto-adjust to data
 
 # Custom scaling function for specific needs
 def custom_scale(moduli):
     return np.tanh(moduli / 2)  # Custom transformation
 
-cp.plot_landscape(domain, f, modulus_mode='custom', 
-                 modulus_params={'scaling_func': custom_scale})
+cp.plot_landscape_pv(domain, f, modulus_mode='custom',
+                     modulus_params={'scaling_func': custom_scale})
 ```
 
 Available modes: `none`, `constant`, `linear`, `arctan`, `logarithmic`, `linear_clamp`, `power`, `sigmoid`, `adaptive`, `hybrid`, `custom`. See `examples/modulus_scaling_showcase.py` for comprehensive examples.

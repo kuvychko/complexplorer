@@ -10,21 +10,10 @@ import numpy as np
 from complexplorer.core.colormap import Phase
 from complexplorer.core.domain import Domain, Rectangle
 
-# Import plotting functions
+# Import plotting functions. 2D is matplotlib; 3D/Riemann are PyVista (a required core
+# dependency as of 3.0 — there is no matplotlib 3D backend).
 from complexplorer.plotting.matplotlib.plot_2d import plot as plot_2d
-from complexplorer.plotting.matplotlib.plot_3d import plot_landscape as plot_3d_landscape
-from complexplorer.plotting.matplotlib.plot_3d import riemann as plot_riemann
-
-# Detect PyVista directly. Importing the wrapper functions here can fail with a circular
-# import during package initialization (the PyVista renderers pull in the mesh/STL layer),
-# which would wrongly report PyVista as unavailable. The wrappers are imported lazily in
-# quick_plot instead.
-try:
-    import pyvista  # noqa: F401
-
-    HAS_PYVISTA = True
-except ImportError:
-    HAS_PYVISTA = False
+from complexplorer.utils.validation import ValidationError
 
 
 def quick_plot(
@@ -53,28 +42,25 @@ def quick_plot(
     if "cmap" not in kwargs:
         kwargs["cmap"] = Phase(n_phi=6, auto_scale_r=True)
 
-    # Pop the backend selector so it never leaks into the renderer. For 3D/Riemann, default
-    # to PyVista when available (per the backend policy); matplotlib (deprecated, removed at
-    # 3.0) is used only as a fallback or when explicitly requested.
+    # Pop the backend selector so it never leaks into the renderer. 2D is matplotlib;
+    # 3D/Riemann are PyVista-only (the matplotlib 3D backend was removed in 3.0).
     backend = kwargs.pop("backend", None)
-    use_pyvista = HAS_PYVISTA and backend != "matplotlib"
 
     if mode == "2d":
         return plot_2d(domain, func, **kwargs)
-    elif mode == "3d":
-        if use_pyvista:
+    if mode in ("3d", "riemann"):
+        if backend == "matplotlib":
+            raise ValidationError(
+                "The matplotlib 3D backend was removed in 3.0; 3D/Riemann use PyVista."
+            )
+        if mode == "3d":
             from complexplorer.plotting.pyvista.plot_3d import plot_landscape_pv
 
             return plot_landscape_pv(domain, func, **kwargs)
-        return plot_3d_landscape(domain, func=func, **kwargs)
-    elif mode == "riemann":
-        if use_pyvista:
-            from complexplorer.plotting.pyvista.riemann import riemann_pv
+        from complexplorer.plotting.pyvista.riemann import riemann_pv
 
-            return riemann_pv(func, **kwargs)
-        return plot_riemann(func, **kwargs)
-    else:
-        raise ValueError(f"Unknown mode: {mode}")
+        return riemann_pv(func, **kwargs)
+    raise ValueError(f"Unknown mode: {mode}")
 
 
 def analyze_function(

@@ -4,15 +4,14 @@ import os
 import tempfile
 
 import numpy as np
-import pytest
 
+from complexplorer import plot_landscape_pv, riemann_pv
 from complexplorer.api import analyze_function, quick_plot
 from complexplorer.core.colormap import Phase
 
 # Import from new API
 from complexplorer.core.domain import Annulus, Disk, Rectangle
 from complexplorer.plotting.matplotlib.plot_2d import plot
-from complexplorer.plotting.matplotlib.plot_3d import plot_landscape, riemann
 
 
 class TestCoreWorkflows:
@@ -46,28 +45,23 @@ class TestCoreWorkflows:
         plt.close("all")
 
     def test_3d_landscape(self):
-        """Test 3D landscape plot."""
+        """Test 3D landscape plot (PyVista)."""
         func = lambda z: z**3 - z
         domain = Rectangle(2, 2)
 
-        ax = plot_landscape(domain, func=func, resolution=30)
-        assert ax is not None
-
-        import matplotlib.pyplot as plt
-
-        plt.close("all")
+        plotter = plot_landscape_pv(
+            domain, func, resolution=30, interactive=False, return_plotter=True
+        )
+        assert plotter is not None
+        plotter.close()
 
     def test_riemann_sphere(self):
-        """Test Riemann sphere visualization."""
+        """Test Riemann sphere visualization (PyVista)."""
         func = lambda z: (z**2 - 1) / (z**2 + 1)
-        domain = Rectangle(2.5, 2.5)
 
-        ax = riemann(func=func, resolution=25)
-        assert ax is not None
-
-        import matplotlib.pyplot as plt
-
-        plt.close("all")
+        plotter = riemann_pv(func, resolution=25, interactive=False, return_plotter=True)
+        assert plotter is not None
+        plotter.close()
 
     def test_high_level_api(self):
         """Test high-level API functions."""
@@ -168,18 +162,10 @@ class TestFunctionTypes:
         plt.close("all")
 
 
-# PyVista availability is authoritative from the package flag. The wrapper import
-# below succeeds even without PyVista (the module guards its own import), so it must
-# NOT be used to infer availability.
-from complexplorer import HAS_STL_EXPORT as HAS_STL
-
-try:
-    from complexplorer.export.stl import create_ornament
-except ImportError:
-    create_ornament = None
+# STL export (PyVista-backed) is always available as of 3.0 (PyVista is a core dependency).
+from complexplorer.export.stl import create_ornament
 
 
-@pytest.mark.skipif(not HAS_STL, reason="PyVista not installed")
 class TestSTLExport:
     """Test STL export functionality."""
 

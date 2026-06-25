@@ -1,6 +1,5 @@
-"""Matplotlib plotting modules."""
+"""Matplotlib plotting modules (2D only; 3D is PyVista as of 3.0)."""
 
 from .plot_2d import *
-from .plot_3d import *
 
-__all__ = ["plot_2d", "plot_3d"]
+__all__ = ["plot_2d"]

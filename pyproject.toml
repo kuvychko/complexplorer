@@ -27,6 +27,9 @@ dependencies = [
     "matplotlib>=3.8.0",
     "scipy>=1.11.0",
     "asteval>=1.0",
+    # PyVista is the sole 3D backend as of 3.0 (matplotlib 3D removed); it also powers STL
+    # export, so it is a required core dependency rather than an optional extra.
+    "pyvista>=0.47",
 ]
 classifiers = [
     "Intended Audience :: Science/Research",
@@ -47,14 +50,10 @@ dev = [
     "pytest-timeout>=2.1.0",
     "ruff>=0.6",
 ]
-pyvista = [
-    "pyvista>=0.47",
-]
-# Alias for the PyVista 3D backend. New 3D features are PyVista-only; PyVista becomes a
-# required dependency at 3.0 (see docs/development/backend-policy.md).
-"3d" = [
-    "complexplorer[pyvista]",
-]
+# PyVista is a core dependency as of 3.0; these are kept as empty no-op aliases so existing
+# `pip install complexplorer[pyvista]` / `[3d]` commands continue to work.
+pyvista = []
+"3d" = []
 qt = [
     "PyQt6>=6.5.0",
 ]

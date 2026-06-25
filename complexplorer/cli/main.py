@@ -12,7 +12,6 @@ import argparse
 import sys
 from collections.abc import Callable
 
-from .. import HAS_PYVISTA
 from ..core.expression import compile_expression
 from ..core.presets import catalog, cmap_from_spec, domain_from_spec
 from ..plotting.matplotlib.plot_2d import plot as plot_2d
@@ -55,14 +54,6 @@ def _parse_cmap(text: str) -> dict:
     return spec
 
 
-def _need_pyvista(what: str) -> None:
-    if not HAS_PYVISTA:
-        raise ValidationError(
-            f"{what} requires the PyVista 3D backend. Install with: pip install "
-            '"complexplorer[pyvista]"'
-        )
-
-
 # --------------------------------------------------------------------------------------
 # Commands
 # --------------------------------------------------------------------------------------
@@ -86,16 +77,14 @@ def cmd_render(args: argparse.Namespace) -> int:
     if not args.output and not args.show:
         raise ValidationError("provide --output FILE or --show")
 
-    # Dispatch directly to the right backend (matplotlib 2D, PyVista 3D — per the backend
-    # policy) rather than quick_plot, whose 3D path defaults to the deprecated matplotlib
-    # renderer unless backend='pyvista' is threaded through.
+    # Dispatch directly to the right backend: matplotlib for 2D, PyVista for 3D/Riemann
+    # (PyVista is a required dependency as of 3.0; there is no matplotlib 3D backend).
     if args.mode == "2d":
         kwargs = {"cmap": cmap, "filename": args.output}
         if args.resolution:
             kwargs["resolution"] = args.resolution
         plot_2d(domain, func, **{k: v for k, v in kwargs.items() if v is not None})
     else:
-        _need_pyvista(f"render --mode {args.mode}")
         common = {"cmap": cmap, "filename": args.output, "interactive": bool(args.show)}
         if args.resolution:
             common["resolution"] = args.resolution
@@ -117,7 +106,6 @@ def cmd_render(args: argparse.Namespace) -> int:
 
 
 def cmd_stl(args: argparse.Namespace) -> int:
-    _need_pyvista("stl")
     from ..export.stl import OrnamentGenerator
 
     func, preset = _resolve_func(args.func)

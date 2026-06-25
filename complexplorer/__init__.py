@@ -21,6 +21,10 @@ from complexplorer.core.functions import (
 )
 from complexplorer.core.presets import FunctionPreset, catalog
 from complexplorer.core.scaling import ModulusScaling, get_scaling_preset
+
+# PyVista is a required core dependency as of 3.0 (the sole 3D backend; also powers STL
+# export), so these imports are unconditional.
+from complexplorer.export.stl import OrnamentGenerator, create_ornament
 from complexplorer.gallery import generate_gallery
 
 # Plotting functions (matplotlib)
@@ -30,34 +34,11 @@ from complexplorer.plotting.matplotlib.plot_2d import (
     riemann_chart,
     riemann_hemispheres,
 )
-from complexplorer.plotting.matplotlib.plot_3d import pair_plot_landscape, plot_landscape, riemann
+from complexplorer.plotting.pyvista.plot_3d import pair_plot_landscape_pv, plot_landscape_pv
+from complexplorer.plotting.pyvista.riemann import riemann_pv
 
 # Utility functions
 from complexplorer.utils.backend import ensure_interactive_plots, setup_matplotlib_backend
-
-# STL export (requires PyVista). Import pyvista explicitly so the flag reflects real
-# backend availability: the export.stl wrappers import fine without PyVista (they guard
-# their own import), so importing them is not a valid availability probe.
-try:
-    import pyvista  # noqa: F401
-
-    from complexplorer.export.stl import OrnamentGenerator, create_ornament
-
-    HAS_STL_EXPORT = True
-except ImportError:
-    HAS_STL_EXPORT = False
-
-# PyVista plotting (optional, high-performance)
-try:
-    import pyvista
-
-    from complexplorer.plotting.pyvista.plot_3d import pair_plot_landscape_pv, plot_landscape_pv
-    from complexplorer.plotting.pyvista.riemann import riemann_pv
-
-    HAS_PYVISTA = True
-except ImportError:
-    HAS_PYVISTA = False
-
 
 __all__ = [
     # Version
@@ -90,9 +71,6 @@ __all__ = [
     "pair_plot",
     "riemann_chart",
     "riemann_hemispheres",
-    "plot_landscape",
-    "pair_plot_landscape",
-    "riemann",
     # Utilities
     "setup_matplotlib_backend",
     "ensure_interactive_plots",
@@ -102,14 +80,11 @@ __all__ = [
     "visualize",
     "explore",
     "Presets",
-    # Flags
-    "HAS_PYVISTA",
-    "HAS_STL_EXPORT",
+    # STL export (PyVista-backed)
+    "OrnamentGenerator",
+    "create_ornament",
+    # PyVista 3D plotting
+    "plot_landscape_pv",
+    "pair_plot_landscape_pv",
+    "riemann_pv",
 ]
-
-# Add optional exports
-if HAS_STL_EXPORT:
-    __all__.extend(["OrnamentGenerator", "create_ornament"])
-
-if HAS_PYVISTA:
-    __all__.extend(["plot_landscape_pv", "pair_plot_landscape_pv", "riemann_pv"])

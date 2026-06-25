@@ -72,34 +72,6 @@ class TestRender2D:
         assert main(["render", "preset:identity"]) == 2
 
 
-class TestPyVistaAbsent:
-    def test_stl_without_pyvista_fails_clearly(self, monkeypatch, tmp_path, capsys):
-        import complexplorer.cli.main as climain
-
-        monkeypatch.setattr(climain, "HAS_PYVISTA", False)
-        rc = main(["stl", "preset:pole_flower_10", "-o", str(tmp_path / "f.stl")])
-        assert rc == 2
-        assert "PyVista" in capsys.readouterr().err
-
-    def test_riemann_render_without_pyvista_fails_clearly(self, monkeypatch, tmp_path):
-        import complexplorer.cli.main as climain
-
-        monkeypatch.setattr(climain, "HAS_PYVISTA", False)
-        assert (
-            main(
-                [
-                    "render",
-                    "preset:pole_flower_10",
-                    "--mode",
-                    "riemann",
-                    "-o",
-                    str(tmp_path / "c.png"),
-                ]
-            )
-            == 2
-        )
-
-
 class TestPyVistaCommands:
     """3D/STL paths require PyVista."""
 

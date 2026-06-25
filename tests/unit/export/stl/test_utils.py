@@ -20,15 +20,8 @@ from complexplorer.export.stl.utils import (
 
 
 class TestCheckPyVistaAvailable:
-    """Test PyVista availability check."""
+    """Test PyVista availability check (PyVista is a required dependency as of 3.0)."""
 
-    @pytest.mark.skipif(HAS_PYVISTA, reason="PyVista is installed")
-    def test_raises_when_not_available(self):
-        """Test error when PyVista not installed."""
-        with pytest.raises(ImportError, match="PyVista is required"):
-            check_pyvista_available()
-
-    @pytest.mark.skipif(not HAS_PYVISTA, reason="PyVista not installed")
     def test_passes_when_available(self):
         """Test no error when PyVista installed."""
         check_pyvista_available()  # Should not raise

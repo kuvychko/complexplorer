@@ -30,19 +30,17 @@ jobs:
         run: uv run --no-sync ruff format --check complexplorer/ tests/
 
   test:
-    name: Test (${{ matrix.os }}, py${{ matrix.python }}, ${{ matrix.config }})
+    name: Test (${{ matrix.os }}, py${{ matrix.python }})
     runs-on: ${{ matrix.os }}
-    # vtk wheels for new Python releases often lag; do not let the PyVista lane on
-    # 3.13 block the matrix until those wheels are confirmed available.
-    continue-on-error: ${{ matrix.config == 'pyvista' && matrix.python == '3.13' }}
+    # vtk wheels for new Python releases often lag; do not let 3.13 block the matrix until
+    # those wheels are confirmed available.
+    continue-on-error: ${{ matrix.python == '3.13' }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
         python: ["3.11", "3.12", "3.13"]
-        config: [base, pyvista]
     env:
-      # Harmless for the base config (no PyVista); required for the PyVista lane.
       PYVISTA_OFF_SCREEN: "true"
     steps:
       - uses: actions/checkout@v4
@@ -54,17 +52,14 @@ jobs:
       - name: Create venv
         run: uv venv
 
-      # Install from pyproject ranges (not uv.lock) so CI catches upstream breakage.
-      - name: Install (base — no PyVista)
-        if: matrix.config == 'base'
+      # Install from pyproject ranges (not uv.lock) so CI catches upstream breakage. PyVista
+      # is a core dependency as of 3.0, so there is no longer a no-PyVista lane.
+      - name: Install
         run: uv pip install -e ".[dev]"
-      - name: Install (with PyVista)
-        if: matrix.config == 'pyvista'
-        run: uv pip install -e ".[pyvista,dev]"
 
       # xvfb for real offscreen rendering on Linux; Windows renders offscreen natively.
-      - name: Headless display (Linux + PyVista)
-        if: matrix.config == 'pyvista' && runner.os == 'Linux'
+      - name: Headless display (Linux)
+        if: runner.os == 'Linux'
         uses: pyvista/setup-headless-display-action@v3
 
       - name: Run tests

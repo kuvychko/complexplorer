@@ -30,8 +30,7 @@ complexplorer/
 │   │   └── constants.py
 │   ├── plotting/
 │   │   ├── matplotlib/
-│   │   │   ├── plot_2d.py       # plot, pair_plot, riemann_chart, riemann_hemispheres
-│   │   │   └── plot_3d.py       # plot_landscape, pair_plot_landscape, riemann
+│   │   │   └── plot_2d.py       # plot, pair_plot, riemann_chart, riemann_hemispheres (2D only)
 │   │   ├── pyvista/
 │   │   │   ├── plot_3d.py       # plot_landscape_pv, pair_plot_landscape_pv
 │   │   │   └── riemann.py       # riemann_pv
@@ -62,14 +61,16 @@ For any non-trivial change, create an OpenSpec change proposal (`/opsx:propose` 
 
 - Python >= 3.11
 - numpy >= 1.26.0
-- matplotlib >= 3.8.0
+- matplotlib >= 3.8.0 (2D backend)
 - scipy >= 1.11.0 (for mesh interpolation and signal processing)
+- PyVista >= 0.47 (the 3D backend **and STL export** — a required dependency as of 3.0)
 
 Optional dependencies:
 - PyQt6 >= 6.5.0 (for interactive matplotlib plots in CLI scripts)
-- PyVista >= 0.45.0 (for high-performance 3D visualizations **and STL export**)
 
-`complexplorer.HAS_PYVISTA` and `complexplorer.HAS_STL_EXPORT` flags report whether the optional PyVista-backed features are available.
+As of 3.0 PyVista is a required core dependency (the sole 3D backend), so the former
+`HAS_PYVISTA` / `HAS_STL_EXPORT` capability flags have been removed — those features are
+always available.
 
 ## Development Setup
 
@@ -138,9 +139,9 @@ The library deals with complex functions f: ℂ → ℂ. Key conventions:
 
 ### Performance Considerations
 
-- Matplotlib is not optimized for 3D rendering, so 3D plots can be slow
-- PyVista provides 15-30x faster 3D rendering with better quality
-- The Riemann sphere plot uses a rectangular mesh which is inefficient at poles
+- All 3D rendering goes through PyVista (the matplotlib 3D backend was removed in 3.0),
+  which is high-quality and fast
+- The Riemann sphere mesh is rectangular, which is inefficient at poles
 - Domain meshing is deferred until plot time for flexibility
 
 ### PyVista Integration
@@ -205,16 +206,14 @@ cp.plot(lambda z: 1/z, **cp.publication_preset())
 
 ### Plot Types
 
-#### Matplotlib-based:
+#### Matplotlib-based (2D only):
 - `plot()`: Basic 2D visualization
 - `pair_plot()`: Side-by-side domain and codomain
 - `riemann_chart()` / `riemann_hemispheres()`: Flat stereographic hemisphere charts
-- `plot_landscape()` / `pair_plot_landscape()`: 3D surface plots
-- `riemann()`: Riemann sphere visualization
 
-#### PyVista-based (high-performance):
-- `plot_landscape_pv()`: Fast 3D landscape
-- `pair_plot_landscape_pv()`: Fast side-by-side 3D
+#### PyVista-based (all 3D; the matplotlib 3D functions were removed in 3.0):
+- `plot_landscape_pv()`: 3D analytic landscape
+- `pair_plot_landscape_pv()`: Side-by-side domain/codomain 3D
 - `riemann_pv()`: Interactive Riemann sphere with modulus scaling
 
 ### STL Export (3D printing)

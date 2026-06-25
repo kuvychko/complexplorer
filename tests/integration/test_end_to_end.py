@@ -4,27 +4,19 @@ import os
 import tempfile
 
 import numpy as np
-import pytest
 
-# Optional-feature availability is authoritative from the package flags. The wrapper
-# imports below succeed even without PyVista (the modules guard their own import), so
-# they must NOT be used to infer availability.
-from complexplorer import HAS_PYVISTA, HAS_STL_EXPORT
+# PyVista is a required core dependency as of 3.0, so STL export and the PyVista 3D
+# renderers are always available.
 from complexplorer.api import Presets, analyze_function, quick_plot
 from complexplorer.core.colormap import Chessboard, LogRings, Phase, PolarChessboard
 
 # Import from new API structure
 from complexplorer.core.domain import Annulus, Rectangle
 from complexplorer.core.scaling import ModulusScaling, get_scaling_preset
+from complexplorer.export.stl import create_ornament
 from complexplorer.plotting.matplotlib.plot_2d import plot
-from complexplorer.plotting.matplotlib.plot_3d import plot_landscape, riemann
-
-try:
-    from complexplorer.export.stl import create_ornament
-    from complexplorer.plotting.pyvista.plot_3d import plot_landscape_pv
-    from complexplorer.plotting.pyvista.riemann import riemann_pv
-except ImportError:
-    create_ornament = plot_landscape_pv = riemann_pv = None
+from complexplorer.plotting.pyvista.plot_3d import plot_landscape_pv
+from complexplorer.plotting.pyvista.riemann import riemann_pv
 
 
 class TestBasicWorkflows:
@@ -68,30 +60,23 @@ class TestBasicWorkflows:
         plt.close("all")
 
     def test_3d_landscape_workflow(self):
-        """Test 3D landscape visualization."""
+        """Test 3D landscape visualization (PyVista)."""
         func = lambda z: np.sin(z)
         domain = Rectangle(4, 4)
 
-        # Create 3D plot
-        ax = plot_landscape(domain, func=func, resolution=40)
-        assert ax is not None
-
-        import matplotlib.pyplot as plt
-
-        plt.close("all")
+        plotter = plot_landscape_pv(
+            domain, func, resolution=40, interactive=False, return_plotter=True
+        )
+        assert plotter is not None
+        plotter.close()
 
     def test_riemann_sphere_workflow(self):
-        """Test Riemann sphere visualization."""
+        """Test Riemann sphere visualization (PyVista)."""
         func = lambda z: z**3 - z
-        domain = Rectangle(3, 3)
 
-        # Create Riemann sphere plot
-        ax = riemann(func=func, resolution=30)
-        assert ax is not None
-
-        import matplotlib.pyplot as plt
-
-        plt.close("all")
+        plotter = riemann_pv(func, resolution=30, interactive=False, return_plotter=True)
+        assert plotter is not None
+        plotter.close()
 
 
 class TestColormapVariations:
@@ -153,14 +138,14 @@ class TestHighLevelAPI:
         ax = quick_plot(func, mode="2d")
         assert ax is not None
 
-        # 3D quick plot (matplotlib path explicitly; the PyVista default is exercised in
-        # the dedicated quick_plot backend tests)
-        ax = quick_plot(func, mode="3d", resolution=30, backend="matplotlib")
-        assert ax is not None
-
         import matplotlib.pyplot as plt
 
         plt.close("all")
+
+        # 3D quick plot (PyVista — the only 3D backend as of 3.0)
+        plotter = quick_plot(func, mode="3d", resolution=30, interactive=False, return_plotter=True)
+        assert plotter is not None
+        plotter.close()
 
     def test_analyze_function(self):
         """Test analyze_function utility."""
@@ -241,7 +226,6 @@ class TestModulusScaling:
         assert np.all(np.isfinite(scaled))
 
 
-@pytest.mark.skipif(not HAS_STL_EXPORT, reason="PyVista not installed")
 class TestSTLExportWorkflow:
     """Test STL export workflow."""
 
@@ -291,7 +275,6 @@ class TestSTLExportWorkflow:
                 os.unlink(filename)
 
 
-@pytest.mark.skipif(not HAS_PYVISTA, reason="PyVista not installed")
 class TestPyVistaIntegration:
     """Test PyVista integration."""
 

@@ -114,13 +114,19 @@ Phase 3  enrich-answer-key-stats                        2.4     no         archi
 Phase 5  add-transfer-function-explorer                 2.5     no         planned
          (EE pulled early — additive, not gated on 3.0)
 ────────────────────────────────────────────────────────────────────────────────
-★ 3.0    require-pyvista-3d-backend                     3.0     YES        proposed
-         · PyVista becomes a required dependency
-         · remove matplotlib 3D paths (plot_landscape,
-           pair_plot_landscape, 3D riemann)
-         · retire the plotting-3d-mpl capability spec
+★ 3.0    require-pyvista-3d-backend                     3.0     YES        in-progress
+         · PyVista is now a required core dependency; HAS_PYVISTA /
+           HAS_STL_EXPORT flags removed; CI collapsed to one config
+         · removed matplotlib 3D paths (plot_landscape,
+           pair_plot_landscape, 3D riemann); plotting-3d-mpl retired
+         · _version bumped to 3.0.0; PyPI 3.0.0 RELEASE held until
+           add-riemann-surfaces lands (bundled 3.0)
          add-riemann-surfaces                           3.0     no         planned
          · sqrt(z), z^(1/n), branch points/cuts, monodromy
+         migrate-examples-and-docs                      3.0     no         planned
+         · review/migrate examples/ notebooks + *.py scripts (they call
+           removed mpl-3D funcs); ensure notebooks run on the 3.0 surface.
+           Separate proposal, after the 3.0 library work.
 ────────────────────────────────────────────────────────────────────────────────
 3.1+     OUT OF UMBRELLA SCOPE (future backlog)
          full EE (filters, resonators, QCM, RF bridge),

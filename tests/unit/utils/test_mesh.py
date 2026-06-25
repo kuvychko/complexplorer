@@ -173,15 +173,3 @@ class TestRectangularSphereGenerator:
         # Most points should be within domain (some boundary effects expected)
         in_domain = domain.contains(w)
         assert np.sum(in_domain) > 0.7 * len(in_domain)
-
-
-@pytest.mark.skipif(HAS_PYVISTA, reason="PyVista is installed")
-class TestWithoutPyVista:
-    """Test behavior without PyVista."""
-
-    def test_import_error(self):
-        """Test that appropriate error is raised."""
-        gen = RectangularSphereGenerator()
-
-        with pytest.raises(ImportError, match="PyVista is required"):
-            gen.generate()
