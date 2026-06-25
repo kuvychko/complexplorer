@@ -78,14 +78,13 @@ exact boundary erosion this section exists to prevent — so it is **cut**. The 
 already exist as **tags** (`singularity-detective`, `branch-cut-zoo`, …). No interactive
 loops, scoring, difficulty, or UI live in complexplorer.
 
-**Parametrized families (Möbius, later Julia / `z^(1/n)` / resonators).** The Phase 2 base
-`FunctionPreset` is **static** (one callable + expression + a fixed answer key). A
-parametrized "playground" is a Phase-3 extension, `FunctionFamily`: a parameter schema
-(names, types, defaults, ranges, constraint), a `make_callable`/expression template, and
-`singularities(**params)`. `family.bind(**params)` emits an ordinary static
-`FunctionPreset` snapshot — so the base model needs no change, and snapshot answer keys
-become the validation oracle for Godot's native math. (A path through a family's parameter
-space is exactly `create_animation`'s `f(z, t)`.)
+**Function presets are static — by decision.** The `FunctionPreset` is one callable +
+expression + a fixed answer key, and stays that way. A parametrized-family abstraction
+(`FunctionFamily`) was considered and **cut** (2026-06-24): its only concrete consumer was
+the now-dissolved games layer, the gallery uses static snapshots, and `create_animation`
+already takes `f(z, t)` directly — so it was scope without a driver. If a real
+visualization need appears (interactive parameter exploration), it gets designed fresh then,
+not carried as speculative roadmap weight.
 
 ---
 
