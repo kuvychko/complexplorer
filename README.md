@@ -107,11 +107,11 @@ Explore the full range of visualizations in our [**Gallery**](docs/gallery/READM
 ## 📚 Documentation
 
 - **[Gallery](docs/gallery/README.md)** - Visual showcase with code examples
-- **[Getting Started](examples/getting_started.ipynb)** - Beginner-friendly introduction
-- **[Advanced Features](examples/advanced_features.ipynb)** - 3D visualization and more
-- **[STL Export Demo](examples/stl_export_demo.ipynb)** - Create 3D printable models
-- **[API Cookbook](examples/api_cookbook.ipynb)** - Ready-to-use code recipes
-- **[Interactive Demo](examples/interactive_showcase.py)** - Run `python examples/interactive_showcase.py`
+- **[Getting Started](examples/notebooks/getting_started.ipynb)** - Beginner-friendly introduction
+- **[Advanced Features](examples/notebooks/advanced_features.ipynb)** - 3D visualization and more
+- **[STL Export Demo](examples/notebooks/stl_export_demo.ipynb)** - Create 3D printable models
+- **[API Cookbook](examples/notebooks/api_cookbook.ipynb)** - Ready-to-use code recipes
+- **[Interactive Demo](examples/scripts/interactive_showcase.py)** - Run `python examples/scripts/interactive_showcase.py`
 - **API Reference** - Use `help()` on any function or class
 
 ## 🛠️ Advanced Example
@@ -158,7 +158,7 @@ cp.riemann_surface_pv('log', turns=3)      # log: the helicoid
 > distinct from the Riemann **sphere** (`riemann_pv`, a *single-valued* function on the
 > compactified plane).
 
-**⚠️ Pro Tip:** For cinema-quality Riemann relief maps, use PyVista via command-line scripts rather than Jupyter notebooks. The CLI experience offers superior antialiasing and interactivity. Try `python examples/interactive_showcase.py` for the ultimate visualization experience!
+**⚠️ Pro Tip:** For cinema-quality Riemann relief maps, use PyVista via command-line scripts rather than Jupyter notebooks. The CLI experience offers superior antialiasing and interactivity. Try `python examples/scripts/interactive_showcase.py` for the ultimate visualization experience!
 
 ### 📊 Modulus Scaling: The Secret to Beautiful Relief Maps
 
@@ -179,7 +179,7 @@ cp.plot_landscape_pv(domain, f, modulus_mode='custom',
                      modulus_params={'scaling_func': custom_scale})
 ```
 
-Available modes: `none`, `constant`, `linear`, `arctan`, `logarithmic`, `linear_clamp`, `power`, `sigmoid`, `adaptive`, `hybrid`, `custom`. See `examples/modulus_scaling_showcase.py` for comprehensive examples.
+Available modes: `none`, `constant`, `linear`, `arctan`, `logarithmic`, `linear_clamp`, `power`, `sigmoid`, `adaptive`, `hybrid`, `custom`. Pass any of them via the `modulus_mode=` argument shown above.
 
 ### 🎯 Domain Restrictions
 
@@ -229,7 +229,7 @@ Features for perfect mathematical ornaments:
 
 Your mathematical functions become conversation pieces - imagine gifting a physical representation of the Riemann zeta function or decorating with the beauty of elliptic functions!
 
-See `examples/stl_export_demo.ipynb` for a complete guide to creating mathematical ornaments.
+See `examples/notebooks/stl_export_demo.ipynb` for a complete guide to creating mathematical ornaments.
 
 ## 🤝 Contributing
 

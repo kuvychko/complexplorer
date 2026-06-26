@@ -1,129 +1,90 @@
 # Complexplorer Examples
 
-This directory contains tutorials, examples, and interactive demos for the complexplorer library.
+Tutorials, runnable demos, and the rendered gallery for the complexplorer library.
 
-## 📚 Jupyter Notebooks
-
-### 1. Getting Started (`getting_started.ipynb`)
-- Installation and basic setup
-- Your first complex function visualization
-- Introduction to domains and colormaps
-- Basic 2D and 3D plotting
-- **Start here if you're new to complexplorer!**
-
-### 2. Advanced Features (`advanced_features.ipynb`)
-- Enhanced phase portraits with auto-scaling
-- All colormap types in detail
-- High-performance 3D visualization with PyVista
-- Riemann sphere projections
-- Performance optimization tips
-
-### 3. STL Export Demo (`stl_export_demo.ipynb`)
-- Step-by-step guide to 3D printing complex functions
-- Visualize functions on the Riemann sphere
-- Export as STL files with various scaling options
-- Tips for successful 3D printing
-- Custom scaling functions
-
-### 4. API Cookbook (`api_cookbook.ipynb`)
-- Gallery of common complex functions
-- Domain manipulation patterns
-- Colormap selection guide
-- PyVista quality optimization
-- Ready-to-use code recipes
-
-## 🖥️ Interactive Scripts
-
-### 1. Interactive Showcase (`interactive_showcase.py`)
-A comprehensive menu-driven demo that includes:
-- 2D phase portraits
-- 3D landscapes (PyVista)
-- Riemann sphere visualizations
-- STL export for 3D printing
-- Batch processing capabilities
-
-Run with:
-```bash
-python interactive_showcase.py
-```
-
-### 2. Gallery Generator (`generate_gallery.py`)
-Generates a complete gallery of visualizations with code snippets:
-- Creates high-quality images
-- Includes source code for each example
-- Generates HTML index
-- Perfect for documentation
-
-Run with:
-```bash
-python generate_gallery.py [output_directory]
-```
-
-## 🎯 Quick Start Guide
-
-1. **New to complexplorer?** Start with `getting_started.ipynb`
-2. **Want to explore interactively?** Run `python interactive_showcase.py`
-3. **Looking for specific examples?** Check `api_cookbook.ipynb`
-4. **Need high-quality 3D plots?** See PyVista examples in `advanced_features.ipynb`
-
-## 💡 Important Tips
-
-### PyVista in Jupyter Notebooks
-For high-quality 3D visualizations in Jupyter, always use `notebook=False`:
-
-```python
-plotter = cp.plot_landscape_pv(domain, func, notebook=False, show=True)
-```
-
-This opens an external window with full interactivity and anti-aliasing.
-
-### Performance
-- **2D plots**: Use matplotlib (built-in)
-- **3D plots**: Always use PyVista functions (`*_pv`)
-- PyVista is 15-30x faster than matplotlib for 3D
-
-### STL Export
-The library can export 3D-printable STL files. See `stl_export_demo.ipynb` for a complete guide:
-```python
-from complexplorer.export.stl import OrnamentGenerator
-generator = OrnamentGenerator(func, resolution=150)
-generator.generate_ornament('output.stl', size_mm=80)
-```
-
-## 📁 Directory Structure
+## 📁 Layout
 
 ```
 examples/
-├── README.md              # This file
-├── getting_started.ipynb  # Beginner tutorial
-├── advanced_features.ipynb # Advanced topics
-├── stl_export_demo.ipynb  # 3D printing guide
-├── api_cookbook.ipynb     # Code recipes
-├── interactive_showcase.py # Interactive demo
-├── generate_gallery.py    # Gallery generator
-├── gallery/              # Gallery images and old generator
-└── archive/              # Old examples (for reference)
+├── notebooks/   Jupyter tutorials (start here)
+├── scripts/     runnable Python demos (best 3D quality — run from a terminal)
+├── gallery/     rendered gallery images (regenerated from the preset registry)
+└── README.md    this file
 ```
 
-## 🔗 Additional Resources
+> **Backend policy (3.0):** matplotlib powers **2D**; **PyVista powers all 3D** (landscapes,
+> Riemann sphere/relief/surface, STL export). The legacy matplotlib 3D functions
+> (`plot_landscape`, `pair_plot_landscape`, the 3D `riemann`) were removed in 3.0 — use the
+> `*_pv` functions (`plot_landscape_pv`, `pair_plot_landscape_pv`, `riemann_pv`,
+> `riemann_surface_pv`). PyVista is a required dependency.
 
-- [Complexplorer Documentation](https://github.com/YOUR_USERNAME/complexplorer)
-- [Visual Complex Functions](http://www.visual.wegert.com/) - Book by Elias Wegert
-- [PyVista Documentation](https://docs.pyvista.org/) - For 3D visualization
+## 📚 Notebooks (`notebooks/`)
+
+| Notebook | What it covers |
+|---|---|
+| `getting_started.ipynb` | Installation, your first visualization, domains and colormaps, basic 2D/3D — **start here.** |
+| `advanced_features.ipynb` | Enhanced phase portraits, the full colormap family, high-performance PyVista 3D, Riemann sphere. |
+| `stl_export_demo.ipynb` | Step-by-step 3D-printable ornaments: Riemann-sphere relief, scaling options, print tips. |
+| `api_cookbook.ipynb` | Gallery of common functions, domain/colormap patterns, ready-to-use recipes. |
+
+> **PyVista in Jupyter:** the inline notebook backend has severe aliasing. For high-quality
+> 3D, pass `notebook=False` (or use `return_plotter=True`) so an external window opens, or
+> prefer the terminal scripts below.
+
+## 🖥️ Scripts (`scripts/`)
+
+### `interactive_showcase.py` — menu-driven explorer
+
+A command-line interface to explore complex functions with high-quality PyVista 3D output
+(2D phase portraits, 3D landscapes, Riemann sphere). Run it from a terminal for the best
+rendering quality:
+
+```bash
+python examples/scripts/interactive_showcase.py
+```
+
+**Interactive window controls:** left-drag rotate · middle-drag pan · right-drag / scroll
+zoom · `R` reset camera · `S` screenshot · `Q` close. Start at a lower resolution to explore
+quickly, then raise it for a final render. All 3D views include Re/Im/Z orientation axes.
+
+> **Tip:** PyVista renders best from a terminal, **not** inside Jupyter — command-line scripts
+> get superior antialiasing and full interactivity.
+
+## 🎨 Gallery (`gallery/`)
+
+The gallery is **generated from the curated preset registry** (`cp.catalog`) rather than
+hand-maintained. The library is the single source of truth — there is no separate hand-rolled
+generator script here. Render a bundle with the CLI:
+
+```bash
+complexplorer gallery --tag <tag> -o gallery_output    # or: -i <id> ...
+```
+
+This writes a deterministic `index.json` manifest plus per-preset portraits and `card.json`
+records. (Higher-resolution 3D / Riemann / STL gallery renders are produced by the
+`examples/showcase.py` script — added in a follow-up change.)
+
+## 🖨️ STL export (3D printing)
+
+```python
+from complexplorer.export.stl import OrnamentGenerator
+
+generator = OrnamentGenerator(lambda z: z / (z**10 - 1), resolution=150)
+generator.generate_and_save("ornament.stl", size_mm=80)
+```
+
+See `notebooks/stl_export_demo.ipynb` for the full guide.
 
 ## 🐛 Troubleshooting
 
-### "No module named complexplorer"
-Make sure complexplorer is installed:
-```bash
-pip install -e ..  # From the examples directory
-```
+- **`No module named complexplorer`** — install it: `pip install -e .` (from the repo root).
+- **PyVista window doesn't appear** — pass `notebook=False` in Jupyter; ensure a display/GPU
+  with OpenGL is available; try `pip install -U pyvista`.
+- **Low-quality 3D in Jupyter** — expected; the inline backend aliases badly. Use
+  `notebook=False` for an external window, or run the terminal scripts.
 
-### PyVista window doesn't appear
-- Ensure you're using `notebook=False` in Jupyter
-- Check that you have a display available (X11, Wayland, etc.)
-- Try updating PyVista: `pip install -U pyvista`
+## 🔗 Resources
 
-### Low quality 3D plots in Jupyter
-- Always use `notebook=False` for external high-quality windows
-- The inline notebook backend has severe aliasing issues
+- [Complexplorer on GitHub](https://github.com/kuvychko/complexplorer)
+- [Visual Complex Functions](https://link.springer.com/book/10.1007/978-3-0348-0180-5) — Elias Wegert
+- [PyVista documentation](https://docs.pyvista.org/)

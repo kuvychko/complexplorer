@@ -94,6 +94,20 @@ only — rejected; it would silently rot.
 One README is the entry point. The interactive-demo notes become a section there, and the
 standalone file is deleted, removing a second source of truth.
 
+**D6 — `docs/gallery/README.md` is 100% M2's; M1 does not touch it.** (Decided during apply.)
+The careful-review pass found the gallery doc carries a *third* category of staleness beyond
+the planned notebook-link fix and M2's image-link rewire: removed-symbol **code examples**
+(`cp.riemann`, `cp.pair_plot_landscape`, `cp.plot_landscape`). Since M2 regenerates this file
+wholesale from the preset registry (code, images, and prose), splitting its ownership — M1
+fixes some lines, M2 rewrites them — produces throwaway work and a messy half-edited file.
+Resolution: **one file, one owner.** M1 owns symbol-cleanliness + path links for the *general*
+docs only (`README.md`, `docs/README.md`, `docs/pyvista_usage_guide.md`, `backend-policy.md`);
+`docs/gallery/README.md` is left untouched and its staleness rides through the brief M1→M2
+window as M2's explicit responsibility. The M1 spec was narrowed accordingly. *Alternative:*
+M1 makes the gallery doc symbol-clean now — rejected as throwaway against M2's wholesale
+rewrite. *Note:* `pyvista_usage_guide.md` and `backend-policy.md` legitimately *document* the
+mpl-3D removal (with migration guidance); those mentions are correct and are kept, not "fixed."
+
 ## Risks / Trade-offs
 
 - **[Moving notebooks breaks external/bookmarked links]** (e.g. blog posts, PyPI cached
@@ -118,9 +132,12 @@ standalone file is deleted, removing a second source of truth.
    `gallery/README_scripts.md`, `modulus_scaling_showcase.py` (broken mpl-3D), `archive/`,
    `old/`, `README_interactive_demo.md`.
 3. Rewrite `examples/README.md` to the new layout (absorbing the interactive-demo notes).
-4. Sweep notebook/script links in `README.md`, `docs/README.md`, `docs/gallery/README.md`,
-   `docs/pyvista_usage_guide.md` to the new paths; drop the already-dead links; repoint the
-   `modulus_scaling_showcase.py` reference to the modulus-scaling prose (M2 reintroduces it).
+4. Sweep the **general** docs (`README.md`, `docs/README.md`, `docs/pyvista_usage_guide.md`,
+   `docs/development/backend-policy.md`): fix notebook/script links to the new paths; drop the
+   already-dead links; repoint the `modulus_scaling_showcase.py` reference to the
+   modulus-scaling prose (M2 reintroduces it); and ensure no removed mpl-3D function is listed
+   as a currently available API (correct "removed in 3.0 — use `*_pv`" notes are kept).
+   `docs/gallery/README.md` is **not touched** here — it is M2's (see D6).
 5. Add the structural guard test; run the suite.
 
 Rollback: revert the commit; all moves are `git mv` and all deletions are recoverable from

@@ -87,7 +87,7 @@ cp.riemann_pv(
 ### Best Practice: Use the Interactive CLI Demo
 
 ```bash
-python examples/interactive_demo.py
+python examples/scripts/interactive_showcase.py
 ```
 
 This provides:
@@ -181,4 +181,4 @@ grid.save("model.stl")  # STL for 3D printing
 
 ## Conclusion
 
-PyVista provides exceptional 3D visualization capabilities for complex functions, but only when used correctly. Always prioritize command-line usage for any serious visualization work. The `examples/interactive_demo.py` script provides an excellent starting point for exploring these capabilities with full quality.
+PyVista provides exceptional 3D visualization capabilities for complex functions, but only when used correctly. Always prioritize command-line usage for any serious visualization work. The `examples/scripts/interactive_showcase.py` script provides an excellent starting point for exploring these capabilities with full quality.

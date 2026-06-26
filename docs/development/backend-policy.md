@@ -27,12 +27,12 @@ mathematical design to fit the weaker backend.
 
 ## Migration plan
 
-- **2.1 (now):** matplotlib 3D entry points — `plot_landscape`, `pair_plot_landscape`, and
-  the 3D `riemann()` surface — emit a `DeprecationWarning` pointing to their PyVista
+- **2.1:** matplotlib 3D entry points — `plot_landscape`, `pair_plot_landscape`, and
+  the 3D `riemann()` surface — emitted a `DeprecationWarning` pointing to their PyVista
   equivalents (`plot_landscape_pv`, `pair_plot_landscape_pv`, `riemann_pv`). PyVista
-  remains optional, installable via `complexplorer[pyvista]` or its alias
-  `complexplorer[3d]`. New 3D features are PyVista-only.
-- **3.0:** PyVista becomes a **required** dependency. The matplotlib 3D paths above are
+  remained optional, installable via `complexplorer[pyvista]` or its alias
+  `complexplorer[3d]`. New 3D features were PyVista-only.
+- **3.0 (current):** PyVista is a **required** dependency. The matplotlib 3D paths above are
   **removed**. matplotlib remains the 2D backend, including the 2D stereographic charts.
 
 The 2D stereographic charts `riemann_chart` and `riemann_hemispheres` are matplotlib **2D**

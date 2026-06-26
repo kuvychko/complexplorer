@@ -8,9 +8,9 @@ Welcome to the Complexplorer documentation! This library provides elegant visual
 Explore beautiful visualizations with code examples. See phase portraits, analytic landscapes, and Riemann sphere projections.
 
 ### 📖 Tutorials
-- [Getting Started](../examples/getting_started.ipynb) - Quick introduction to complexplorer
-- [Advanced Features](../examples/advanced_features.ipynb) - Enhanced visualizations and PyVista
-- [API Cookbook](../examples/api_cookbook.ipynb) - Code recipes and patterns
+- [Getting Started](../examples/notebooks/getting_started.ipynb) - Quick introduction to complexplorer
+- [Advanced Features](../examples/notebooks/advanced_features.ipynb) - Enhanced visualizations and PyVista
+- [API Cookbook](../examples/notebooks/api_cookbook.ipynb) - Code recipes and patterns
 
 ### 🔧 User Guides
 - [PyVista Usage Guide](pyvista_usage_guide.md) - High-performance 3D visualization
@@ -61,22 +61,21 @@ cp.plot(domain, func, cmap=cmap)
 - `pair_plot()` - Side-by-side domain and codomain
 - `riemann_chart()` - Riemann hemisphere visualization
 
-**3D Visualization (Matplotlib):**
-- `plot_landscape()` - 3D surface plot
-- `pair_plot_landscape()` - Side-by-side 3D plots
-- `riemann()` - Riemann sphere visualization
-
-**3D Visualization (PyVista) - 15-30x faster:**
+**3D Visualization (PyVista — the sole 3D backend):**
 - `plot_landscape_pv()` - High-performance 3D landscape
 - `pair_plot_landscape_pv()` - Side-by-side with linked cameras
 - `riemann_pv()` - Interactive Riemann sphere with modulus scaling
+- `riemann_surface_pv()` - Riemann surface of a multivalued function (sqrt, log, …)
+
+> The matplotlib 3D functions (`plot_landscape`, `pair_plot_landscape`, the 3D `riemann`) were
+> **removed in 3.0** — use the `*_pv` equivalents above. matplotlib remains the 2D backend.
 
 ## 🎯 Interactive Demo
 
 For the best experience with PyVista visualizations:
 
 ```bash
-python examples/interactive_showcase.py
+python examples/scripts/interactive_showcase.py
 ```
 
 This provides a menu-driven interface with:
@@ -88,7 +87,7 @@ This provides a menu-driven interface with:
 ## 🤝 Getting Help
 
 - Browse the [Gallery](gallery/README.md) for visual examples
-- Check the [API Cookbook](../examples/api_cookbook.ipynb) for code patterns
+- Check the [API Cookbook](../examples/notebooks/api_cookbook.ipynb) for code patterns
 - Read the [Technical Reference](technical_reference.md) for deep dives
 - Report issues on [GitHub](https://github.com/user/complexplorer/issues)
 
