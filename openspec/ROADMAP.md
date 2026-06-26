@@ -131,11 +131,13 @@ Phase 5  add-transfer-function-explorer                 2.5     no         plann
               gallery/generate_gallery_images.py); culled archive/+old/; rewrote README
             · new `examples` capability spec (specs 16→17). Seam (D6): docs/gallery
               is 100% M2's. modulus_scaling_showcase deleted (mpl-3D) → M2 rebuilds
-         M2 rebuild-gallery-from-registry               3.0     no         planned
+         M2 rebuild-gallery-from-registry               3.0     no         archived
             · examples/showcase.py (Option B): cp.catalog → hi-res 2D + PyVista
-              3D/riemann/surface/STL screenshots; regenerate COMMITTED-but-
-              regenerable images; rewire README + docs/gallery from the manifest.
-              Library cp.gallery stays PyVista-free + deterministic (untouched)
+              3D/sphere/surface/relief screenshots (1560px); tag-driven render set;
+              split manifest (showcase.json) + generated docs/gallery; colormap
+              gallery. Library cp.gallery + index.json stay deterministic (untouched).
+              Hero banner kept. STL not committed. Riemann spheres use domain=None
+              (full sphere). examples spec 3→8 reqs
          M3 migrate-and-verify-notebooks                3.0     no         planned
             · modernize the 4 notebooks onto the 3.0 surface (fix cp.plot_landscape
               + HAS_PYVISTA breakage); add Riemann-surface + perceptual-family
