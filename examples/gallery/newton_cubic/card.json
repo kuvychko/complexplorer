@@ -1,0 +1,67 @@
+{
+  "answer_key_stats": {
+    "count": 4,
+    "count_by_type": {
+      "pole": 1,
+      "zero": 3
+    },
+    "min_separation": 0.7937005259840998
+  },
+  "cmap_spec": {
+    "auto_scale_r": true,
+    "n_phi": 6,
+    "type": "Phase"
+  },
+  "domain_spec": {
+    "im_length": 4,
+    "re_length": 4,
+    "type": "rectangle"
+  },
+  "expression": "(2*z**3 + 1) / (3*z**2)",
+  "files": {
+    "portrait": "newton_cubic/portrait.png"
+  },
+  "id": "newton_cubic",
+  "scaling_spec": "balanced",
+  "schema_version": 2,
+  "singularities": [
+    {
+      "at": [
+        0.0,
+        0.0
+      ],
+      "order": 2,
+      "type": "pole"
+    },
+    {
+      "at": [
+        0.39685026299205,
+        0.6873648184993013
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -0.7937005259840998,
+        9.720028086279985e-17
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.39685026299205,
+        -0.6873648184993013
+      ],
+      "order": 1,
+      "type": "zero"
+    }
+  ],
+  "story": "The Newton iteration map for z³ - 1: an order-2 pole at 0 and three simple zeros at the cube roots of -1/2.",
+  "tags": [
+    "dynamics",
+    "poles"
+  ],
+  "title": "Newton map (z³ - 1)"
+}

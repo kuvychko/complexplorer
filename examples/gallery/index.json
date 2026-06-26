@@ -1,0 +1,914 @@
+{
+  "complexplorer_version": "3.0.0",
+  "generator": "complexplorer gallery",
+  "presets": [
+    {
+      "answer_key_stats": {
+        "count": 1,
+        "count_by_type": {
+          "branch_point": 1
+        },
+        "min_separation": null
+      },
+      "cmap_spec": {
+        "auto_scale_r": true,
+        "n_phi": 6,
+        "type": "Phase"
+      },
+      "domain_spec": {
+        "im_length": 4,
+        "re_length": 4,
+        "type": "rectangle"
+      },
+      "expression": "z**(1/3)",
+      "files": {
+        "portrait": "cbrt/portrait.png"
+      },
+      "id": "cbrt",
+      "scaling_spec": "balanced",
+      "schema_version": 2,
+      "singularities": [
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "order": 3,
+          "type": "branch_point"
+        }
+      ],
+      "story": "Principal-branch cube root; an order-3 branch point at 0 (three sheets).",
+      "tags": [
+        "branches",
+        "branch-cut-zoo"
+      ],
+      "title": "Cube root"
+    },
+    {
+      "answer_key_stats": {
+        "count": 3,
+        "count_by_type": {
+          "zero": 3
+        },
+        "min_separation": 1.0
+      },
+      "cmap_spec": {
+        "auto_scale_r": true,
+        "n_phi": 6,
+        "type": "Phase"
+      },
+      "domain_spec": {
+        "im_length": 4,
+        "re_length": 4,
+        "type": "rectangle"
+      },
+      "expression": "z**3 - z",
+      "files": {
+        "portrait": "cubic_real_roots/portrait.png"
+      },
+      "id": "cubic_real_roots",
+      "scaling_spec": "balanced",
+      "schema_version": 2,
+      "singularities": [
+        {
+          "at": [
+            -1.0,
+            0.0
+          ],
+          "order": 1,
+          "type": "zero"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "type": "zero"
+        },
+        {
+          "at": [
+            1.0,
+            0.0
+          ],
+          "order": 1,
+          "type": "zero"
+        }
+      ],
+      "story": "Three simple zeros at -1, 0, 1.",
+      "tags": [
+        "basic",
+        "canonical"
+      ],
+      "title": "z³ - z"
+    },
+    {
+      "answer_key_stats": {
+        "count": 1,
+        "count_by_type": {
+          "essential": 1
+        },
+        "min_separation": null
+      },
+      "cmap_spec": {
+        "auto_scale_r": true,
+        "n_phi": 6,
+        "type": "Phase"
+      },
+      "domain_spec": {
+        "inner_radius": 0.2,
+        "outer_radius": 3,
+        "type": "annulus"
+      },
+      "expression": "exp(1 / z)",
+      "files": {
+        "portrait": "essential_exp_inv/portrait.png"
+      },
+      "id": "essential_exp_inv",
+      "scaling_spec": "balanced",
+      "schema_version": 2,
+      "singularities": [
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "order": null,
+          "type": "essential"
+        }
+      ],
+      "story": "exp(1/z) has an essential singularity at 0 — infinitely dense structure nearby.",
+      "tags": [
+        "singularity-detective",
+        "essential"
+      ],
+      "title": "Essential singularity"
+    },
+    {
+      "answer_key_stats": {
+        "count": 0,
+        "count_by_type": {},
+        "min_separation": null
+      },
+      "cmap_spec": {
+        "auto_scale_r": true,
+        "n_phi": 6,
+        "type": "Phase"
+      },
+      "domain_spec": {
+        "im_length": 4,
+        "re_length": 4,
+        "type": "rectangle"
+      },
+      "expression": "exp(z)",
+      "files": {
+        "portrait": "exp/portrait.png"
+      },
+      "id": "exp",
+      "scaling_spec": "balanced",
+      "schema_version": 2,
+      "singularities": [],
+      "story": "Entire and never zero: no finite zeros or poles (an empty answer key).",
+      "tags": [
+        "transcendental",
+        "function-guessr"
+      ],
+      "title": "Exponential"
+    },
+    {
+      "answer_key_stats": {
+        "count": 1,
+        "count_by_type": {
+          "zero": 1
+        },
+        "min_separation": null
+      },
+      "cmap_spec": {
+        "auto_scale_r": true,
+        "n_phi": 6,
+        "type": "Phase"
+      },
+      "domain_spec": {
+        "im_length": 4,
+        "re_length": 4,
+        "type": "rectangle"
+      },
+      "expression": "z",
+      "files": {
+        "portrait": "identity/portrait.png"
+      },
+      "id": "identity",
+      "scaling_spec": "balanced",
+      "schema_version": 2,
+      "singularities": [
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "type": "zero"
+        }
+      ],
+      "story": "The identity map. A single simple zero at the origin; phase winds once.",
+      "tags": [
+        "basic",
+        "canonical",
+        "function-guessr"
+      ],
+      "title": "Identity"
+    },
+    {
+      "answer_key_stats": {
+        "count": 1,
+        "count_by_type": {
+          "branch_point": 1
+        },
+        "min_separation": null
+      },
+      "cmap_spec": {
+        "auto_scale_r": true,
+        "n_phi": 6,
+        "type": "Phase"
+      },
+      "domain_spec": {
+        "im_length": 4,
+        "re_length": 4,
+        "type": "rectangle"
+      },
+      "expression": "log(z)",
+      "files": {
+        "portrait": "log/portrait.png"
+      },
+      "id": "log",
+      "scaling_spec": "balanced",
+      "schema_version": 2,
+      "singularities": [
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "label": "logarithmic",
+          "order": null,
+          "type": "branch_point"
+        }
+      ],
+      "story": "Principal-branch logarithm; a logarithmic (infinite-order) branch point at 0.",
+      "tags": [
+        "branches",
+        "branch-cut-zoo"
+      ],
+      "title": "Natural log"
+    },
+    {
+      "answer_key_stats": {
+        "count": 2,
+        "count_by_type": {
+          "pole": 1,
+          "zero": 1
+        },
+        "min_separation": 2.0
+      },
+      "cmap_spec": {
+        "auto_scale_r": true,
+        "n_phi": 6,
+        "type": "Phase"
+      },
+      "domain_spec": {
+        "im_length": 4,
+        "re_length": 4,
+        "type": "rectangle"
+      },
+      "expression": "(z - 1) / (z + 1)",
+      "files": {
+        "portrait": "mobius_cayley/portrait.png"
+      },
+      "id": "mobius_cayley",
+      "scaling_spec": "balanced",
+      "schema_version": 2,
+      "singularities": [
+        {
+          "at": [
+            1.0,
+            0.0
+          ],
+          "order": 1,
+          "type": "zero"
+        },
+        {
+          "at": [
+            -1.0,
+            0.0
+          ],
+          "order": 1,
+          "type": "pole"
+        }
+      ],
+      "story": "One zero at +1, one pole at -1. Maps the right half-plane to the unit disk.",
+      "tags": [
+        "basic",
+        "canonical",
+        "mobius"
+      ],
+      "title": "Cayley transform"
+    },
+    {
+      "answer_key_stats": {
+        "count": 4,
+        "count_by_type": {
+          "pole": 1,
+          "zero": 3
+        },
+        "min_separation": 0.7937005259840998
+      },
+      "cmap_spec": {
+        "auto_scale_r": true,
+        "n_phi": 6,
+        "type": "Phase"
+      },
+      "domain_spec": {
+        "im_length": 4,
+        "re_length": 4,
+        "type": "rectangle"
+      },
+      "expression": "(2*z**3 + 1) / (3*z**2)",
+      "files": {
+        "portrait": "newton_cubic/portrait.png"
+      },
+      "id": "newton_cubic",
+      "scaling_spec": "balanced",
+      "schema_version": 2,
+      "singularities": [
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "type": "pole"
+        },
+        {
+          "at": [
+            0.39685026299205,
+            0.6873648184993013
+          ],
+          "order": 1,
+          "type": "zero"
+        },
+        {
+          "at": [
+            -0.7937005259840998,
+            9.720028086279985e-17
+          ],
+          "order": 1,
+          "type": "zero"
+        },
+        {
+          "at": [
+            0.39685026299205,
+            -0.6873648184993013
+          ],
+          "order": 1,
+          "type": "zero"
+        }
+      ],
+      "story": "The Newton iteration map for z³ - 1: an order-2 pole at 0 and three simple zeros at the cube roots of -1/2.",
+      "tags": [
+        "dynamics",
+        "poles"
+      ],
+      "title": "Newton map (z³ - 1)"
+    },
+    {
+      "answer_key_stats": {
+        "count": 11,
+        "count_by_type": {
+          "pole": 10,
+          "zero": 1
+        },
+        "min_separation": 0.6180339887498948
+      },
+      "cmap_spec": {
+        "auto_scale_r": true,
+        "n_phi": 6,
+        "type": "Phase"
+      },
+      "domain_spec": {
+        "inner_radius": 0.2,
+        "outer_radius": 3,
+        "type": "annulus"
+      },
+      "expression": "z / (z**10 - 1)",
+      "files": {
+        "portrait": "pole_flower_10/portrait.png"
+      },
+      "id": "pole_flower_10",
+      "scaling_spec": "poles_emphasis",
+      "schema_version": 2,
+      "singularities": [
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "type": "zero"
+        },
+        {
+          "at": [
+            1.0,
+            0.0
+          ],
+          "order": 1,
+          "type": "pole"
+        },
+        {
+          "at": [
+            0.8090169943749475,
+            0.5877852522924731
+          ],
+          "order": 1,
+          "type": "pole"
+        },
+        {
+          "at": [
+            0.30901699437494745,
+            0.9510565162951535
+          ],
+          "order": 1,
+          "type": "pole"
+        },
+        {
+          "at": [
+            -0.30901699437494734,
+            0.9510565162951536
+          ],
+          "order": 1,
+          "type": "pole"
+        },
+        {
+          "at": [
+            -0.8090169943749473,
+            0.5877852522924732
+          ],
+          "order": 1,
+          "type": "pole"
+        },
+        {
+          "at": [
+            -1.0,
+            1.2246467991473532e-16
+          ],
+          "order": 1,
+          "type": "pole"
+        },
+        {
+          "at": [
+            -0.8090169943749475,
+            -0.587785252292473
+          ],
+          "order": 1,
+          "type": "pole"
+        },
+        {
+          "at": [
+            -0.30901699437494756,
+            -0.9510565162951535
+          ],
+          "order": 1,
+          "type": "pole"
+        },
+        {
+          "at": [
+            0.30901699437494723,
+            -0.9510565162951536
+          ],
+          "order": 1,
+          "type": "pole"
+        },
+        {
+          "at": [
+            0.8090169943749473,
+            -0.5877852522924734
+          ],
+          "order": 1,
+          "type": "pole"
+        }
+      ],
+      "story": "A ring of ten simple poles (the 10th roots of unity) around a central simple zero. The signature printable ornament.",
+      "tags": [
+        "ornament",
+        "poles",
+        "canonical",
+        "singularity-detective"
+      ],
+      "title": "Pole Flower 10"
+    },
+    {
+      "answer_key_stats": {
+        "count": 1,
+        "count_by_type": {
+          "pole": 1
+        },
+        "min_separation": null
+      },
+      "cmap_spec": {
+        "auto_scale_r": true,
+        "n_phi": 6,
+        "type": "Phase"
+      },
+      "domain_spec": {
+        "inner_radius": 0.2,
+        "outer_radius": 3,
+        "type": "annulus"
+      },
+      "expression": "1 / z**2",
+      "files": {
+        "portrait": "pole_order_2/portrait.png"
+      },
+      "id": "pole_order_2",
+      "scaling_spec": "balanced",
+      "schema_version": 2,
+      "singularities": [
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "type": "pole"
+        }
+      ],
+      "story": "An order-2 pole at the origin; phase winds backward twice.",
+      "tags": [
+        "poles",
+        "singularity-detective"
+      ],
+      "title": "Double pole"
+    },
+    {
+      "answer_key_stats": {
+        "count": 1,
+        "count_by_type": {
+          "pole": 1
+        },
+        "min_separation": null
+      },
+      "cmap_spec": {
+        "auto_scale_r": true,
+        "n_phi": 6,
+        "type": "Phase"
+      },
+      "domain_spec": {
+        "inner_radius": 0.2,
+        "outer_radius": 3,
+        "type": "annulus"
+      },
+      "expression": "1 / z**3",
+      "files": {
+        "portrait": "pole_order_3/portrait.png"
+      },
+      "id": "pole_order_3",
+      "scaling_spec": "balanced",
+      "schema_version": 2,
+      "singularities": [
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "order": 3,
+          "type": "pole"
+        }
+      ],
+      "story": "An order-3 pole at the origin.",
+      "tags": [
+        "poles",
+        "singularity-detective"
+      ],
+      "title": "Triple pole"
+    },
+    {
+      "answer_key_stats": {
+        "count": 4,
+        "count_by_type": {
+          "pole": 2,
+          "zero": 2
+        },
+        "min_separation": 1.4142135623730951
+      },
+      "cmap_spec": {
+        "auto_scale_r": true,
+        "n_phi": 6,
+        "type": "Phase"
+      },
+      "domain_spec": {
+        "im_length": 4,
+        "re_length": 4,
+        "type": "rectangle"
+      },
+      "expression": "(z**2 - 1) / (z**2 + 1)",
+      "files": {
+        "portrait": "rational_zeros_poles/portrait.png"
+      },
+      "id": "rational_zeros_poles",
+      "scaling_spec": "balanced",
+      "schema_version": 2,
+      "singularities": [
+        {
+          "at": [
+            -1.0,
+            0.0
+          ],
+          "order": 1,
+          "type": "zero"
+        },
+        {
+          "at": [
+            1.0,
+            0.0
+          ],
+          "order": 1,
+          "type": "zero"
+        },
+        {
+          "at": [
+            0.0,
+            1.0
+          ],
+          "label": "i",
+          "order": 1,
+          "type": "pole"
+        },
+        {
+          "at": [
+            -0.0,
+            -1.0
+          ],
+          "label": "-i",
+          "order": 1,
+          "type": "pole"
+        }
+      ],
+      "story": "Zeros at ±1, poles at ±i.",
+      "tags": [
+        "canonical",
+        "singularity-detective"
+      ],
+      "title": "(z² - 1)/(z² + 1)"
+    },
+    {
+      "answer_key_stats": {
+        "count": 1,
+        "count_by_type": {
+          "pole": 1
+        },
+        "min_separation": null
+      },
+      "cmap_spec": {
+        "auto_scale_r": true,
+        "n_phi": 6,
+        "type": "Phase"
+      },
+      "domain_spec": {
+        "inner_radius": 0.2,
+        "outer_radius": 3,
+        "type": "annulus"
+      },
+      "expression": "1 / z",
+      "files": {
+        "portrait": "reciprocal/portrait.png"
+      },
+      "id": "reciprocal",
+      "scaling_spec": "balanced",
+      "schema_version": 2,
+      "singularities": [
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "type": "pole"
+        }
+      ],
+      "story": "A simple pole at the origin (Möbius inversion); phase winds backward.",
+      "tags": [
+        "basic",
+        "canonical",
+        "poles",
+        "function-guessr"
+      ],
+      "title": "1 / z"
+    },
+    {
+      "answer_key_stats": {
+        "count": 3,
+        "count_by_type": {
+          "zero": 3
+        },
+        "min_separation": 3.141592653589793
+      },
+      "cmap_spec": {
+        "auto_scale_r": true,
+        "n_phi": 6,
+        "type": "Phase"
+      },
+      "domain_spec": {
+        "im_length": 4,
+        "re_length": 8,
+        "type": "rectangle"
+      },
+      "expression": "sin(z)",
+      "files": {
+        "portrait": "sine/portrait.png"
+      },
+      "id": "sine",
+      "scaling_spec": "balanced",
+      "schema_version": 2,
+      "singularities": [
+        {
+          "at": [
+            -3.141592653589793,
+            0.0
+          ],
+          "label": "-pi",
+          "order": 1,
+          "type": "zero"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "type": "zero"
+        },
+        {
+          "at": [
+            3.141592653589793,
+            0.0
+          ],
+          "label": "pi",
+          "order": 1,
+          "type": "zero"
+        }
+      ],
+      "story": "Simple zeros at integer multiples of pi (−pi, 0, pi shown).",
+      "tags": [
+        "transcendental",
+        "function-guessr"
+      ],
+      "title": "Sine"
+    },
+    {
+      "answer_key_stats": {
+        "count": 1,
+        "count_by_type": {
+          "branch_point": 1
+        },
+        "min_separation": null
+      },
+      "cmap_spec": {
+        "auto_scale_r": true,
+        "n_phi": 6,
+        "type": "Phase"
+      },
+      "domain_spec": {
+        "im_length": 4,
+        "re_length": 4,
+        "type": "rectangle"
+      },
+      "expression": "sqrt(z)",
+      "files": {
+        "portrait": "sqrt/portrait.png"
+      },
+      "id": "sqrt",
+      "scaling_spec": "balanced",
+      "schema_version": 2,
+      "singularities": [
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "type": "branch_point"
+        }
+      ],
+      "story": "Principal-branch square root; an order-2 branch point at 0 (two sheets).",
+      "tags": [
+        "branches",
+        "branch-cut-zoo",
+        "ornament"
+      ],
+      "title": "Square root"
+    },
+    {
+      "answer_key_stats": {
+        "count": 1,
+        "count_by_type": {
+          "zero": 1
+        },
+        "min_separation": null
+      },
+      "cmap_spec": {
+        "auto_scale_r": true,
+        "n_phi": 6,
+        "type": "Phase"
+      },
+      "domain_spec": {
+        "im_length": 4,
+        "re_length": 4,
+        "type": "rectangle"
+      },
+      "expression": "z**2",
+      "files": {
+        "portrait": "square/portrait.png"
+      },
+      "id": "square",
+      "scaling_spec": "balanced",
+      "schema_version": 2,
+      "singularities": [
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "type": "zero"
+        }
+      ],
+      "story": "A double zero at the origin; phase winds twice.",
+      "tags": [
+        "basic",
+        "canonical",
+        "function-guessr"
+      ],
+      "title": "z squared"
+    },
+    {
+      "answer_key_stats": {
+        "count": 3,
+        "count_by_type": {
+          "pole": 2,
+          "zero": 1
+        },
+        "min_separation": 1.5707963267948966
+      },
+      "cmap_spec": {
+        "auto_scale_r": true,
+        "n_phi": 6,
+        "type": "Phase"
+      },
+      "domain_spec": {
+        "im_length": 4,
+        "re_length": 4,
+        "type": "rectangle"
+      },
+      "expression": "tan(z)",
+      "files": {
+        "portrait": "tangent/portrait.png"
+      },
+      "id": "tangent",
+      "scaling_spec": "balanced",
+      "schema_version": 2,
+      "singularities": [
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "type": "zero"
+        },
+        {
+          "at": [
+            1.5707963267948966,
+            0.0
+          ],
+          "label": "pi/2",
+          "order": 1,
+          "type": "pole"
+        },
+        {
+          "at": [
+            -1.5707963267948966,
+            0.0
+          ],
+          "label": "-pi/2",
+          "order": 1,
+          "type": "pole"
+        }
+      ],
+      "story": "Zero at 0; simple poles at ±pi/2 (within the shown window).",
+      "tags": [
+        "transcendental",
+        "singularity-detective"
+      ],
+      "title": "Tangent"
+    }
+  ],
+  "schema_version": 2
+}

@@ -1,0 +1,61 @@
+{
+  "answer_key_stats": {
+    "count": 3,
+    "count_by_type": {
+      "pole": 2,
+      "zero": 1
+    },
+    "min_separation": 1.5707963267948966
+  },
+  "cmap_spec": {
+    "auto_scale_r": true,
+    "n_phi": 6,
+    "type": "Phase"
+  },
+  "domain_spec": {
+    "im_length": 4,
+    "re_length": 4,
+    "type": "rectangle"
+  },
+  "expression": "tan(z)",
+  "files": {
+    "portrait": "tangent/portrait.png"
+  },
+  "id": "tangent",
+  "scaling_spec": "balanced",
+  "schema_version": 2,
+  "singularities": [
+    {
+      "at": [
+        0.0,
+        0.0
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        1.5707963267948966,
+        0.0
+      ],
+      "label": "pi/2",
+      "order": 1,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -1.5707963267948966,
+        0.0
+      ],
+      "label": "-pi/2",
+      "order": 1,
+      "type": "pole"
+    }
+  ],
+  "story": "Zero at 0; simple poles at ±pi/2 (within the shown window).",
+  "tags": [
+    "transcendental",
+    "singularity-detective"
+  ],
+  "title": "Tangent"
+}

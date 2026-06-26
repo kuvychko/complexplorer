@@ -1,0 +1,43 @@
+{
+  "answer_key_stats": {
+    "count": 1,
+    "count_by_type": {
+      "branch_point": 1
+    },
+    "min_separation": null
+  },
+  "cmap_spec": {
+    "auto_scale_r": true,
+    "n_phi": 6,
+    "type": "Phase"
+  },
+  "domain_spec": {
+    "im_length": 4,
+    "re_length": 4,
+    "type": "rectangle"
+  },
+  "expression": "log(z)",
+  "files": {
+    "portrait": "log/portrait.png"
+  },
+  "id": "log",
+  "scaling_spec": "balanced",
+  "schema_version": 2,
+  "singularities": [
+    {
+      "at": [
+        0.0,
+        0.0
+      ],
+      "label": "logarithmic",
+      "order": null,
+      "type": "branch_point"
+    }
+  ],
+  "story": "Principal-branch logarithm; a logarithmic (infinite-order) branch point at 0.",
+  "tags": [
+    "branches",
+    "branch-cut-zoo"
+  ],
+  "title": "Natural log"
+}

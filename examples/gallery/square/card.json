@@ -1,0 +1,43 @@
+{
+  "answer_key_stats": {
+    "count": 1,
+    "count_by_type": {
+      "zero": 1
+    },
+    "min_separation": null
+  },
+  "cmap_spec": {
+    "auto_scale_r": true,
+    "n_phi": 6,
+    "type": "Phase"
+  },
+  "domain_spec": {
+    "im_length": 4,
+    "re_length": 4,
+    "type": "rectangle"
+  },
+  "expression": "z**2",
+  "files": {
+    "portrait": "square/portrait.png"
+  },
+  "id": "square",
+  "scaling_spec": "balanced",
+  "schema_version": 2,
+  "singularities": [
+    {
+      "at": [
+        0.0,
+        0.0
+      ],
+      "order": 2,
+      "type": "zero"
+    }
+  ],
+  "story": "A double zero at the origin; phase winds twice.",
+  "tags": [
+    "basic",
+    "canonical",
+    "function-guessr"
+  ],
+  "title": "z squared"
+}

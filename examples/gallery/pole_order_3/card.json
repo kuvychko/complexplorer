@@ -1,0 +1,42 @@
+{
+  "answer_key_stats": {
+    "count": 1,
+    "count_by_type": {
+      "pole": 1
+    },
+    "min_separation": null
+  },
+  "cmap_spec": {
+    "auto_scale_r": true,
+    "n_phi": 6,
+    "type": "Phase"
+  },
+  "domain_spec": {
+    "inner_radius": 0.2,
+    "outer_radius": 3,
+    "type": "annulus"
+  },
+  "expression": "1 / z**3",
+  "files": {
+    "portrait": "pole_order_3/portrait.png"
+  },
+  "id": "pole_order_3",
+  "scaling_spec": "balanced",
+  "schema_version": 2,
+  "singularities": [
+    {
+      "at": [
+        0.0,
+        0.0
+      ],
+      "order": 3,
+      "type": "pole"
+    }
+  ],
+  "story": "An order-3 pole at the origin.",
+  "tags": [
+    "poles",
+    "singularity-detective"
+  ],
+  "title": "Triple pole"
+}

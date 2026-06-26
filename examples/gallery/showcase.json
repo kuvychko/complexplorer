@@ -1,0 +1,301 @@
+{
+  "banner": "Riemann_relief_map_20250726.png",
+  "colormaps": {
+    "reference_preset": "rational_zeros_poles",
+    "renders": [
+      {
+        "ctor": "cp.Phase()",
+        "file": "_colormaps/phase_basic.png",
+        "name": "phase_basic"
+      },
+      {
+        "ctor": "cp.Phase(n_phi=6)",
+        "file": "_colormaps/phase_enhanced.png",
+        "name": "phase_enhanced"
+      },
+      {
+        "ctor": "cp.Phase(r_linear_step=0.6)",
+        "file": "_colormaps/phase_modulus.png",
+        "name": "phase_modulus"
+      },
+      {
+        "ctor": "cp.Phase(n_phi=6, auto_scale_r=True)",
+        "file": "_colormaps/phase_full.png",
+        "name": "phase_full"
+      },
+      {
+        "ctor": "cp.Chessboard(spacing=0.25)",
+        "file": "_colormaps/chessboard.png",
+        "name": "chessboard"
+      },
+      {
+        "ctor": "cp.PolarChessboard(n_phi=6, spacing=0.25)",
+        "file": "_colormaps/polar_linear.png",
+        "name": "polar_linear"
+      },
+      {
+        "ctor": "cp.PolarChessboard(n_phi=6, r_log=np.e)",
+        "file": "_colormaps/polar_log.png",
+        "name": "polar_log"
+      },
+      {
+        "ctor": "cp.LogRings(log_spacing=0.2)",
+        "file": "_colormaps/logrings.png",
+        "name": "logrings"
+      }
+    ]
+  },
+  "complexplorer_version": "3.0.0",
+  "generator": "complexplorer showcase",
+  "presets": [
+    {
+      "expression": "z**(1/3)",
+      "id": "cbrt",
+      "renders": {
+        "portrait": "cbrt/portrait.png",
+        "surface": "cbrt/surface.png"
+      },
+      "story": "Principal-branch cube root; an order-3 branch point at 0 (three sheets).",
+      "tags": [
+        "branches",
+        "branch-cut-zoo"
+      ],
+      "title": "Cube root"
+    },
+    {
+      "expression": "z**3 - z",
+      "id": "cubic_real_roots",
+      "renders": {
+        "landscape": "cubic_real_roots/landscape.png",
+        "portrait": "cubic_real_roots/portrait.png",
+        "sphere": "cubic_real_roots/sphere.png"
+      },
+      "story": "Three simple zeros at -1, 0, 1.",
+      "tags": [
+        "basic",
+        "canonical"
+      ],
+      "title": "z³ - z"
+    },
+    {
+      "expression": "exp(1 / z)",
+      "id": "essential_exp_inv",
+      "renders": {
+        "portrait": "essential_exp_inv/portrait.png"
+      },
+      "story": "exp(1/z) has an essential singularity at 0 — infinitely dense structure nearby.",
+      "tags": [
+        "singularity-detective",
+        "essential"
+      ],
+      "title": "Essential singularity"
+    },
+    {
+      "expression": "exp(z)",
+      "id": "exp",
+      "renders": {
+        "portrait": "exp/portrait.png"
+      },
+      "story": "Entire and never zero: no finite zeros or poles (an empty answer key).",
+      "tags": [
+        "transcendental",
+        "function-guessr"
+      ],
+      "title": "Exponential"
+    },
+    {
+      "expression": "z",
+      "id": "identity",
+      "renders": {
+        "landscape": "identity/landscape.png",
+        "portrait": "identity/portrait.png",
+        "sphere": "identity/sphere.png"
+      },
+      "story": "The identity map. A single simple zero at the origin; phase winds once.",
+      "tags": [
+        "basic",
+        "canonical",
+        "function-guessr"
+      ],
+      "title": "Identity"
+    },
+    {
+      "expression": "log(z)",
+      "id": "log",
+      "renders": {
+        "portrait": "log/portrait.png",
+        "surface": "log/surface.png"
+      },
+      "story": "Principal-branch logarithm; a logarithmic (infinite-order) branch point at 0.",
+      "tags": [
+        "branches",
+        "branch-cut-zoo"
+      ],
+      "title": "Natural log"
+    },
+    {
+      "expression": "(z - 1) / (z + 1)",
+      "id": "mobius_cayley",
+      "renders": {
+        "landscape": "mobius_cayley/landscape.png",
+        "portrait": "mobius_cayley/portrait.png",
+        "sphere": "mobius_cayley/sphere.png"
+      },
+      "story": "One zero at +1, one pole at -1. Maps the right half-plane to the unit disk.",
+      "tags": [
+        "basic",
+        "canonical",
+        "mobius"
+      ],
+      "title": "Cayley transform"
+    },
+    {
+      "expression": "(2*z**3 + 1) / (3*z**2)",
+      "id": "newton_cubic",
+      "renders": {
+        "portrait": "newton_cubic/portrait.png"
+      },
+      "story": "The Newton iteration map for z³ - 1: an order-2 pole at 0 and three simple zeros at the cube roots of -1/2.",
+      "tags": [
+        "dynamics",
+        "poles"
+      ],
+      "title": "Newton map (z³ - 1)"
+    },
+    {
+      "expression": "z / (z**10 - 1)",
+      "id": "pole_flower_10",
+      "renders": {
+        "landscape": "pole_flower_10/landscape.png",
+        "ornament": "pole_flower_10/ornament.png",
+        "portrait": "pole_flower_10/portrait.png",
+        "sphere": "pole_flower_10/sphere.png"
+      },
+      "story": "A ring of ten simple poles (the 10th roots of unity) around a central simple zero. The signature printable ornament.",
+      "tags": [
+        "ornament",
+        "poles",
+        "canonical",
+        "singularity-detective"
+      ],
+      "title": "Pole Flower 10"
+    },
+    {
+      "expression": "1 / z**2",
+      "id": "pole_order_2",
+      "renders": {
+        "portrait": "pole_order_2/portrait.png"
+      },
+      "story": "An order-2 pole at the origin; phase winds backward twice.",
+      "tags": [
+        "poles",
+        "singularity-detective"
+      ],
+      "title": "Double pole"
+    },
+    {
+      "expression": "1 / z**3",
+      "id": "pole_order_3",
+      "renders": {
+        "portrait": "pole_order_3/portrait.png"
+      },
+      "story": "An order-3 pole at the origin.",
+      "tags": [
+        "poles",
+        "singularity-detective"
+      ],
+      "title": "Triple pole"
+    },
+    {
+      "expression": "(z**2 - 1) / (z**2 + 1)",
+      "id": "rational_zeros_poles",
+      "renders": {
+        "landscape": "rational_zeros_poles/landscape.png",
+        "portrait": "rational_zeros_poles/portrait.png",
+        "sphere": "rational_zeros_poles/sphere.png"
+      },
+      "story": "Zeros at ±1, poles at ±i.",
+      "tags": [
+        "canonical",
+        "singularity-detective"
+      ],
+      "title": "(z² - 1)/(z² + 1)"
+    },
+    {
+      "expression": "1 / z",
+      "id": "reciprocal",
+      "renders": {
+        "landscape": "reciprocal/landscape.png",
+        "portrait": "reciprocal/portrait.png",
+        "sphere": "reciprocal/sphere.png"
+      },
+      "story": "A simple pole at the origin (Möbius inversion); phase winds backward.",
+      "tags": [
+        "basic",
+        "canonical",
+        "poles",
+        "function-guessr"
+      ],
+      "title": "1 / z"
+    },
+    {
+      "expression": "sin(z)",
+      "id": "sine",
+      "renders": {
+        "portrait": "sine/portrait.png"
+      },
+      "story": "Simple zeros at integer multiples of pi (−pi, 0, pi shown).",
+      "tags": [
+        "transcendental",
+        "function-guessr"
+      ],
+      "title": "Sine"
+    },
+    {
+      "expression": "sqrt(z)",
+      "id": "sqrt",
+      "renders": {
+        "ornament": "sqrt/ornament.png",
+        "portrait": "sqrt/portrait.png",
+        "surface": "sqrt/surface.png"
+      },
+      "story": "Principal-branch square root; an order-2 branch point at 0 (two sheets).",
+      "tags": [
+        "branches",
+        "branch-cut-zoo",
+        "ornament"
+      ],
+      "title": "Square root"
+    },
+    {
+      "expression": "z**2",
+      "id": "square",
+      "renders": {
+        "landscape": "square/landscape.png",
+        "portrait": "square/portrait.png",
+        "sphere": "square/sphere.png"
+      },
+      "story": "A double zero at the origin; phase winds twice.",
+      "tags": [
+        "basic",
+        "canonical",
+        "function-guessr"
+      ],
+      "title": "z squared"
+    },
+    {
+      "expression": "tan(z)",
+      "id": "tangent",
+      "renders": {
+        "portrait": "tangent/portrait.png"
+      },
+      "story": "Zero at 0; simple poles at ±pi/2 (within the shown window).",
+      "tags": [
+        "transcendental",
+        "singularity-detective"
+      ],
+      "title": "Tangent"
+    }
+  ],
+  "schema_version": 1
+}

@@ -1,0 +1,69 @@
+{
+  "answer_key_stats": {
+    "count": 4,
+    "count_by_type": {
+      "pole": 2,
+      "zero": 2
+    },
+    "min_separation": 1.4142135623730951
+  },
+  "cmap_spec": {
+    "auto_scale_r": true,
+    "n_phi": 6,
+    "type": "Phase"
+  },
+  "domain_spec": {
+    "im_length": 4,
+    "re_length": 4,
+    "type": "rectangle"
+  },
+  "expression": "(z**2 - 1) / (z**2 + 1)",
+  "files": {
+    "portrait": "rational_zeros_poles/portrait.png"
+  },
+  "id": "rational_zeros_poles",
+  "scaling_spec": "balanced",
+  "schema_version": 2,
+  "singularities": [
+    {
+      "at": [
+        -1.0,
+        0.0
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        1.0,
+        0.0
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.0,
+        1.0
+      ],
+      "label": "i",
+      "order": 1,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -0.0,
+        -1.0
+      ],
+      "label": "-i",
+      "order": 1,
+      "type": "pole"
+    }
+  ],
+  "story": "Zeros at ±1, poles at ±i.",
+  "tags": [
+    "canonical",
+    "singularity-detective"
+  ],
+  "title": "(z² - 1)/(z² + 1)"
+}

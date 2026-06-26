@@ -1,0 +1,60 @@
+{
+  "answer_key_stats": {
+    "count": 3,
+    "count_by_type": {
+      "zero": 3
+    },
+    "min_separation": 3.141592653589793
+  },
+  "cmap_spec": {
+    "auto_scale_r": true,
+    "n_phi": 6,
+    "type": "Phase"
+  },
+  "domain_spec": {
+    "im_length": 4,
+    "re_length": 8,
+    "type": "rectangle"
+  },
+  "expression": "sin(z)",
+  "files": {
+    "portrait": "sine/portrait.png"
+  },
+  "id": "sine",
+  "scaling_spec": "balanced",
+  "schema_version": 2,
+  "singularities": [
+    {
+      "at": [
+        -3.141592653589793,
+        0.0
+      ],
+      "label": "-pi",
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.0,
+        0.0
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        3.141592653589793,
+        0.0
+      ],
+      "label": "pi",
+      "order": 1,
+      "type": "zero"
+    }
+  ],
+  "story": "Simple zeros at integer multiples of pi (−pi, 0, pi shown).",
+  "tags": [
+    "transcendental",
+    "function-guessr"
+  ],
+  "title": "Sine"
+}

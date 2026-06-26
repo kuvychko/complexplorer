@@ -1,0 +1,52 @@
+{
+  "answer_key_stats": {
+    "count": 2,
+    "count_by_type": {
+      "pole": 1,
+      "zero": 1
+    },
+    "min_separation": 2.0
+  },
+  "cmap_spec": {
+    "auto_scale_r": true,
+    "n_phi": 6,
+    "type": "Phase"
+  },
+  "domain_spec": {
+    "im_length": 4,
+    "re_length": 4,
+    "type": "rectangle"
+  },
+  "expression": "(z - 1) / (z + 1)",
+  "files": {
+    "portrait": "mobius_cayley/portrait.png"
+  },
+  "id": "mobius_cayley",
+  "scaling_spec": "balanced",
+  "schema_version": 2,
+  "singularities": [
+    {
+      "at": [
+        1.0,
+        0.0
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -1.0,
+        0.0
+      ],
+      "order": 1,
+      "type": "pole"
+    }
+  ],
+  "story": "One zero at +1, one pole at -1. Maps the right half-plane to the unit disk.",
+  "tags": [
+    "basic",
+    "canonical",
+    "mobius"
+  ],
+  "title": "Cayley transform"
+}

@@ -1,0 +1,42 @@
+{
+  "answer_key_stats": {
+    "count": 1,
+    "count_by_type": {
+      "pole": 1
+    },
+    "min_separation": null
+  },
+  "cmap_spec": {
+    "auto_scale_r": true,
+    "n_phi": 6,
+    "type": "Phase"
+  },
+  "domain_spec": {
+    "inner_radius": 0.2,
+    "outer_radius": 3,
+    "type": "annulus"
+  },
+  "expression": "1 / z**2",
+  "files": {
+    "portrait": "pole_order_2/portrait.png"
+  },
+  "id": "pole_order_2",
+  "scaling_spec": "balanced",
+  "schema_version": 2,
+  "singularities": [
+    {
+      "at": [
+        0.0,
+        0.0
+      ],
+      "order": 2,
+      "type": "pole"
+    }
+  ],
+  "story": "An order-2 pole at the origin; phase winds backward twice.",
+  "tags": [
+    "poles",
+    "singularity-detective"
+  ],
+  "title": "Double pole"
+}

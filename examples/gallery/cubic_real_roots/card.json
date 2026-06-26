@@ -1,0 +1,58 @@
+{
+  "answer_key_stats": {
+    "count": 3,
+    "count_by_type": {
+      "zero": 3
+    },
+    "min_separation": 1.0
+  },
+  "cmap_spec": {
+    "auto_scale_r": true,
+    "n_phi": 6,
+    "type": "Phase"
+  },
+  "domain_spec": {
+    "im_length": 4,
+    "re_length": 4,
+    "type": "rectangle"
+  },
+  "expression": "z**3 - z",
+  "files": {
+    "portrait": "cubic_real_roots/portrait.png"
+  },
+  "id": "cubic_real_roots",
+  "scaling_spec": "balanced",
+  "schema_version": 2,
+  "singularities": [
+    {
+      "at": [
+        -1.0,
+        0.0
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.0,
+        0.0
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        1.0,
+        0.0
+      ],
+      "order": 1,
+      "type": "zero"
+    }
+  ],
+  "story": "Three simple zeros at -1, 0, 1.",
+  "tags": [
+    "basic",
+    "canonical"
+  ],
+  "title": "z³ - z"
+}

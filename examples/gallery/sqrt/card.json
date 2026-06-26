@@ -1,0 +1,43 @@
+{
+  "answer_key_stats": {
+    "count": 1,
+    "count_by_type": {
+      "branch_point": 1
+    },
+    "min_separation": null
+  },
+  "cmap_spec": {
+    "auto_scale_r": true,
+    "n_phi": 6,
+    "type": "Phase"
+  },
+  "domain_spec": {
+    "im_length": 4,
+    "re_length": 4,
+    "type": "rectangle"
+  },
+  "expression": "sqrt(z)",
+  "files": {
+    "portrait": "sqrt/portrait.png"
+  },
+  "id": "sqrt",
+  "scaling_spec": "balanced",
+  "schema_version": 2,
+  "singularities": [
+    {
+      "at": [
+        0.0,
+        0.0
+      ],
+      "order": 2,
+      "type": "branch_point"
+    }
+  ],
+  "story": "Principal-branch square root; an order-2 branch point at 0 (two sheets).",
+  "tags": [
+    "branches",
+    "branch-cut-zoo",
+    "ornament"
+  ],
+  "title": "Square root"
+}

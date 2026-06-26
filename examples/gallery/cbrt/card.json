@@ -1,0 +1,42 @@
+{
+  "answer_key_stats": {
+    "count": 1,
+    "count_by_type": {
+      "branch_point": 1
+    },
+    "min_separation": null
+  },
+  "cmap_spec": {
+    "auto_scale_r": true,
+    "n_phi": 6,
+    "type": "Phase"
+  },
+  "domain_spec": {
+    "im_length": 4,
+    "re_length": 4,
+    "type": "rectangle"
+  },
+  "expression": "z**(1/3)",
+  "files": {
+    "portrait": "cbrt/portrait.png"
+  },
+  "id": "cbrt",
+  "scaling_spec": "balanced",
+  "schema_version": 2,
+  "singularities": [
+    {
+      "at": [
+        0.0,
+        0.0
+      ],
+      "order": 3,
+      "type": "branch_point"
+    }
+  ],
+  "story": "Principal-branch cube root; an order-3 branch point at 0 (three sheets).",
+  "tags": [
+    "branches",
+    "branch-cut-zoo"
+  ],
+  "title": "Cube root"
+}

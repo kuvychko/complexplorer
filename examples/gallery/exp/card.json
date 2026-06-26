@@ -1,0 +1,31 @@
+{
+  "answer_key_stats": {
+    "count": 0,
+    "count_by_type": {},
+    "min_separation": null
+  },
+  "cmap_spec": {
+    "auto_scale_r": true,
+    "n_phi": 6,
+    "type": "Phase"
+  },
+  "domain_spec": {
+    "im_length": 4,
+    "re_length": 4,
+    "type": "rectangle"
+  },
+  "expression": "exp(z)",
+  "files": {
+    "portrait": "exp/portrait.png"
+  },
+  "id": "exp",
+  "scaling_spec": "balanced",
+  "schema_version": 2,
+  "singularities": [],
+  "story": "Entire and never zero: no finite zeros or poles (an empty answer key).",
+  "tags": [
+    "transcendental",
+    "function-guessr"
+  ],
+  "title": "Exponential"
+}

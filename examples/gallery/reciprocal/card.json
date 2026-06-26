@@ -1,0 +1,44 @@
+{
+  "answer_key_stats": {
+    "count": 1,
+    "count_by_type": {
+      "pole": 1
+    },
+    "min_separation": null
+  },
+  "cmap_spec": {
+    "auto_scale_r": true,
+    "n_phi": 6,
+    "type": "Phase"
+  },
+  "domain_spec": {
+    "inner_radius": 0.2,
+    "outer_radius": 3,
+    "type": "annulus"
+  },
+  "expression": "1 / z",
+  "files": {
+    "portrait": "reciprocal/portrait.png"
+  },
+  "id": "reciprocal",
+  "scaling_spec": "balanced",
+  "schema_version": 2,
+  "singularities": [
+    {
+      "at": [
+        0.0,
+        0.0
+      ],
+      "order": 1,
+      "type": "pole"
+    }
+  ],
+  "story": "A simple pole at the origin (Möbius inversion); phase winds backward.",
+  "tags": [
+    "basic",
+    "canonical",
+    "poles",
+    "function-guessr"
+  ],
+  "title": "1 / z"
+}

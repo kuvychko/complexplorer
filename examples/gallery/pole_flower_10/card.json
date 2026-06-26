@@ -1,0 +1,125 @@
+{
+  "answer_key_stats": {
+    "count": 11,
+    "count_by_type": {
+      "pole": 10,
+      "zero": 1
+    },
+    "min_separation": 0.6180339887498948
+  },
+  "cmap_spec": {
+    "auto_scale_r": true,
+    "n_phi": 6,
+    "type": "Phase"
+  },
+  "domain_spec": {
+    "inner_radius": 0.2,
+    "outer_radius": 3,
+    "type": "annulus"
+  },
+  "expression": "z / (z**10 - 1)",
+  "files": {
+    "portrait": "pole_flower_10/portrait.png"
+  },
+  "id": "pole_flower_10",
+  "scaling_spec": "poles_emphasis",
+  "schema_version": 2,
+  "singularities": [
+    {
+      "at": [
+        0.0,
+        0.0
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        1.0,
+        0.0
+      ],
+      "order": 1,
+      "type": "pole"
+    },
+    {
+      "at": [
+        0.8090169943749475,
+        0.5877852522924731
+      ],
+      "order": 1,
+      "type": "pole"
+    },
+    {
+      "at": [
+        0.30901699437494745,
+        0.9510565162951535
+      ],
+      "order": 1,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -0.30901699437494734,
+        0.9510565162951536
+      ],
+      "order": 1,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -0.8090169943749473,
+        0.5877852522924732
+      ],
+      "order": 1,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -1.0,
+        1.2246467991473532e-16
+      ],
+      "order": 1,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -0.8090169943749475,
+        -0.587785252292473
+      ],
+      "order": 1,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -0.30901699437494756,
+        -0.9510565162951535
+      ],
+      "order": 1,
+      "type": "pole"
+    },
+    {
+      "at": [
+        0.30901699437494723,
+        -0.9510565162951536
+      ],
+      "order": 1,
+      "type": "pole"
+    },
+    {
+      "at": [
+        0.8090169943749473,
+        -0.5877852522924734
+      ],
+      "order": 1,
+      "type": "pole"
+    }
+  ],
+  "story": "A ring of ten simple poles (the 10th roots of unity) around a central simple zero. The signature printable ornament.",
+  "tags": [
+    "ornament",
+    "poles",
+    "canonical",
+    "singularity-detective"
+  ],
+  "title": "Pole Flower 10"
+}

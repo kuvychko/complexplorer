@@ -98,9 +98,9 @@ Explore the full range of visualizations in our [**Gallery**](docs/gallery/READM
 
 <p align="center">
   <a href="docs/gallery/README.md">
-    <img src="examples/gallery/Polar_chessboard_log_modulus_spacing_2d.png" width="30%">
-    <img src="examples/gallery/Phase_portrait_phase_enhanced_3d.png" width="30%">
-    <img src="examples/gallery/riemann_chart_2d.png" width="30%">
+    <img src="examples/gallery/_colormaps/polar_log.png" width="30%">
+    <img src="examples/gallery/pole_flower_10/landscape.png" width="30%">
+    <img src="examples/gallery/sqrt/surface.png" width="30%">
   </a>
 </p>
 
@@ -179,7 +179,7 @@ cp.plot_landscape_pv(domain, f, modulus_mode='custom',
                      modulus_params={'scaling_func': custom_scale})
 ```
 
-Available modes: `none`, `constant`, `linear`, `arctan`, `logarithmic`, `linear_clamp`, `power`, `sigmoid`, `adaptive`, `hybrid`, `custom`. Pass any of them via the `modulus_mode=` argument shown above.
+Available modes: `none`, `constant`, `linear`, `arctan`, `logarithmic`, `linear_clamp`, `power`, `sigmoid`, `adaptive`, `hybrid`, `custom`. Pass any of them via the `modulus_mode=` argument shown above. See `examples/scripts/modulus_scaling_showcase.py` for a side-by-side comparison across modes.
 
 ### 🎯 Domain Restrictions
 

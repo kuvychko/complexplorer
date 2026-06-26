@@ -1,0 +1,42 @@
+{
+  "answer_key_stats": {
+    "count": 1,
+    "count_by_type": {
+      "essential": 1
+    },
+    "min_separation": null
+  },
+  "cmap_spec": {
+    "auto_scale_r": true,
+    "n_phi": 6,
+    "type": "Phase"
+  },
+  "domain_spec": {
+    "inner_radius": 0.2,
+    "outer_radius": 3,
+    "type": "annulus"
+  },
+  "expression": "exp(1 / z)",
+  "files": {
+    "portrait": "essential_exp_inv/portrait.png"
+  },
+  "id": "essential_exp_inv",
+  "scaling_spec": "balanced",
+  "schema_version": 2,
+  "singularities": [
+    {
+      "at": [
+        0.0,
+        0.0
+      ],
+      "order": null,
+      "type": "essential"
+    }
+  ],
+  "story": "exp(1/z) has an essential singularity at 0 — infinitely dense structure nearby.",
+  "tags": [
+    "singularity-detective",
+    "essential"
+  ],
+  "title": "Essential singularity"
+}
