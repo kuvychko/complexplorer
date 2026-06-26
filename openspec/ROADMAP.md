@@ -125,10 +125,12 @@ Phase 5  add-transfer-function-explorer                 2.5     no         plann
          · sqrt(z), z^(1/n), branch points/cuts, monodromy
          EXAMPLES & DOCS REWORK (migrate-examples-and-docs, phased 3-change sub-block,
          gallery-first M1→M2→M3 — see "Examples & docs rework" section below):
-         M1 restructure-examples                        3.0     no         planned
-            · new examples/ layout (notebooks/, scripts/, gallery/); retire the
+         M1 restructure-examples                        3.0     no         archived
+            · new examples/ layout (notebooks/, scripts/, gallery/); retired the
               TWO legacy hand-rolled generators (examples/generate_gallery.py +
-              gallery/generate_gallery_images.py); cull archive/+old/; rewrite README
+              gallery/generate_gallery_images.py); culled archive/+old/; rewrote README
+            · new `examples` capability spec (specs 16→17). Seam (D6): docs/gallery
+              is 100% M2's. modulus_scaling_showcase deleted (mpl-3D) → M2 rebuilds
          M2 rebuild-gallery-from-registry               3.0     no         planned
             · examples/showcase.py (Option B): cp.catalog → hi-res 2D + PyVista
               3D/riemann/surface/STL screenshots; regenerate COMMITTED-but-
