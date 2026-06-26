@@ -7,7 +7,7 @@ Complexplorer is a Python library for visualization of complex functions, inspir
 ## Key Concepts
 
 - **Complex Domains**: Rectangular, disk, and annular regions in the complex plane, plus composite domains built via set operations (union, intersection, difference)
-- **Color Maps**: Schemes to visualize complex values — classic Phase portraits, grayscale Chessboard/PolarChessboard/LogRings patterns, and a family of perceptually-uniform colormaps (OKLAB/OkLCh, cubehelix, etc.)
+- **Color Maps**: Schemes to visualize complex values — classic/enhanced Phase portraits and grayscale Chessboard/PolarChessboard/LogRings patterns
 - **Modulus Scaling**: ~10 transfer functions mapping `|f(z)|` to radius/height, used by 3D landscapes, Riemann relief, and STL export
 - **Visualization Types**: 2D plots, 3D analytic landscapes, and Riemann sphere projections (matplotlib and PyVista backends)
 - **STL Export**: Modulus-scaled Riemann sphere ornaments for 3D printing
@@ -23,11 +23,12 @@ complexplorer/
 │   ├── exceptions.py           # ComplexplorerError hierarchy
 │   ├── core/
 │   │   ├── domain.py           # Domain, Rectangle, Disk, Annulus, CompositeDomain
-│   │   ├── colormap.py         # Colormap base + Phase, OklabPhase, Chessboard, … (14 colormaps)
+│   │   ├── colormap.py         # Colormap base + Phase, Chessboard, PolarChessboard, LogRings (4 colormaps)
 │   │   ├── scaling.py          # ModulusScaling modes + get_scaling_preset()
 │   │   ├── functions.py        # phase, sawtooth, stereographic_projection, …
-│   │   ├── color_utils.py      # OkLCh/HSL/cubehelix color conversions
-│   │   └── constants.py
+│   │   ├── field.py            # ComplexField sampling (planar/sphere)
+│   │   ├── expression.py       # expression-string helpers
+│   │   └── presets.py          # FunctionPreset + cp.catalog registry
 │   ├── plotting/
 │   │   ├── matplotlib/
 │   │   │   └── plot_2d.py       # plot, pair_plot, riemann_chart, riemann_hemispheres (2D only)
@@ -202,7 +203,6 @@ cp.plot(lambda z: 1/z, **cp.publication_preset())
 - `Chessboard()`: Cartesian grid pattern
 - `PolarChessboard()`: Polar grid pattern
 - `LogRings()`: Logarithmic black/white rings
-- Perceptual family: `OklabPhase()`, `PerceptualPastel()`, `AnalogousWedge()`, `DivergingWarmCool()`, `Isoluminant()`, `CubehelixPhase()`, `InkPaper()`, `EarthTopographic()`, `FourQuadrant()`
 
 ### Plot Types
 
