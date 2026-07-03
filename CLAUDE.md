@@ -176,7 +176,7 @@ def f(z):
     return (z - 1) / (z**2 + z + 1)
 
 # Choose color map (auto-scaled enhanced phase)
-cmap = cp.Phase(phase_sectors=6, auto_scale_r=True)
+cmap = cp.Phase(n_phi=6, auto_scale_r=True)
 
 # Create visualization (note: cmap is a keyword argument)
 cp.plot(domain, f, cmap=cmap)
@@ -198,7 +198,7 @@ cp.plot(lambda z: 1/z, **cp.publication_preset())
 
 - `Phase()`: Basic or enhanced phase portraits
   - Use `auto_scale_r=True` for automatic square cell sizing
-  - Set `phase_sectors` for the number of phase sectors
+  - Set `n_phi` for the number of phase sectors
   - Adjust `scale_radius` to control cell size
 - `Chessboard()`: Cartesian grid pattern
 - `PolarChessboard()`: Polar grid pattern

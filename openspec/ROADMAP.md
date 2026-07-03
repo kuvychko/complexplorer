@@ -111,8 +111,10 @@ Phase 3  enrich-answer-key-stats                        2.4     no         archi
          · DISSOLVED: add-level-export. The gallery manifest already IS the
            Godot interchange; task/scoring/difficulty are game design and live
            in Godot, not here. Curated SETS already exist as tags.
-Phase 5  add-transfer-function-explorer                 2.5     no         planned
-         (EE pulled early — additive, not gated on 3.0)
+Phase 5  add-transfer-function-explorer                 —       no         deferred → 3.1+
+         (EE feature, originally pulled early as 2.5. Decision 2026-07-03:
+         it was never gating 3.0, and 3.0's two anchor changes are done —
+         so it moves to the 3.1+ backlog rather than delaying the release.)
 ────────────────────────────────────────────────────────────────────────────────
 ★ 3.0    require-pyvista-3d-backend                     3.0     YES        archived
          · PyVista is now a required core dependency; HAS_PYVISTA /
@@ -145,6 +147,7 @@ Phase 5  add-transfer-function-explorer                 2.5     no         plann
               not exist); DoD = pytest --nbmake (local, opt-in). [examples] extra added
 ────────────────────────────────────────────────────────────────────────────────
 3.1+     OUT OF UMBRELLA SCOPE (future backlog)
+         add-transfer-function-explorer (deferred from Phase 5),
          full EE (filters, resonators, QCM, RF bridge),
          w² = P(z) algebraic curves, objects/project-cards,
          special-function atlas, conformal/hyperbolic labs
