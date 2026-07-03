@@ -1,15 +1,6 @@
-# Riemann Surfaces
+# Riemann Surfaces — Delta for add-algebraic-curves
 
-## Purpose
-
-The riemann-surfaces capability covers rendering the Riemann surface of a multivalued complex
-function for the supported families (power roots, the logarithm, and algebraic curves
-`w² = P(z)`). It is distinct from the
-riemann-sphere capability: instead of visualizing a single-valued function on the compactified
-plane, it embeds the multi-sheeted surface of a multivalued function in 3D, colored by phase.
-The feature is visualization-only and reuses the shared surface kernel mesh and colormap path.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Multivalued-family Riemann surface rendering
 
@@ -39,16 +30,7 @@ phase of the function value. The renderer SHALL be distinct from the Riemann *sp
 - **WHEN** the renderer is called with the shared options (colormap, interactivity, return-plotter, output filename)
 - **THEN** it honors them consistently with the other PyVista renderers (returning a plotter or writing a file as requested)
 
-### Requirement: Riemann surface meshes reuse the surface kernel
-
-The Riemann surface builder SHALL produce a `SurfaceMesh` (the shared kernel mesh) decorated
-through the standard color path, so the surface participates in the common mesh pipeline
-without special-casing.
-
-#### Scenario: Builder returns a decorated surface mesh
-
-- **WHEN** the surface builder is invoked for a supported family
-- **THEN** it returns a `SurfaceMesh` whose geometry embeds the parameter grid and whose colors come from the shared colormap path (finite RGB within `[0, 1]`)
+## ADDED Requirements
 
 ### Requirement: Algebraic-family inputs and branch-point metadata
 
@@ -65,19 +47,3 @@ returned `SurfaceMesh` metadata SHALL record the roots of `P` as branch points.
 
 - **WHEN** `family="algebraic"` is requested with `p` missing, shorter than two coefficients, or with a zero leading coefficient
 - **THEN** a `ValidationError` is raised naming the problem
-
-### Requirement: Honest embedding; visualization-only scope
-
-The Riemann surface SHALL use the faithful ("honest") embedding in which sheets and branch
-cuts are emergent from the geometry (the power surface self-intersects along the cut). The
-feature is visualization-only.
-
-#### Scenario: Self-intersection is preserved, not separated
-
-- **WHEN** a power-root surface with `n ≥ 2` is built
-- **THEN** the surface is a single continuous mesh that passes through itself along the branch cut (the sheets are not artificially separated)
-
-#### Scenario: STL export is not offered for Riemann surfaces
-
-- **WHEN** a Riemann surface is produced
-- **THEN** it is a visualization object and no STL export is provided for it (the self-intersecting geometry is non-manifold)

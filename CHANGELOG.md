@@ -28,8 +28,10 @@ the road to 3.0 and were never published, so the notes below describe the upgrad
 
 ### Added
 - **Riemann surfaces**: `riemann_surface_pv()` renders the multi-sheeted cover on which a
-  multivalued family becomes single-valued — `power` roots `z^(1/n)` and `log` — with
-  branch points, branch cuts, and sheet structure made explicit
+  multivalued family becomes single-valued — `power` roots `z^(1/n)`, `log`, and the
+  algebraic family `w² = P(z)` (`family="algebraic"`, `p=[...]` polynomial coefficients;
+  e.g. the elliptic curve `w² = z³ − z`) — with branch points, branch cuts, and sheet
+  structure made explicit; algebraic branch points are recorded in the mesh metadata
 - **Function preset registry**: `cp.catalog` with 17 curated presets. Each
   `FunctionPreset` carries a callable, an expression string, plain-dict
   domain/colormap/scaling specs, a hand-authored singularity answer key

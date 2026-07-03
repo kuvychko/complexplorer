@@ -1,9 +1,9 @@
 """PyVista renderer for Riemann *surfaces* of multivalued functions.
 
 ``riemann_surface_pv`` draws the multi-sheeted cover of a multivalued family (power roots
-``z**(1/n)``, or ``log``) — the surface on which the function becomes single-valued. This is
-distinct from ``riemann_pv``, which renders a *single*-valued function on the Riemann
-*sphere*.
+``z**(1/n)``, ``log``, or the algebraic curve ``w**2 = P(z)``) — the surface on which the
+function becomes single-valued. This is distinct from ``riemann_pv``, which renders a
+*single*-valued function on the Riemann *sphere*.
 """
 
 from __future__ import annotations
@@ -33,6 +33,7 @@ _OWN_KWARGS = frozenset(
         "family",
         "n",
         "turns",
+        "p",
         "r_max",
         "resolution",
         "cmap",
@@ -54,6 +55,7 @@ def riemann_surface_pv(
     *,
     n: int = 2,
     turns: int = 3,
+    p=None,
     r_max: float = 1.5,
     resolution: int = 60,
     cmap: Colormap | None = None,
@@ -72,13 +74,18 @@ def riemann_surface_pv(
     Parameters
     ----------
     family : str, default="power"
-        ``"power"`` (``z**(1/n)``) or ``"log"``.
+        ``"power"`` (``z**(1/n)``), ``"log"``, or ``"algebraic"`` (``w**2 = P(z)``).
     n : int, default=2
         Sheet count for the power family (sqrt=2, cbrt=3, ...).
     turns : int, default=3
         Number of 2*pi turns for the log helicoid.
+    p : sequence of numbers, optional
+        Polynomial coefficients of ``P`` for the algebraic family (``numpy.polyval``
+        order, highest degree first); e.g. ``[1, 0, -1, 0]`` is the elliptic curve
+        ``w**2 = z**3 - z``. Required when ``family="algebraic"``.
     r_max : float, default=1.5
-        Radius in the ``z``-plane that the surface spans.
+        Radius in the ``z``-plane that the surface spans. For the algebraic family choose
+        it to enclose the interesting branch points (the roots of ``P``).
     resolution : int, default=60
         Radial sample count.
     cmap : Colormap, optional
@@ -100,7 +107,7 @@ def riemann_surface_pv(
         cmap = Phase(n_phi=6, v_base=0.6)
 
     sm = build_riemann_surface(
-        family, n=n, turns=turns, r_max=r_max, resolution=resolution, cmap=cmap
+        family, n=n, turns=turns, p=p, r_max=r_max, resolution=resolution, cmap=cmap
     )
     mesh = sm.to_pyvista()
 
@@ -125,7 +132,8 @@ def riemann_surface_pv(
     if title:
         plotter.add_text(title, position="upper_edge", font_size=14)
     if show_orientation:
-        add_axes_widget(plotter, labels=("Re", "Im", "Re w" if family == "power" else "Im w"))
+        z_label = "Im w" if family == "log" else "Re w"
+        add_axes_widget(plotter, labels=("Re", "Im", z_label))
     plotter.set_background("white")
 
     if filename:

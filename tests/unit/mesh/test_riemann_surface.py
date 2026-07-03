@@ -78,6 +78,56 @@ class TestLogFamily:
             build_riemann_surface("log", turns=0)
 
 
+class TestAlgebraicFamily:
+    """w**2 = P(z) (add-algebraic-curves)."""
+
+    ELLIPTIC = [1, 0, -1, 0]  # w**2 = z**3 - z
+
+    def test_two_sheets_double_the_points(self):
+        warnings.simplefilter("ignore")
+        res = 30
+        sm = build_riemann_surface("algebraic", p=self.ELLIPTIC, resolution=res)
+        # single sheet grid is res x 4*res; the cover carries two of them, unmerged
+        assert sm.to_pyvista().n_points == 2 * res * 4 * res
+
+    def test_sheets_are_mirror_heights(self):
+        warnings.simplefilter("ignore")
+        sm = build_riemann_surface("algebraic", p=self.ELLIPTIC, resolution=25)
+        pts = _points(sm)
+        half = pts.shape[0] // 2
+        np.testing.assert_allclose(pts[:half, 2], -pts[half:, 2], atol=1e-12)
+        # x/y grids identical across sheets
+        np.testing.assert_allclose(pts[:half, :2], pts[half:, :2], atol=1e-12)
+
+    def test_branch_points_in_metadata(self):
+        warnings.simplefilter("ignore")
+        sm = build_riemann_surface("algebraic", p=self.ELLIPTIC, resolution=20)
+        assert sm.metadata["topology"] == "riemann_surface:algebraic:deg=3"
+        roots = sorted(np.asarray(sm.metadata["branch_points"]).real)
+        np.testing.assert_allclose(roots, [-1.0, 0.0, 1.0], atol=1e-9)
+
+    def test_colors_finite(self):
+        warnings.simplefilter("ignore")
+        sm = build_riemann_surface("algebraic", p=self.ELLIPTIC, resolution=20)
+        mesh = sm.to_pyvista()
+        assert "RGB" in mesh.array_names and "phase" in mesh.array_names
+        rgb = np.asarray(mesh["RGB"], dtype=float)
+        assert np.all(np.isfinite(rgb))
+        assert rgb.min() >= 0.0
+
+    def test_missing_p_raises(self):
+        with pytest.raises(ValidationError, match="requires polynomial coefficients"):
+            build_riemann_surface("algebraic")
+
+    def test_short_p_raises(self):
+        with pytest.raises(ValidationError, match="at least two coefficients"):
+            build_riemann_surface("algebraic", p=[1])
+
+    def test_zero_leading_coefficient_raises(self):
+        with pytest.raises(ValidationError, match="nonzero leading coefficient"):
+            build_riemann_surface("algebraic", p=[0, 1, 1])
+
+
 class TestColorsAndValidation:
     def test_colors_finite_and_in_gamut(self):
         warnings.simplefilter("ignore")
