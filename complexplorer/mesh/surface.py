@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..core.colormap import Colormap
+from ..exceptions import ValidationError
 from ..export.stl.mesh_repair import repair_mesh_simple
 from ..export.stl.utils import center_mesh, scale_to_size, validate_printability
 
@@ -29,7 +30,7 @@ def _flatten_rgb(rgb: np.ndarray, n_points: int) -> np.ndarray:
     rgb = np.asarray(rgb)
     flat = rgb.reshape(-1, 3)
     if flat.shape[0] != n_points:
-        raise ValueError(f"RGB has {flat.shape[0]} rows but mesh has {n_points} points")
+        raise ValidationError(f"RGB has {flat.shape[0]} rows but mesh has {n_points} points")
     return flat
 
 

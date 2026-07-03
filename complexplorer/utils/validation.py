@@ -10,11 +10,8 @@ from typing import Any
 
 import numpy as np
 
-
-class ValidationError(ValueError):
-    """Custom exception for validation errors in complexplorer."""
-
-    pass
+# Historical import location — the class is defined in complexplorer.exceptions.
+from complexplorer.exceptions import ValidationError
 
 
 def validate_domain_or_mesh(

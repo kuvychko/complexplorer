@@ -44,6 +44,9 @@ the road to 3.0 and were never published, so the notes below describe the upgrad
   Riemann relief, Riemann surfaces, and STL export
 - `[examples]` optional-dependency group (`nbmake`, `nbconvert`, `ipykernel`); included
   in `[dev]`
+- **Exception hierarchy**: `complexplorer.exceptions` with `ComplexplorerError` as the base
+  class for all deliberate library errors; `ValidationError` now derives from it (and still
+  from `ValueError`, so existing handlers keep working). Both are exported at top level
 
 ### Fixed
 - Colormaps now emit finite, deterministic RGB at non-finite inputs (poles and essential

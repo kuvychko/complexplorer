@@ -14,6 +14,7 @@ import numpy as np
 from ...core.colormap import Colormap, Phase
 from ...core.domain import Domain
 from ...core.field import sample_sphere
+from ...exceptions import ValidationError
 from ...mesh import build_relief
 from ...utils.mesh_distortion import get_default_scaling_params
 from .mesh_repair import repair_mesh_simple
@@ -123,7 +124,7 @@ class OrnamentGenerator:
             Validation results.
         """
         if self.sphere_mesh is None:
-            raise ValueError("No mesh generated yet. Call generate_ornament() first.")
+            raise ValidationError("No mesh generated yet. Call generate_ornament() first.")
 
         return validate_printability(self.sphere_mesh, size_mm, verbose)
 
@@ -162,7 +163,7 @@ class OrnamentGenerator:
             Path to saved file.
         """
         if self.sphere_mesh is None:
-            raise ValueError("No mesh generated yet. Call generate_ornament() first.")
+            raise ValidationError("No mesh generated yet. Call generate_ornament() first.")
 
         mesh = self.sphere_mesh.copy()
 

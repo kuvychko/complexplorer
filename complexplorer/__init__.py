@@ -21,6 +21,7 @@ from complexplorer.core.functions import (
 )
 from complexplorer.core.presets import FunctionPreset, catalog
 from complexplorer.core.scaling import ModulusScaling, get_scaling_preset
+from complexplorer.exceptions import ComplexplorerError, ValidationError
 
 # PyVista is a required core dependency as of 3.0 (the sole 3D backend; also powers STL
 # export), so these imports are unconditional.
@@ -44,6 +45,9 @@ from complexplorer.utils.backend import ensure_interactive_plots, setup_matplotl
 __all__ = [
     # Version
     "__version__",
+    # Exceptions
+    "ComplexplorerError",
+    "ValidationError",
     # Core classes
     "Domain",
     "Rectangle",

@@ -5,6 +5,8 @@ This module provides helper functions for PyVista-based visualizations.
 
 import warnings
 
+from complexplorer.exceptions import ValidationError
+
 # Only import PyVista if available
 try:
     import pyvista as pv
@@ -159,7 +161,7 @@ def get_camera_position(position: str | tuple) -> str | tuple:
 
     if isinstance(position, str):
         if position not in valid_strings:
-            raise ValueError(
+            raise ValidationError(
                 f"Invalid camera position '{position}'. Must be one of: {valid_strings}"
             )
         return position

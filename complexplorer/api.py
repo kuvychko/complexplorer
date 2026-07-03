@@ -58,7 +58,7 @@ def quick_plot(
         from complexplorer.plotting.pyvista.riemann import riemann_pv
 
         return riemann_pv(func, **kwargs)
-    raise ValueError(f"Unknown mode: {mode}")
+    raise ValidationError(f"Unknown mode: {mode}")
 
 
 # Preset configurations for common use cases

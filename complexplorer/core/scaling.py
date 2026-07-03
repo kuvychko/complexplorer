@@ -8,6 +8,8 @@ from collections.abc import Callable
 
 import numpy as np
 
+from complexplorer.exceptions import ValidationError
+
 __all__ = ["ModulusScaling", "SCALING_PRESETS", "get_scaling_preset"]
 
 
@@ -386,12 +388,12 @@ def get_scaling_preset(name: str) -> dict:
 
     Raises
     ------
-    ValueError
+    ValidationError
         If preset name is not recognized.
     """
     if name not in SCALING_PRESETS:
         available = ", ".join(SCALING_PRESETS.keys())
-        raise ValueError(f"Unknown preset: {name}. Available presets: {available}")
+        raise ValidationError(f"Unknown preset: {name}. Available presets: {available}")
 
     preset = SCALING_PRESETS[name]
     return {"method": preset["method"], "params": preset["params"].copy()}

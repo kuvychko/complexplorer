@@ -6,6 +6,8 @@ This module provides validation and helper functions for 3D printing.
 import warnings
 from typing import Any
 
+from complexplorer.exceptions import ValidationError
+
 # Import PyVista if available
 try:
     import pyvista as pv
@@ -189,7 +191,7 @@ def scale_to_size(mesh: "pv.PolyData", target_size_mm: float, axis: str = "max")
     elif axis == "z":
         current_size = dimensions[2]
     else:
-        raise ValueError(f"Invalid axis: {axis}")
+        raise ValidationError(f"Invalid axis: {axis}")
 
     scale_factor = target_size_mm / current_size
 
