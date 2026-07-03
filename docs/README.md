@@ -14,15 +14,14 @@ Explore beautiful visualizations with code examples. See phase portraits, analyt
 
 ### 🔧 User Guides
 - [PyVista Usage Guide](pyvista_usage_guide.md) - High-performance 3D visualization
-- [STL Export Guide](stl_export_guide.md) - Creating 3D-printable ornaments
-- [Migration Guide](../MIGRATION_GUIDE.md) - Upgrading from older versions
+- [STL Export Demo](../examples/notebooks/stl_export_demo.ipynb) - Creating 3D-printable ornaments
+- [Changelog](../CHANGELOG.md) - What changed in each release (including the 3.0 breaking changes)
 
 ### 📐 Technical Reference
-- [Technical Documentation](technical_reference.md) - In-depth technical details including:
-  - Modulus scaling analysis
-  - Icosphere mesh generation
-  - PyVista implementation details
-  - STL ornament generation
+- [Backend Policy](development/backend-policy.md) - The 2D (matplotlib) / 3D (PyVista) capability line
+- [Surface Kernel](development/surface-kernel.md) - The shared `SurfaceMesh` pipeline
+- [Function Presets](function-presets.md) - The `cp.catalog` registry
+- [CLI](cli.md) - The `complexplorer` command-line interface
 
 ## 🚀 Quick Start
 
@@ -65,7 +64,11 @@ cp.plot(domain, func, cmap=cmap)
 - `plot_landscape_pv()` - High-performance 3D landscape
 - `pair_plot_landscape_pv()` - Side-by-side with linked cameras
 - `riemann_pv()` - Interactive Riemann sphere with modulus scaling
-- `riemann_surface_pv()` - Riemann surface of a multivalued function (sqrt, log, …)
+- `riemann_surface_pv()` - Riemann surface of a multivalued function (`z^(1/n)`, `log`, and algebraic curves `w² = P(z)` via `family="algebraic"`)
+
+**Engineering mode (`cp.ee`):**
+- `TransferFunction(num, den)` - rational `H(s)`/`H(z)`; a plain complex callable usable with every renderer
+- `transfer_portrait()`, `pole_zero_plot()`, `bode_plot()`, `nyquist_plot()`
 
 > The matplotlib 3D functions (`plot_landscape`, `pair_plot_landscape`, the 3D `riemann`) were
 > **removed in 3.0** — use the `*_pv` equivalents above. matplotlib remains the 2D backend.
@@ -88,19 +91,16 @@ This provides a menu-driven interface with:
 
 - Browse the [Gallery](gallery/README.md) for visual examples
 - Check the [API Cookbook](../examples/notebooks/api_cookbook.ipynb) for code patterns
-- Read the [Technical Reference](technical_reference.md) for deep dives
+- Read the [development docs](development/) for deep dives
 - Report issues on [GitHub](https://github.com/user/complexplorer/issues)
 
 ## 📦 Installation
 
 ```bash
-# Basic installation
+# Standard installation (includes PyVista, the required 3D backend)
 pip install complexplorer
 
-# With PyVista support
-pip install "complexplorer[pyvista]"
-
-# With all optional features
+# With all optional features (PyQt6 for interactive matplotlib windows)
 pip install "complexplorer[all]"
 ```
 

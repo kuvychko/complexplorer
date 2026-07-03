@@ -4,22 +4,29 @@ context: |
   Complexplorer is a Python library (>=3.11) for domain-coloring visualization of
   complex functions f: C -> C, inspired by Wegert's "Visual Complex Functions".
 
-  Tech stack: numpy, matplotlib, scipy. Optional: PyVista (high-performance 3D + STL
-  export), PyQt6 (interactive matplotlib). Packaged with pyproject.toml; uv for env.
+  Tech stack: numpy, matplotlib (2D backend), scipy, PyVista >= 0.47 (required; the sole
+  3D backend and STL export). Optional: PyQt6 (interactive matplotlib). Packaged with
+  pyproject.toml; uv for env.
 
-  Package layout (current, as of v2.0.0):
+  Package layout (as of v3.0.0):
     complexplorer/
-      core/        domain.py, colormap.py, scaling.py, functions.py, color_utils.py
-      plotting/    matplotlib/{plot_2d,plot_3d}.py, pyvista/{plot_3d,riemann}.py, validation.py
+      core/        domain.py, colormap.py, scaling.py, functions.py, field.py,
+                   expression.py, presets.py
+      ee/          transfer_function.py (TransferFunction + pole-zero/Bode/Nyquist/portrait)
+      mesh/        surface.py (SurfaceMesh kernel), builders.py, riemann_surface.py
+      plotting/    matplotlib/plot_2d.py, pyvista/{plot_3d,riemann,riemann_surface}.py
+      cli/         main.py (complexplorer render | stl | list | gallery)
       export/stl/  ornament_generator.py, mesh_repair.py, utils.py
-      utils/       backend.py, mesh.py, logging.py, validation.py
-      api.py       high-level show()/plot()/presets
-      exceptions.py  ComplexplorerError hierarchy
+      utils/       backend.py, mesh.py, mesh_distortion.py, validation.py
+      api.py       high-level quick_plot() + Presets
+      exceptions.py  ComplexplorerError base + ValidationError
+      gallery.py   generate_gallery (byte-stable index.json manifest)
 
-  Capabilities are specced in openspec/specs/: domains, colormaps, modulus-scaling,
-  core-functions, plotting-2d, plotting-3d-mpl, plotting-3d-pyvista, riemann-sphere,
-  stl-export, high-level-api. These were captured as a behavioral-contract baseline of
-  the existing v2.0.0 system.
+  Capabilities are specced in openspec/specs/ (19): domains, colormaps, modulus-scaling,
+  core-functions, plotting-2d, plotting-3d-pyvista, riemann-sphere, riemann-surfaces,
+  stl-export, high-level-api, exceptions, transfer-functions, expression,
+  function-presets, gallery, cli, surface-mesh, packaging, examples.
+  (plotting-3d-mpl was retired in 3.0 when the matplotlib 3D paths were removed.)
 
   Conventions: PEP 8, type hints, comprehensive docstrings with math where relevant.
   Domain-specific exceptions inherit from ComplexplorerError. Tests in tests/unit/ (pytest).

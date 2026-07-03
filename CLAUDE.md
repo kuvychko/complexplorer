@@ -19,42 +19,50 @@ complexplorer/
 ├── complexplorer/              # Main library package
 │   ├── __init__.py             # Public API surface (see __all__)
 │   ├── _version.py
-│   ├── api.py                  # High-level API: show(), plot(), *_preset()
-│   ├── exceptions.py           # ComplexplorerError hierarchy
+│   ├── api.py                  # High-level API: quick_plot(), Presets
+│   ├── exceptions.py           # ComplexplorerError base + ValidationError
+│   ├── gallery.py              # generate_gallery (byte-stable index.json manifest)
 │   ├── core/
 │   │   ├── domain.py           # Domain, Rectangle, Disk, Annulus, CompositeDomain
 │   │   ├── colormap.py         # Colormap base + Phase, Chessboard, PolarChessboard, LogRings (4 colormaps)
 │   │   ├── scaling.py          # ModulusScaling modes + get_scaling_preset()
 │   │   ├── functions.py        # phase, sawtooth, stereographic_projection, …
 │   │   ├── field.py            # ComplexField sampling (planar/sphere)
-│   │   ├── expression.py       # expression-string helpers
-│   │   └── presets.py          # FunctionPreset + cp.catalog registry
+│   │   ├── expression.py       # Safe expression-string → callable evaluation
+│   │   └── presets.py          # FunctionPreset + cp.catalog registry (answer keys)
+│   ├── ee/
+│   │   └── transfer_function.py # TransferFunction + pole_zero/bode/nyquist/transfer_portrait
+│   ├── mesh/
+│   │   ├── surface.py          # SurfaceMesh kernel (shared 3D mesh pipeline)
+│   │   ├── builders.py         # build_landscape, build_relief
+│   │   └── riemann_surface.py  # build_riemann_surface (power/log/algebraic)
 │   ├── plotting/
 │   │   ├── matplotlib/
-│   │   │   └── plot_2d.py       # plot, pair_plot, riemann_chart, riemann_hemispheres (2D only)
-│   │   ├── pyvista/
-│   │   │   ├── plot_3d.py       # plot_landscape_pv, pair_plot_landscape_pv
-│   │   │   └── riemann.py       # riemann_pv
-│   │   └── validation.py        # Shared plot input validation
+│   │   │   └── plot_2d.py       # plot, pair_plot (legend= phase wheel), riemann_chart, riemann_hemispheres
+│   │   └── pyvista/
+│   │       ├── plot_3d.py       # plot_landscape_pv, pair_plot_landscape_pv
+│   │       ├── riemann.py       # riemann_pv
+│   │       └── riemann_surface.py # riemann_surface_pv
+│   ├── cli/                    # `complexplorer render | stl | list | gallery`
 │   ├── export/
-│   │   └── stl/                 # OrnamentGenerator, create_ornament, mesh repair
+│   │   └── stl/                # OrnamentGenerator, create_ornament, mesh repair
 │   └── utils/
 │       ├── backend.py          # Matplotlib backend detection/setup
 │       ├── mesh.py             # Mesh generation (incl. Riemann sphere)
-│       ├── logging.py
-│       └── validation.py
+│       ├── mesh_distortion.py
+│       └── validation.py       # Validation helpers (re-exports ValidationError)
 ├── openspec/                   # OpenSpec specs and change proposals (see below)
-├── examples/                   # Example notebooks and output images
-├── tests/unit/                 # Unit tests (pytest)
+├── examples/                   # notebooks/, scripts/, gallery/, showcase.py
+├── tests/                      # unit/, integration/, regression/ (pytest)
 ├── pyproject.toml
 └── README.md
 ```
 
-> Note: the public API is re-exported flat from the top-level package (e.g. `cp.Rectangle`, `cp.Phase`, `cp.plot`). Import from `complexplorer` directly; the submodule layout above is internal organization.
+> Note: the public API is re-exported flat from the top-level package (e.g. `cp.Rectangle`, `cp.Phase`, `cp.plot`) — except engineering mode, which is namespaced under `cp.ee`. Import from `complexplorer` directly; the submodule layout above is internal organization.
 
 ## Spec-Driven Development (OpenSpec)
 
-This project uses **OpenSpec** for managing changes. Baseline behavioral-contract specs for the existing system live in `openspec/specs/`, organized into 10 capabilities: `domains`, `colormaps`, `modulus-scaling`, `core-functions`, `plotting-2d`, `plotting-3d-mpl`, `plotting-3d-pyvista`, `riemann-sphere`, `stl-export`, `high-level-api`.
+This project uses **OpenSpec** for managing changes. Behavioral-contract specs live in `openspec/specs/`, organized into 19 capabilities: `domains`, `colormaps`, `modulus-scaling`, `core-functions`, `plotting-2d`, `plotting-3d-pyvista`, `riemann-sphere`, `riemann-surfaces`, `stl-export`, `high-level-api`, `exceptions`, `transfer-functions`, `expression`, `function-presets`, `gallery`, `cli`, `surface-mesh`, `packaging`, `examples`.
 
 For any non-trivial change, create an OpenSpec change proposal (`/opsx:propose` or `/opsx:explore`) rather than editing code directly, then implement against it. Project context for artifact generation lives in `openspec/config.yaml`. Validate specs with `openspec validate --specs`.
 
@@ -90,7 +98,6 @@ uv pip install -e ".[all]"
 
 # Or install specific optional features
 uv pip install -e ".[qt]"      # For interactive matplotlib plots
-uv pip install -e ".[pyvista]" # For high-performance 3D + STL export
 ```
 
 ### Running Tests
@@ -187,11 +194,24 @@ cp.plot(domain, f, cmap=cmap)
 ```python
 import complexplorer as cp
 
-# One-liner with sensible defaults
-cp.show(lambda z: (z**2 - 1) / (z**2 + 1))
+# One-liner with sensible defaults (modes: "2d", "3d", "riemann")
+cp.quick_plot(lambda z: (z**2 - 1) / (z**2 + 1))
 
-# Bundled presets
-cp.plot(lambda z: 1/z, **cp.publication_preset())
+# Bundled plot-config presets (distinct from the cp.catalog function registry)
+cp.quick_plot(lambda z: 1/z, **cp.Presets.publication_ready())
+
+# Add a phase-wheel legend to any 2D portrait
+cp.plot(cp.Rectangle(4, 4), lambda z: 1/z, legend=True)
+```
+
+### Engineering Mode (cp.ee)
+
+```python
+H = cp.ee.TransferFunction([1], [1, 0.2, 1])   # 1 / (s² + 0.2s + 1)
+H.poles, H.is_stable                            # math kernel
+cp.ee.transfer_portrait(H, legend=True)         # phase portrait + poles/zeros + jω axis
+cp.ee.bode_plot(H); cp.ee.nyquist_plot(H)       # canonical companion views
+cp.plot_landscape_pv(cp.Rectangle(6, 6), H)     # H is a plain callable — all renderers work
 ```
 
 ### Common Color Maps
@@ -215,7 +235,7 @@ cp.plot(lambda z: 1/z, **cp.publication_preset())
 - `plot_landscape_pv()`: 3D analytic landscape
 - `pair_plot_landscape_pv()`: Side-by-side domain/codomain 3D
 - `riemann_pv()`: Interactive Riemann **sphere** (a single-valued function on the compactified plane)
-- `riemann_surface_pv()`: Riemann **surface** of a multivalued family — the multi-sheeted cover (`power` roots `z^(1/n)`, or `log`). Distinct from the sphere: this is the surface on which a multivalued function becomes single-valued.
+- `riemann_surface_pv()`: Riemann **surface** of a multivalued family — the multi-sheeted cover (`power` roots `z^(1/n)`, `log`, or `algebraic` curves `w² = P(z)` via `p=` polynomial coefficients). Distinct from the sphere: this is the surface on which a multivalued function becomes single-valued.
 
 ### STL Export (3D printing)
 

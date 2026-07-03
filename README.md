@@ -17,10 +17,13 @@
 Unlike other domain coloring libraries, Complexplorer offers:
 
 - **🎨 Riemann Relief Maps**: First library to offer modulus-scaled Riemann sphere visualizations that reveal the true topology of complex functions
+- **🌀 Riemann Surfaces**: Multi-sheeted covers of multivalued functions — `z^(1/n)`, `log`, and algebraic curves `w² = P(z)` (elliptic curves) — with branch points and cuts emergent from the geometry
 - **🖨️ Direct STL Export**: Transform any complex function into a 3D-printable mathematical ornament
 - **🚀 PyVista Integration**: 15-30x faster 3D rendering with cinema-quality output
 - **🔧 Advanced Domain Composition**: Create complex domains through set operations (union, intersection, difference)
 - **📊 Flexible Modulus Mapping**: 10+ scaling modes to highlight different function features
+- **⚡ Engineering Mode (`cp.ee`)**: Transfer functions `H(s)`/`H(z)` as first-class complex functions — phase portraits with poles/zeros and the stability boundary, plus Bode and Nyquist views
+- **🧭 Phase-Wheel Legend**: `legend=True` adds an in-figure key decoding hue → phase and shading → modulus, faithful to the active colormap
 
 ## 📦 Installation
 

@@ -81,10 +81,12 @@ loops, scoring, difficulty, or UI live in complexplorer.
 **Function presets are static — by decision.** The `FunctionPreset` is one callable +
 expression + a fixed answer key, and stays that way. A parametrized-family abstraction
 (`FunctionFamily`) was considered and **cut** (2026-06-24): its only concrete consumer was
-the now-dissolved games layer, the gallery uses static snapshots, and `create_animation`
-already takes `f(z, t)` directly — so it was scope without a driver. If a real
-visualization need appears (interactive parameter exploration), it gets designed fresh then,
-not carried as speculative roadmap weight.
+the now-dissolved games layer and the gallery uses static snapshots — so it was scope
+without a driver. (The cut was originally also justified by `create_animation` taking
+`f(z, t)` — that function turned out to be an unimplemented stub and was removed in
+`curate-high-level-api`; the cut stands on the other grounds.) If a real visualization
+need appears (interactive parameter exploration), it gets designed fresh then, not carried
+as speculative roadmap weight.
 
 ---
 
@@ -111,10 +113,10 @@ Phase 3  enrich-answer-key-stats                        2.4     no         archi
          · DISSOLVED: add-level-export. The gallery manifest already IS the
            Godot interchange; task/scoring/difficulty are game design and live
            in Godot, not here. Curated SETS already exist as tags.
-Phase 5  add-transfer-function-explorer                 —       no         deferred → 3.1+
-         (EE feature, originally pulled early as 2.5. Decision 2026-07-03:
-         it was never gating 3.0, and 3.0's two anchor changes are done —
-         so it moves to the 3.1+ backlog rather than delaying the release.)
+Phase 5  add-transfer-function-explorer                 —       no         → pulled into 3.0
+         (EE feature, originally pulled early as 2.5. Deferred to 3.1+ on
+         2026-07-03, then pulled back into 3.0 the same day as part of the
+         pre-release capability review — see the 3.0 block below.)
 ────────────────────────────────────────────────────────────────────────────────
 ★ 3.0    require-pyvista-3d-backend                     3.0     YES        archived
          · PyVista is now a required core dependency; HAS_PYVISTA /
@@ -145,12 +147,35 @@ Phase 5  add-transfer-function-explorer                 —       no         def
               matplotlib-vs-PyVista narrative; static backend; strip notebook=/show=);
               add Riemann-surface + preset-registry coverage (NOT perceptual — it does
               not exist); DoD = pytest --nbmake (local, opt-in). [examples] extra added
+         PRE-RELEASE CAPABILITY REVIEW (2026-07-03, five changes wrapped into 3.0):
+         curate-high-level-api                          3.0     YES        archived
+            · removed the NotImplementedError stubs (create_animation,
+              compare_functions), the analyze_function print-stub, the
+              visualize/explore aliases, and dead plotting/base.py;
+              quick_plot is the single high-level entry point
+         add-exception-hierarchy                        3.0     no         archived
+            · exceptions.py: ComplexplorerError base; ValidationError
+              re-parented (still a ValueError); new `exceptions` capability
+         add-phase-legend                               3.0     no         archived
+            · plot/pair_plot legend=True → phase-wheel inset rendered
+              through the active colormap's own rgb() pipeline
+         add-algebraic-curves                           3.0     no         archived
+            · riemann_surface_pv(family="algebraic", p=[...]): two-sheeted
+              w² = P(z) covers (elliptic curves); branch points in metadata
+         add-transfer-function-explorer                 3.0     no         archived
+            · cp.ee.TransferFunction (H(s)/H(z), callable → composes with
+              every renderer) + pole_zero/bode/nyquist/transfer_portrait;
+              new `transfer-functions` capability
 ────────────────────────────────────────────────────────────────────────────────
 3.1+     OUT OF UMBRELLA SCOPE (future backlog)
-         add-transfer-function-explorer (deferred from Phase 5),
          full EE (filters, resonators, QCM, RF bridge),
-         w² = P(z) algebraic curves, objects/project-cards,
-         special-function atlas, conformal/hyperbolic labs
+         objects/project-cards, special-function atlas,
+         conformal/hyperbolic labs,
+         animation + function-comparison (re-add as real features;
+         the 2.x stubs were removed in curate-high-level-api),
+         elliptic-curve catalog preset + showcase SURFACE_FAMILY entry
+         (deferred to protect the byte-stable gallery manifest),
+         docs site (Sphinx/MkDocs)
 ```
 
 `STATUS` values: `planned` → `proposed` (OpenSpec change exists) → `in-progress` →
