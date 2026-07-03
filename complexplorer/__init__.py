@@ -5,6 +5,8 @@ This library provides tools to create beautiful visualizations of complex-valued
 functions using various color mapping techniques and plot types.
 """
 
+# Engineering mode (namespaced: cp.ee.TransferFunction, cp.ee.bode_plot, ...)
+from complexplorer import ee
 from complexplorer._version import __version__
 
 # High-level API
@@ -82,6 +84,8 @@ __all__ = [
     # High-level API
     "quick_plot",
     "Presets",
+    # Engineering mode (namespaced subpackage)
+    "ee",
     # STL export (PyVista-backed)
     "OrnamentGenerator",
     "create_ornament",

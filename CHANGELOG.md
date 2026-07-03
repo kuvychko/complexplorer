@@ -53,6 +53,11 @@ the road to 3.0 and were never published, so the notes below describe the upgrad
   unit-disk inset colored by the active colormap (faithful for enhanced phase portraits,
   chessboards, and log rings), giving figures an in-image key for hue → phase and
   shading → modulus
+- **Transfer-function explorer** (`cp.ee`): `TransferFunction(num, den, system="s"|"z")`
+  with `poles`/`zeros`/`is_stable`/`frequency_response()`; the object is a plain complex
+  callable, so it works with every renderer (`cp.plot`, `plot_landscape_pv`, `riemann_pv`,
+  STL export). Companion views: `pole_zero_plot`, `bode_plot`, `nyquist_plot`, and
+  `transfer_portrait` (phase portrait with poles/zeros and the stability boundary overlaid)
 
 ### Fixed
 - Colormaps now emit finite, deterministic RGB at non-finite inputs (poles and essential
