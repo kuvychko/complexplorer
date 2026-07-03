@@ -47,6 +47,10 @@ the road to 3.0 and were never published, so the notes below describe the upgrad
 - **Exception hierarchy**: `complexplorer.exceptions` with `ComplexplorerError` as the base
   class for all deliberate library errors; `ValidationError` now derives from it (and still
   from `ValueError`, so existing handlers keep working). Both are exported at top level
+- **Phase-wheel legend**: `plot(..., legend=True)` and `pair_plot(..., legend=True)` draw a
+  unit-disk inset colored by the active colormap (faithful for enhanced phase portraits,
+  chessboards, and log rings), giving figures an in-image key for hue → phase and
+  shading → modulus
 
 ### Fixed
 - Colormaps now emit finite, deterministic RGB at non-finite inputs (poles and essential

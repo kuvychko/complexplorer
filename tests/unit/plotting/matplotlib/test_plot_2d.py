@@ -176,6 +176,59 @@ class TestPairPlot:
         plt.close("all")
 
 
+class TestPhaseLegend:
+    """Test the legend= phase-wheel inset (add-phase-legend)."""
+
+    def test_legend_off_by_default(self):
+        domain = Rectangle(2, 2)
+        ax = plot(domain, lambda z: z**2, resolution=30)
+        assert len(ax.child_axes) == 0
+        plt.close("all")
+
+    def test_legend_adds_inset(self):
+        domain = Rectangle(2, 2)
+        ax = plot(domain, lambda z: z**2, resolution=30, legend=True)
+        assert len(ax.child_axes) == 1
+        plt.close("all")
+
+    def test_legend_with_provided_ax(self):
+        fig, ax = plt.subplots()
+        plot(Rectangle(2, 2), lambda z: z, resolution=30, ax=ax, legend=True)
+        assert len(ax.child_axes) == 1
+        plt.close("all")
+
+    def test_legend_image_is_rgba_with_transparent_corners(self):
+        domain = Rectangle(2, 2)
+        ax = plot(domain, lambda z: z**2, resolution=30, legend=True)
+        inset = ax.child_axes[0]
+        img = inset.get_images()[0].get_array()
+        assert img.shape[-1] == 4  # RGBA
+        # Corners lie outside the unit disk -> fully transparent
+        assert img[0, 0, 3] == 0.0
+        assert img[-1, -1, 3] == 0.0
+        # Center is inside the disk -> opaque
+        h, w = img.shape[:2]
+        assert img[h // 2, w // 4, 3] == 1.0
+        plt.close("all")
+
+    def test_legend_works_for_all_colormaps(self):
+        from complexplorer.core.colormap import LogRings, PolarChessboard
+
+        domain = Rectangle(2, 2)
+        for cmap in (Phase(n_phi=6), Chessboard(), PolarChessboard(), LogRings()):
+            ax = plot(domain, lambda z: z**2, resolution=20, cmap=cmap, legend=True)
+            assert len(ax.child_axes) == 1
+            plt.close("all")
+
+    def test_pair_plot_legend_on_codomain_only(self):
+        domain = Rectangle(2, 2)
+        fig = pair_plot(domain=domain, func=lambda z: z**2, resolution=30, legend=True)
+        domain_panel, codomain_panel = fig.axes[0], fig.axes[1]
+        assert len(domain_panel.child_axes) == 0
+        assert len(codomain_panel.child_axes) == 1
+        plt.close("all")
+
+
 class TestRiemannChart:
     """Test riemann_chart() function."""
 

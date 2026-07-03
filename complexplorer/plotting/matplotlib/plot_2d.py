@@ -130,6 +130,34 @@ class Matplotlib2DPlotter:
         return fig
 
 
+def _draw_phase_legend(ax: Axes, cmap: Colormap, size: float = 0.26, resolution: int = 256):
+    """Draw a phase-wheel legend inset on ``ax``.
+
+    The unit disk is colored by ``cmap`` applied to the identity map ``w = x + iy``,
+    so the legend is exact for any colormap (enhanced-phase rings and sectors,
+    chessboards, log rings). Pixels outside the disk are transparent.
+
+    Returns the inset axes.
+    """
+    x = np.linspace(-1, 1, resolution)
+    xx, yy = np.meshgrid(x, x)
+    w = xx + 1j * yy
+    outside = np.abs(w) > 1.0
+
+    rgb = cmap.rgb(w)
+    rgba = np.dstack([rgb, np.where(outside, 0.0, 1.0)])
+
+    inset = ax.inset_axes([1.0 - size - 0.02, 1.0 - size - 0.02, size, size])
+    inset.imshow(rgba, origin="lower", extent=[-1, 1, -1, 1])
+    # Thin border separating the wheel from the portrait beneath.
+    border = plt.Circle((0, 0), 1.0, fill=False, color="white", linewidth=1.5)
+    inset.add_patch(border)
+    inset.set_xlim(-1.02, 1.02)
+    inset.set_ylim(-1.02, 1.02)
+    inset.axis("off")
+    return inset
+
+
 def plot(
     domain: Domain | None = None,
     func: Callable | None = None,
@@ -140,6 +168,7 @@ def plot(
     ax: Axes | None = None,
     title: str | None = None,
     filename: str | None = None,
+    legend: bool = False,
 ) -> Axes | None:
     """Plot complex function as domain coloring.
 
@@ -167,6 +196,9 @@ def plot(
         Plot title.
     filename : str, optional
         If provided, save figure to this file.
+    legend : bool, optional
+        If True, draw a phase-wheel legend inset (the unit disk colored by the
+        active colormap) in the upper-right corner.
 
     Returns
     -------
@@ -232,16 +264,20 @@ def plot(
         plt.ylabel("Im(z)")
         if title:
             plt.title(title)
+        main_ax = plt.gca()
+        if legend:
+            _draw_phase_legend(main_ax, cmap)
         if filename:
             plt.savefig(filename)
-        # Return the current axes
-        return plt.gca()
+        return main_ax
     else:
         ax.imshow(rgb, origin="lower", extent=extent, aspect=aspect)
         ax.set_xlabel("Re(z)")
         ax.set_ylabel("Im(z)")
         if title:
             ax.set_title(title)
+        if legend:
+            _draw_phase_legend(ax, cmap)
         return ax
 
 
@@ -255,6 +291,7 @@ def pair_plot(
     title: str | None = None,
     figsize: tuple[float, float] = (10, 5),
     filename: str | None = None,
+    legend: bool = False,
 ) -> Figure:
     """Plot domain and codomain side by side.
 
@@ -278,6 +315,8 @@ def pair_plot(
         Figure size (width, height).
     filename : str, optional
         If provided, save figure to this file.
+    legend : bool, optional
+        If True, draw a phase-wheel legend inset on the codomain panel.
 
     Returns
     -------
@@ -302,7 +341,8 @@ def pair_plot(
         ax=ax0,
     )
 
-    # Plot codomain
+    # Plot codomain (the legend, if requested, belongs here — the domain panel is an
+    # identity portrait and already is its own legend)
     plot(
         domain=domain,
         func=func,
@@ -312,6 +352,7 @@ def pair_plot(
         cmap=cmap,
         title="Codomain f(z)",
         ax=ax1,
+        legend=legend,
     )
 
     if title:
