@@ -63,3 +63,9 @@ desktop.ini
 # Package manager
 pip-log.txt
 pip-delete-this-directory.txt
+
+# Generated STL meshes (3D-print artifacts, never committed — see roadmap STL policy)
+*.stl
+
+# Notebook-generated figure artifacts (regenerable; the inline output is in the .ipynb)
+examples/notebooks/publication_figure.*

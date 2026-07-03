@@ -49,6 +49,14 @@ dev = [
     "pytest-cov>=3.0.0",
     "pytest-timeout>=2.1.0",
     "ruff>=0.6",
+    "complexplorer[examples]",
+]
+# Notebook tooling for running and verifying the example notebooks (a local, opt-in gate:
+# `pytest --nbmake examples/notebooks/`). Not used by the default test suite or CI.
+examples = [
+    "nbmake>=1.5",
+    "nbconvert>=7.0",
+    "ipykernel>=6.0",
 ]
 # PyVista is a core dependency as of 3.0; these are kept as empty no-op aliases so existing
 # `pip install complexplorer[pyvista]` / `[3d]` commands continue to work.

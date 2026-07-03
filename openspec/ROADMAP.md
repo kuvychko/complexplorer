@@ -138,10 +138,11 @@ Phase 5  add-transfer-function-explorer                 2.5     no         plann
               gallery. Library cp.gallery + index.json stay deterministic (untouched).
               Hero banner kept. STL not committed. Riemann spheres use domain=None
               (full sphere). examples spec 3→8 reqs
-         M3 migrate-and-verify-notebooks                3.0     no         planned
-            · modernize the 4 notebooks onto the 3.0 surface (fix cp.plot_landscape
-              + HAS_PYVISTA breakage); add Riemann-surface + perceptual-family
-              coverage; DoD = each notebook runs top-to-bottom via nbconvert (local)
+         M3 migrate-and-verify-notebooks                3.0     no         proposed
+            · modernize the 4 notebooks onto the 3.0 surface (excise the obsolete
+              matplotlib-vs-PyVista narrative; static backend; strip notebook=/show=);
+              add Riemann-surface + preset-registry coverage (NOT perceptual — it does
+              not exist); DoD = pytest --nbmake (local, opt-in). [examples] extra added
 ────────────────────────────────────────────────────────────────────────────────
 3.1+     OUT OF UMBRELLA SCOPE (future backlog)
          full EE (filters, resonators, QCM, RF bridge),

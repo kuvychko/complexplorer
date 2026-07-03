@@ -23,13 +23,29 @@ examples/
 | Notebook | What it covers |
 |---|---|
 | `getting_started.ipynb` | Installation, your first visualization, domains and colormaps, basic 2D/3D — **start here.** |
-| `advanced_features.ipynb` | Enhanced phase portraits, the full colormap family, high-performance PyVista 3D, Riemann sphere. |
+| `advanced_features.ipynb` | Phase portraits, the colormap family, PyVista 3D, Riemann sphere **and Riemann surfaces**. |
 | `stl_export_demo.ipynb` | Step-by-step 3D-printable ornaments: Riemann-sphere relief, scaling options, print tips. |
-| `api_cookbook.ipynb` | Gallery of common functions, domain/colormap patterns, ready-to-use recipes. |
+| `api_cookbook.ipynb` | Common functions, domain/colormap patterns, the **preset registry** (`cp.catalog`), recipes. |
 
-> **PyVista in Jupyter:** the inline notebook backend has severe aliasing. For high-quality
-> 3D, pass `notebook=False` (or use `return_plotter=True`) so an external window opens, or
-> prefer the terminal scripts below.
+> **PyVista in Jupyter:** each notebook sets the **static** backend
+> (`pv.set_jupyter_backend('static')`) so 3D plots embed as images and the notebook runs
+> headlessly. For interactive rotation/zoom and the best anti-aliasing, run the terminal
+> scripts below instead.
+
+### Running & verifying the notebooks
+
+Install the notebook tooling, then verify all four execute top-to-bottom:
+
+```bash
+uv pip install -e ".[examples]"          # nbmake, nbconvert, ipykernel
+pytest --nbmake examples/notebooks/       # the local execution gate (opt-in; not in the default suite or CI)
+```
+
+To regenerate the committed output (e.g. after editing a notebook):
+
+```bash
+jupyter nbconvert --to notebook --execute --inplace examples/notebooks/*.ipynb
+```
 
 ## 🖥️ Scripts (`scripts/`)
 
