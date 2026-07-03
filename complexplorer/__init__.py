@@ -8,7 +8,7 @@ functions using various color mapping techniques and plot types.
 from complexplorer._version import __version__
 
 # High-level API
-from complexplorer.api import Presets, analyze_function, explore, quick_plot, visualize
+from complexplorer.api import Presets, quick_plot
 from complexplorer.core.colormap import Chessboard, Colormap, LogRings, Phase, PolarChessboard
 
 # Core functionality
@@ -77,9 +77,6 @@ __all__ = [
     "ensure_interactive_plots",
     # High-level API
     "quick_plot",
-    "analyze_function",
-    "visualize",
-    "explore",
     "Presets",
     # STL export (PyVista-backed)
     "OrnamentGenerator",

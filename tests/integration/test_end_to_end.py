@@ -7,7 +7,7 @@ import numpy as np
 
 # PyVista is a required core dependency as of 3.0, so STL export and the PyVista 3D
 # renderers are always available.
-from complexplorer.api import Presets, analyze_function, quick_plot
+from complexplorer.api import Presets, quick_plot
 from complexplorer.core.colormap import Chessboard, LogRings, Phase, PolarChessboard
 
 # Import from new API structure
@@ -146,21 +146,6 @@ class TestHighLevelAPI:
         plotter = quick_plot(func, mode="3d", resolution=30, interactive=False, return_plotter=True)
         assert plotter is not None
         plotter.close()
-
-    def test_analyze_function(self):
-        """Test analyze_function utility."""
-        func = lambda z: (z**2 - 1) / (z**2 + 1)
-
-        results = analyze_function(func)
-
-        assert "plot" in results
-        assert "domain" in results
-        assert "function" in results
-        assert "colormap" in results
-
-        import matplotlib.pyplot as plt
-
-        plt.close("all")
 
     def test_presets(self):
         """Test preset configurations."""

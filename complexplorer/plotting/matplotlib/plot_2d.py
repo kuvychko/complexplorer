@@ -16,10 +16,8 @@ from ...core.colormap import Colormap, Phase
 from ...core.domain import Domain, Rectangle
 from ...utils.validation import ValidationError
 
-# from ..base import Base2DPlotter, PlotConfig  # TODO: Implement base classes
 
-
-class Matplotlib2DPlotter:  # (Base2DPlotter):  # TODO: Add base class
+class Matplotlib2DPlotter:
     """2D plotter implementation using matplotlib."""
 
     def plot_single(
@@ -30,8 +28,7 @@ class Matplotlib2DPlotter:  # (Base2DPlotter):  # TODO: Add base class
         resolution: int,
         ax: Axes | None = None,
         title: str | None = None,
-        config=None,
-    ) -> Axes:  # config: Optional[PlotConfig] = None
+    ) -> Axes:
         """Plot a single complex function visualization.
 
         Parameters
@@ -48,8 +45,6 @@ class Matplotlib2DPlotter:  # (Base2DPlotter):  # TODO: Add base class
             Matplotlib axes to plot on.
         title : str, optional
             Plot title.
-        config : PlotConfig, optional
-            Additional plot configuration.
 
         Returns
         -------
@@ -97,8 +92,7 @@ class Matplotlib2DPlotter:  # (Base2DPlotter):  # TODO: Add base class
         resolution: int,
         figsize: tuple[float, float] = (10, 5),
         title: str | None = None,
-        config=None,
-    ) -> Figure:  # config: Optional[PlotConfig] = None
+    ) -> Figure:
         """Plot domain and codomain side by side.
 
         Parameters
@@ -115,8 +109,6 @@ class Matplotlib2DPlotter:  # (Base2DPlotter):  # TODO: Add base class
             Figure size (width, height).
         title : str, optional
             Overall figure title.
-        config : PlotConfig, optional
-            Additional plot configuration.
 
         Returns
         -------

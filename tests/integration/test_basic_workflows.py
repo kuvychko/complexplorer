@@ -6,7 +6,7 @@ import tempfile
 import numpy as np
 
 from complexplorer import plot_landscape_pv, riemann_pv
-from complexplorer.api import analyze_function, quick_plot
+from complexplorer.api import quick_plot
 from complexplorer.core.colormap import Phase
 
 # Import from new API
@@ -70,11 +70,6 @@ class TestCoreWorkflows:
         # Quick plot
         ax = quick_plot(func, mode="2d", resolution=30)
         assert ax is not None
-
-        # Analyze function
-        results = analyze_function(func)
-        assert "plot" in results
-        assert results["plot"] is not None
 
         import matplotlib.pyplot as plt
 

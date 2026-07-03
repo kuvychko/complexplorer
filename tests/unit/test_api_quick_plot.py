@@ -58,3 +58,30 @@ def test_2d_unaffected():
     warnings.simplefilter("ignore")
     ax = quick_plot(_f, mode="2d", resolution=30)
     assert ax is not None
+
+
+class TestCuratedSurface:
+    """3.0 curation (curate-high-level-api): no stubs, no aliases on the surface."""
+
+    def test_removed_api_names_not_importable(self):
+        import complexplorer.api as api
+
+        for name in ("create_animation", "compare_functions", "analyze_function"):
+            assert not hasattr(api, name)
+
+    def test_removed_top_level_names_not_importable(self):
+        import complexplorer as cp
+
+        for name in ("visualize", "explore", "analyze_function"):
+            assert not hasattr(cp, name)
+
+    def test_top_level_all_is_curated(self):
+        import complexplorer as cp
+
+        assert "quick_plot" in cp.__all__
+        assert "Presets" in cp.__all__
+        for name in ("visualize", "explore", "analyze_function"):
+            assert name not in cp.__all__
+        # __all__ must be importable in full
+        for name in cp.__all__:
+            assert hasattr(cp, name)

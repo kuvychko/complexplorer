@@ -1,14 +1,6 @@
-# High-Level API
+# High-Level API — Delta for curate-high-level-api
 
-## Purpose
-
-The high-level-api capability is the friendly front door to the library: a single `quick_plot`
-entry point that dispatches across 2D, 3D, and Riemann modes, and named presets that bundle good
-colormap and resolution settings for common goals. It composes the lower-level domain, colormap,
-and plotting capabilities so casual users need not assemble them by hand, and it exports only
-implemented functionality — no stubs, no aliases.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Mode- and backend-dispatching plot
 
@@ -45,15 +37,20 @@ the matplotlib 3D backend was removed. No alias names for `quick_plot` are expor
 - **WHEN** `quick_plot` is called with a mode other than `2d`, `3d`, or `riemann`
 - **THEN** an error is raised naming the unknown mode
 
-### Requirement: Named configuration presets
+## REMOVED Requirements
 
-The library SHALL provide named presets that return bundled colormap and resolution settings for
-common rendering goals, usable as keyword arguments to the plotting entry points.
+### Requirement: Quick exploration entry point
 
-#### Scenario: Presets return ready-to-use settings
+**Reason**: This requirement described a `show` function taking simple range specifications
+(`(min, max)` / `(min, max, resolution)` tuples). No such function has ever existed in the
+implementation — the requirement was a baseline-capture error. The quick-exploration role is
+filled by `quick_plot`, now covered by the modified mode-dispatching requirement above.
 
-- **WHEN** the publication, interactive, or high-contrast preset is requested
-- **THEN** a settings bundle is returned with a configured `Phase` colormap and a resolution tuned for that goal (higher resolution and more phase sectors for publication, balanced for interactive, many sectors and tighter modulus scaling for high contrast)
+**Migration**: Use `quick_plot(func)` — it defaults to a `Rectangle(4, 4)` domain, an enhanced
+`Phase` colormap, and 2D mode. To control the viewing region, pass a `Domain`
+(e.g. `Rectangle(re_length, im_length)`) instead of range tuples.
+
+## ADDED Requirements
 
 ### Requirement: Curated exported surface
 

@@ -16,6 +16,15 @@ the road to 3.0 and were never published, so the notes below describe the upgrad
   `riemann_hemispheres`) remain matplotlib-based
 - Removed the `HAS_PYVISTA` / `HAS_STL_EXPORT` capability flags — those features are
   always available
+- **Curated the high-level API surface** — removed never-implemented stubs and redundant
+  aliases so everything exported actually works:
+  - `create_animation()` and `compare_functions()` (raised `NotImplementedError`) — no
+    replacement yet; candidates for a future 3.x as real features
+  - `analyze_function()` (its zero/pole "detection" was an unimplemented stub) — use
+    `quick_plot()`; curated singularity answer keys live on `cp.catalog` presets
+  - the `visualize` / `explore` aliases — use `quick_plot()`
+  - the unused plotter base-class scaffolding `complexplorer.plotting.base`
+    (`BasePlotter`, `Base2DPlotter`, `Base3DPlotter`, `PlotConfig`)
 
 ### Added
 - **Riemann surfaces**: `riemann_surface_pv()` renders the multi-sheeted cover on which a
