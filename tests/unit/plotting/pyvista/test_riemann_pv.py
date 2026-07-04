@@ -5,6 +5,9 @@ rather than mocking ``pyvista.Plotter`` — so they actually cover mesh construc
 handling, and export.
 """
 
+import os
+import sys
+
 import numpy as np
 import pytest
 
@@ -13,6 +16,11 @@ pyvista = pytest.importorskip("pyvista")
 from complexplorer.core.colormap import LogRings, Phase
 from complexplorer.exceptions import ValidationError
 from complexplorer.plotting.pyvista.riemann import riemann_pv
+
+# A real offscreen VTK screenshot render crashes (access violation) on the headless Windows
+# CI runner (no GPU / no reliable offscreen GL). Building the plotter is fine; only the
+# render-to-file step is unsafe there. Linux CI exercises it via the headless-display action.
+_NO_OFFSCREEN_RENDER = sys.platform == "win32" and os.environ.get("CI") == "true"
 
 
 class TestRiemannPV:
@@ -63,6 +71,9 @@ class TestRiemannPV:
         assert isinstance(p, pyvista.Plotter)
         p.close()
 
+    @pytest.mark.skipif(
+        _NO_OFFSCREEN_RENDER, reason="offscreen VTK screenshot crashes on headless Windows CI"
+    )
     def test_save_screenshot(self, tmp_path):
         out = tmp_path / "riemann_test.png"
         riemann_pv(lambda z: z**2 + 1, resolution=20, interactive=False, filename=str(out))
@@ -117,7 +128,13 @@ class TestRiemannPVKwargValidation:
 
     @pytest.mark.parametrize(
         "bad",
-        [{"n_theta": 30}, {"n_phi": 30}, {"show": False}, {"project_from_north": False}, {"bogus": 1}],
+        [
+            {"n_theta": 30},
+            {"n_phi": 30},
+            {"show": False},
+            {"project_from_north": False},
+            {"bogus": 1},
+        ],
     )
     def test_removed_or_unknown_kwargs_rejected(self, bad):
         with pytest.raises(ValidationError):

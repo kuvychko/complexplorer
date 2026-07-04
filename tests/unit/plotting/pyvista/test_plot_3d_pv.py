@@ -4,6 +4,9 @@ The landscape renderers are exercised off-screen against the real PyVista backen
 as of 3.0) instead of mocking ``pyvista.Plotter``.
 """
 
+import os
+import sys
+
 import numpy as np
 import pytest
 
@@ -18,6 +21,11 @@ from complexplorer.plotting.pyvista.plot_3d import (
     plot_landscape_pv,
 )
 from complexplorer.plotting.pyvista.utils import ensure_pyvista_setup
+
+# A real offscreen VTK screenshot render crashes (access violation) on the headless Windows
+# CI runner (no GPU / no reliable offscreen GL). Building the plotter is fine; only the
+# render-to-file step is unsafe there. Linux CI exercises it via the headless-display action.
+_NO_OFFSCREEN_RENDER = sys.platform == "win32" and os.environ.get("CI") == "true"
 
 
 class TestCreateComplexSurface:
@@ -94,6 +102,9 @@ class TestPlotLandscapePV:
         assert isinstance(p, pyvista.Plotter)
         p.close()
 
+    @pytest.mark.skipif(
+        _NO_OFFSCREEN_RENDER, reason="offscreen VTK screenshot crashes on headless Windows CI"
+    )
     def test_save_to_file(self, tmp_path):
         out = tmp_path / "landscape.png"
         plot_landscape_pv(
@@ -145,6 +156,9 @@ class TestPairPlotLandscapePV:
         assert isinstance(p, pyvista.Plotter)
         p.close()
 
+    @pytest.mark.skipif(
+        _NO_OFFSCREEN_RENDER, reason="offscreen VTK screenshot crashes on headless Windows CI"
+    )
     def test_save_pair_plot(self, tmp_path):
         out = tmp_path / "pair.png"
         pair_plot_landscape_pv(

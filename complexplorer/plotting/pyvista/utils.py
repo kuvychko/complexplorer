@@ -145,7 +145,9 @@ def reject_unknown_kwargs(kwargs: dict) -> None:
     for key in kwargs:
         if key in _REMOVED_KWARGS:
             replacement = _REMOVED_KWARGS[key]
-            parts.append(f"{key!r} (use {replacement!r})" if replacement else f"{key!r} (removed in 3.0)")
+            parts.append(
+                f"{key!r} (use {replacement!r})" if replacement else f"{key!r} (removed in 3.0)"
+            )
         else:
             parts.append(repr(key))
     raise ValidationError(

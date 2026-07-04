@@ -14,14 +14,11 @@ __all__ = ["ModulusScaling", "SCALING_PRESETS", "apply_scaling_mode", "get_scali
 
 # Names of the built-in scaling modes, for error messages.
 _SCALING_MODE_NAMES = (
-    "constant, linear, arctan, logarithmic, linear_clamp, power, sigmoid, adaptive, "
-    "hybrid, custom"
+    "constant, linear, arctan, logarithmic, linear_clamp, power, sigmoid, adaptive, hybrid, custom"
 )
 
 
-def apply_scaling_mode(
-    values: np.ndarray, mode: str, params: dict | None = None
-) -> np.ndarray:
+def apply_scaling_mode(values: np.ndarray, mode: str, params: dict | None = None) -> np.ndarray:
     """Map ``values`` through a named ``ModulusScaling`` mode (or a ``custom`` callable).
 
     Shared dispatch for the mesh builders (height scaling) and the sphere distortion (radial

@@ -23,9 +23,7 @@ class TestRiemannDomainForwarding:
             captured.update(kwargs)
             return "plotter"
 
-        monkeypatch.setattr(
-            "complexplorer.plotting.pyvista.riemann.riemann_pv", fake_riemann_pv
-        )
+        monkeypatch.setattr("complexplorer.plotting.pyvista.riemann.riemann_pv", fake_riemann_pv)
         dom = Disk(2)
         quick_plot(_f, domain=dom, mode="riemann")
         assert captured.get("domain") is dom
@@ -37,9 +35,7 @@ class TestRiemannDomainForwarding:
             captured.update(kwargs)
             return "plotter"
 
-        monkeypatch.setattr(
-            "complexplorer.plotting.pyvista.riemann.riemann_pv", fake_riemann_pv
-        )
+        monkeypatch.setattr("complexplorer.plotting.pyvista.riemann.riemann_pv", fake_riemann_pv)
         quick_plot(_f, mode="riemann")
         assert "domain" not in captured  # default full-sphere, no mask
 
