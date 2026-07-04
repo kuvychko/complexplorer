@@ -2,7 +2,7 @@
 
 All notable changes to complexplorer will be documented in this file.
 
-## [3.0.0] - 2026-07-03
+## [3.0.0] - 2026-07-04
 
 Consolidates all work since 2.0.0. The 2.1–2.4 version bumps were internal milestones on
 the road to 3.0 and were never published, so the notes below describe the upgrade from
@@ -14,8 +14,23 @@ the road to 3.0 and were never published, so the notes below describe the upgrad
   3D `riemann()` surface. Use `plot_landscape_pv()`, `pair_plot_landscape_pv()`, and
   `riemann_pv()` instead. The 2D stereographic charts (`riemann_chart`,
   `riemann_hemispheres`) remain matplotlib-based
-- Removed the `HAS_PYVISTA` / `HAS_STL_EXPORT` capability flags — those features are
+- Removed the `HAS_PYVISTA` / `HAS_STL_EXPORT` capability flags **and their internal
+  machinery** (`check_pyvista_available`, the `try/except ImportError` guards, and the
+  `ImportError` fallbacks) — PyVista is imported unconditionally and those features are
   always available
+- **`Rectangle` membership now uses the rectangle's actual `re_length`/`im_length`** about
+  its `center`, independent of any square-padding applied to the viewing window. A
+  non-square `Rectangle` (with the default `square=True`) no longer reports the padded
+  strips as inside — `contains()`, masking, and STL/relief output change accordingly
+- **The PyVista renderers reject unknown keyword arguments** with a `ValidationError`
+  instead of leaking them into `pyvista.Plotter` (a raw `TypeError`) or silently dropping
+  them. Removed 2.x names are reported with their replacement: `n_theta`/`n_phi` →
+  `resolution`, `show` → `interactive`
+- Removed unused/dead public surface that was never wired up: the `complexplorer.export.base`
+  exporter framework, `Matplotlib2DPlotter`, `ensure_consistent_normals`, the reversed
+  `complexplorer.utils.mesh` projection aliases + `RectangularSphereGenerator`, the
+  `core.functions.stereographic` alias, and most `utils.validation` helpers (only
+  `validate_resolution` remains)
 - **Curated the high-level API surface** — removed never-implemented stubs and redundant
   aliases so everything exported actually works:
   - `create_animation()` and `compare_functions()` (raised `NotImplementedError`) — no
@@ -65,10 +80,30 @@ the road to 3.0 and were never published, so the notes below describe the upgrad
   run-to-run-varying colors)
 - `quick_plot` 3D/Riemann modes now dispatch to PyVista per the backend policy and no
   longer leak the `backend` kwarg into renderers
+- `quick_plot(..., mode="riemann", domain=...)` now forwards a caller-supplied domain to
+  `riemann_pv` (it was silently discarded)
+- `riemann_chart(domain=...)` now actually masks out-of-domain samples with the colormap's
+  out-of-domain color (it previously guarded on a nonexistent attribute and did nothing)
+- `plot(..., ax=..., filename=...)` now saves the figure even when an `ax` is supplied, and
+  `plot` consistently returns the drawn `Axes`
+- `pair_plot_landscape_pv(title=...)` now renders `title` as a figure-level title instead of
+  overwriting the codomain panel's label
+- CLI: `render --show` opens a window in 2D mode (previously a silent no-op); `stl
+  preset:<id>` now applies the preset's recommended domain and colormap; `main` reports any
+  `ComplexplorerError` (not only `ValidationError`)
 
 ### Changed
 - Version and license metadata reconciled: `complexplorer/_version.py` is the single
-  version source; MIT license consistent across `LICENSE` and packaging classifiers
+  version source; the code license is declared as an SPDX `license = "MIT"` expression
+  (the deprecated `License ::` classifier was dropped), and `LICENSE`/`LICENSE.art` ship in
+  the distribution
+- The package now ships a PEP 561 `py.typed` marker so downstream type checkers honor its
+  annotations; added a `Development Status` classifier and `keywords`; the `all` extra is
+  now user-facing (`complexplorer[qt]`) rather than pulling in dev/test tooling
+- Internal consolidation (no behavior change): a single modulus-scaling dispatch
+  (`core.scaling.apply_scaling_mode`) shared by the mesh builders and sphere distortion; a
+  shared planar input-resolver (`core.field.resolve_plane_inputs`) used by both the 2D and
+  3D renderers; and a shared PyVista show/export tail
 - Tooling and CI: ruff lint/format gates plus a GitHub Actions test matrix
   (ubuntu/windows × Python 3.11–3.13)
 - Examples reworked onto the 3.0 surface: new `examples/{notebooks,scripts,gallery}`
@@ -78,6 +113,11 @@ the road to 3.0 and were never published, so the notes below describe the upgrad
 - All four tutorial notebooks modernized (static PyVista Jupyter backend, no
   `HAS_PYVISTA` guards) and verified to execute top-to-bottom via the opt-in
   `pytest --nbmake examples/notebooks/`
+
+## [2.0.0] - 2025
+
+Tagged in git (`v2.0.0`) but never published to PyPI; it served as the baseline the 3.0
+work built on. See the `[3.0.0]` notes above, which describe the upgrade from 2.0.0 directly.
 
 ## [1.0.0] - 2025-07-27
 

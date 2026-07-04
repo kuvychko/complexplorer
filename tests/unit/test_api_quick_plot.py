@@ -5,11 +5,43 @@ import warnings
 import pytest
 
 from complexplorer.api import quick_plot
-from complexplorer.utils.validation import ValidationError
+from complexplorer.core.domain import Disk
+from complexplorer.exceptions import ValidationError
 
 
 def _f(z):
     return z**2 - 1
+
+
+class TestRiemannDomainForwarding:
+    """A caller-supplied domain is forwarded to riemann_pv; the default is not."""
+
+    def test_supplied_domain_is_forwarded(self, monkeypatch):
+        captured = {}
+
+        def fake_riemann_pv(func, **kwargs):
+            captured.update(kwargs)
+            return "plotter"
+
+        monkeypatch.setattr(
+            "complexplorer.plotting.pyvista.riemann.riemann_pv", fake_riemann_pv
+        )
+        dom = Disk(2)
+        quick_plot(_f, domain=dom, mode="riemann")
+        assert captured.get("domain") is dom
+
+    def test_default_domain_not_forwarded(self, monkeypatch):
+        captured = {}
+
+        def fake_riemann_pv(func, **kwargs):
+            captured.update(kwargs)
+            return "plotter"
+
+        monkeypatch.setattr(
+            "complexplorer.plotting.pyvista.riemann.riemann_pv", fake_riemann_pv
+        )
+        quick_plot(_f, mode="riemann")
+        assert "domain" not in captured  # default full-sphere, no mask
 
 
 class TestPyVistaDefault:

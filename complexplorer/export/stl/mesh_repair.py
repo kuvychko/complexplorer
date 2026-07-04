@@ -4,16 +4,10 @@ This module provides lightweight mesh repair functions to ensure
 watertight meshes suitable for 3D printing.
 """
 
-from .utils import check_pyvista_available
+from typing import TYPE_CHECKING
 
-# Import PyVista if available
-try:
+if TYPE_CHECKING:
     import pyvista as pv
-
-    HAS_PYVISTA = True
-except ImportError:
-    HAS_PYVISTA = False
-    pv = None
 
 
 def close_mesh_holes(mesh: "pv.PolyData", verbose: bool = False) -> "pv.PolyData":
@@ -35,8 +29,6 @@ def close_mesh_holes(mesh: "pv.PolyData", verbose: bool = False) -> "pv.PolyData
     pv.PolyData
         Mesh with attempted hole filling.
     """
-    check_pyvista_available()
-
     if verbose:
         # Check initial state
         edges = mesh.extract_feature_edges(boundary_edges=True)
@@ -95,8 +87,6 @@ def repair_mesh_simple(
     pv.PolyData
         Repaired mesh.
     """
-    check_pyvista_available()
-
     if verbose:
         print("=== Simple Mesh Repair ===")
         print(f"Input: {mesh.n_points} points, {mesh.n_cells} faces")
@@ -145,32 +135,4 @@ def repair_mesh_simple(
     return repaired
 
 
-def ensure_consistent_normals(mesh: "pv.PolyData", verbose: bool = False) -> "pv.PolyData":
-    """Ensure all face normals point consistently outward.
-
-    Parameters
-    ----------
-    mesh : pv.PolyData
-        Input mesh.
-    verbose : bool, default=False
-        Print progress.
-
-    Returns
-    -------
-    pv.PolyData
-        Mesh with consistent normals.
-    """
-    check_pyvista_available()
-
-    if verbose:
-        print("Ensuring consistent normals...")
-
-    # Compute normals
-    mesh_with_normals = mesh.compute_normals(
-        cell_normals=True, point_normals=False, consistent_normals=True, auto_orient_normals=True
-    )
-
-    return mesh_with_normals
-
-
-__all__ = ["close_mesh_holes", "repair_mesh_simple", "ensure_consistent_normals"]
+__all__ = ["close_mesh_holes", "repair_mesh_simple"]

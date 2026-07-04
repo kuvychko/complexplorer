@@ -254,7 +254,7 @@ class _Catalog:
 
 
 # --------------------------------------------------------------------------------------
-# Curated content (~20) — exact, hand-authored answer keys
+# Curated content (17 presets) — exact, hand-authored answer keys
 # --------------------------------------------------------------------------------------
 
 _RECT4 = {"type": "rectangle", "re_length": 4, "im_length": 4}

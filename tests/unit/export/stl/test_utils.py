@@ -2,32 +2,15 @@
 
 import numpy as np
 import pytest
-
-# Check if PyVista is available
-try:
-    import pyvista as pv
-
-    HAS_PYVISTA = True
-except ImportError:
-    HAS_PYVISTA = False
+import pyvista as pv
 
 from complexplorer.export.stl.utils import (
     center_mesh,
-    check_pyvista_available,
     scale_to_size,
     validate_printability,
 )
 
 
-class TestCheckPyVistaAvailable:
-    """Test PyVista availability check (PyVista is a required dependency as of 3.0)."""
-
-    def test_passes_when_available(self):
-        """Test no error when PyVista installed."""
-        check_pyvista_available()  # Should not raise
-
-
-@pytest.mark.skipif(not HAS_PYVISTA, reason="PyVista not installed")
 class TestValidatePrintability:
     """Test mesh validation for 3D printing."""
 
@@ -86,7 +69,6 @@ class TestValidatePrintability:
         assert "ready for 3D printing" in captured.out
 
 
-@pytest.mark.skipif(not HAS_PYVISTA, reason="PyVista not installed")
 class TestScaleToSize:
     """Test mesh scaling function."""
 
@@ -127,7 +109,6 @@ class TestScaleToSize:
             scale_to_size(sphere, 50, axis="invalid")
 
 
-@pytest.mark.skipif(not HAS_PYVISTA, reason="PyVista not installed")
 class TestCenterMesh:
     """Test mesh centering function."""
 

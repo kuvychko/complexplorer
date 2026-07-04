@@ -7,11 +7,11 @@ from collections.abc import Callable
 
 from complexplorer.core.colormap import Phase
 from complexplorer.core.domain import Domain, Rectangle
+from complexplorer.exceptions import ValidationError
 
 # Import plotting functions. 2D is matplotlib; 3D/Riemann are PyVista (a required core
 # dependency as of 3.0 — there is no matplotlib 3D backend).
 from complexplorer.plotting.matplotlib.plot_2d import plot as plot_2d
-from complexplorer.utils.validation import ValidationError
 
 
 def quick_plot(
@@ -34,6 +34,9 @@ def quick_plot(
     -------
     Axes or Plotter object depending on mode
     """
+    # Remember whether the caller supplied a domain: in Riemann mode a domain masks the
+    # sphere, so the Rectangle(4, 4) default must NOT be forwarded (default = full sphere).
+    domain_supplied = domain is not None
     if domain is None:
         domain = Rectangle(4, 4)
 
@@ -57,6 +60,8 @@ def quick_plot(
             return plot_landscape_pv(domain, func, **kwargs)
         from complexplorer.plotting.pyvista.riemann import riemann_pv
 
+        if domain_supplied:
+            kwargs["domain"] = domain
         return riemann_pv(func, **kwargs)
     raise ValidationError(f"Unknown mode: {mode}")
 

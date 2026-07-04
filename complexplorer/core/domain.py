@@ -16,7 +16,8 @@ from math import ceil
 
 import numpy as np
 
-from ..utils.validation import ValidationError, validate_resolution
+from ..exceptions import ValidationError
+from ..utils.validation import validate_resolution
 
 
 class Domain(ABC):
@@ -277,9 +278,16 @@ class Rectangle(Domain):
         super().__init__(real_bounds, imag_bounds, square)
 
     def contains(self, z: np.ndarray) -> np.ndarray:
-        """Check if points are inside the rectangle."""
-        re_min, re_max = self.window_real
-        im_min, im_max = self.window_imag
+        """Check if points are inside the rectangle.
+
+        Membership is defined by the rectangle's own ``re_length``/``im_length`` about its
+        ``center`` — independent of any square-padding applied to the viewing window for
+        display (so a non-square rectangle does not report the padded strips as inside).
+        """
+        re_min = self.center.real - self.re_length / 2
+        re_max = self.center.real + self.re_length / 2
+        im_min = self.center.imag - self.im_length / 2
+        im_max = self.center.imag + self.im_length / 2
 
         return (
             (np.real(z) >= re_min)

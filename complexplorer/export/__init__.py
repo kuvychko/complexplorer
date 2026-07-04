@@ -1,5 +1,6 @@
-"""Export modules for complexplorer."""
+"""Export modules for complexplorer.
 
-from .base import *
-
-__all__ = ["base"]
+The STL export surface lives in the :mod:`complexplorer.export.stl` subpackage; import from
+there (or from the top-level package, which re-exports ``OrnamentGenerator`` /
+``create_ornament``).
+"""

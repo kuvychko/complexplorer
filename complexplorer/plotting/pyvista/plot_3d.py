@@ -5,31 +5,21 @@ using PyVista as an alternative to matplotlib-based plots.
 """
 
 from collections.abc import Callable
-from typing import Optional
 
 import numpy as np
+import pyvista as pv
 
 from ...core.colormap import Colormap, Phase
 from ...core.domain import Domain
-from ...core.field import ComplexField
+from ...core.field import ComplexField, resolve_plane_inputs
 from ...mesh import build_landscape
-from ...utils.validation import ValidationError
 from .utils import (
     add_axes_widget,
-    check_pyvista_available,
     ensure_pyvista_setup,
+    finalize_plot,
     get_camera_position,
-    handle_export,
+    reject_unknown_kwargs,
 )
-
-# Import PyVista if available
-try:
-    import pyvista as pv
-
-    HAS_PYVISTA = True
-except ImportError:
-    HAS_PYVISTA = False
-    pv = None
 
 
 def create_complex_surface(
@@ -79,30 +69,11 @@ def create_complex_surface(
     rgb_colors : ndarray
         RGB color array.
     """
-    # Validate inputs
-    if domain is None and z is None:
-        raise ValidationError("Either domain or z must be provided")
-    if f is None and func is None:
-        raise ValidationError("Either f or func must be provided")
     if cmap is None:
         cmap = Phase(n_phi=6, v_base=0.6)
 
-    # Resolve the sampling grid + out-of-domain mask (mask only when derived from a domain).
-    if z is None:
-        z = domain.mesh(resolution)
-        mask = domain.outmask(resolution)
-    else:
-        z = np.asarray(z)
-        mask = None
-
-    # Resolve the function values.
-    if f is None:
-        with np.errstate(all="ignore"):
-            f = np.asarray(func(z))
-    else:
-        f = np.asarray(f)
-    if f.ndim == 0:  # scalar case
-        f = np.full_like(z, f)
+    # Resolve the sampling grid, values, and out-of-domain mask (shared with the 2D backend).
+    z, f, mask = resolve_plane_inputs(domain, func, z, f, resolution)
 
     # Delegate geometry + decoration to the surface kernel (output-preserving).
     with np.errstate(all="ignore"):
@@ -145,7 +116,7 @@ def plot_landscape_pv(
     return_plotter: bool = False,
     show_orientation: bool = True,
     **kwargs,
-) -> Optional["pv.Plotter"]:
+) -> "pv.Plotter | None":
     """Plot complex function as 3D landscape using PyVista.
 
     This function provides high-performance, interactive 3D visualization
@@ -200,7 +171,9 @@ def plot_landscape_pv(
     show_orientation : bool, optional
         If True, show orientation widget.
     **kwargs
-        Additional arguments passed to pv.Plotter.
+        Reserved. Passing any keyword argument here raises ``ValidationError``; removed 2.x
+        names are reported with their 3.0 replacement (e.g. ``n_theta``/``n_phi`` →
+        ``resolution``, ``show`` → ``interactive``).
 
     Returns
     -------
@@ -217,7 +190,7 @@ def plot_landscape_pv(
     >>> plot_landscape_pv(domain, lambda z: 1/z,
     ...                   interactive=False, filename='poles.png')
     """
-    check_pyvista_available()
+    reject_unknown_kwargs(kwargs)
     ensure_pyvista_setup()
 
     # Create surface mesh
@@ -232,38 +205,6 @@ def plot_landscape_pv(
     }
     if notebook is not None:
         plotter_kwargs["notebook"] = notebook
-
-    # Add any user-provided kwargs, filtering out our function parameters
-    # that might have been accidentally passed as kwargs
-    filtered_kwargs = {
-        k: v
-        for k, v in kwargs.items()
-        if k
-        not in {
-            "resolution",
-            "n",
-            "domain",
-            "func",
-            "z",
-            "f",
-            "cmap",
-            "interactive",
-            "camera_position",
-            "show_edges",
-            "edge_color",
-            "z_scale",
-            "log_z",
-            "z_max",
-            "modulus_mode",
-            "modulus_params",
-            "title",
-            "filename",
-            "return_plotter",
-            "show_orientation",
-            "show",
-        }
-    }
-    plotter_kwargs.update(filtered_kwargs)
 
     plotter = pv.Plotter(**plotter_kwargs)
 
@@ -292,20 +233,7 @@ def plot_landscape_pv(
     if show_orientation:
         add_axes_widget(plotter, labels=("Re", "Im", "|f|"))
 
-    # Handle export
-    if filename:
-        if interactive:
-            # For interactive mode, we'll export after showing
-            plotter.show()
-            handle_export(plotter, filename, interactive)
-        else:
-            # For static mode, export directly
-            handle_export(plotter, filename, interactive)
-    elif interactive:
-        plotter.show()
-
-    if return_plotter:
-        return plotter
+    return finalize_plot(plotter, filename, interactive, return_plotter)
 
 
 def pair_plot_landscape_pv(
@@ -328,7 +256,7 @@ def pair_plot_landscape_pv(
     filename: str | None = None,
     return_plotter: bool = False,
     **kwargs,
-) -> Optional["pv.Plotter"]:
+) -> "pv.Plotter | None":
     """Plot domain and codomain landscapes side-by-side using PyVista.
 
     Parameters
@@ -364,18 +292,23 @@ def pair_plot_landscape_pv(
     window_size : tuple, optional
         Window size in pixels.
     title : str, optional
-        Overall title.
+        Overall figure title (shown above the paired views; the codomain panel keeps its own
+        ``Codomain f(z)`` label).
     filename : str, optional
         Save plot to file.
     return_plotter : bool, optional
         If True, return the plotter object.
+    **kwargs
+        Reserved. Passing any keyword argument here raises ``ValidationError``; removed 2.x
+        names are reported with their 3.0 replacement (e.g. ``n_theta``/``n_phi`` →
+        ``resolution``, ``show`` → ``interactive``).
 
     Returns
     -------
     pv.Plotter or None
         The plotter object if return_plotter=True.
     """
-    check_pyvista_available()
+    reject_unknown_kwargs(kwargs)
     ensure_pyvista_setup()
 
     # Create plotter with two viewports
@@ -386,37 +319,6 @@ def pair_plot_landscape_pv(
     }
     if notebook is not None:
         plotter_kwargs["notebook"] = notebook
-
-    # Filter kwargs to avoid passing our function parameters to PyVista
-    filtered_kwargs = {
-        k: v
-        for k, v in kwargs.items()
-        if k
-        not in {
-            "resolution",
-            "n",
-            "domain",
-            "func",
-            "z",
-            "f",
-            "cmap",
-            "interactive",
-            "camera_position",
-            "show_edges",
-            "edge_color",
-            "z_scale",
-            "log_z",
-            "z_max",
-            "modulus_mode",
-            "modulus_params",
-            "title",
-            "filename",
-            "return_plotter",
-            "show_orientation",
-            "show",
-        }
-    }
-    plotter_kwargs.update(filtered_kwargs)
 
     plotter = pv.Plotter(**plotter_kwargs)
 
@@ -460,9 +362,7 @@ def pair_plot_landscape_pv(
         specular=0.5,
         specular_power=15,
     )
-    # Use title as codomain label if provided, otherwise default
-    codomain_label = title if title else "Codomain f(z)"
-    plotter.add_text(codomain_label, position="upper_edge")
+    plotter.add_text("Codomain f(z)", position="upper_edge")
     add_axes_widget(plotter, labels=("Re", "Im", "|f|"))
     plotter.camera_position = get_camera_position(camera_position)
 
@@ -470,15 +370,10 @@ def pair_plot_landscape_pv(
     if interactive:
         plotter.link_views()
 
-    # Handle export/display
-    if filename:
-        if interactive:
-            plotter.show()
-            handle_export(plotter, filename, interactive)
-        else:
-            handle_export(plotter, filename, interactive)
-    elif interactive:
-        plotter.show()
+    # Overall figure title, kept distinct from the per-panel labels (it does not replace the
+    # "Codomain f(z)" label). Placed at the top-left of the paired window.
+    if title:
+        plotter.subplot(0, 0)
+        plotter.add_text(title, position="upper_left", font_size=12)
 
-    if return_plotter:
-        return plotter
+    return finalize_plot(plotter, filename, interactive, return_plotter)

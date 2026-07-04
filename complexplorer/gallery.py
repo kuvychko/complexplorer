@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 
 from ._version import __version__
 from .core.presets import FunctionPreset, catalog
+from .exceptions import ValidationError
 from .plotting.matplotlib.plot_2d import plot as plot_2d
 
 SCHEMA_VERSION = 2  # v2: card records carry answer_key_stats (enrich-answer-key-stats)
@@ -86,6 +87,8 @@ def generate_gallery(
         The ``index.json`` manifest that was written.
     """
     presets = _resolve(selection)
+    if not presets:
+        raise ValidationError(f"0 presets matched selection {selection!r}")
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
 

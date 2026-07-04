@@ -4,14 +4,11 @@ This module provides shared functionality for distorting meshes based on
 complex function moduli, used by both visualization and STL export.
 """
 
-import warnings
-from collections.abc import Callable
 from typing import Any
 
 import numpy as np
 
-from ..core.scaling import ModulusScaling
-from ..utils.validation import ValidationError
+from ..core.scaling import apply_scaling_mode
 
 
 def apply_modulus_distortion(
@@ -63,82 +60,12 @@ def apply_modulus_distortion(
             # All infinite - use 1.0
             moduli = np.ones_like(moduli)
 
-    # Get scaling method
-    if scaling_mode == "custom":
-        # Custom mode requires a function
-        if "scaling_func" not in scaling_params:
-            raise ValidationError("Custom mode requires 'scaling_func' in scaling_params")
-        radii = scaling_params["scaling_func"](moduli)
-    else:
-        # Use built-in scaling method
-        scaling_method = getattr(ModulusScaling, scaling_mode, None)
-        if scaling_method is None:
-            raise ValidationError(
-                f"Unknown scaling mode: {scaling_mode}. "
-                f"Available: constant, linear, arctan, logarithmic, "
-                f"linear_clamp, power, sigmoid, adaptive, hybrid, custom"
-            )
-        radii = scaling_method(moduli, **scaling_params)
+    radii = apply_scaling_mode(moduli, scaling_mode, scaling_params)
 
     # Apply radial scaling
     scaled_points = mesh_points * radii[:, np.newaxis]
 
     return scaled_points, radii
-
-
-def compute_riemann_sphere_distortion(
-    sphere_mesh,
-    func: Callable,
-    scaling_mode: str = "arctan",
-    scaling_params: dict[str, Any] | None = None,
-    from_north: bool = True,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Compute distorted Riemann sphere from complex function.
-
-    Parameters
-    ----------
-    sphere_mesh : mesh object
-        Base sphere mesh with .points attribute.
-    func : callable
-        Complex function to evaluate.
-    scaling_mode : str, default='arctan'
-        Scaling method for modulus.
-    scaling_params : dict, optional
-        Parameters for scaling method.
-    from_north : bool, default=True
-        Use north pole stereographic projection.
-
-    Returns
-    -------
-    scaled_points : np.ndarray
-        Distorted mesh points.
-    f_vals : np.ndarray
-        Complex function values.
-    radii : np.ndarray
-        Applied scaling factors.
-    """
-    from ..core.functions import inverse_stereographic
-
-    # Get sphere points
-    points = sphere_mesh.points
-    x, y, z = points[:, 0], points[:, 1], points[:, 2]
-
-    # Apply stereographic projection to get complex values
-    w = inverse_stereographic(x, y, z, project_from_north=from_north)
-
-    # Evaluate function
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=RuntimeWarning)
-        f_vals = func(w)
-
-    # Get moduli
-    f_vals = np.asarray(f_vals)
-    moduli = np.abs(f_vals)
-
-    # Apply distortion
-    scaled_points, radii = apply_modulus_distortion(points, moduli, scaling_mode, scaling_params)
-
-    return scaled_points, f_vals, radii
 
 
 def get_default_scaling_params(scaling_mode: str, for_stl: bool = False) -> dict[str, Any]:
@@ -189,6 +116,5 @@ def get_default_scaling_params(scaling_mode: str, for_stl: bool = False) -> dict
 
 __all__ = [
     "apply_modulus_distortion",
-    "compute_riemann_sphere_distortion",
     "get_default_scaling_params",
 ]

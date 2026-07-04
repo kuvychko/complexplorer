@@ -27,15 +27,11 @@ module is PyVista-backed (3D).
 from __future__ import annotations
 
 import numpy as np
+import pyvista as pv
 
 from ..core.colormap import Colormap, Phase
-from ..utils.validation import ValidationError
+from ..exceptions import ValidationError
 from .surface import SurfaceMesh
-
-try:
-    import pyvista as pv
-except ImportError:  # pragma: no cover - exercised only without the 3D backend
-    pv = None
 
 RIEMANN_FAMILIES = ("power", "log", "algebraic")
 
@@ -137,8 +133,6 @@ def build_riemann_surface(
         The embedded surface, colored by the phase of the value. For the algebraic family
         the metadata records the roots of ``P`` under ``branch_points``.
     """
-    if pv is None:
-        raise ImportError("PyVista is required for 3D mesh building.")
     if family not in RIEMANN_FAMILIES:
         raise ValidationError(f"Unknown family {family!r}; supported: {RIEMANN_FAMILIES}")
     if cmap is None:

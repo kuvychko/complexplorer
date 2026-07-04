@@ -69,6 +69,17 @@ class TestRectangle:
         expected = np.array([True, True, False, True, False])
         np.testing.assert_array_equal(mask, expected)
 
+    def test_contains_non_square_ignores_padding(self):
+        """A non-square rectangle's membership uses its actual dimensions, not the
+        square-padded viewing window (regression: contains used the padded window)."""
+        rect = Rectangle(re_length=4, im_length=2)  # default square=True pads the window
+        # Point inside the real 4x2 rectangle
+        assert rect.contains(0 + 0.5j)
+        # Point inside the padded 4x4 window but OUTSIDE the 4x2 rectangle
+        assert not rect.contains(0 + 1.5j)
+        # Edge of the actual rectangle is inclusive
+        assert rect.contains(0 + 1j)
+
     def test_mesh_generation(self):
         """Test mesh generation."""
         rect = Rectangle(2, 2)

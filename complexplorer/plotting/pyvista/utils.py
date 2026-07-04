@@ -5,24 +5,9 @@ This module provides helper functions for PyVista-based visualizations.
 
 import warnings
 
+import pyvista as pv
+
 from complexplorer.exceptions import ValidationError
-
-# Only import PyVista if available
-try:
-    import pyvista as pv
-
-    HAS_PYVISTA = True
-except ImportError:
-    HAS_PYVISTA = False
-    pv = None
-
-
-def check_pyvista_available():
-    """Check if PyVista is available and raise error if not."""
-    if not HAS_PYVISTA:
-        raise ImportError(
-            "PyVista is required for this functionality. Install with: pip install pyvista"
-        )
 
 
 def handle_export(plotter: "pv.Plotter", filename: str, interactive: bool) -> None:
@@ -58,10 +43,28 @@ def handle_export(plotter: "pv.Plotter", filename: str, interactive: bool) -> No
         plotter.screenshot(filename)
 
 
+def finalize_plot(
+    plotter: "pv.Plotter",
+    filename: str | None,
+    interactive: bool,
+    return_plotter: bool = False,
+) -> "pv.Plotter | None":
+    """Show and/or export a plotter, then optionally return it.
+
+    Interactive plots are shown first; a filename (if any) is exported afterward. This is the
+    shared tail used by every PyVista entry point so the show/export/return behavior stays
+    identical across them.
+    """
+    if interactive:
+        plotter.show()
+    if filename:
+        handle_export(plotter, filename, interactive)
+    return plotter if return_plotter else None
+
+
 def add_axes_widget(
     plotter: "pv.Plotter",
     labels: tuple[str, str, str] = ("Re", "Im", "Z"),
-    position: tuple[float, float] = (0.0, 0.0),
     size: float = 0.25,
     label_size: tuple[float, float] = (0.25, 0.1),
 ) -> None:
@@ -73,58 +76,34 @@ def add_axes_widget(
         The PyVista plotter object.
     labels : tuple of str, default=('Re', 'Im', 'Z')
         Labels for x, y, z axes.
-    position : tuple of float, default=(0.0, 0.0)
-        Position of widget in viewport coordinates (0-1).
     size : float, default=0.25
-        Size of the widget as fraction of viewport.
+        Size of the widget as fraction of viewport (off-screen rendering only).
     label_size : tuple of float, default=(0.25, 0.1)
         Width and height of the axes label actors (values between 0 and 1).
     """
-    # Check if we're in off-screen mode (static rendering)
-    is_static = plotter.off_screen
-
-    if is_static:
-        # For static rendering, use viewport-based approach
-        axes_actor = plotter.add_axes(
-            xlabel=labels[0],
-            ylabel=labels[1],
-            zlabel=labels[2],
-            line_width=4,
-            labels_off=False,
-            interactive=True,
-            viewport=(0, 0, size, size),
-            label_size=label_size,
-            cone_radius=0.4,
-            shaft_length=0.8,
-            tip_length=0.2,
-            ambient=0.5,
-            color="black",
-        )
-    else:
-        # For interactive mode, use the standard add_axes without viewport
-        # This seems to work better in Jupyter notebooks
-        axes_actor = plotter.add_axes(
-            xlabel=labels[0],
-            ylabel=labels[1],
-            zlabel=labels[2],
-            line_width=4,
-            labels_off=False,
-            interactive=True,
-            label_size=label_size,
-            cone_radius=0.4,
-            shaft_length=0.8,
-            tip_length=0.2,
-            ambient=0.5,
-            color="black",
-        )
-
-    return axes_actor
+    kwargs = dict(
+        xlabel=labels[0],
+        ylabel=labels[1],
+        zlabel=labels[2],
+        line_width=4,
+        labels_off=False,
+        interactive=True,
+        label_size=label_size,
+        cone_radius=0.4,
+        shaft_length=0.8,
+        tip_length=0.2,
+        ambient=0.5,
+        color="black",
+    )
+    # For static (off-screen) rendering, pin the widget into a viewport corner; the
+    # interactive path works better with the default placement (esp. in Jupyter).
+    if plotter.off_screen:
+        kwargs["viewport"] = (0, 0, size, size)
+    plotter.add_axes(**kwargs)
 
 
 def ensure_pyvista_setup():
     """Ensure PyVista is properly configured for the current environment."""
-    check_pyvista_available()
-
     # Set conservative defaults for better compatibility
     # Users can increase these if their system supports it
     if pv.global_theme.multi_samples is None:
@@ -132,16 +111,46 @@ def ensure_pyvista_setup():
     pv.global_theme.smooth_shading = True
 
     backend = pv.global_theme.jupyter_backend
-    if backend is None:
-        # Not in Jupyter, use default
-        pass
-    elif backend != "trame" and not str(backend).startswith("<MagicMock"):
-        # Only warn for real backends, not mocked ones in tests
+    if backend is not None and backend != "trame":
         warnings.warn(
             f"PyVista backend is '{backend}', but 'trame' is recommended for "
             "interactive Jupyter visualizations. Set with: pv.set_jupyter_backend('trame')",
             stacklevel=2,
         )
+
+
+# Keyword arguments accepted by earlier (2.x) releases and removed in 3.0. Mapped to their
+# current replacement (or None when there is no replacement) so the error can guide callers.
+_REMOVED_KWARGS = {
+    "n": "resolution",
+    "n_theta": "resolution",
+    "n_phi": "resolution",
+    "show": "interactive",
+    "radius": None,
+    "project_from_north": None,
+}
+
+
+def reject_unknown_kwargs(kwargs: dict) -> None:
+    """Raise a clear ``ValidationError`` for any keyword argument the renderer does not accept.
+
+    The PyVista entry points take an explicit signature and do not forward arbitrary keyword
+    arguments to ``pyvista.Plotter``. Passing an unknown one — including a 2.x name removed in
+    3.0 — raises here with the current replacement named, instead of a raw ``TypeError`` from
+    PyVista or a silent no-op.
+    """
+    if not kwargs:
+        return
+    parts = []
+    for key in kwargs:
+        if key in _REMOVED_KWARGS:
+            replacement = _REMOVED_KWARGS[key]
+            parts.append(f"{key!r} (use {replacement!r})" if replacement else f"{key!r} (removed in 3.0)")
+        else:
+            parts.append(repr(key))
+    raise ValidationError(
+        "Unexpected keyword argument(s) not accepted by this renderer: " + ", ".join(parts)
+    )
 
 
 def get_camera_position(position: str | tuple) -> str | tuple:

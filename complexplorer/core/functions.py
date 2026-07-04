@@ -238,7 +238,3 @@ def inverse_stereographic(
 
     result = real_part + 1j * imag_part
     return complex(result) if scalar_input else result
-
-
-# Backward compatibility
-stereographic = stereographic_projection

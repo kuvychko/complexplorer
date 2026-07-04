@@ -72,6 +72,7 @@ For any non-trivial change, create an OpenSpec change proposal (`/opsx:propose` 
 - numpy >= 1.26.0
 - matplotlib >= 3.8.0 (2D backend)
 - scipy >= 1.11.0 (for mesh interpolation and signal processing)
+- asteval >= 1.0 (safe expression-string evaluation for `core/expression.py` and the CLI)
 - PyVista >= 0.47 (the 3D backend **and STL export** — a required dependency as of 3.0)
 
 Optional dependencies:

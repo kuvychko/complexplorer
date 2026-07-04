@@ -4,26 +4,12 @@ This module provides validation and helper functions for 3D printing.
 """
 
 import warnings
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from complexplorer.exceptions import ValidationError
 
-# Import PyVista if available
-try:
+if TYPE_CHECKING:
     import pyvista as pv
-
-    HAS_PYVISTA = True
-except ImportError:
-    HAS_PYVISTA = False
-    pv = None
-
-
-def check_pyvista_available():
-    """Check if PyVista is available and raise error if not."""
-    if not HAS_PYVISTA:
-        raise ImportError(
-            "PyVista is required for STL export functionality. Install with: pip install pyvista"
-        )
 
 
 def validate_printability(
@@ -55,8 +41,6 @@ def validate_printability(
         - wall_thickness_ok: bool, if size_mm provided
         - recommended_size_mm: float, recommended print size
     """
-    check_pyvista_available()
-
     results = {}
 
     # Check if watertight (no boundary edges)
@@ -84,11 +68,10 @@ def validate_printability(
     except Exception:
         results["volume"] = None
         results["surface_area"] = None
-        if verbose:
-            warnings.warn(
-                "Could not compute volume/area. Mesh may not be watertight.",
-                stacklevel=2,
-            )
+        warnings.warn(
+            "Could not compute volume/area. Mesh may not be watertight.",
+            stacklevel=2,
+        )
 
     # Scaling validation if size provided
     if size_mm is not None:
@@ -173,8 +156,6 @@ def scale_to_size(mesh: "pv.PolyData", target_size_mm: float, axis: str = "max")
     pv.PolyData
         Scaled mesh.
     """
-    check_pyvista_available()
-
     bounds = mesh.bounds
     dimensions = [
         bounds[1] - bounds[0],  # x
@@ -215,8 +196,6 @@ def center_mesh(mesh: "pv.PolyData") -> "pv.PolyData":
     pv.PolyData
         Centered mesh.
     """
-    check_pyvista_available()
-
     centered = mesh.copy()
     center = centered.center
     centered.points -= center

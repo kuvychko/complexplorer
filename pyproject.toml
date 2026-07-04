@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=77.0.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
@@ -9,6 +9,10 @@ include-package-data = false
 where = ["."]
 include = ["complexplorer", "complexplorer.*"]
 exclude = ["examples*", "tests*", "docs*", "build*", "*.egg-info"]
+
+[tool.setuptools.package-data]
+# PEP 561 marker so downstream type checkers honor the inline annotations.
+complexplorer = ["py.typed"]
 
 [tool.setuptools.dynamic]
 version = {attr = "complexplorer._version.__version__"}
@@ -22,6 +26,19 @@ authors = [
 description = "Complex function visualizations inspired by Elias Wegert's 'Visual Complex Functions - An Introduction with Phase Portraits'"
 readme = "README.md"
 requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE", "LICENSE.art"]
+keywords = [
+    "complex analysis",
+    "visualization",
+    "phase portrait",
+    "domain coloring",
+    "riemann sphere",
+    "riemann surface",
+    "stl",
+    "3d printing",
+    "pyvista",
+]
 dependencies = [
     "numpy>=1.26.0",
     "matplotlib>=3.8.0",
@@ -32,11 +49,11 @@ dependencies = [
     "pyvista>=0.47",
 ]
 classifiers = [
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
-    "License :: OSI Approved :: MIT License",
     "Topic :: Scientific/Engineering :: Visualization",
     "Topic :: Multimedia :: Graphics",
     "Operating System :: OS Independent",
@@ -65,8 +82,9 @@ pyvista = []
 qt = [
     "PyQt6>=6.5.0",
 ]
+# User-facing "everything" extra: optional runtime features only (not dev/test tooling).
 all = [
-    "complexplorer[dev,pyvista,qt]",
+    "complexplorer[qt]",
 ]
 
 [project.scripts]

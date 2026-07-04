@@ -102,3 +102,43 @@ class TestPyVistaCommands:
         out = tmp_path / "f.stl"
         rc = main(["stl", "preset:pole_flower_10", "--resolution", "40", "-o", str(out)])
         assert rc == 0 and out.exists() and out.stat().st_size > 0
+
+
+class TestCLIBehaviorFixes:
+    """Behavioral fixes: 2D --show opens a window; stl uses the preset's domain."""
+
+    def test_render_2d_show_invokes_show(self, monkeypatch):
+        import matplotlib.pyplot as plt
+
+        called = {"setup": False, "show": False}
+        monkeypatch.setattr(
+            "complexplorer.utils.backend.setup_matplotlib_backend",
+            lambda *a, **k: called.__setitem__("setup", True),
+        )
+        monkeypatch.setattr(plt, "show", lambda *a, **k: called.__setitem__("show", True))
+        warnings.simplefilter("ignore")
+
+        rc = main(["render", "z**2", "--domain", "rect:4:4", "--mode", "2d", "--show"])
+
+        assert rc == 0
+        assert called["show"], "2D --show must call plt.show()"
+
+    def test_stl_forwards_preset_domain(self, monkeypatch):
+        import complexplorer.export.stl as stl_pkg
+
+        captured = {}
+
+        class FakeGen:
+            def __init__(self, func, **kwargs):
+                captured.update(kwargs)
+
+            def generate_and_save(self, *args, **kwargs):
+                return "ok"
+
+        monkeypatch.setattr(stl_pkg, "OrnamentGenerator", FakeGen)
+        warnings.simplefilter("ignore")
+
+        rc = main(["stl", "preset:pole_flower_10", "-o", "unused.stl"])
+
+        assert rc == 0
+        assert captured.get("domain") is not None, "stl preset must forward the preset's domain"

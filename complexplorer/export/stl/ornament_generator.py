@@ -7,7 +7,7 @@ by using the modulus-scaled Riemann sphere mesh with optional simple repairs.
 import os
 import warnings
 from collections.abc import Callable
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -18,16 +18,10 @@ from ...exceptions import ValidationError
 from ...mesh import build_relief
 from ...utils.mesh_distortion import get_default_scaling_params
 from .mesh_repair import repair_mesh_simple
-from .utils import center_mesh, check_pyvista_available, scale_to_size, validate_printability
+from .utils import center_mesh, scale_to_size, validate_printability
 
-# Import PyVista if available
-try:
+if TYPE_CHECKING:
     import pyvista as pv
-
-    HAS_PYVISTA = True
-except ImportError:
-    HAS_PYVISTA = False
-    pv = None
 
 
 class OrnamentGenerator:
@@ -62,8 +56,6 @@ class OrnamentGenerator:
         domain: Domain | None = None,
     ):
         """Initialize ornament generator."""
-        check_pyvista_available()
-
         self.func = func
         self.resolution = resolution
         self.scaling = scaling

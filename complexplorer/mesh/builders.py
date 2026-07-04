@@ -14,20 +14,16 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
+import pyvista as pv
 
 from ..core.colormap import Colormap, Phase
-from ..core.scaling import ModulusScaling
+from ..core.scaling import apply_scaling_mode
+from ..exceptions import ValidationError
 from ..utils.mesh_distortion import apply_modulus_distortion, get_default_scaling_params
-from ..utils.validation import ValidationError
 from .surface import SurfaceMesh
 
 if TYPE_CHECKING:
     from ..core.field import ComplexField
-
-try:
-    import pyvista as pv
-except ImportError:  # pragma: no cover - exercised only without the 3D backend
-    pv = None
 
 
 def _default_cmap() -> Colormap:
@@ -45,8 +41,6 @@ def build_landscape(
     modulus_params: dict | None = None,
 ) -> SurfaceMesh:
     """Build a planar landscape mesh from a planar ``ComplexField``."""
-    if pv is None:
-        raise ImportError("PyVista is required for 3D mesh building.")
     if field.kind != "planar" or field.z is None:
         raise ValidationError("build_landscape requires a planar ComplexField")
     if cmap is None:
@@ -62,15 +56,7 @@ def build_landscape(
     if modulus_mode != "none":
         if modulus_params is None:
             modulus_params = get_default_scaling_params(modulus_mode)
-        if modulus_mode == "custom":
-            if "scaling_func" not in modulus_params:
-                raise ValidationError("Custom mode requires 'scaling_func' in modulus_params")
-            magnitude = modulus_params["scaling_func"](magnitude)
-        else:
-            scaling_method = getattr(ModulusScaling, modulus_mode, None)
-            if scaling_method is None:
-                raise ValidationError(f"Unknown scaling mode: {modulus_mode}")
-            magnitude = scaling_method(magnitude, **modulus_params)
+        magnitude = apply_scaling_mode(magnitude, modulus_mode, modulus_params)
 
     if z_max is not None:
         magnitude = np.clip(magnitude, 0, z_max)
@@ -103,8 +89,6 @@ def build_relief(
     for_stl: bool = False,
 ) -> SurfaceMesh:
     """Build a radially-distorted sphere (relief) mesh from a sphere ``ComplexField``."""
-    if pv is None:
-        raise ImportError("PyVista is required for 3D mesh building.")
     if field.kind != "sphere" or field.sphere_xyz is None:
         raise ValidationError("build_relief requires a sphere ComplexField")
     if cmap is None:

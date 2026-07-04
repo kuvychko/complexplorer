@@ -10,12 +10,13 @@ from __future__ import annotations
 
 import argparse
 import sys
+import warnings
 from collections.abc import Callable
 
 from ..core.expression import compile_expression
 from ..core.presets import catalog, cmap_from_spec, domain_from_spec
+from ..exceptions import ComplexplorerError, ValidationError
 from ..plotting.matplotlib.plot_2d import plot as plot_2d
-from ..utils.validation import ValidationError
 
 # --------------------------------------------------------------------------------------
 # Resolution helpers (reuse the catalog + spec factories)
@@ -80,10 +81,25 @@ def cmd_render(args: argparse.Namespace) -> int:
     # Dispatch directly to the right backend: matplotlib for 2D, PyVista for 3D/Riemann
     # (PyVista is a required dependency as of 3.0; there is no matplotlib 3D backend).
     if args.mode == "2d":
+        if args.scaling:
+            warnings.warn(
+                "--scaling has no effect in --mode 2d (it applies to 3d/riemann only)",
+                stacklevel=2,
+            )
+        # Configure an interactive backend BEFORE the figure is created so --show can
+        # open a window (the 2D renderer never calls plt.show() itself).
+        if args.show:
+            from ..utils.backend import setup_matplotlib_backend
+
+            setup_matplotlib_backend()
         kwargs = {"cmap": cmap, "filename": args.output}
         if args.resolution:
             kwargs["resolution"] = args.resolution
         plot_2d(domain, func, **{k: v for k, v in kwargs.items() if v is not None})
+        if args.show:
+            import matplotlib.pyplot as plt
+
+            plt.show()
     else:
         common = {"cmap": cmap, "filename": args.output, "interactive": bool(args.show)}
         if args.resolution:
@@ -110,20 +126,27 @@ def cmd_stl(args: argparse.Namespace) -> int:
 
     func, preset = _resolve_func(args.func)
     scaling = args.scaling or "arctan"
-    gen = OrnamentGenerator(func, resolution=args.resolution, scaling=scaling)
+    # Apply the preset's recommended domain/colormap (mirrors cmd_render); the domain in
+    # particular avoids numerical issues at extreme values during ornament generation.
+    extra = {}
+    if preset is not None:
+        extra["domain"] = preset.domain()
+        extra["cmap"] = preset.colormap()
+    gen = OrnamentGenerator(func, resolution=args.resolution, scaling=scaling, **extra)
     gen.generate_and_save(args.output, size_mm=args.size_mm, verbose=False)
     print(f"Wrote {args.output}")
     return 0
 
 
 def cmd_gallery(args: argparse.Namespace) -> int:
-    from ..gallery import _resolve, generate_gallery
+    from ..gallery import generate_gallery
 
     if not args.output:
         raise ValidationError("provide --output DIR")
+    if args.preset and args.tag:
+        warnings.warn("both --preset and --tag given; using --preset", stacklevel=2)
     selection: str | list[str] | None = args.preset or args.tag or None
-    if not _resolve(selection):
-        raise ValidationError(f"0 presets matched selection {selection!r}")
+    # generate_gallery raises ValidationError if the selection matches no presets.
     manifest = generate_gallery(args.output, selection=selection)
     print(f"Wrote {len(manifest['presets'])} preset(s) to {args.output}")
     return 0
@@ -188,7 +211,7 @@ def main(argv: list[str] | None = None) -> int:
     handler: Callable[[argparse.Namespace], int] = args.handler
     try:
         return handler(args)
-    except ValidationError as exc:
+    except ComplexplorerError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
 

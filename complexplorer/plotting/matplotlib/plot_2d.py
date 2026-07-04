@@ -14,120 +14,8 @@ from matplotlib.figure import Figure
 
 from ...core.colormap import Colormap, Phase
 from ...core.domain import Domain, Rectangle
-from ...utils.validation import ValidationError
-
-
-class Matplotlib2DPlotter:
-    """2D plotter implementation using matplotlib."""
-
-    def plot_single(
-        self,
-        domain: Domain,
-        func: Callable[[np.ndarray], np.ndarray],
-        colormap: Colormap,
-        resolution: int,
-        ax: Axes | None = None,
-        title: str | None = None,
-    ) -> Axes:
-        """Plot a single complex function visualization.
-
-        Parameters
-        ----------
-        domain : Domain
-            The domain to plot over.
-        func : callable
-            Complex function to visualize.
-        colormap : Colormap
-            Colormap for domain coloring.
-        resolution : int
-            Number of points along longest edge.
-        ax : Axes, optional
-            Matplotlib axes to plot on.
-        title : str, optional
-            Plot title.
-
-        Returns
-        -------
-        Axes
-            The matplotlib axes used for plotting.
-        """
-        # Get mesh and evaluate function
-        z = domain.mesh(resolution)
-        mask = domain.outmask(resolution)
-        f_z = func(z)
-
-        # Convert to RGB
-        rgb = colormap.rgb(f_z, outmask=mask)
-
-        # Calculate extent
-        extent = [
-            np.real(z).min(),
-            np.real(z).max(),
-            np.imag(z).min(),
-            np.imag(z).max(),
-        ]
-
-        # Calculate aspect ratio
-        aspect = (extent[1] - extent[0]) / (extent[3] - extent[2])
-
-        # Create axes if not provided
-        if ax is None:
-            fig, ax = plt.subplots()
-
-        # Plot the image
-        ax.imshow(rgb, origin="lower", extent=extent, aspect=aspect)
-        ax.set_xlabel("Re(z)")
-        ax.set_ylabel("Im(z)")
-
-        if title:
-            ax.set_title(title)
-
-        return ax
-
-    def plot_pair(
-        self,
-        domain: Domain,
-        func: Callable[[np.ndarray], np.ndarray],
-        colormap: Colormap,
-        resolution: int,
-        figsize: tuple[float, float] = (10, 5),
-        title: str | None = None,
-    ) -> Figure:
-        """Plot domain and codomain side by side.
-
-        Parameters
-        ----------
-        domain : Domain
-            The domain to plot over.
-        func : callable
-            Complex function to visualize.
-        colormap : Colormap
-            Colormap for domain coloring.
-        resolution : int
-            Number of points along longest edge.
-        figsize : tuple, optional
-            Figure size (width, height).
-        title : str, optional
-            Overall figure title.
-
-        Returns
-        -------
-        Figure
-            The matplotlib figure.
-        """
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=figsize)
-
-        # Plot domain (identity function)
-        self.plot_single(domain, lambda z: z, colormap, resolution, ax=ax1, title="Domain z")
-
-        # Plot codomain
-        self.plot_single(domain, func, colormap, resolution, ax=ax2, title="Codomain f(z)")
-
-        if title:
-            fig.suptitle(title)
-
-        plt.tight_layout()
-        return fig
+from ...core.field import resolve_plane_inputs
+from ...exceptions import ValidationError
 
 
 def _draw_phase_legend(ax: Axes, cmap: Colormap, size: float = 0.26, resolution: int = 256):
@@ -169,7 +57,7 @@ def plot(
     title: str | None = None,
     filename: str | None = None,
     legend: bool = False,
-) -> Axes | None:
+) -> Axes:
     """Plot complex function as domain coloring.
 
     This function provides a convenient interface for plotting complex
@@ -195,15 +83,15 @@ def plot(
     title : str, optional
         Plot title.
     filename : str, optional
-        If provided, save figure to this file.
+        If provided, save the figure to this file (honored whether or not ``ax`` is supplied).
     legend : bool, optional
         If True, draw a phase-wheel legend inset (the unit disk colored by the
         active colormap) in the upper-right corner.
 
     Returns
     -------
-    Axes or None
-        The axes if ax was provided, otherwise None.
+    Axes
+        The matplotlib axes drawn on (always returned).
 
     Examples
     --------
@@ -216,32 +104,11 @@ def plot(
     >>> f = z**2
     >>> plot(z=z, f=f)
     """
-    # Validate inputs
-    if domain is None and z is None:
-        raise ValidationError("Either domain or z must be provided")
-
-    if f is None and func is None:
-        raise ValidationError("Either f or func must be provided")
-
     # Default colormap
     if cmap is None:
         cmap = Phase(n_phi=6, auto_scale_r=True)
 
-    # Get mesh and mask
-    if z is None:
-        z = domain.mesh(resolution)
-        mask = domain.outmask(resolution)
-    else:
-        mask = None
-
-    # Evaluate function
-    if f is None:
-        f = func(z)
-
-    # Ensure f has the same shape as z if it's a scalar
-    f = np.asarray(f)
-    if f.ndim == 0:
-        f = np.full_like(z, f)
+    z, f, mask = resolve_plane_inputs(domain, func, z, f, resolution)
 
     # Get RGB values
     rgb = cmap.rgb(f, outmask=mask)
@@ -264,21 +131,19 @@ def plot(
         plt.ylabel("Im(z)")
         if title:
             plt.title(title)
-        main_ax = plt.gca()
-        if legend:
-            _draw_phase_legend(main_ax, cmap)
-        if filename:
-            plt.savefig(filename)
-        return main_ax
+        ax = plt.gca()
     else:
         ax.imshow(rgb, origin="lower", extent=extent, aspect=aspect)
         ax.set_xlabel("Re(z)")
         ax.set_ylabel("Im(z)")
         if title:
             ax.set_title(title)
-        if legend:
-            _draw_phase_legend(ax, cmap)
-        return ax
+
+    if legend:
+        _draw_phase_legend(ax, cmap)
+    if filename:
+        ax.figure.savefig(filename)
+    return ax
 
 
 def pair_plot(
@@ -387,7 +252,8 @@ def riemann_chart(
     func : callable
         Complex function to visualize.
     domain : Domain, optional
-        If provided, its mask will be applied.
+        If provided, chart samples outside this domain are painted with the colormap's
+        out-of-domain color.
     resolution : int, optional
         Resolution for the mesh.
     show_south_hemisphere : bool, optional
@@ -421,10 +287,6 @@ def riemann_chart(
     # Create domain for unit disk with margin
     disk_radius = 1 + margin
     dom = Rectangle(2 * disk_radius, 2 * disk_radius)
-
-    # Apply mask from provided domain if any
-    if domain and hasattr(domain, "mask_list"):
-        dom.mask_list = domain.mask_list
 
     z = dom.mesh(resolution)
 
@@ -464,6 +326,11 @@ def riemann_chart(
     # Convert to RGB
     HSV = np.dstack((H, S, V))
     RGB = mcolors.hsv_to_rgb(HSV)
+
+    # Mask samples outside a provided domain with the colormap's out-of-domain color.
+    if domain is not None:
+        outside = ~np.asarray(domain.contains(z))
+        RGB[outside] = mcolors.hsv_to_rgb(np.asarray(cmap.out_of_domain_hsv, dtype=float))
 
     # Create axes if needed
     if ax is None:

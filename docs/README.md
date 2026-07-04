@@ -82,8 +82,8 @@ python examples/scripts/interactive_showcase.py
 ```
 
 This provides a menu-driven interface with:
-- 8 pre-defined complex functions
-- 8 color schemes
+- A selection of pre-defined complex functions
+- Multiple color schemes
 - Multiple domain types
 - Resolution and scaling controls
 
@@ -92,7 +92,7 @@ This provides a menu-driven interface with:
 - Browse the [Gallery](gallery/README.md) for visual examples
 - Check the [API Cookbook](../examples/notebooks/api_cookbook.ipynb) for code patterns
 - Read the [development docs](development/) for deep dives
-- Report issues on [GitHub](https://github.com/user/complexplorer/issues)
+- Report issues on [GitHub](https://github.com/kuvychko/complexplorer/issues)
 
 ## 📦 Installation
 

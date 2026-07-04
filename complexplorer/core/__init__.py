@@ -21,15 +21,15 @@ from .functions import (
     phase,
     sawtooth,
     sawtooth_log,
-    stereographic,
     stereographic_projection,
 )
-from .scaling import SCALING_PRESETS, ModulusScaling, get_scaling_preset
+from .scaling import SCALING_PRESETS, ModulusScaling, apply_scaling_mode, get_scaling_preset
 
 __all__ = [
     # Scaling
     "ModulusScaling",
     "SCALING_PRESETS",
+    "apply_scaling_mode",
     "get_scaling_preset",
     # Domains
     "Domain",
@@ -50,5 +50,4 @@ __all__ = [
     "sawtooth_log",
     "stereographic_projection",
     "inverse_stereographic",
-    "stereographic",
 ]

@@ -8,45 +8,18 @@ function becomes single-valued. This is distinct from ``riemann_pv``, which rend
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from collections.abc import Sequence
+
+import pyvista as pv
 
 from ...core.colormap import Colormap, Phase
 from ...mesh import build_riemann_surface
 from .utils import (
     add_axes_widget,
-    check_pyvista_available,
     ensure_pyvista_setup,
+    finalize_plot,
     get_camera_position,
-    handle_export,
-)
-
-if TYPE_CHECKING:
-    import pyvista as pv
-
-try:
-    import pyvista as pv
-except ImportError:  # pragma: no cover - exercised only without the 3D backend
-    pv = None
-
-_OWN_KWARGS = frozenset(
-    {
-        "family",
-        "n",
-        "turns",
-        "p",
-        "r_max",
-        "resolution",
-        "cmap",
-        "interactive",
-        "notebook",
-        "camera_position",
-        "window_size",
-        "title",
-        "filename",
-        "return_plotter",
-        "show_orientation",
-        "show",
-    }
+    reject_unknown_kwargs,
 )
 
 
@@ -55,7 +28,7 @@ def riemann_surface_pv(
     *,
     n: int = 2,
     turns: int = 3,
-    p=None,
+    p: Sequence[float] | None = None,
     r_max: float = 1.5,
     resolution: int = 60,
     cmap: Colormap | None = None,
@@ -94,13 +67,15 @@ def riemann_surface_pv(
         Show an interactive window. If False, render off-screen.
     notebook, camera_position, window_size, title, filename, show_orientation, return_plotter
         Standard PyVista renderer options (see ``riemann_pv``).
+    **kwargs
+        Reserved. Passing any keyword argument here raises ``ValidationError``.
 
     Returns
     -------
     pyvista.Plotter or None
         The plotter if ``return_plotter`` is True, else None.
     """
-    check_pyvista_available()
+    reject_unknown_kwargs(kwargs)
     ensure_pyvista_setup()
 
     if cmap is None:
@@ -114,7 +89,6 @@ def riemann_surface_pv(
     plotter_kwargs = {"window_size": window_size, "off_screen": not interactive}
     if notebook is not None:
         plotter_kwargs["notebook"] = notebook
-    plotter_kwargs.update({k: v for k, v in kwargs.items() if k not in _OWN_KWARGS})
 
     plotter = pv.Plotter(**plotter_kwargs)
     plotter.add_mesh(
@@ -136,13 +110,4 @@ def riemann_surface_pv(
         add_axes_widget(plotter, labels=("Re", "Im", z_label))
     plotter.set_background("white")
 
-    if filename:
-        if interactive:
-            plotter.show()
-        handle_export(plotter, filename, interactive)
-    elif interactive:
-        plotter.show()
-
-    if return_plotter:
-        return plotter
-    return None
+    return finalize_plot(plotter, filename, interactive, return_plotter)

@@ -10,7 +10,47 @@ import numpy as np
 
 from complexplorer.exceptions import ValidationError
 
-__all__ = ["ModulusScaling", "SCALING_PRESETS", "get_scaling_preset"]
+__all__ = ["ModulusScaling", "SCALING_PRESETS", "apply_scaling_mode", "get_scaling_preset"]
+
+# Names of the built-in scaling modes, for error messages.
+_SCALING_MODE_NAMES = (
+    "constant, linear, arctan, logarithmic, linear_clamp, power, sigmoid, adaptive, "
+    "hybrid, custom"
+)
+
+
+def apply_scaling_mode(
+    values: np.ndarray, mode: str, params: dict | None = None
+) -> np.ndarray:
+    """Map ``values`` through a named ``ModulusScaling`` mode (or a ``custom`` callable).
+
+    Shared dispatch for the mesh builders (height scaling) and the sphere distortion (radial
+    scaling) so the mode lookup and error messages stay in one place.
+
+    Parameters
+    ----------
+    values : np.ndarray
+        Moduli to transform.
+    mode : str
+        A ``ModulusScaling`` method name, or ``"custom"`` (which requires a ``scaling_func``
+        entry in ``params``).
+    params : dict, optional
+        Keyword arguments for the scaling method (or the ``scaling_func`` for custom mode).
+
+    Raises
+    ------
+    ValidationError
+        If ``mode`` is unknown, or ``custom`` mode is missing ``scaling_func``.
+    """
+    params = params or {}
+    if mode == "custom":
+        if "scaling_func" not in params:
+            raise ValidationError("Custom mode requires 'scaling_func' in scaling params")
+        return params["scaling_func"](values)
+    method = getattr(ModulusScaling, mode, None)
+    if method is None:
+        raise ValidationError(f"Unknown scaling mode: {mode}. Available: {_SCALING_MODE_NAMES}")
+    return method(values, **params)
 
 
 class ModulusScaling:

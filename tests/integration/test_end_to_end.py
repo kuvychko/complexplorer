@@ -264,25 +264,21 @@ class TestPyVistaIntegration:
     """Test PyVista integration."""
 
     def test_pyvista_landscape(self):
-        """Test PyVista landscape plotting."""
+        """Test PyVista landscape plotting (real off-screen render)."""
         func = lambda z: z**2
         domain = Rectangle(2, 2)
 
-        # Mock the plotter to avoid display
-        from unittest import mock
-
-        with mock.patch("pyvista.Plotter"):
-            plot_landscape_pv(domain, func, resolution=30, show=False)
+        p = plot_landscape_pv(domain, func, resolution=30, interactive=False, return_plotter=True)
+        assert p is not None
+        p.close()
 
     def test_pyvista_riemann(self):
-        """Test PyVista Riemann sphere."""
+        """Test PyVista Riemann sphere (real off-screen render)."""
         func = lambda z: (z - 1) / (z + 1)
 
-        # Mock the plotter
-        from unittest import mock
-
-        with mock.patch("pyvista.Plotter"):
-            riemann_pv(func, n_theta=20, n_phi=20, show=False)
+        p = riemann_pv(func, resolution=20, interactive=False, return_plotter=True)
+        assert p is not None
+        p.close()
 
 
 class TestComplexFunctions:

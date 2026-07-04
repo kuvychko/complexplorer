@@ -8,65 +8,13 @@ from matplotlib.figure import Figure
 
 from complexplorer.core.colormap import Chessboard, Phase
 from complexplorer.core.domain import Disk, Rectangle
+from complexplorer.exceptions import ValidationError
 from complexplorer.plotting.matplotlib.plot_2d import (
-    Matplotlib2DPlotter,
     pair_plot,
     plot,
     riemann_chart,
     riemann_hemispheres,
 )
-from complexplorer.utils.validation import ValidationError
-
-
-class TestMatplotlib2DPlotter:
-    """Test Matplotlib2DPlotter class."""
-
-    def test_plot_single(self):
-        """Test single plot generation."""
-        plotter = Matplotlib2DPlotter()
-        domain = Rectangle(4, 4)
-        func = lambda z: z**2
-        colormap = Phase(n_phi=6)
-
-        ax = plotter.plot_single(domain, func, colormap, resolution=50)
-
-        assert isinstance(ax, Axes)
-        assert ax.get_xlabel() == "Re(z)"
-        assert ax.get_ylabel() == "Im(z)"
-
-        plt.close("all")
-
-    def test_plot_single_with_ax(self):
-        """Test plotting on provided axes."""
-        plotter = Matplotlib2DPlotter()
-        domain = Rectangle(2, 2)
-        func = lambda z: z
-        colormap = Chessboard()
-
-        fig, ax = plt.subplots()
-        result_ax = plotter.plot_single(domain, func, colormap, resolution=30, ax=ax, title="Test")
-
-        assert result_ax is ax
-        assert ax.get_title() == "Test"
-
-        plt.close("all")
-
-    def test_plot_pair(self):
-        """Test pair plot generation."""
-        plotter = Matplotlib2DPlotter()
-        domain = Rectangle(3, 3)
-        func = lambda z: (z - 1) / (z + 1)
-        colormap = Phase()
-
-        fig = plotter.plot_pair(
-            domain, func, colormap, resolution=40, figsize=(8, 4), title="Möbius"
-        )
-
-        assert isinstance(fig, Figure)
-        assert len(fig.axes) == 2
-        assert fig._suptitle.get_text() == "Möbius"
-
-        plt.close("all")
 
 
 class TestPlotFunction:
@@ -134,6 +82,18 @@ class TestPlotFunction:
         plot(domain=domain, func=func, filename=str(filename))
 
         assert filename.exists()
+        plt.close("all")
+
+    def test_save_with_provided_ax(self, tmp_path):
+        """filename must be honored even when the caller supplies an ax."""
+        fig, ax = plt.subplots()
+        filename = tmp_path / "with_ax.png"
+
+        result = plot(Rectangle(2, 2), lambda z: z**2, ax=ax, filename=str(filename), resolution=30)
+
+        assert result is ax
+        assert filename.exists()
+        assert filename.stat().st_size > 0
         plt.close("all")
 
 
@@ -278,6 +238,21 @@ class TestRiemannChart:
 
         assert isinstance(ax, Axes)
         plt.close("all")
+
+    def test_domain_actually_masks(self):
+        """A restrictive domain changes the rendered chart (masking is applied, not a no-op)."""
+        func = lambda z: z
+
+        ax0 = riemann_chart(func, resolution=40)
+        img_unmasked = np.array(ax0.get_images()[0].get_array())
+        plt.close("all")
+
+        ax1 = riemann_chart(func, domain=Disk(0.5), resolution=40)
+        img_masked = np.array(ax1.get_images()[0].get_array())
+        plt.close("all")
+
+        # Masking repaints out-of-domain samples, so the images must differ.
+        assert not np.array_equal(img_unmasked, img_masked)
 
     def test_constant_function(self):
         """Test handling of constant functions."""

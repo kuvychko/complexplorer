@@ -8,6 +8,7 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING, Optional
 
 import numpy as np
+import pyvista as pv
 
 from ...core.colormap import Colormap, Phase
 from ...core.field import sample_sphere
@@ -15,23 +16,14 @@ from ...mesh import build_relief
 from ...utils.mesh_distortion import get_default_scaling_params
 from .utils import (
     add_axes_widget,
-    check_pyvista_available,
     ensure_pyvista_setup,
+    finalize_plot,
     get_camera_position,
-    handle_export,
+    reject_unknown_kwargs,
 )
 
 if TYPE_CHECKING:
     from ...core.domain import Domain
-
-# Import PyVista if available
-try:
-    import pyvista as pv
-
-    HAS_PYVISTA = True
-except ImportError:
-    HAS_PYVISTA = False
-    pv = None
 
 
 def riemann_pv(
@@ -107,7 +99,9 @@ def riemann_pv(
     return_plotter : bool, optional
         If True, return the plotter object.
     **kwargs
-        Additional arguments passed to pv.Plotter.
+        Reserved. Passing any keyword argument here raises ``ValidationError``; removed 2.x
+        names are reported with their 3.0 replacement (e.g. ``n_theta``/``n_phi`` →
+        ``resolution``, ``show`` → ``interactive``).
 
     Returns
     -------
@@ -128,7 +122,7 @@ def riemann_pv(
     >>> riemann_pv(lambda z: np.sin(z), modulus_mode='custom',
     ...           modulus_params={'scaling_func': custom_scale})
     """
-    check_pyvista_available()
+    reject_unknown_kwargs(kwargs)
     ensure_pyvista_setup()
 
     # Default colormap
@@ -147,10 +141,6 @@ def riemann_pv(
     sm = build_relief(field, cmap=cmap, scaling=modulus_mode, scaling_params=modulus_params)
     mesh = sm.to_pyvista()
 
-    # Unit-sphere points for the optional lat/long grid overlay.
-    original_points = field.sphere_xyz.reshape(-1, 3)
-    scaled_points = mesh.points
-
     # Create plotter
     plotter_kwargs = {
         "window_size": window_size,
@@ -158,31 +148,6 @@ def riemann_pv(
     }
     if notebook is not None:
         plotter_kwargs["notebook"] = notebook
-
-    # Filter kwargs to avoid passing our function parameters to PyVista
-    filtered_kwargs = {
-        k: v
-        for k, v in kwargs.items()
-        if k
-        not in {
-            "func",
-            "cmap",
-            "modulus_mode",
-            "modulus_params",
-            "resolution",
-            "n",
-            "domain",
-            "interactive",
-            "camera_position",
-            "radius",
-            "title",
-            "filename",
-            "return_plotter",
-            "show_orientation",
-            "show",
-        }
-    }
-    plotter_kwargs.update(filtered_kwargs)
 
     plotter = pv.Plotter(**plotter_kwargs)
 
@@ -201,16 +166,7 @@ def riemann_pv(
 
     # Add latitude/longitude grid if requested
     if show_grid:
-        add_lat_long_grid(
-            plotter,
-            radius=1.0,
-            n_lat=10,
-            n_long=12,
-            modulus_mode=modulus_mode,
-            modulus_params=modulus_params,
-            scaled_points=scaled_points,
-            points=original_points,
-        )
+        add_lat_long_grid(plotter, radius=1.0, n_lat=10, n_long=12, modulus_mode=modulus_mode)
 
     # Set camera
     plotter.camera_position = get_camera_position(camera_position)
@@ -226,18 +182,7 @@ def riemann_pv(
     # Set background
     plotter.set_background("white")
 
-    # Handle export/display
-    if filename:
-        if interactive:
-            plotter.show()
-            handle_export(plotter, filename, interactive)
-        else:
-            handle_export(plotter, filename, interactive)
-    elif interactive:
-        plotter.show()
-
-    if return_plotter:
-        return plotter
+    return finalize_plot(plotter, filename, interactive, return_plotter)
 
 
 def add_lat_long_grid(
@@ -246,14 +191,14 @@ def add_lat_long_grid(
     n_lat: int = 10,
     n_long: int = 12,
     modulus_mode: str = "constant",
-    modulus_params: dict | None = None,
-    scaled_points: np.ndarray | None = None,
-    points: np.ndarray | None = None,
     color: str = "black",
     line_width: float = 1.0,
     opacity: float = 0.5,
 ) -> None:
     """Add latitude and longitude grid lines to the Riemann sphere.
+
+    The grid is always drawn on the unit sphere; under a non-constant ``modulus_mode`` it does
+    not follow the modulus distortion (a warning is emitted).
 
     Parameters
     ----------
@@ -266,13 +211,7 @@ def add_lat_long_grid(
     n_long : int
         Number of longitude lines.
     modulus_mode : str
-        Modulus scaling mode.
-    modulus_params : dict, optional
-        Parameters for modulus scaling.
-    scaled_points : ndarray, optional
-        Pre-scaled sphere points for modulus distortion.
-    points : ndarray, optional
-        Original sphere points.
+        Modulus scaling mode (only used to decide whether to warn about the flat grid).
     color : str
         Color of grid lines.
     line_width : float
@@ -280,9 +219,6 @@ def add_lat_long_grid(
     opacity : float
         Opacity of grid lines.
     """
-    # For simplicity, create grid on unit sphere if modulus is constant
-    # For non-constant modulus, we'd need more sophisticated interpolation
-
     # Create latitude lines (circles at constant theta)
     for i in range(1, n_lat):
         theta = i * np.pi / n_lat

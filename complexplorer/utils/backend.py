@@ -10,7 +10,9 @@ def setup_matplotlib_backend(force_qt: bool = False):
     Parameters
     ----------
     force_qt : bool
-        Force PyQt6 backend even in non-interactive environments
+        Skip the headless (Agg) fallback and attempt an interactive Qt backend even when no
+        display is detected. Qt is still only used if PyQt6/PyQt5 is installed; otherwise the
+        current default backend is returned.
 
     Returns
     -------

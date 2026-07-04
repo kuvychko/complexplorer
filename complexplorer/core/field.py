@@ -104,6 +104,43 @@ def sample(
     return ComplexField("planar", w, modulus, phase, mask=mask, z=z, metadata=meta)
 
 
+def resolve_plane_inputs(
+    domain: Domain | None,
+    func: Callable | None,
+    z: np.ndarray | None,
+    f: np.ndarray | None,
+    resolution: int,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray | None]:
+    """Resolve the ``(z, f, outmask)`` triple shared by the 2D and 3D planar renderers.
+
+    Accepts either a ``domain`` (meshed at ``resolution``, with an out-of-domain mask) or an
+    explicit ``z`` grid, and either a ``func`` (evaluated on ``z``) or explicit values ``f``.
+    Raises ``ValidationError`` if neither member of a pair is given. Scalar-valued callables
+    are broadcast to the grid shape.
+    """
+    if domain is None and z is None:
+        raise ValidationError("Either domain or z must be provided")
+    if f is None and func is None:
+        raise ValidationError("Either f or func must be provided")
+
+    if z is None:
+        z = domain.mesh(resolution)
+        mask = domain.outmask(resolution)
+    else:
+        z = np.asarray(z)
+        mask = None
+
+    if f is None:
+        with np.errstate(all="ignore"):
+            f = np.asarray(func(z))
+    else:
+        f = np.asarray(f)
+    if f.ndim == 0:  # scalar-valued callable
+        f = np.full_like(z, f)
+
+    return z, f, mask
+
+
 def sphere_coordinates(
     resolution: int, *, avoid_poles: bool = True
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -157,4 +194,10 @@ def sample_sphere(
     )
 
 
-__all__ = ["ComplexField", "sample", "sample_sphere", "sphere_coordinates"]
+__all__ = [
+    "ComplexField",
+    "resolve_plane_inputs",
+    "sample",
+    "sample_sphere",
+    "sphere_coordinates",
+]

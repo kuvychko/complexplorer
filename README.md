@@ -7,7 +7,7 @@
 **Transform complex mathematics into tangible art.** Complexplorer brings complex function visualization into the physical world through stunning Riemann relief maps and 3D-printable mathematical ornaments.
 
 <p align="center">
-  <img src="examples/gallery/Riemann_relief_map_20250726.png" width="50%">
+  <img src="https://raw.githubusercontent.com/kuvychko/complexplorer/main/examples/gallery/Riemann_relief_map_20250726.png" width="50%">
   <br>
   <em>From mathematical function to physical sculpture: f(z) = z / (z**10 - 1)</em>
 </p>
@@ -43,7 +43,7 @@ pip install "complexplorer[all]"
 > Riemann relief/sphere, STL export). As of 3.0 PyVista is a **required** dependency and the
 > legacy matplotlib 3D functions (`plot_landscape`, `pair_plot_landscape`, 3D `riemann`) have
 > been removed — use `plot_landscape_pv`, `pair_plot_landscape_pv`, and `riemann_pv`. See
-> [docs/development/backend-policy.md](docs/development/backend-policy.md).
+> [docs/development/backend-policy.md](https://github.com/kuvychko/complexplorer/blob/main/docs/development/backend-policy.md).
 
 ## 🚀 Quick Start - From Math to Matter
 
@@ -73,6 +73,37 @@ domain = cp.Rectangle(4, 4)
 cp.plot(domain, f, cmap=cp.Phase(n_phi=12, auto_scale_r=True))
 ```
 
+## ⚡ One-Liners, a Function Catalog, a CLI, and Engineering Mode
+
+```python
+import complexplorer as cp
+
+# One-liner exploration with sensible defaults (modes: "2d", "3d", "riemann")
+cp.quick_plot(lambda z: (z**2 - 1) / (z**2 + 1))
+cp.quick_plot(lambda z: 1/z, **cp.Presets.publication_ready())  # bundled plot presets
+
+# A curated catalog of functions (expression + exact zeros/poles/branch-point answer key)
+preset = cp.catalog.get("pole_flower_10")
+cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
+cp.catalog.filter("singularity-detective")     # curated sets via tags
+
+# Engineering mode: transfer functions H(s)/H(z) as first-class complex callables
+H = cp.ee.TransferFunction([1], [1, 0.2, 1])    # 1 / (s² + 0.2s + 1)
+H.poles, H.is_stable
+cp.ee.transfer_portrait(H, legend=True)          # phase portrait + poles/zeros + jω axis
+cp.ee.bode_plot(H); cp.ee.nyquist_plot(H)
+cp.plot_landscape_pv(cp.Rectangle(6, 6), H)      # H composes with every renderer
+```
+
+From the command line (installed as `complexplorer`):
+
+```bash
+complexplorer list                                   # browse the catalog
+complexplorer render preset:pole_flower_10 -o out.png --mode riemann
+complexplorer stl preset:sqrt -o ornament.stl --size-mm 80
+complexplorer gallery --tag canonical -o gallery/    # reproducible asset bundle + index.json
+```
+
 ## 💫 The Magic of Complex Numbers
 
 *We cannot directly see the minute details of a Dedekind cut, nor is it clear that arbitrarily great or
@@ -93,28 +124,28 @@ which, in my view, can only be referred to as 'magic'.*
 
 ## 🎨 Gallery
 
-Explore the full range of visualizations in our [**Gallery**](docs/gallery/README.md), featuring:
+Explore the full range of visualizations in our [**Gallery**](https://github.com/kuvychko/complexplorer/blob/main/docs/gallery/README.md), featuring:
 - Phase portraits with various enhancements
 - Chessboard and polar patterns  
 - 3D analytic landscapes
 - Riemann relief maps and mathematical ornaments
 
 <p align="center">
-  <a href="docs/gallery/README.md">
-    <img src="examples/gallery/_colormaps/polar_log.png" width="30%">
-    <img src="examples/gallery/pole_flower_10/landscape.png" width="30%">
-    <img src="examples/gallery/sqrt/surface.png" width="30%">
+  <a href="https://github.com/kuvychko/complexplorer/blob/main/docs/gallery/README.md">
+    <img src="https://raw.githubusercontent.com/kuvychko/complexplorer/main/examples/gallery/_colormaps/polar_log.png" width="30%">
+    <img src="https://raw.githubusercontent.com/kuvychko/complexplorer/main/examples/gallery/pole_flower_10/landscape.png" width="30%">
+    <img src="https://raw.githubusercontent.com/kuvychko/complexplorer/main/examples/gallery/sqrt/surface.png" width="30%">
   </a>
 </p>
 
 ## 📚 Documentation
 
-- **[Gallery](docs/gallery/README.md)** - Visual showcase with code examples
-- **[Getting Started](examples/notebooks/getting_started.ipynb)** - Beginner-friendly introduction
-- **[Advanced Features](examples/notebooks/advanced_features.ipynb)** - 3D visualization and more
-- **[STL Export Demo](examples/notebooks/stl_export_demo.ipynb)** - Create 3D printable models
-- **[API Cookbook](examples/notebooks/api_cookbook.ipynb)** - Ready-to-use code recipes
-- **[Interactive Demo](examples/scripts/interactive_showcase.py)** - Run `python examples/scripts/interactive_showcase.py`
+- **[Gallery](https://github.com/kuvychko/complexplorer/blob/main/docs/gallery/README.md)** - Visual showcase with code examples
+- **[Getting Started](https://github.com/kuvychko/complexplorer/blob/main/examples/notebooks/getting_started.ipynb)** - Beginner-friendly introduction
+- **[Advanced Features](https://github.com/kuvychko/complexplorer/blob/main/examples/notebooks/advanced_features.ipynb)** - 3D visualization and more
+- **[STL Export Demo](https://github.com/kuvychko/complexplorer/blob/main/examples/notebooks/stl_export_demo.ipynb)** - Create 3D printable models
+- **[API Cookbook](https://github.com/kuvychko/complexplorer/blob/main/examples/notebooks/api_cookbook.ipynb)** - Ready-to-use code recipes
+- **[Interactive Demo](https://github.com/kuvychko/complexplorer/blob/main/examples/scripts/interactive_showcase.py)** - Run `python examples/scripts/interactive_showcase.py`
 - **API Reference** - Use `help()` on any function or class
 
 ## 🛠️ Advanced Example

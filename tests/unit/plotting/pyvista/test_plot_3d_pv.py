@@ -1,15 +1,17 @@
-"""Tests for PyVista 3D plotting functions."""
+"""Tests for PyVista 3D plotting functions.
 
-from unittest import mock
+The landscape renderers are exercised off-screen against the real PyVista backend (required
+as of 3.0) instead of mocking ``pyvista.Plotter``.
+"""
 
 import numpy as np
 import pytest
 
-# Skip all tests if PyVista is not available
 pyvista = pytest.importorskip("pyvista")
 
 from complexplorer.core.colormap import Chessboard, Phase
 from complexplorer.core.domain import Disk, Rectangle
+from complexplorer.exceptions import ValidationError
 from complexplorer.plotting.pyvista.plot_3d import (
     create_complex_surface,
     pair_plot_landscape_pv,
@@ -59,131 +61,109 @@ class TestCreateComplexSurface:
         assert grid.n_points == 40 * 40
         assert rgb.shape == (40, 40, 3)
 
-    def test_with_high_resolution(self):
-        """Test surface creation with high resolution."""
-        domain = Rectangle(2, 2)
-        func = lambda z: z**2
-
-        grid, rgb = create_complex_surface(domain, func, resolution=100)
-
-        assert grid.n_points == 100 * 100
-        assert rgb.shape == (100, 100, 3)
+    def test_missing_inputs_raise(self):
+        with pytest.raises(ValidationError):
+            create_complex_surface(None, None, resolution=20)
 
 
 class TestPlotLandscapePV:
-    """Test plot_landscape_pv function."""
+    """Real off-screen rendering of the 3D landscape."""
 
-    def test_basic_plot(self):
-        """Test basic landscape plot."""
-        domain = Rectangle(2, 2)
-        func = lambda z: z**2
+    def test_returns_plotter_when_requested(self):
+        p = plot_landscape_pv(
+            Rectangle(2, 2), lambda z: z**2, resolution=30, interactive=False, return_plotter=True
+        )
+        assert isinstance(p, pyvista.Plotter)
+        p.close()
 
-        with mock.patch("pyvista.Plotter") as MockPlotter:
-            plotter = MockPlotter.return_value
-            result = plot_landscape_pv(domain, func, resolution=50, show=False)
-
-            # Function doesn't return plotter when show=False
-            assert result is None
-            assert MockPlotter.called
-            plotter.add_mesh.assert_called()
+    def test_returns_none_without_return_plotter(self):
+        result = plot_landscape_pv(
+            Rectangle(2, 2), lambda z: z**2, resolution=30, interactive=False
+        )
+        assert result is None
 
     def test_with_colormap(self):
-        """Test plot with custom colormap."""
-        domain = Disk(2)
-        func = lambda z: (z - 1) / (z + 1)
-        cmap = Phase(n_phi=6, auto_scale_r=True)
+        p = plot_landscape_pv(
+            Disk(2),
+            lambda z: (z - 1) / (z + 1),
+            cmap=Phase(n_phi=6, auto_scale_r=True),
+            resolution=40,
+            interactive=False,
+            return_plotter=True,
+        )
+        assert isinstance(p, pyvista.Plotter)
+        p.close()
 
-        with mock.patch("pyvista.Plotter") as MockPlotter:
-            plotter = MockPlotter.return_value
-            result = plot_landscape_pv(domain, func, cmap=cmap, resolution=60, show=False)
-
-            # Function doesn't return plotter when show=False
-            assert result is None
-            assert MockPlotter.called
-
-    def test_save_to_file(self):
-        """Test saving plot to file."""
-        domain = Rectangle(1, 1)
-        func = lambda z: z
-
-        with mock.patch("pyvista.Plotter") as MockPlotter:
-            plotter = MockPlotter.return_value
-            plot_landscape_pv(domain, func, resolution=30, filename="test.png", show=False)
-
-            plotter.screenshot.assert_called_once_with("test.png")
+    def test_save_to_file(self, tmp_path):
+        out = tmp_path / "landscape.png"
+        plot_landscape_pv(
+            Rectangle(1, 1), lambda z: z, resolution=30, interactive=False, filename=str(out)
+        )
+        assert out.exists()
+        assert out.stat().st_size > 0
 
     def test_custom_title(self):
-        """Test plot with custom title."""
-        domain = Rectangle(2, 2)
-        func = lambda z: z**3 - 1
+        p = plot_landscape_pv(
+            Rectangle(2, 2),
+            lambda z: z**3 - 1,
+            title="Cubic",
+            resolution=20,
+            interactive=False,
+            return_plotter=True,
+        )
+        assert isinstance(p, pyvista.Plotter)
+        p.close()
 
-        with mock.patch("pyvista.Plotter") as MockPlotter:
-            plotter = MockPlotter.return_value
-            plot_landscape_pv(domain, func, title="Cubic Function", show=False)
-
-            plotter.add_text.assert_called_with(
-                "Cubic Function", position="upper_edge", font_size=14
+    @pytest.mark.parametrize("bad", [{"n_theta": 30}, {"show": False}, {"bogus": 1}])
+    def test_unknown_kwargs_rejected(self, bad):
+        with pytest.raises(ValidationError):
+            plot_landscape_pv(
+                Rectangle(2, 2), lambda z: z**2, resolution=20, interactive=False, **bad
             )
 
 
 class TestPairPlotLandscapePV:
-    """Test pair_plot_landscape_pv function."""
+    """Real off-screen rendering of the paired landscape."""
 
-    def test_basic_pair_plot(self):
-        """Test basic pair plot."""
-        domain = Rectangle(2, 2)
-        func = lambda z: z**2
+    def test_returns_plotter(self):
+        p = pair_plot_landscape_pv(
+            Rectangle(2, 2), lambda z: z**2, resolution=30, interactive=False, return_plotter=True
+        )
+        assert isinstance(p, pyvista.Plotter)
+        p.close()
 
-        with mock.patch("pyvista.Plotter") as MockPlotter:
-            plotter = MockPlotter.return_value
-            result = pair_plot_landscape_pv(domain, func, resolution=40, show=False)
+    def test_title_renders(self):
+        # The title is applied as a figure-level annotation; it must not raise.
+        p = pair_plot_landscape_pv(
+            Rectangle(2, 2),
+            lambda z: np.sin(z),
+            title="Sine",
+            resolution=20,
+            interactive=False,
+            return_plotter=True,
+        )
+        assert isinstance(p, pyvista.Plotter)
+        p.close()
 
-            # Function doesn't return plotter when show=False
-            assert result is None
-            assert MockPlotter.called
-            # Should have 2 viewports
-            # Check that shape=(1, 2) was included in the call
-            assert MockPlotter.call_args is not None
-            assert MockPlotter.call_args.kwargs.get("shape") == (1, 2)
+    def test_save_pair_plot(self, tmp_path):
+        out = tmp_path / "pair.png"
+        pair_plot_landscape_pv(
+            Rectangle(1, 1), lambda z: z**2 - 1, resolution=20, interactive=False, filename=str(out)
+        )
+        assert out.exists()
+        assert out.stat().st_size > 0
 
-    def test_with_labels(self):
-        """Test pair plot with custom labels."""
-        domain = Disk(1.5)
-        func = lambda z: np.sin(z)
-
-        with mock.patch("pyvista.Plotter") as MockPlotter:
-            plotter = MockPlotter.return_value
-            pair_plot_landscape_pv(domain, func, labels=["Input", "Output"], show=False)
-
-            # Check that labels were added
-            calls = plotter.add_text.call_args_list
-            assert len(calls) >= 2
-
-    def test_save_pair_plot(self):
-        """Test saving pair plot."""
-        domain = Rectangle(1, 1)
-        func = lambda z: z**2 - 1
-
-        with mock.patch("pyvista.Plotter") as MockPlotter:
-            plotter = MockPlotter.return_value
-            pair_plot_landscape_pv(domain, func, filename="pair_test.png", show=False)
-
-            plotter.screenshot.assert_called_once_with("pair_test.png")
+    def test_unknown_kwargs_rejected(self):
+        with pytest.raises(ValidationError):
+            pair_plot_landscape_pv(
+                Rectangle(2, 2), lambda z: z**2, resolution=20, interactive=False, show=False
+            )
 
 
 class TestPyVistaSetup:
-    """Test PyVista setup utilities."""
+    """Test PyVista setup utilities against the real global theme."""
 
-    def test_ensure_setup(self):
-        """Test ensure_pyvista_setup function."""
-        with mock.patch("pyvista.global_theme") as mock_theme:
-            ensure_pyvista_setup()
-            # Should not raise any errors
-            assert True
-
-    def test_theme_settings(self):
-        """Test that theme is configured properly."""
-        with mock.patch.object(pyvista, "global_theme") as mock_theme:
-            ensure_pyvista_setup()
-            # Basic check that theme was accessed
-            assert mock_theme is not None
+    def test_ensure_setup_configures_theme(self):
+        ensure_pyvista_setup()
+        assert pyvista.global_theme.smooth_shading is True
+        assert pyvista.global_theme.multi_samples is not None
