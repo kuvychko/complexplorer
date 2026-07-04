@@ -1,5 +1,7 @@
 """Tests for the Riemann surface PyVista renderer (add-riemann-surfaces)."""
 
+import os
+import sys
 import warnings
 
 import pytest
@@ -8,6 +10,11 @@ pytest.importorskip("pyvista")
 
 from complexplorer import riemann_surface_pv
 from complexplorer.utils.validation import ValidationError
+
+# A real offscreen VTK screenshot render crashes (access violation) on the headless Windows
+# CI runner (no GPU / no reliable offscreen GL). Building the plotter is fine; only the
+# render-to-file step is unsafe there. Linux CI exercises it via the headless-display action.
+_NO_OFFSCREEN_RENDER = sys.platform == "win32" and os.environ.get("CI") == "true"
 
 
 class TestRiemannSurfacePV:
@@ -36,6 +43,9 @@ class TestRiemannSurfacePV:
         with pytest.raises(ValidationError):
             riemann_surface_pv(family="algebraic", interactive=False, return_plotter=True)
 
+    @pytest.mark.skipif(
+        _NO_OFFSCREEN_RENDER, reason="offscreen VTK screenshot crashes on headless Windows CI"
+    )
     def test_algebraic_screenshot_export(self, tmp_path):
         warnings.simplefilter("ignore")
         out = tmp_path / "elliptic.png"
