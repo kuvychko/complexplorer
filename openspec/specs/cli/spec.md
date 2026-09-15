@@ -3,30 +3,39 @@
 ## Purpose
 
 The cli capability provides a `complexplorer` console entry point exposing `render`, `stl`,
-and `list` subcommands. It resolves a function from a preset or an expression, reuses the
-spec factories for domain/colormap shorthands, drives the STL export pipeline, and degrades
-gracefully when the optional PyVista backend is absent.
+`list`, and `gallery` subcommands. It resolves a function from a preset or an expression, reuses
+the spec factories for domain/colormap shorthands, drives the STL export pipeline and the gallery
+generator, and reports library errors cleanly. PyVista is a required dependency, so every
+subcommand is always available.
 
 ## Requirements
 
-### Requirement: CLI entry point with render, stl, and list commands
+### Requirement: CLI entry point with render, stl, list, and gallery commands
 
 The package SHALL provide a `complexplorer` console entry point (via `[project.scripts]`)
-exposing `render`, `stl`, and `list` subcommands. `main(argv)` SHALL return a process exit
-code.
+exposing `render`, `stl`, `list`, and `gallery` subcommands. `main(argv)` SHALL return a
+process exit code and SHALL report any `ComplexplorerError` (not only `ValidationError`) as a
+clean, non-zero exit with a message on stderr rather than an uncaught traceback.
 
 #### Scenario: Entry point is installed
 
 - **WHEN** the package is installed
 - **THEN** a `complexplorer` console command is available and `complexplorer --help` lists
-  the `render`, `stl`, and `list` subcommands
+  the `render`, `stl`, `list`, and `gallery` subcommands
+
+#### Scenario: Library errors are reported cleanly
+
+- **WHEN** a subcommand raises any `ComplexplorerError` (e.g. a bad expression or an unknown preset id)
+- **THEN** `main` prints an `error: ...` message to stderr and returns a non-zero exit code, without a Python traceback
 
 ### Requirement: Function argument resolves a preset or an expression
 
 The `render` and `stl` commands SHALL accept a function argument that is either
 `preset:<id>` (resolved through the function preset registry, using the preset's recommended
 domain/colormap/scaling as defaults) or an expression string (evaluated via the expression
-evaluator).
+evaluator). Both commands SHALL apply the preset's recommended specs; in particular `stl`
+SHALL use the preset's recommended domain (and colormap where the exporter accepts one) rather
+than discarding them.
 
 #### Scenario: Render a registry preset
 
@@ -39,6 +48,11 @@ evaluator).
 - **WHEN** `render "z**2 - 1" --domain rect:4:4 --output out.png` is run
 - **THEN** the expression is evaluated, the domain shorthand is built into a `Domain`, and an
   image is written
+
+#### Scenario: STL from a preset uses the preset's domain
+
+- **WHEN** `stl preset:pole_flower_10 --output flower.stl` is run
+- **THEN** the preset's recommended domain is passed to the ornament generator (not silently discarded)
 
 ### Requirement: Domain and colormap shorthands reuse the spec factories
 
@@ -62,18 +76,13 @@ kernel / STL pipeline, honoring size and resolution options.
 - **WHEN** `stl preset:pole_flower_10 --size-mm 80 --output flower.stl` is run
 - **THEN** a non-empty STL file is written at the requested size
 
-### Requirement: 2D commands work without the 3D backend
+### Requirement: Interactive display works in every render mode
 
-`render --mode 2d` and `list` SHALL function without PyVista installed. Commands that need
-the 3D backend (`render --mode 3d|riemann`, `stl`) SHALL exit with a clear message when
-PyVista is absent.
+`render --show` SHALL open an interactive window regardless of `--mode`. For `--mode 2d` this
+SHALL display the matplotlib figure; for `--mode 3d|riemann` it SHALL open the PyVista window.
+`--show` SHALL NOT be silently ignored in any mode.
 
-#### Scenario: list without PyVista
+#### Scenario: 2D show opens a window
 
-- **WHEN** `list` is run in an environment without PyVista
-- **THEN** it prints the available presets and exits successfully
-
-#### Scenario: stl without PyVista fails clearly
-
-- **WHEN** `stl …` is run without PyVista
-- **THEN** the command exits non-zero with a message that PyVista is required for 3D/STL
+- **WHEN** `render "z**2" --mode 2d --show` is run (no `--output`)
+- **THEN** the matplotlib figure is displayed rather than the command drawing off-screen and exiting with no visible output

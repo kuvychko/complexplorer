@@ -18,7 +18,8 @@ point — that selects among 2D, 3D landscape, and Riemann renderings, defaultin
 **3D and Riemann use PyVista, which is a required dependency** — there is no matplotlib 3D
 backend. The `backend` selector SHALL NOT be forwarded to the underlying renderer, and
 requesting `backend="matplotlib"` for a 3D or Riemann mode SHALL raise a clear error stating
-the matplotlib 3D backend was removed. No alias names for `quick_plot` are exported.
+the matplotlib 3D backend was removed. A caller-supplied `domain` SHALL be forwarded to the
+selected renderer in every mode, including Riemann. No alias names for `quick_plot` are exported.
 
 #### Scenario: Quick plot with only a function
 
@@ -44,6 +45,11 @@ the matplotlib 3D backend was removed. No alias names for `quick_plot` are expor
 
 - **WHEN** `quick_plot` is called with a mode other than `2d`, `3d`, or `riemann`
 - **THEN** an error is raised naming the unknown mode
+
+#### Scenario: A supplied domain is forwarded in Riemann mode
+
+- **WHEN** `quick_plot` is called with mode `riemann` and an explicit `domain`
+- **THEN** that domain is passed through to `riemann_pv` (used to mask the sphere) rather than being discarded in favor of the default
 
 ### Requirement: Named configuration presets
 

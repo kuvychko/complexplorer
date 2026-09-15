@@ -166,6 +166,36 @@ Phase 5  add-transfer-function-explorer                 —       no         →
             · cp.ee.TransferFunction (H(s)/H(z), callable → composes with
               every renderer) + pole_zero/bode/nyquist/transfer_portrait;
               new `transfer-functions` capability
+         RELEASE HARDENING + CLOSEOUT (tracker: openspec/REV3_CLOSEOUT.md):
+         harden-3-0-release                             3.0     YES        archived
+            · pre-release review fixes (HAS_PYVISTA machinery + dead code removed,
+              Rectangle.contains, unknown-kwarg rejection, CLI gaps, SPDX license,
+              py.typed). Task 6.3 (save_stl delegation) DEFERRED → backlog
+         FINDING (2026-09-14): 2.0.0 WAS PUBLISHED (PyPI 2025-10-19, tag v2.0.0 on
+         main). This line forked from main at c892bdb (2025-08-22) and never
+         contained it (13 colormap families, n_phi→phase_sectors, logging, MkDocs
+         site, 12 notebooks). Decision: rev3 stays the trunk; port selectively;
+         phase_sectors is canonical; histories joined at release with
+         `git merge -s ours origin/main` (rev3 tree wins, 2.0 history reachable).
+         C1 reconcile-with-2-0-release                  3.0     YES        planned
+            · port the 2.0 colormap families + CVD content; n_phi → phase_sectors;
+              recover the MkDocs scaffold; everything else → migration guide
+         C2 curate-rev3-visual-tour                     3.0     no         planned
+            · curated tour layer in showcase.py, RENDER_PROFILES, hero montage,
+              thumbnail gallery; generate → private review page → approve loop
+         C3 publish-rev3-docs-site                      3.0     no         planned
+            · MkDocs Material (continuity with the live v2 site) + mkdocstrings
+              API reference; new `docs` capability; tag-triggered deploy
+         C4 gate-release-artifacts-and-ci               3.0     no         planned
+            · wheel/sdist smoke, macOS, min-deps, blocking 3.13, nbmake, gallery
+              structure; retire the stale no-PyVista packaging reqs; record the
+              mandatory-PyVista decision
+         C5 finalize-public-api-contract                3.0     YES        planned
+            · Presets → PlotPresets (to confirm), ComplexFunction Protocol,
+              TypedDict specs, pyright gate, API map
+         C6 prepare-3-0-release-notes                   3.0     no         planned
+            · 2.0.0 → 3.0 migration guide, truthful changelog, README reframe,
+              CONTRIBUTING / CITATION.cff / project URLs / issue templates
 ────────────────────────────────────────────────────────────────────────────────
 3.1+     OUT OF UMBRELLA SCOPE (future backlog)
          full EE (filters, resonators, QCM, RF bridge),
@@ -175,7 +205,11 @@ Phase 5  add-transfer-function-explorer                 —       no         →
          the 2.x stubs were removed in curate-high-level-api),
          elliptic-curve catalog preset + showcase SURFACE_FAMILY entry
          (deferred to protect the byte-stable gallery manifest),
-         docs site (Sphinx/MkDocs)
+         OrnamentGenerator.save_stl → SurfaceMesh.save_stl delegation
+         (harden-3-0-release 6.3; changes STL bytes, needs regression review),
+         release automation (trusted publishing, TestPyPI dry runs, docs PR
+         previews, image-size budget), CoC / SECURITY.md / Zenodo DOI
+         (REV3_CLOSEOUT §14–16)
 ```
 
 `STATUS` values: `planned` → `proposed` (OpenSpec change exists) → `in-progress` →

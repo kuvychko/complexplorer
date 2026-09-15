@@ -9,15 +9,16 @@ mathematics to a physical object.
 
 ## Requirements
 
-### Requirement: Optional-dependency gating
+### Requirement: STL export is always available
 
-STL export SHALL be available only when PyVista is installed and SHALL fail with a clear error
-otherwise, without breaking import of the rest of the library.
+STL export SHALL be available whenever `complexplorer` is importable, because PyVista is a
+required dependency. The export modules SHALL import PyVista unconditionally and SHALL NOT define
+or expose any PyVista-availability flag or gating check.
 
-#### Scenario: Missing PyVista raises a clear error
+#### Scenario: Ornament export works without any availability guard
 
-- **WHEN** an ornament generator is constructed and PyVista is not installed
-- **THEN** an `ImportError` explaining that PyVista is required (with install guidance) is raised
+- **WHEN** an `OrnamentGenerator` is constructed and used in a normal installation
+- **THEN** it generates and saves an STL mesh without consulting any capability flag, and no `HAS_PYVISTA` / `check_pyvista_available` symbol is importable from the library
 
 ### Requirement: Ornament mesh generation
 

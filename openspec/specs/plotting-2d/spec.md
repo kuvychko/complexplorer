@@ -13,7 +13,8 @@ masking), a function, and a colormap, and produces matplotlib artists without fo
 
 The library SHALL render `f(z)` over a domain as a 2D image whose colors come from a colormap and
 whose exterior points are masked, accepting either a domain plus function or pre-computed mesh
-arrays.
+arrays. `plot` SHALL always return the matplotlib `Axes` it drew on, and SHALL honor a supplied
+`filename` regardless of whether the caller also passed an `ax`.
 
 #### Scenario: Plot from domain and function
 
@@ -39,7 +40,17 @@ arrays.
 #### Scenario: Display is left to the caller
 
 - **WHEN** a plot is produced
-- **THEN** the figure is not shown automatically; it is only written to disk if a filename is provided
+- **THEN** the figure is not shown automatically
+
+#### Scenario: Filename is honored with a caller-supplied axes
+
+- **WHEN** `plot` is called with both an `ax` and a `filename`
+- **THEN** the figure containing that axes is written to `filename` (saving is not skipped just because an axes was supplied)
+
+#### Scenario: The drawn axes is always returned
+
+- **WHEN** `plot` returns
+- **THEN** it returns the matplotlib `Axes` used, whether or not the caller supplied `ax`
 
 ### Requirement: Paired domain and codomain plot
 
@@ -79,6 +90,8 @@ outside transparent, and SHALL default to off.
 
 The library SHALL render a flat stereographic view of a Riemann sphere hemisphere, projecting the
 unit disk (plus a margin) and visually distinguishing the interior, exterior, and the unit circle.
+When an optional `domain` is supplied, samples outside that domain SHALL be masked with the
+colormap's out-of-domain color.
 
 #### Scenario: Single hemisphere chart
 
@@ -94,3 +107,9 @@ unit disk (plus a margin) and visually distinguishing the interior, exterior, an
 
 - **WHEN** `riemann_hemispheres` is called
 - **THEN** the south and north hemisphere charts are drawn side by side in one figure
+
+#### Scenario: Optional domain masks the chart
+
+- **WHEN** `riemann_chart` is given a `domain`
+- **THEN** samples for which `domain.contains` is false are rendered with the out-of-domain color
+- **AND** when no `domain` is given, no domain masking is applied
