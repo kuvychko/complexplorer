@@ -180,7 +180,7 @@ Phase 5  add-transfer-function-explorer                 —       no         →
          C1 reconcile-with-2-0-release                  3.0     YES        archived
             · port the 2.0 colormap families + CVD content; n_phi → phase_sectors;
               recover the MkDocs scaffold; everything else → migration guide
-         C2 curate-rev3-visual-tour                     3.0     no         planned
+         C2 curate-rev3-visual-tour                     3.0     no         proposed
             · curated tour layer in showcase.py, RENDER_PROFILES, hero montage,
               thumbnail gallery; generate → private review page → approve loop
          C3 publish-rev3-docs-site                      3.0     no         planned
