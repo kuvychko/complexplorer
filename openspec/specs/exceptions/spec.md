@@ -3,9 +3,10 @@
 ## Purpose
 
 The exceptions capability is the library-wide error contract: a single `ComplexplorerError`
-base class from which every error the library raises deliberately derives, and a
+base class from which every error the library raises deliberately derives, a
 `ValidationError` that is simultaneously a `ComplexplorerError` and a `ValueError` so that
-handlers written against earlier releases keep working. It lets callers wrap any
+handlers written against earlier releases keep working, and `ColormapError` for invalid
+colormap configuration. It lets callers wrap any
 complexplorer call in one `except ComplexplorerError` handler without enumerating
 lower-level types.
 
@@ -41,3 +42,20 @@ importable from its historical location `complexplorer.utils.validation`.
 
 - **WHEN** `from complexplorer.utils.validation import ValidationError` is executed
 - **THEN** it imports the same class as `complexplorer.exceptions.ValidationError`
+
+### Requirement: Colormap configuration errors
+
+The library SHALL provide `complexplorer.exceptions.ColormapError`. It is raised for invalid
+colormap configuration and is a subclass of `ValidationError`, and therefore of both
+`ComplexplorerError` and `ValueError`. It SHALL be exported from the top-level `complexplorer`
+package, as it was in 2.0.0.
+
+#### Scenario: ColormapError is a ValidationError
+
+- **WHEN** a `ColormapError` is raised
+- **THEN** `except ValidationError`, `except ComplexplorerError`, and `except ValueError` each catch it
+
+#### Scenario: ColormapError is a top-level export
+
+- **WHEN** a user imports `ColormapError` from `complexplorer`
+- **THEN** the import succeeds and `ColormapError` appears in `complexplorer.__all__`
