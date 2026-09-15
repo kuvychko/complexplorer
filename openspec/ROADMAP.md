@@ -177,7 +177,7 @@ Phase 5  add-transfer-function-explorer                 —       no         →
          site, 12 notebooks). Decision: rev3 stays the trunk; port selectively;
          phase_sectors is canonical; histories joined at release with
          `git merge -s ours origin/main` (rev3 tree wins, 2.0 history reachable).
-         C1 reconcile-with-2-0-release                  3.0     YES        proposed
+         C1 reconcile-with-2-0-release                  3.0     YES        implemented
             · port the 2.0 colormap families + CVD content; n_phi → phase_sectors;
               recover the MkDocs scaffold; everything else → migration guide
          C2 curate-rev3-visual-tour                     3.0     no         planned

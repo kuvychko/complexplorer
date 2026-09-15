@@ -7,7 +7,7 @@ Complexplorer is a Python library for visualization of complex functions, inspir
 ## Key Concepts
 
 - **Complex Domains**: Rectangular, disk, and annular regions in the complex plane, plus composite domains built via set operations (union, intersection, difference)
-- **Color Maps**: Schemes to visualize complex values — classic/enhanced Phase portraits and grayscale Chessboard/PolarChessboard/LogRings patterns
+- **Color Maps**: 13 schemes for visualizing complex values — classic/enhanced `Phase` portraits, the perceptual family built on OkLCh/cubehelix, and grayscale `Chessboard`/`PolarChessboard`/`LogRings` patterns
 - **Modulus Scaling**: ~10 transfer functions mapping `|f(z)|` to radius/height, used by 3D landscapes, Riemann relief, and STL export
 - **Visualization Types**: 2D plots, 3D analytic landscapes, and Riemann sphere projections (matplotlib and PyVista backends)
 - **STL Export**: Modulus-scaled Riemann sphere ornaments for 3D printing
@@ -20,7 +20,7 @@ complexplorer/
 │   ├── __init__.py             # Public API surface (see __all__)
 │   ├── _version.py
 │   ├── api.py                  # High-level API: quick_plot(), Presets
-│   ├── exceptions.py           # ComplexplorerError base + ValidationError
+│   ├── exceptions.py           # ComplexplorerError base + ValidationError + ColormapError
 │   ├── gallery.py              # generate_gallery (byte-stable index.json manifest)
 │   ├── core/
 │   │   ├── domain.py           # Domain, Rectangle, Disk, Annulus, CompositeDomain
@@ -77,6 +77,8 @@ For any non-trivial change, create an OpenSpec change proposal (`/opsx:propose` 
 
 Optional dependencies:
 - PyQt6 >= 6.5.0 (for interactive matplotlib plots in CLI scripts)
+- `[examples]` extra: nbmake, nbconvert, ipykernel, colorspacious (CVD simulation in the
+  colour/accessibility notebook)
 
 As of 3.0 PyVista is a required core dependency (the sole 3D backend), so the former
 `HAS_PYVISTA` / `HAS_STL_EXPORT` capability flags have been removed — those features are
@@ -219,8 +221,15 @@ cp.plot_landscape_pv(cp.Rectangle(6, 6), H)     # H is a plain callable — all 
 
 - `Phase()`: Basic or enhanced phase portraits
   - Use `auto_scale_r=True` for automatic square cell sizing
-  - Set `phase_sectors` for the number of phase sectors
+  - Set `phase_sectors` for the number of phase sectors (renamed from `n_phi` in 2.0; passing
+    `n_phi` raises `ValidationError`)
   - Adjust `scale_radius` to control cell size
+  - `emphasize_unit_circle=True` highlights `|z| = 1`
+- Perceptual family (OkLCh / cubehelix, restored from 2.0.0): `OklabPhase()`,
+  `PerceptualPastel()`, `AnalogousWedge()`, `DivergingWarmCool()`, `Isoluminant()`,
+  `CubehelixPhase()`, `InkPaper()`, `EarthTopographic()`, `FourQuadrant()`
+  - See `examples/notebooks/color_and_accessibility.ipynb` for the tour and the
+    colour-vision-deficiency comparison
 - `Chessboard()`: Cartesian grid pattern
 - `PolarChessboard()`: Polar grid pattern
 - `LogRings()`: Logarithmic black/white rings

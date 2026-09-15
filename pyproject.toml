@@ -74,6 +74,8 @@ examples = [
     "nbmake>=1.5",
     "nbconvert>=7.0",
     "ipykernel>=6.0",
+    # CVD simulation in examples/notebooks/color_and_accessibility.ipynb
+    "colorspacious>=1.1",
 ]
 # PyVista is a core dependency as of 3.0; these are kept as empty no-op aliases so existing
 # `pip install complexplorer[pyvista]` / `[3d]` commands continue to work.

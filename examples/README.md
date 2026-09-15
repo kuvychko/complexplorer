@@ -7,6 +7,7 @@ Tutorials, runnable demos, and the rendered gallery for the complexplorer librar
 ```
 examples/
 ├── notebooks/   Jupyter tutorials (start here)
+│   └── applications/  worked applications (FFT, special functions, conformal maps, dynamics)
 ├── scripts/     runnable Python demos (best 3D quality — run from a terminal)
 ├── gallery/     rendered gallery images (regenerated from the preset registry)
 └── README.md    this file
@@ -26,6 +27,18 @@ examples/
 | `advanced_features.ipynb` | Phase portraits, the colormap family, PyVista 3D, Riemann sphere **and Riemann surfaces**. |
 | `stl_export_demo.ipynb` | Step-by-step 3D-printable ornaments: Riemann-sphere relief, scaling options, print tips. |
 | `api_cookbook.ipynb` | Common functions, domain/colormap patterns, the **preset registry** (`cp.catalog`), recipes. |
+| `color_and_accessibility.ipynb` | All 13 colormaps on one function, then which of them survive **colour-vision deficiency** (needs `colorspacious`). |
+
+### Applications (`notebooks/applications/`)
+
+Worked examples that use the library on a real problem rather than teaching the API:
+
+| Notebook | What it covers |
+|---|---|
+| `app_01_fft_matrices.ipynb` | The DFT matrix as a complex image. |
+| `app_02_special_functions.ipynb` | Gamma, zeta and friends (via `scipy.special`). |
+| `app_03_conformal_maps.ipynb` | Conformal mappings and what they preserve. |
+| `app_04_complex_dynamics.ipynb` | Iteration, Julia/Mandelbrot structure. |
 
 > **PyVista in Jupyter:** each notebook sets the **static** backend
 > (`pv.set_jupyter_backend('static')`) so 3D plots embed as images and the notebook runs
@@ -34,10 +47,10 @@ examples/
 
 ### Running & verifying the notebooks
 
-Install the notebook tooling, then verify all four execute top-to-bottom:
+Install the notebook tooling, then verify every notebook executes top-to-bottom:
 
 ```bash
-uv pip install -e ".[examples]"          # nbmake, nbconvert, ipykernel
+uv pip install -e ".[examples]"          # nbmake, nbconvert, ipykernel, colorspacious
 pytest --nbmake examples/notebooks/       # the local execution gate (opt-in; not in the default suite or CI)
 ```
 
@@ -77,8 +90,13 @@ complexplorer gallery --tag <tag> -o gallery_output    # or: -i <id> ...
 ```
 
 This writes a deterministic `index.json` manifest plus per-preset portraits and `card.json`
-records. (Higher-resolution 3D / Riemann / STL gallery renders are produced by the
-`examples/showcase.py` script — added in a follow-up change.)
+records. The higher-resolution 3D / Riemann / relief renders and the colormap gallery are
+produced by `examples/showcase.py`:
+
+```bash
+python examples/showcase.py                    # everything (local only; needs a GPU/display)
+python examples/showcase.py --only colormaps   # just the colormap section
+```
 
 ## 🖨️ STL export (3D printing)
 

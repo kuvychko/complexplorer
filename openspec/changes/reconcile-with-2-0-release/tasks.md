@@ -80,19 +80,19 @@
 
 ## 6. Notebooks
 
-- [ ] 6.1 Create `examples/notebooks/color_and_accessibility.ipynb` from 2.0 `04_colormaps_comprehensive` and
+- [x] 6.1 Create `examples/notebooks/color_and_accessibility.ipynb` from 2.0 `04_colormaps_comprehensive` and
   `05_accessibility_cvd`:
   - Include the colormap tour, the CVD simulation, and recommendations.
   - Use the 3.0 surface: static PyVista backend and `phase_sectors`.
   - Commit it executed.
-- [ ] 6.2 Fold composite-domain material from 2.0 `02_domains_advanced` into
+- [x] 6.2 Fold composite-domain material from 2.0 `02_domains_advanced` into
   `examples/notebooks/advanced_features.ipynb`, where it isn't already covered. Re-execute.
-- [ ] 6.3 Rename `n_phi` → `phase_sectors` in the four existing rev3 notebooks and re-execute them.
-- [ ] 6.4 Port the 2.0 application notebooks `app_01`–`app_04` into
+- [x] 6.3 Rename `n_phi` → `phase_sectors` in the four existing rev3 notebooks and re-execute them.
+- [x] 6.4 Port the 2.0 application notebooks `app_01`–`app_04` into
   `examples/notebooks/applications/`.
   - Keep each only if `pytest --nbmake` passes.
   - Record each dropped notebook in the `openspec/ROADMAP.md` 3.1+ backlog.
-- [ ] 6.5 Update `examples/README.md` and `tests/unit/test_examples_structure.py` for the new
+- [x] 6.5 Update `examples/README.md` and `tests/unit/test_examples_structure.py` for the new
   notebooks.
 
 ## 7. Migration inventory and docs scaffold
@@ -112,12 +112,12 @@
 
 ## 8. Verification and bookkeeping
 
-- [ ] 8.1 Run the full gate and confirm it is green:
+- [x] 8.1 Run the full gate and confirm it is green:
   - `pytest tests/`
   - `ruff check` and `ruff format --check complexplorer/ tests/`
   - `pytest --nbmake examples/notebooks/`
   - `openspec validate --specs`
   - `openspec validate reconcile-with-2-0-release`
   - gallery manifest byte-stability
-- [ ] 8.2 Update `CLAUDE.md` (the colormap list and the `phase_sectors` quick reference) and flip
+- [x] 8.2 Update `CLAUDE.md` (the colormap list and the `phase_sectors` quick reference) and flip
   C1's status in `openspec/ROADMAP.md`.

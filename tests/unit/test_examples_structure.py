@@ -52,3 +52,32 @@ def test_layout_directories_exist():
     assert (EXAMPLES / "notebooks").is_dir()
     assert (EXAMPLES / "scripts").is_dir()
     assert (EXAMPLES / "scripts" / "interactive_showcase.py").is_file()
+
+
+def test_expected_notebooks_are_present():
+    """The tutorial set the `examples` capability describes (incl. the CVD notebook)."""
+    expected = {
+        "getting_started.ipynb",
+        "advanced_features.ipynb",
+        "api_cookbook.ipynb",
+        "stl_export_demo.ipynb",
+        "color_and_accessibility.ipynb",
+    }
+    present = {p.name for p in (EXAMPLES / "notebooks").glob("*.ipynb")}
+    assert expected <= present, f"missing tutorials: {sorted(expected - present)}"
+
+
+def test_application_notebooks_live_in_their_own_directory():
+    apps = EXAMPLES / "notebooks" / "applications"
+    assert apps.is_dir()
+    assert len(list(apps.glob("*.ipynb"))) >= 4
+
+
+def test_notebooks_use_the_current_phase_sector_parameter():
+    """`n_phi` was renamed to `phase_sectors` in 2.0; notebooks must not teach the old name."""
+    offenders = [
+        p.relative_to(REPO_ROOT)
+        for p in (EXAMPLES / "notebooks").rglob("*.ipynb")
+        if re.search(r"n_phi", p.read_text(encoding="utf-8"))
+    ]
+    assert not offenders, f"notebooks still reference n_phi: {offenders}"
