@@ -1,27 +1,27 @@
 ## 1. Locked render settings
 
-- [ ] 1.1 Add a `RENDER_PROFILES` table to `examples/showcase.py`: one entry per family
+- [x] 1.1 Add a `RENDER_PROFILES` table to `examples/showcase.py`: one entry per family
   (`portrait`, `landscape`, `sphere`, `relief`, `surface`, `mesh`) carrying ground, lighting,
   specular, antialiasing, orientation widget, camera zoom, window size and mesh resolution.
   - Seed it with the R0 decision (Gallery grey) and the R0b resolutions.
   - Replace `WINDOW_3D`, `RESOLUTION_3D` and `SURFACE_RESOLUTION`.
-- [ ] 1.2 Route every render through the profile: take the plotter with `return_plotter=True`,
+- [x] 1.2 Route every render through the profile: take the plotter with `return_plotter=True`,
   apply ground/lighting/specular/antialiasing/zoom, then screenshot. 2D portraits get the
   phase-wheel legend and a tight bounding box.
-- [ ] 1.3 Record the profile name and mesh resolution on every `showcase.json` render record.
+- [x] 1.3 Record the profile name and mesh resolution on every `showcase.json` render record.
 
 ## 2. Producer plumbing
 
-- [ ] 2.1 Add `--out DIR` (redirect every write, including the generated page) and extend
+- [x] 2.1 Add `--out DIR` (redirect every write, including the generated page) and extend
   `--only` to `{presets, colormaps, tour, hero, thumbs, all}`. Sections that are not re-rendered
   keep their existing manifest records.
-- [ ] 2.2 Bump `showcase.json` to schema 2: add the `tour` and `curated` sections and fold the
+- [x] 2.2 Bump `showcase.json` to schema 2: add the `tour` and `curated` sections and fold the
   existing `banner` entry into `curated`.
-- [ ] 2.3 Generate a ~400 px PNG thumbnail for every render, under `thumb/`.
+- [x] 2.3 Generate a ~400 px PNG thumbnail for every render, under `thumb/`.
 
 ## 3. Library defect fix
 
-- [ ] 3.1 Save portraits from `complexplorer/gallery.py` with a tight bounding box, and add a test
+- [x] 3.1 Save portraits from `complexplorer/gallery.py` with a tight bounding box, and add a test
   that the saved figure keeps its axis labels (no clipped `Im(z)`), then regenerate the committed
   portraits.
 

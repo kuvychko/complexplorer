@@ -90,3 +90,27 @@ def test_cli_gallery_unmatched_tag_exits_2(tmp_path, capsys):
     rc = main(["gallery", "--tag", "no-such-tag-xyz", "-o", str(tmp_path)])
     assert rc == 2
     assert "0 presets matched" in capsys.readouterr().err
+
+
+def test_portrait_keeps_its_axis_labels(tmp_path):
+    """The committed portraits used to clip the Im(z) label at the left edge.
+
+    `curate-rev3-visual-tour` saves with a tight bounding box. The check is functional: the
+    left margin must contain the dark ink of the y-axis label, and the image must no longer be
+    the nominal figure rectangle (which cropped the labels away).
+    """
+    import numpy as np
+    from PIL import Image
+
+    from complexplorer.gallery import _FIGSIZE, generate_gallery
+
+    dpi = 150
+    generate_gallery(tmp_path, selection=["identity"], dpi=dpi)
+    image = Image.open(tmp_path / "identity" / "portrait.png").convert("L")
+    width, height = image.size
+
+    nominal = (round(_FIGSIZE[0] * dpi), round(_FIGSIZE[1] * dpi))
+    assert (width, height) != nominal, "portrait still saved at the label-clipping figure size"
+
+    left_margin = np.asarray(image.crop((0, 0, max(1, width // 8), height)))
+    assert left_margin.min() < 100, "no y-axis label ink in the left margin: it is still clipped"

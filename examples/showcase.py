@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""examples/showcase.py — the high-res visual gallery producer (M2).
+"""examples/showcase.py — the high-res visual gallery producer.
 
 Renders the curated preset registry (``cp.catalog``) into the committed visual gallery:
 the 2D portraits + deterministic ``index.json`` (via the library ``cp.gallery``), plus the
-PyVista 3D screenshots that manifest deliberately omits, a colormap gallery, a presentation
-manifest (``showcase.json``), and a generated docs gallery page.
+PyVista 3D screenshots that manifest deliberately omits, a colormap gallery, thumbnails, a
+presentation manifest (``showcase.json``), and a generated docs gallery page.
 
 The render set per preset follows the preset's TAGS (which encode mathematical character):
 
@@ -13,10 +13,16 @@ The render set per preset follows the preset's TAGS (which encode mathematical c
     branches          -> surface.png    (riemann_surface_pv)
     ornament          -> ornament.png   (relief sphere)
 
+Every render takes its look from ``RENDER_PROFILES`` — one locked profile per family, so the
+committed gallery shares a single camera, ground, lighting and mesh resolution (the outcome of
+visual-review rounds R0/R0b; see openspec/REV3_CLOSEOUT.md).
+
 This is a LOCAL regeneration tool — off-screen VTK screenshots crash only on headless CI.
 Run it from the repo root:
 
-    python examples/showcase.py
+    python examples/showcase.py                      # everything, into examples/gallery
+    python examples/showcase.py --only colormaps     # one section
+    python examples/showcase.py --out /tmp/round3    # stage a review round; repo untouched
 
 It is idempotent: re-running reproduces the same bundle (images best-effort, manifest stable).
 """
@@ -39,6 +45,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from PIL import Image
 
 # ---------------------------------------------------------------------------------------
 # Configuration
@@ -47,19 +54,75 @@ import matplotlib.pyplot as plt
 REPO_ROOT = Path(__file__).resolve().parents[1]
 GALLERY_DIR = REPO_ROOT / "examples" / "gallery"
 DOCS_GALLERY = REPO_ROOT / "docs" / "gallery"
-COLORMAPS_DIR = GALLERY_DIR / "_colormaps"
 
-SCHEMA_VERSION = 1  # showcase manifest schema (independent of cp.gallery's index.json)
+SCHEMA_VERSION = 2  # v2: adds the `tour` and `curated` sections (independent of index.json)
 HERO_BANNER = "Riemann_relief_map_20250726.png"  # curated, kept (not regenerated)
 
-PORTRAIT_DPI = 390          # 2D portraits / colormaps (figsize 4x4 -> ~1560px); +30%
-WINDOW_3D = (1560, 1560)    # PyVista screenshot size; +30%
-RESOLUTION_3D = 260         # mesh resolution for landscapes/spheres; +30%
-SURFACE_RESOLUTION = 104    # Riemann-surface radial samples; +30%
+PORTRAIT_DPI = 390  # 2D portraits / colormaps (figsize 4x4 -> ~1560px)
+THUMB_PX = 400      # gallery thumbnails; PNG for README/PyPI compatibility
 
 COLORMAP_REFERENCE = "rational_zeros_poles"  # zeros at +-1, poles at +-i — good contrast
 
-# The colormap family — only the colormaps that actually exist in the public API.
+# The house style, decided in visual-review round R0 ("Gallery grey"), with the mesh
+# resolutions from round R0b. One entry per render family; every render reads its look from
+# here, so a restyle happens in one place and the committed images cannot drift apart.
+GROUND = ("#e6e9ee", "#fbfcfd")  # (bottom, top) of the vertical gradient
+
+RENDER_PROFILES = {
+    "portrait": {
+        "kind": "matplotlib",
+        "dpi": PORTRAIT_DPI,
+        "figsize": (4.0, 4.0),
+        "tight": True,  # keeps the Im(z) label inside the image
+    },
+    "landscape": {
+        "kind": "pyvista",
+        "window": (1560, 1560),
+        "resolution": 600,
+        "ground": GROUND,
+        "lighting": "three",
+        "specular": 0.3,
+        "anti_aliasing": "ssaa",
+        "orientation_widget": False,
+        # Looser than the other families: at 1.22 the domain's corners left the frame.
+        "zoom": 0.94,
+    },
+    "sphere": {
+        "kind": "pyvista",
+        "window": (1560, 1560),
+        "resolution": 1000,
+        "ground": GROUND,
+        "lighting": "three",
+        "specular": 0.3,
+        "anti_aliasing": "ssaa",
+        "orientation_widget": False,
+        "zoom": 1.22,
+    },
+    "ornament": {
+        "kind": "pyvista",
+        "window": (1560, 1560),
+        "resolution": 800,
+        "ground": GROUND,
+        "lighting": "three",
+        "specular": 0.3,
+        "anti_aliasing": "ssaa",
+        "orientation_widget": False,
+        "zoom": 1.22,
+    },
+    "surface": {
+        "kind": "pyvista",
+        "window": (1560, 1560),
+        "resolution": 312,
+        "ground": GROUND,
+        "lighting": "three",
+        "specular": 0.3,
+        "anti_aliasing": "ssaa",
+        "orientation_widget": False,
+        "zoom": 1.22,
+    },
+}
+
+
 def _colormap_family() -> list[tuple[str, cp.Colormap, str]]:
     """(name, colormap, snippet-constructor) tuples for the colormap gallery.
 
@@ -133,12 +196,62 @@ def _renders_for(preset) -> list[str]:
     return types
 
 
-def _render_portrait_mpl(domain, func, cmap, path: Path) -> None:
-    """A 2D portrait via matplotlib (used for the colormap gallery)."""
-    fig, ax = plt.subplots(figsize=(4.0, 4.0))
+def _style(plotter, profile: dict) -> None:
+    """Apply a family profile to a returned (off-screen) plotter.
+
+    The renderers expose camera, window and orientation but not ground or lighting, so the
+    gallery's look is applied here rather than widening the library's signatures.
+    """
+    bottom, top = profile["ground"]
+    plotter.set_background(bottom, top=top)
+    if profile["lighting"] == "three":
+        plotter.remove_all_lights()
+        plotter.enable_3_lights()
+    for actor in plotter.renderer.actors.values():
+        prop = getattr(actor, "prop", None)
+        if prop is not None and hasattr(prop, "specular"):
+            prop.specular = profile["specular"]
+    if profile["anti_aliasing"]:
+        try:
+            plotter.enable_anti_aliasing(profile["anti_aliasing"])
+        except Exception as exc:  # pragma: no cover - driver dependent
+            print(f"    (anti-aliasing unavailable: {exc})")
+    if profile["zoom"] != 1.0:
+        plotter.camera.zoom(profile["zoom"])
+
+
+def _shoot(plotter, path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    plotter.screenshot(str(path))
+    plotter.close()
+
+
+def _thumbnail(path: Path, gallery_dir: Path) -> str:
+    """Write a THUMB_PX-wide PNG mirroring the render's path under thumb/."""
+    rel = path.relative_to(gallery_dir)
+    dst = gallery_dir / "thumb" / rel
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    with Image.open(path) as img:
+        thumb = img.copy()
+    thumb.thumbnail((THUMB_PX, THUMB_PX), Image.LANCZOS)
+    thumb.save(dst)
+    return str(Path("thumb") / rel).replace("\\", "/")
+
+
+def _render_portrait_mpl(domain, func, cmap, path: Path, legend: bool = False) -> None:
+    """A 2D portrait via matplotlib (used for the colormap gallery and the tour)."""
+    profile = RENDER_PROFILES["portrait"]
+    fig, ax = plt.subplots(figsize=profile["figsize"])
     try:
-        plot_2d(domain, func, cmap=cmap, ax=ax)
-        fig.savefig(path, dpi=PORTRAIT_DPI, metadata={"Software": None})
+        plot_2d(domain, func, cmap=cmap, ax=ax, legend=legend)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(
+            path,
+            dpi=profile["dpi"],
+            metadata={"Software": None},
+            bbox_inches="tight" if profile["tight"] else None,
+            pad_inches=0.05,
+        )
     finally:
         plt.close(fig)
 
@@ -148,41 +261,58 @@ def _render_portrait_mpl(domain, func, cmap, path: Path) -> None:
 # ---------------------------------------------------------------------------------------
 
 def _render_landscape(preset, path: Path) -> None:
+    profile = RENDER_PROFILES["landscape"]
     sc = preset.scaling()
-    cp.plot_landscape_pv(
+    plotter = cp.plot_landscape_pv(
         preset.domain(), preset.func, cmap=preset.colormap(),
         modulus_mode=sc["method"], modulus_params=sc["params"],
-        resolution=RESOLUTION_3D, window_size=WINDOW_3D,
-        interactive=False, filename=str(path),
+        resolution=profile["resolution"], window_size=profile["window"],
+        interactive=False, return_plotter=True,
+        show_orientation=profile["orientation_widget"],
     )
+    _style(plotter, profile)
+    _shoot(plotter, path)
 
 
 def _render_sphere(preset, path: Path) -> None:
     # domain=None -> no stereographic mask -> the FULL sphere (both poles), no "cup".
-    cp.riemann_pv(
-        preset.func, cmap=preset.colormap(),
-        modulus_mode="constant", resolution=RESOLUTION_3D, window_size=WINDOW_3D,
-        interactive=False, filename=str(path),
+    profile = RENDER_PROFILES["sphere"]
+    plotter = cp.riemann_pv(
+        preset.func, cmap=preset.colormap(), modulus_mode="constant",
+        resolution=profile["resolution"], window_size=profile["window"],
+        interactive=False, return_plotter=True,
+        show_orientation=profile["orientation_widget"],
     )
+    _style(plotter, profile)
+    _shoot(plotter, path)
 
 
 def _render_ornament(preset, path: Path) -> None:
+    # domain=None -> full sphere relief (the infinity pole is included, not cut off).
+    profile = RENDER_PROFILES["ornament"]
     sc = preset.scaling()
-    # domain=None -> full sphere relief (the ∞ pole is included, not cut off).
-    cp.riemann_pv(
+    plotter = cp.riemann_pv(
         preset.func, cmap=preset.colormap(),
         modulus_mode=sc["method"], modulus_params=sc["params"],
-        resolution=RESOLUTION_3D, window_size=WINDOW_3D,
-        interactive=False, filename=str(path),
+        resolution=profile["resolution"], window_size=profile["window"],
+        interactive=False, return_plotter=True,
+        show_orientation=profile["orientation_widget"],
     )
+    _style(plotter, profile)
+    _shoot(plotter, path)
 
 
 def _render_surface(preset, path: Path) -> None:
+    profile = RENDER_PROFILES["surface"]
     family, kw = SURFACE_FAMILY[preset.id]
-    cp.riemann_surface_pv(
-        family, **kw, resolution=SURFACE_RESOLUTION, window_size=WINDOW_3D,
-        interactive=False, filename=str(path),
+    plotter = cp.riemann_surface_pv(
+        family, **kw,
+        resolution=profile["resolution"], window_size=profile["window"],
+        interactive=False, return_plotter=True,
+        show_orientation=profile["orientation_widget"],
     )
+    _style(plotter, profile)
+    _shoot(plotter, path)
 
 
 _RENDERERS = {
@@ -246,7 +376,7 @@ def _md_entry(title: str, story: str, images: list[str], snippet: str) -> str:
     return "\n".join(lines)
 
 
-def _generate_docs_page(manifest: dict) -> None:
+def _generate_docs_page(manifest: dict, docs_dir: Path) -> None:
     out = ["<!-- GENERATED by examples/showcase.py — do not edit by hand. -->", ""]
     out += ["# Gallery (generated)", "", "## Functions", ""]
     for rec in manifest["presets"]:
@@ -262,49 +392,38 @@ def _generate_docs_page(manifest: dict) -> None:
     for r in manifest["colormaps"]["renders"]:
         out.append(_md_entry(r["name"], "", [r["file"]], _colormap_snippet(r["ctor"])))
 
-    (DOCS_GALLERY / "gallery.generated.md").write_text("\n".join(out), encoding="utf-8", newline="\n")
+    docs_dir.mkdir(parents=True, exist_ok=True)
+    (docs_dir / "gallery.generated.md").write_text("\n".join(out), encoding="utf-8", newline="\n")
 
 
 # ---------------------------------------------------------------------------------------
-# Main
+# Sections
 # ---------------------------------------------------------------------------------------
 
-def _existing_manifest() -> dict:
-    path = GALLERY_DIR / "showcase.json"
+def _existing_manifest(gallery_dir: Path) -> dict:
+    path = gallery_dir / "showcase.json"
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
 
 
-def main(only: str = "all") -> None:
-    GALLERY_DIR.mkdir(parents=True, exist_ok=True)
-    COLORMAPS_DIR.mkdir(parents=True, exist_ok=True)
+def _render_presets(gallery_dir: Path) -> list[dict]:
+    """Deterministic 2D portraits + index.json, then the PyVista screenshots by tag policy."""
+    print("Rendering 2D portraits + index.json (cp.gallery) ...")
+    generate_gallery(gallery_dir, selection=None, dpi=PORTRAIT_DPI)
 
-    if only == "colormaps":
-        # Reuse the committed preset renders; only the colormap section is re-rendered.
-        preset_records = _existing_manifest().get("presets", [])
-    else:
-        # 1. Deterministic 2D portraits + index.json (the library bundle; untouched contract).
-        print("Rendering 2D portraits + index.json (cp.gallery) ...")
-        generate_gallery(GALLERY_DIR, selection=None, dpi=PORTRAIT_DPI)
-
-        # 2. Per-preset PyVista screenshots, by tag policy.
-        preset_records = _render_presets()
-    _finish(preset_records)
-
-
-def _render_presets() -> list[dict]:
-    preset_records = []
+    records = []
     for pid in catalog.list():
         preset = catalog.get(pid)
-        rtypes = _renders_for(preset)
         renders = {"portrait": f"{pid}/portrait.png"}
-        for rtype in rtypes:
+        used = {"portrait": "portrait"}
+        for rtype in _renders_for(preset):
             if rtype == "portrait":
                 continue
             rel = f"{pid}/{rtype}.png"
             print(f"  {pid}: {rtype}")
-            _RENDERERS[rtype](preset, GALLERY_DIR / rel)
+            _RENDERERS[rtype](preset, gallery_dir / rel)
             renders[rtype] = rel
-        preset_records.append(
+            used[rtype] = rtype
+        records.append(
             {
                 "id": pid,
                 "title": preset.title,
@@ -312,46 +431,124 @@ def _render_presets() -> list[dict]:
                 "story": preset.story,
                 "tags": list(preset.tags),
                 "renders": renders,
+                "thumbs": {
+                    rtype: _thumbnail(gallery_dir / rel, gallery_dir)
+                    for rtype, rel in renders.items()
+                },
+                "profiles": {
+                    rtype: {
+                        "profile": name,
+                        "resolution": RENDER_PROFILES[name].get("resolution"),
+                    }
+                    for rtype, name in used.items()
+                },
             }
         )
+    return records
 
-    return preset_records
 
-
-def _finish(preset_records: list[dict]) -> None:
-    # 3. Colormap gallery — one reference function under each implemented colormap.
+def _render_colormaps(gallery_dir: Path) -> list[dict]:
     print("Rendering colormap gallery ...")
     ref = catalog.get(COLORMAP_REFERENCE)
-    cmap_records = []
+    records = []
     for name, cmap, ctor in _colormap_family():
         rel = f"_colormaps/{name}.png"
-        _render_portrait_mpl(ref.domain(), ref.func, cmap, GALLERY_DIR / rel)
-        cmap_records.append({"name": name, "file": rel, "ctor": ctor})
+        _render_portrait_mpl(ref.domain(), ref.func, cmap, gallery_dir / rel)
+        records.append(
+            {
+                "name": name,
+                "file": rel,
+                "ctor": ctor,
+                "thumb": _thumbnail(gallery_dir / rel, gallery_dir),
+            }
+        )
+    return records
 
-    # 4. Presentation manifest (split from index.json).
+
+def _curated_records(gallery_dir: Path) -> list[dict]:
+    """Assets that are committed but never regenerated: the banner and printed-object photos.
+
+    Each entry records its kind and origin and carries no render recipe, so a photograph can
+    never be mistaken for — or overwritten by — a render.
+    """
+    records = [
+        {
+            "file": HERO_BANNER,
+            "kind": "banner",
+            "origin": "hand-composed relief render, kept from the 2.x gallery",
+        }
+    ]
+    photo_dir = gallery_dir / "_curated"
+    if photo_dir.is_dir():
+        for photo in sorted(photo_dir.glob("*")):
+            if photo.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}:
+                records.append(
+                    {
+                        "file": f"_curated/{photo.name}",
+                        "kind": "photograph",
+                        "origin": "supplied by the author; a printed ornament, not a render",
+                        "thumb": _thumbnail(photo, gallery_dir),
+                    }
+                )
+    return records
+
+
+# ---------------------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------------------
+
+SECTIONS = ("presets", "colormaps", "tour", "hero", "thumbs")
+
+
+def main(only: str = "all", out: str | None = None) -> None:
+    gallery_dir = Path(out).resolve() if out else GALLERY_DIR
+    docs_dir = (gallery_dir / "docs") if out else DOCS_GALLERY
+    gallery_dir.mkdir(parents=True, exist_ok=True)
+
+    # Sections that are not re-rendered keep the records they already have.
+    previous = _existing_manifest(GALLERY_DIR if out else gallery_dir)
+
+    if only in ("all", "presets"):
+        preset_records = _render_presets(gallery_dir)
+    else:
+        preset_records = previous.get("presets", [])
+
+    if only in ("all", "colormaps"):
+        colormap_records = _render_colormaps(gallery_dir)
+    else:
+        colormap_records = previous.get("colormaps", {}).get("renders", [])
+
     manifest = {
         "schema_version": SCHEMA_VERSION,
         "complexplorer_version": __version__,
         "generator": "complexplorer showcase",
-        "banner": HERO_BANNER,
-        "colormaps": {"reference_preset": COLORMAP_REFERENCE, "renders": cmap_records},
+        "banner": HERO_BANNER,  # kept until the docs page stops reading it
+        "curated": _curated_records(gallery_dir),
+        "colormaps": {"reference_preset": COLORMAP_REFERENCE, "renders": colormap_records},
         "presets": preset_records,
+        "tour": previous.get("tour", []),
     }
-    _write_json(GALLERY_DIR / "showcase.json", manifest)
-
-    # 5. Generated docs gallery page.
-    _generate_docs_page(manifest)
-    print(f"Done. {len(preset_records)} presets, {len(cmap_records)} colormaps -> {GALLERY_DIR}")
+    _write_json(gallery_dir / "showcase.json", manifest)
+    _generate_docs_page(manifest, docs_dir)
+    print(
+        f"Done. {len(preset_records)} presets, {len(colormap_records)} colormaps, "
+        f"{len(manifest['curated'])} curated -> {gallery_dir}"
+    )
 
 
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description="Render the complexplorer visual gallery.")
     parser.add_argument(
         "--only",
-        choices=["all", "colormaps"],
+        choices=["all", *SECTIONS],
         default="all",
         help="regenerate only one section (default: everything)",
+    )
+    parser.add_argument(
+        "--out",
+        default=None,
+        help="write the bundle here instead of examples/gallery (for staging a review round)",
     )
     main(**vars(parser.parse_args()))

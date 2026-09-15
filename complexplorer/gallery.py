@@ -53,7 +53,11 @@ def _render_portrait(preset: FunctionPreset, path: Path, dpi: int) -> None:
     fig, ax = plt.subplots(figsize=_FIGSIZE)
     try:
         plot_2d(preset.domain(), preset.func, cmap=preset.colormap(), ax=ax)
-        fig.savefig(path, dpi=dpi, metadata={"Software": None})
+        # bbox_inches="tight" keeps the axis labels inside the image; without it the Im(z)
+        # label is clipped at the left edge and a wide empty margin sits above the plot.
+        fig.savefig(
+            path, dpi=dpi, metadata={"Software": None}, bbox_inches="tight", pad_inches=0.05
+        )
     finally:
         plt.close(fig)
 
