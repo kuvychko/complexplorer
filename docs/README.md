@@ -35,7 +35,7 @@ domain = cp.Rectangle(4, 4)
 func = lambda z: (z - 1) / (z**2 + z + 1)
 
 # Create enhanced phase portrait
-cmap = cp.Phase(n_phi=6, auto_scale_r=True)
+cmap = cp.Phase(phase_sectors=6, auto_scale_r=True)
 
 # Visualize!
 cp.plot(domain, func, cmap=cmap)

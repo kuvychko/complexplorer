@@ -61,17 +61,38 @@ COLORMAP_REFERENCE = "rational_zeros_poles"  # zeros at +-1, poles at +-i — go
 
 # The colormap family — only the colormaps that actually exist in the public API.
 def _colormap_family() -> list[tuple[str, cp.Colormap, str]]:
-    """(name, colormap, snippet-constructor) tuples for the colormap gallery."""
+    """(name, colormap, snippet-constructor) tuples for the colormap gallery.
+
+    Covers every concrete colormap the package exports, so the gallery cannot drift from the
+    public API (see the `examples` capability).
+    """
     import numpy as np
 
     return [
         ("phase_basic", cp.Phase(), "cp.Phase()"),
-        ("phase_enhanced", cp.Phase(n_phi=6), "cp.Phase(n_phi=6)"),
+        ("phase_enhanced", cp.Phase(phase_sectors=6), "cp.Phase(phase_sectors=6)"),
         ("phase_modulus", cp.Phase(r_linear_step=0.6), "cp.Phase(r_linear_step=0.6)"),
-        ("phase_full", cp.Phase(n_phi=6, auto_scale_r=True), "cp.Phase(n_phi=6, auto_scale_r=True)"),
+        ("phase_full", cp.Phase(phase_sectors=6, auto_scale_r=True),
+         "cp.Phase(phase_sectors=6, auto_scale_r=True)"),
+        ("oklab_phase", cp.OklabPhase(phase_sectors=6), "cp.OklabPhase(phase_sectors=6)"),
+        ("perceptual_pastel", cp.PerceptualPastel(phase_sectors=6),
+         "cp.PerceptualPastel(phase_sectors=6)"),
+        ("analogous_wedge", cp.AnalogousWedge(phase_sectors=6),
+         "cp.AnalogousWedge(phase_sectors=6)"),
+        ("diverging_warm_cool", cp.DivergingWarmCool(phase_sectors=6),
+         "cp.DivergingWarmCool(phase_sectors=6)"),
+        ("isoluminant", cp.Isoluminant(phase_sectors=6), "cp.Isoluminant(phase_sectors=6)"),
+        ("cubehelix_phase", cp.CubehelixPhase(phase_sectors=6),
+         "cp.CubehelixPhase(phase_sectors=6)"),
+        ("ink_paper", cp.InkPaper(phase_sectors=6), "cp.InkPaper(phase_sectors=6)"),
+        ("earth_topographic", cp.EarthTopographic(phase_sectors=6),
+         "cp.EarthTopographic(phase_sectors=6)"),
+        ("four_quadrant", cp.FourQuadrant(phase_sectors=6), "cp.FourQuadrant(phase_sectors=6)"),
         ("chessboard", cp.Chessboard(spacing=0.25), "cp.Chessboard(spacing=0.25)"),
-        ("polar_linear", cp.PolarChessboard(n_phi=6, spacing=0.25), "cp.PolarChessboard(n_phi=6, spacing=0.25)"),
-        ("polar_log", cp.PolarChessboard(n_phi=6, r_log=np.e), "cp.PolarChessboard(n_phi=6, r_log=np.e)"),
+        ("polar_linear", cp.PolarChessboard(phase_sectors=6, spacing=0.25),
+         "cp.PolarChessboard(phase_sectors=6, spacing=0.25)"),
+        ("polar_log", cp.PolarChessboard(phase_sectors=6, r_log=np.e),
+         "cp.PolarChessboard(phase_sectors=6, r_log=np.e)"),
         ("logrings", cp.LogRings(log_spacing=0.2), "cp.LogRings(log_spacing=0.2)"),
     ]
 
@@ -248,15 +269,29 @@ def _generate_docs_page(manifest: dict) -> None:
 # Main
 # ---------------------------------------------------------------------------------------
 
-def main() -> None:
+def _existing_manifest() -> dict:
+    path = GALLERY_DIR / "showcase.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+
+
+def main(only: str = "all") -> None:
     GALLERY_DIR.mkdir(parents=True, exist_ok=True)
     COLORMAPS_DIR.mkdir(parents=True, exist_ok=True)
 
-    # 1. Deterministic 2D portraits + index.json (the library bundle; untouched contract).
-    print("Rendering 2D portraits + index.json (cp.gallery) ...")
-    generate_gallery(GALLERY_DIR, selection=None, dpi=PORTRAIT_DPI)
+    if only == "colormaps":
+        # Reuse the committed preset renders; only the colormap section is re-rendered.
+        preset_records = _existing_manifest().get("presets", [])
+    else:
+        # 1. Deterministic 2D portraits + index.json (the library bundle; untouched contract).
+        print("Rendering 2D portraits + index.json (cp.gallery) ...")
+        generate_gallery(GALLERY_DIR, selection=None, dpi=PORTRAIT_DPI)
 
-    # 2. Per-preset PyVista screenshots, by tag policy.
+        # 2. Per-preset PyVista screenshots, by tag policy.
+        preset_records = _render_presets()
+    _finish(preset_records)
+
+
+def _render_presets() -> list[dict]:
     preset_records = []
     for pid in catalog.list():
         preset = catalog.get(pid)
@@ -280,6 +315,10 @@ def main() -> None:
             }
         )
 
+    return preset_records
+
+
+def _finish(preset_records: list[dict]) -> None:
     # 3. Colormap gallery — one reference function under each implemented colormap.
     print("Rendering colormap gallery ...")
     ref = catalog.get(COLORMAP_REFERENCE)
@@ -306,4 +345,13 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--only",
+        choices=["all", "colormaps"],
+        default="all",
+        help="regenerate only one section (default: everything)",
+    )
+    main(**vars(parser.parse_args()))

@@ -22,7 +22,7 @@ from .core.presets import FunctionPreset, catalog
 from .exceptions import ValidationError
 from .plotting.matplotlib.plot_2d import plot as plot_2d
 
-SCHEMA_VERSION = 2  # v2: card records carry answer_key_stats (enrich-answer-key-stats)
+SCHEMA_VERSION = 3  # v3: cmap_spec uses 'phase_sectors' (reconcile-with-2-0-release)
 _FIGSIZE = (4.0, 4.0)
 
 

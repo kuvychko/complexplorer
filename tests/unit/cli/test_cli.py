@@ -30,7 +30,7 @@ class TestShorthandParsers:
             _parse_domain("triangle:1:2:3")
 
     def test_cmap_shorthand(self):
-        assert _parse_cmap("phase:6") == {"type": "Phase", "n_phi": 6}
+        assert _parse_cmap("phase:6") == {"type": "Phase", "phase_sectors": 6}
         assert _parse_cmap("phase") == {"type": "Phase"}
 
 

@@ -154,7 +154,7 @@ class FunctionPreset:
     expression: str
     func: Callable = field(repr=False)
     domain_spec: dict = field(default_factory=dict)
-    cmap_spec: dict = field(default_factory=lambda: {"type": "Phase", "n_phi": 6})
+    cmap_spec: dict = field(default_factory=lambda: {"type": "Phase", "phase_sectors": 6})
     scaling_spec: str | dict = "balanced"
     singularities: tuple[dict, ...] = ()
     story: str = ""
@@ -260,7 +260,7 @@ class _Catalog:
 _RECT4 = {"type": "rectangle", "re_length": 4, "im_length": 4}
 _RECT8 = {"type": "rectangle", "re_length": 8, "im_length": 4}
 _ANNULUS = {"type": "annulus", "inner_radius": 0.2, "outer_radius": 3}
-_PHASE = {"type": "Phase", "n_phi": 6, "auto_scale_r": True}
+_PHASE = {"type": "Phase", "phase_sectors": 6, "auto_scale_r": True}
 
 
 def _build_presets() -> dict[str, FunctionPreset]:

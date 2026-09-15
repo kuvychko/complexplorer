@@ -13,7 +13,7 @@ from complexplorer.mesh import build_landscape, build_relief
 from complexplorer.plotting.pyvista.plot_3d import create_complex_surface
 from complexplorer.utils.validation import ValidationError
 
-CMAP = cp.Phase(n_phi=6, v_base=0.6)
+CMAP = cp.Phase(phase_sectors=6, v_base=0.6)
 
 
 class TestBuildLandscape:

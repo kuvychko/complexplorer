@@ -106,7 +106,7 @@ def plot(
     """
     # Default colormap
     if cmap is None:
-        cmap = Phase(n_phi=6, auto_scale_r=True)
+        cmap = Phase(phase_sectors=6, auto_scale_r=True)
 
     z, f, mask = resolve_plane_inputs(domain, func, z, f, resolution)
 
@@ -190,7 +190,7 @@ def pair_plot(
     """
     # Default colormap
     if cmap is None:
-        cmap = Phase(n_phi=6, auto_scale_r=True)
+        cmap = Phase(phase_sectors=6, auto_scale_r=True)
 
     fig, (ax0, ax1) = plt.subplots(1, 2, figsize=figsize)
 
@@ -282,7 +282,7 @@ def riemann_chart(
 
     # Default colormap
     if cmap is None:
-        cmap = Phase(n_phi=6, auto_scale_r=True)
+        cmap = Phase(phase_sectors=6, auto_scale_r=True)
 
     # Create domain for unit disk with margin
     disk_radius = 1 + margin

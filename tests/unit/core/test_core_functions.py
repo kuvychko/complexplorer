@@ -1,6 +1,7 @@
 """Tests for mathematical functions."""
 
 import numpy as np
+import pytest
 
 from complexplorer.core.functions import (
     inverse_stereographic,
@@ -220,3 +221,62 @@ class TestInverseStereographic:
 
         expected = np.array([1 + 0j, 0 + 1j, -1 + 0j, 0 - 1j])
         np.testing.assert_allclose(w, expected)
+
+
+class TestSigmoid:
+    """`sigmoid`, ported from 2.0.0 for the perceptual colormaps."""
+
+    def test_midpoint_and_range(self):
+        from complexplorer.core.functions import sigmoid
+
+        assert sigmoid(0.0) == pytest.approx(0.5)
+        x = np.linspace(-50, 50, 201)
+        y = sigmoid(x)
+        assert np.all((y >= 0) & (y <= 1))
+        assert np.all(np.diff(y) >= 0)
+
+    def test_center_and_scale(self):
+        from complexplorer.core.functions import sigmoid
+
+        assert sigmoid(3.0, center=3.0) == pytest.approx(0.5)
+        steep = sigmoid(1.0, scale=0.1)
+        shallow = sigmoid(1.0, scale=10.0)
+        assert steep > shallow
+
+
+class TestCircularInterpolate:
+    """`circular_interpolate`, ported from 2.0.0 for the perceptual colormaps."""
+
+    def test_midpoint_is_shortest_path(self):
+        from complexplorer.core.functions import circular_interpolate
+
+        assert circular_interpolate(0.0, np.pi / 2, 0.5) == pytest.approx(np.pi / 4)
+
+    def test_interpolates_across_zero(self):
+        from complexplorer.core.functions import circular_interpolate
+
+        # 7pi/4 -> pi/4 crosses 0; the shortest path passes through 0, not pi. Floating point
+        # can land a hair below 0, which the wrap sends to just under 2*pi - the same angle, so
+        # compare modulo 2*pi (hue consumers only care about the angle).
+        out = circular_interpolate(7 * np.pi / 4, np.pi / 4, 0.5)
+        assert np.angle(np.exp(1j * out)) == pytest.approx(0.0, abs=1e-9)
+        assert 0 <= out < 2 * np.pi
+
+    def test_array_parameter_stays_in_range(self):
+        from complexplorer.core.functions import circular_interpolate
+
+        out = circular_interpolate(0.0, 3 * np.pi / 2, np.linspace(0, 1, 9))
+        assert np.all((out >= 0) & (out < 2 * np.pi))
+
+
+def test_sawtooth_log_at_zero_is_quiet():
+    """log(0) must not leak an invalid-value warning; the x == 0 case is handled explicitly."""
+    import warnings
+
+    from complexplorer.core.functions import sawtooth_log
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        out = sawtooth_log(np.array([0.0, 1.0, np.e]))
+    assert out[0] == 0.0
+    assert np.all(np.isfinite(out))

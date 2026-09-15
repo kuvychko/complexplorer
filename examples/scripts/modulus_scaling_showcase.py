@@ -26,7 +26,7 @@ def f(z):
 
 
 DOMAIN = cp.Rectangle(4, 4)
-CMAP = cp.Phase(n_phi=6, auto_scale_r=True)
+CMAP = cp.Phase(phase_sectors=6, auto_scale_r=True)
 
 # (mode, description) — the bounded/illustrative subset of ModulusScaling modes.
 MODES = [

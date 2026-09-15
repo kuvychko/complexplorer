@@ -36,7 +36,7 @@ class TestRiemannPV:
         assert result is None
 
     def test_custom_colormap(self):
-        cmap = Phase(n_phi=12, auto_scale_r=True)
+        cmap = Phase(phase_sectors=12, auto_scale_r=True)
         p = riemann_pv(
             lambda z: (z - 1) / (z + 1),
             cmap=cmap,

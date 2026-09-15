@@ -8,7 +8,7 @@
   },
   "cmap_spec": {
     "auto_scale_r": true,
-    "n_phi": 6,
+    "phase_sectors": 6,
     "type": "Phase"
   },
   "domain_spec": {
@@ -22,7 +22,7 @@
   },
   "id": "identity",
   "scaling_spec": "balanced",
-  "schema_version": 2,
+  "schema_version": 3,
   "singularities": [
     {
       "at": [

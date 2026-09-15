@@ -25,21 +25,21 @@ cp.riemann_surface_pv("power", n=3)   # z**(1/3)
 
 Three simple zeros at -1, 0, 1.
 
-![z³ - z](../../examples/gallery/cubic_real_roots/portrait.png)
 ![z³ - z](../../examples/gallery/cubic_real_roots/landscape.png)
+![z³ - z](../../examples/gallery/cubic_real_roots/portrait.png)
 ![z³ - z](../../examples/gallery/cubic_real_roots/sphere.png)
 
 ```python
 import complexplorer as cp
 preset = cp.catalog.get("cubic_real_roots")   # f(z) = z**3 - z
-cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
+sc = preset.scaling()
+cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
+                     modulus_mode=sc["method"], modulus_params=sc["params"])
 
 # ---
 import complexplorer as cp
 preset = cp.catalog.get("cubic_real_roots")   # f(z) = z**3 - z
-sc = preset.scaling()
-cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
-                     modulus_mode=sc["method"], modulus_params=sc["params"])
+cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 # ---
 import complexplorer as cp
@@ -75,21 +75,21 @@ cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 The identity map. A single simple zero at the origin; phase winds once.
 
-![Identity](../../examples/gallery/identity/portrait.png)
 ![Identity](../../examples/gallery/identity/landscape.png)
+![Identity](../../examples/gallery/identity/portrait.png)
 ![Identity](../../examples/gallery/identity/sphere.png)
 
 ```python
 import complexplorer as cp
 preset = cp.catalog.get("identity")   # f(z) = z
-cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
+sc = preset.scaling()
+cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
+                     modulus_mode=sc["method"], modulus_params=sc["params"])
 
 # ---
 import complexplorer as cp
 preset = cp.catalog.get("identity")   # f(z) = z
-sc = preset.scaling()
-cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
-                     modulus_mode=sc["method"], modulus_params=sc["params"])
+cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 # ---
 import complexplorer as cp
@@ -118,21 +118,21 @@ cp.riemann_surface_pv("log")   # log(z)
 
 One zero at +1, one pole at -1. Maps the right half-plane to the unit disk.
 
-![Cayley transform](../../examples/gallery/mobius_cayley/portrait.png)
 ![Cayley transform](../../examples/gallery/mobius_cayley/landscape.png)
+![Cayley transform](../../examples/gallery/mobius_cayley/portrait.png)
 ![Cayley transform](../../examples/gallery/mobius_cayley/sphere.png)
 
 ```python
 import complexplorer as cp
 preset = cp.catalog.get("mobius_cayley")   # f(z) = (z - 1) / (z + 1)
-cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
+sc = preset.scaling()
+cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
+                     modulus_mode=sc["method"], modulus_params=sc["params"])
 
 # ---
 import complexplorer as cp
 preset = cp.catalog.get("mobius_cayley")   # f(z) = (z - 1) / (z + 1)
-sc = preset.scaling()
-cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
-                     modulus_mode=sc["method"], modulus_params=sc["params"])
+cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 # ---
 import complexplorer as cp
@@ -156,15 +156,17 @@ cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 A ring of ten simple poles (the 10th roots of unity) around a central simple zero. The signature printable ornament.
 
-![Pole Flower 10](../../examples/gallery/pole_flower_10/portrait.png)
-![Pole Flower 10](../../examples/gallery/pole_flower_10/ornament.png)
 ![Pole Flower 10](../../examples/gallery/pole_flower_10/landscape.png)
+![Pole Flower 10](../../examples/gallery/pole_flower_10/ornament.png)
+![Pole Flower 10](../../examples/gallery/pole_flower_10/portrait.png)
 ![Pole Flower 10](../../examples/gallery/pole_flower_10/sphere.png)
 
 ```python
 import complexplorer as cp
 preset = cp.catalog.get("pole_flower_10")   # f(z) = z / (z**10 - 1)
-cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
+sc = preset.scaling()
+cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
+                     modulus_mode=sc["method"], modulus_params=sc["params"])
 
 # ---
 import complexplorer as cp
@@ -176,9 +178,7 @@ cp.riemann_pv(preset.func, cmap=preset.colormap(),
 # ---
 import complexplorer as cp
 preset = cp.catalog.get("pole_flower_10")   # f(z) = z / (z**10 - 1)
-sc = preset.scaling()
-cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
-                     modulus_mode=sc["method"], modulus_params=sc["params"])
+cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 # ---
 import complexplorer as cp
@@ -214,21 +214,21 @@ cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 Zeros at ±1, poles at ±i.
 
-![(z² - 1)/(z² + 1)](../../examples/gallery/rational_zeros_poles/portrait.png)
 ![(z² - 1)/(z² + 1)](../../examples/gallery/rational_zeros_poles/landscape.png)
+![(z² - 1)/(z² + 1)](../../examples/gallery/rational_zeros_poles/portrait.png)
 ![(z² - 1)/(z² + 1)](../../examples/gallery/rational_zeros_poles/sphere.png)
 
 ```python
 import complexplorer as cp
 preset = cp.catalog.get("rational_zeros_poles")   # f(z) = (z**2 - 1) / (z**2 + 1)
-cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
+sc = preset.scaling()
+cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
+                     modulus_mode=sc["method"], modulus_params=sc["params"])
 
 # ---
 import complexplorer as cp
 preset = cp.catalog.get("rational_zeros_poles")   # f(z) = (z**2 - 1) / (z**2 + 1)
-sc = preset.scaling()
-cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
-                     modulus_mode=sc["method"], modulus_params=sc["params"])
+cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 # ---
 import complexplorer as cp
@@ -240,21 +240,21 @@ cp.riemann_pv(preset.func, cmap=preset.colormap())   # full sphere
 
 A simple pole at the origin (Möbius inversion); phase winds backward.
 
-![1 / z](../../examples/gallery/reciprocal/portrait.png)
 ![1 / z](../../examples/gallery/reciprocal/landscape.png)
+![1 / z](../../examples/gallery/reciprocal/portrait.png)
 ![1 / z](../../examples/gallery/reciprocal/sphere.png)
 
 ```python
 import complexplorer as cp
 preset = cp.catalog.get("reciprocal")   # f(z) = 1 / z
-cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
+sc = preset.scaling()
+cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
+                     modulus_mode=sc["method"], modulus_params=sc["params"])
 
 # ---
 import complexplorer as cp
 preset = cp.catalog.get("reciprocal")   # f(z) = 1 / z
-sc = preset.scaling()
-cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
-                     modulus_mode=sc["method"], modulus_params=sc["params"])
+cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 # ---
 import complexplorer as cp
@@ -278,11 +278,18 @@ cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 Principal-branch square root; an order-2 branch point at 0 (two sheets).
 
+![Square root](../../examples/gallery/sqrt/ornament.png)
 ![Square root](../../examples/gallery/sqrt/portrait.png)
 ![Square root](../../examples/gallery/sqrt/surface.png)
-![Square root](../../examples/gallery/sqrt/ornament.png)
 
 ```python
+import complexplorer as cp
+preset = cp.catalog.get("sqrt")   # f(z) = sqrt(z)
+sc = preset.scaling()
+cp.riemann_pv(preset.func, cmap=preset.colormap(),
+              modulus_mode=sc["method"], modulus_params=sc["params"])  # relief
+
+# ---
 import complexplorer as cp
 preset = cp.catalog.get("sqrt")   # f(z) = sqrt(z)
 cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
@@ -290,34 +297,27 @@ cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 # ---
 import complexplorer as cp
 cp.riemann_surface_pv("power", n=2)   # sqrt(z)
-
-# ---
-import complexplorer as cp
-preset = cp.catalog.get("sqrt")   # f(z) = sqrt(z)
-sc = preset.scaling()
-cp.riemann_pv(preset.func, cmap=preset.colormap(),
-              modulus_mode=sc["method"], modulus_params=sc["params"])  # relief
 ```
 
 ### z squared
 
 A double zero at the origin; phase winds twice.
 
-![z squared](../../examples/gallery/square/portrait.png)
 ![z squared](../../examples/gallery/square/landscape.png)
+![z squared](../../examples/gallery/square/portrait.png)
 ![z squared](../../examples/gallery/square/sphere.png)
 
 ```python
 import complexplorer as cp
 preset = cp.catalog.get("square")   # f(z) = z**2
-cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
+sc = preset.scaling()
+cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
+                     modulus_mode=sc["method"], modulus_params=sc["params"])
 
 # ---
 import complexplorer as cp
 preset = cp.catalog.get("square")   # f(z) = z**2
-sc = preset.scaling()
-cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
-                     modulus_mode=sc["method"], modulus_params=sc["params"])
+cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 # ---
 import complexplorer as cp
@@ -358,7 +358,7 @@ cp.plot(preset.domain(), preset.func, cmap=cp.Phase())
 ```python
 import complexplorer as cp
 preset = cp.catalog.get("rational_zeros_poles")
-cp.plot(preset.domain(), preset.func, cmap=cp.Phase(n_phi=6))
+cp.plot(preset.domain(), preset.func, cmap=cp.Phase(phase_sectors=6))
 ```
 
 ### phase_modulus
@@ -378,7 +378,97 @@ cp.plot(preset.domain(), preset.func, cmap=cp.Phase(r_linear_step=0.6))
 ```python
 import complexplorer as cp
 preset = cp.catalog.get("rational_zeros_poles")
-cp.plot(preset.domain(), preset.func, cmap=cp.Phase(n_phi=6, auto_scale_r=True))
+cp.plot(preset.domain(), preset.func, cmap=cp.Phase(phase_sectors=6, auto_scale_r=True))
+```
+
+### oklab_phase
+
+![oklab_phase](../../examples/gallery/_colormaps/oklab_phase.png)
+
+```python
+import complexplorer as cp
+preset = cp.catalog.get("rational_zeros_poles")
+cp.plot(preset.domain(), preset.func, cmap=cp.OklabPhase(phase_sectors=6))
+```
+
+### perceptual_pastel
+
+![perceptual_pastel](../../examples/gallery/_colormaps/perceptual_pastel.png)
+
+```python
+import complexplorer as cp
+preset = cp.catalog.get("rational_zeros_poles")
+cp.plot(preset.domain(), preset.func, cmap=cp.PerceptualPastel(phase_sectors=6))
+```
+
+### analogous_wedge
+
+![analogous_wedge](../../examples/gallery/_colormaps/analogous_wedge.png)
+
+```python
+import complexplorer as cp
+preset = cp.catalog.get("rational_zeros_poles")
+cp.plot(preset.domain(), preset.func, cmap=cp.AnalogousWedge(phase_sectors=6))
+```
+
+### diverging_warm_cool
+
+![diverging_warm_cool](../../examples/gallery/_colormaps/diverging_warm_cool.png)
+
+```python
+import complexplorer as cp
+preset = cp.catalog.get("rational_zeros_poles")
+cp.plot(preset.domain(), preset.func, cmap=cp.DivergingWarmCool(phase_sectors=6))
+```
+
+### isoluminant
+
+![isoluminant](../../examples/gallery/_colormaps/isoluminant.png)
+
+```python
+import complexplorer as cp
+preset = cp.catalog.get("rational_zeros_poles")
+cp.plot(preset.domain(), preset.func, cmap=cp.Isoluminant(phase_sectors=6))
+```
+
+### cubehelix_phase
+
+![cubehelix_phase](../../examples/gallery/_colormaps/cubehelix_phase.png)
+
+```python
+import complexplorer as cp
+preset = cp.catalog.get("rational_zeros_poles")
+cp.plot(preset.domain(), preset.func, cmap=cp.CubehelixPhase(phase_sectors=6))
+```
+
+### ink_paper
+
+![ink_paper](../../examples/gallery/_colormaps/ink_paper.png)
+
+```python
+import complexplorer as cp
+preset = cp.catalog.get("rational_zeros_poles")
+cp.plot(preset.domain(), preset.func, cmap=cp.InkPaper(phase_sectors=6))
+```
+
+### earth_topographic
+
+![earth_topographic](../../examples/gallery/_colormaps/earth_topographic.png)
+
+```python
+import complexplorer as cp
+preset = cp.catalog.get("rational_zeros_poles")
+cp.plot(preset.domain(), preset.func, cmap=cp.EarthTopographic(phase_sectors=6))
+```
+
+### four_quadrant
+
+![four_quadrant](../../examples/gallery/_colormaps/four_quadrant.png)
+
+```python
+import complexplorer as cp
+preset = cp.catalog.get("rational_zeros_poles")
+cp.plot(preset.domain(), preset.func, cmap=cp.FourQuadrant(phase_sectors=6))
 ```
 
 ### chessboard
@@ -398,7 +488,7 @@ cp.plot(preset.domain(), preset.func, cmap=cp.Chessboard(spacing=0.25))
 ```python
 import complexplorer as cp
 preset = cp.catalog.get("rational_zeros_poles")
-cp.plot(preset.domain(), preset.func, cmap=cp.PolarChessboard(n_phi=6, spacing=0.25))
+cp.plot(preset.domain(), preset.func, cmap=cp.PolarChessboard(phase_sectors=6, spacing=0.25))
 ```
 
 ### polar_log
@@ -408,7 +498,7 @@ cp.plot(preset.domain(), preset.func, cmap=cp.PolarChessboard(n_phi=6, spacing=0
 ```python
 import complexplorer as cp
 preset = cp.catalog.get("rational_zeros_poles")
-cp.plot(preset.domain(), preset.func, cmap=cp.PolarChessboard(n_phi=6, r_log=np.e))
+cp.plot(preset.domain(), preset.func, cmap=cp.PolarChessboard(phase_sectors=6, r_log=np.e))
 ```
 
 ### logrings

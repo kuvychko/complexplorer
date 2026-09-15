@@ -115,3 +115,6 @@ ignore = [
 # Tests: E402 is the required `pytest.importorskip(...)`-before-imports idiom; F841
 # unused locals are common, intentional test scaffolding.
 "tests/**" = ["E402", "F841"]
+# Colour-space math ported from 2.0.0: `l`, `m`, `s` are the standard LMS cone-response names
+# in the OKLab conversion, so the "ambiguous name" rule is wrong here.
+"complexplorer/core/color_utils.py" = ["E741"]

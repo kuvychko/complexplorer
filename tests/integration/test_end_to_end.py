@@ -29,7 +29,7 @@ class TestBasicWorkflows:
         domain = Rectangle(2, 2)
 
         # Create colormap
-        cmap = Phase(n_phi=6, auto_scale_r=True)
+        cmap = Phase(phase_sectors=6, auto_scale_r=True)
 
         # Create 2D plot
         ax = plot(domain, func, cmap=cmap, resolution=50)
@@ -49,7 +49,7 @@ class TestBasicWorkflows:
         domain = Annulus(0.5, 2.0)
 
         # Use enhanced phase portrait
-        cmap = Phase(n_phi=12, r_linear_step=0.5, v_base=0.4)
+        cmap = Phase(phase_sectors=12, r_linear_step=0.5, v_base=0.4)
 
         # Create plot
         ax = plot(domain, func, cmap=cmap, resolution=60)
@@ -90,9 +90,9 @@ class TestColormapVariations:
         # Test each colormap type
         colormaps = [
             Phase(),
-            Phase(n_phi=6, auto_scale_r=True),
+            Phase(phase_sectors=6, auto_scale_r=True),
             Chessboard(spacing=0.5),
-            PolarChessboard(spacing=0.5, n_phi=12),
+            PolarChessboard(spacing=0.5, phase_sectors=12),
             LogRings(log_spacing=0.3),
         ]
 
@@ -111,10 +111,10 @@ class TestColormapVariations:
 
         # Different enhanced phase configurations
         configs = [
-            {"n_phi": 4, "r_linear_step": 1.0, "v_base": 0.5},
-            {"n_phi": 8, "r_linear_step": 0.5, "v_base": 0.3},
-            {"n_phi": 12, "auto_scale_r": True, "v_base": 0.4},
-            {"n_phi": 6, "r_log_base": 2.0, "v_base": 0.5},
+            {"phase_sectors": 4, "r_linear_step": 1.0, "v_base": 0.5},
+            {"phase_sectors": 8, "r_linear_step": 0.5, "v_base": 0.3},
+            {"phase_sectors": 12, "auto_scale_r": True, "v_base": 0.4},
+            {"phase_sectors": 6, "r_log_base": 2.0, "v_base": 0.5},
         ]
 
         for config in configs:
@@ -241,7 +241,7 @@ class TestSTLExportWorkflow:
 
         try:
             # Use custom colormap and scaling
-            cmap = Phase(n_phi=12, auto_scale_r=True)
+            cmap = Phase(phase_sectors=12, auto_scale_r=True)
 
             saved = create_ornament(
                 func,
@@ -294,7 +294,7 @@ class TestComplexFunctions:
         ]
 
         domain = Rectangle(2, 2)
-        cmap = Phase(n_phi=6, auto_scale_r=True)
+        cmap = Phase(phase_sectors=6, auto_scale_r=True)
 
         for func in polynomials:
             ax = plot(domain, func, cmap=cmap, resolution=30)
@@ -315,7 +315,7 @@ class TestComplexFunctions:
 
         # Use annulus to avoid poles at origin
         domain = Annulus(0.5, 2.0)
-        cmap = Phase(n_phi=8, r_linear_step=0.5, v_base=0.4)
+        cmap = Phase(phase_sectors=8, r_linear_step=0.5, v_base=0.4)
 
         for func in rationals:
             ax = plot(domain, func, cmap=cmap, resolution=40)

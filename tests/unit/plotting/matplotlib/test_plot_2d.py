@@ -175,7 +175,7 @@ class TestPhaseLegend:
         from complexplorer.core.colormap import LogRings, PolarChessboard
 
         domain = Rectangle(2, 2)
-        for cmap in (Phase(n_phi=6), Chessboard(), PolarChessboard(), LogRings()):
+        for cmap in (Phase(phase_sectors=6), Chessboard(), PolarChessboard(), LogRings()):
             ax = plot(domain, lambda z: z**2, resolution=20, cmap=cmap, legend=True)
             assert len(ax.child_axes) == 1
             plt.close("all")

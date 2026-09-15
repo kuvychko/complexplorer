@@ -62,7 +62,7 @@ def riemann_surface_pv(
     resolution : int, default=60
         Radial sample count.
     cmap : Colormap, optional
-        Colormap for the phase of the value. Defaults to ``Phase(n_phi=6, v_base=0.6)``.
+        Colormap for the phase of the value. Defaults to ``Phase(phase_sectors=6, v_base=0.6)``.
     interactive : bool, default=True
         Show an interactive window. If False, render off-screen.
     notebook, camera_position, window_size, title, filename, show_orientation, return_plotter
@@ -79,7 +79,7 @@ def riemann_surface_pv(
     ensure_pyvista_setup()
 
     if cmap is None:
-        cmap = Phase(n_phi=6, v_base=0.6)
+        cmap = Phase(phase_sectors=6, v_base=0.6)
 
     sm = build_riemann_surface(
         family, n=n, turns=turns, p=p, r_max=r_max, resolution=resolution, cmap=cmap

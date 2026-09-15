@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
 
 def _default_cmap() -> Colormap:
-    return Phase(n_phi=6, v_base=0.6)
+    return Phase(phase_sectors=6, v_base=0.6)
 
 
 def build_landscape(

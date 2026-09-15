@@ -80,3 +80,33 @@ def test_only_curated_hero_is_a_top_level_image():
     """Top-level gallery dir holds only manifests + the curated hero; renders live in <id>/."""
     top_level_pngs = [p.name for p in GALLERY.glob("*.png")]
     assert top_level_pngs == [HERO], top_level_pngs
+
+
+def test_colormap_gallery_covers_every_exported_colormap():
+    """The gallery must not drift from the public colormap surface (examples capability)."""
+    import inspect
+    import re
+
+    import complexplorer as cp
+    from complexplorer.core.colormap import BasePhasePortrait, Colormap
+
+    exported = {
+        name
+        for name in cp.__all__
+        if inspect.isclass(getattr(cp, name))
+        and issubclass(getattr(cp, name), Colormap)
+        and getattr(cp, name) not in (Colormap, BasePhasePortrait)
+        and not inspect.isabstract(getattr(cp, name))
+    }
+    rendered = set()
+    for entry in _manifest()["colormaps"]["renders"]:
+        match = re.match(r"cp\.(\w+)\(", entry["ctor"])
+        assert match, f"unrecognised constructor snippet: {entry['ctor']}"
+        rendered.add(match.group(1))
+
+    assert not exported - rendered, (
+        f"public colormaps missing from the gallery: {sorted(exported - rendered)}"
+    )
+    assert not rendered - exported, (
+        f"gallery renders a colormap that is not exported: {sorted(rendered - exported)}"
+    )

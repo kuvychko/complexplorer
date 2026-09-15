@@ -51,7 +51,7 @@ PyPI carries **2.0.0** (uploaded 2025-10-19), built from tag `v2.0.0` on `main`.
 forked from `main` at `c892bdb` (2025-08-22, just after 1.0.1), so it has never contained 2.0.
 Measured against what users actually have installed, rev3 removes:
 
-- 10 colormaps (`OklabPhase`, `PerceptualPastel`, `AnalogousWedge`, `DivergingWarmCool`,
+- 9 colormaps (`OklabPhase`, `PerceptualPastel`, `AnalogousWedge`, `DivergingWarmCool`,
   `Isoluminant`, `CubehelixPhase`, `InkPaper`, `EarthTopographic`, `FourQuadrant`, plus OkLCh
   gamut clipping)
 - the published `n_phi → phase_sectors` rename
@@ -70,6 +70,34 @@ The CHANGELOG claim that 2.0 was "never published" is false.
 - Histories are joined at release with `git merge -s ours origin/main`.
 - Visual review runs through a private review page.
 - Printed-ornament photos are supplied by the owner.
+
+## Visual review outcomes
+
+### R0 — style calibration (decided 2026-09-15)
+
+Review board: https://claude.ai/artifact/L8avJ54troJqabjh8iERHw
+
+**Profile B ("Gallery grey") is the house style for every render family**, and it is the locked
+`RENDER_PROFILES` baseline for `curate-rev3-visual-tour`:
+
+- ground: vertical gradient `#fbfcfd` (top) to `#e6e9ee` (bottom)
+- lighting: three-point, specular `0.3`
+- finish: SSAA, no orientation widget, camera zoom `1.22` (landscape `0.94`, so the domain
+  corners stay inside the frame)
+- window: 1560 x 1560 px
+- 2D portraits: axes and ticks kept, phase-wheel legend inset, tight bounding box
+
+**Open follow-up (owner note on the sphere):** "We need to increase the sphere's resolution - the
+figure is blocky. Main benefit of PyVista is excellent visual quality, we don't want to lose it in
+the gallery - where it matters most." Round R0b renders a resolution ladder per family to set the
+production mesh resolution before the tour is produced.
+
+**Defects found during R0, owned by `curate-rev3-visual-tour`:**
+
+- The committed gallery portraits clip the `Im(z)` axis label at the left edge and carry a wide top
+  margin; `cp.gallery`'s save call needs a tight bounding box.
+- Per-vertex colouring on the rectangular sphere mesh stair-steps where a brightness band crosses
+  mesh rows (the R0b subject).
 
 ## Proposal map
 

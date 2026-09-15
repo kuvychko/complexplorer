@@ -50,3 +50,23 @@ class TestLibraryErrorsDeriveFromBase:
         gen = cp.OrnamentGenerator(lambda z: z, resolution=20)
         with pytest.raises(ComplexplorerError):
             gen.save_stl("never_written.stl")
+
+
+class TestColormapError:
+    """`ColormapError` restores the 2.0.0 name for invalid colormap configuration."""
+
+    def test_is_a_validation_error(self):
+        assert issubclass(cp.ColormapError, cp.ValidationError)
+        assert issubclass(cp.ColormapError, cp.ComplexplorerError)
+        assert issubclass(cp.ColormapError, ValueError)
+
+    def test_caught_by_every_documented_handler(self):
+        for handler in (cp.ColormapError, cp.ValidationError, cp.ComplexplorerError, ValueError):
+            with pytest.raises(handler):
+                raise cp.ColormapError("bad spacing")
+
+    def test_is_a_top_level_export(self):
+        from complexplorer.exceptions import ColormapError
+
+        assert cp.ColormapError is ColormapError
+        assert "ColormapError" in cp.__all__

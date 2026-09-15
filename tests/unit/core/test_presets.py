@@ -35,7 +35,7 @@ class TestSpecFactories:
         assert d.center == complex(1, 2)
 
     def test_cmap_from_spec(self):
-        assert isinstance(cmap_from_spec({"type": "Phase", "n_phi": 6}), Phase)
+        assert isinstance(cmap_from_spec({"type": "Phase", "phase_sectors": 6}), Phase)
         assert isinstance(cmap_from_spec({"type": "Chessboard", "spacing": 0.5}), Chessboard)
 
     def test_unknown_types_raise(self):

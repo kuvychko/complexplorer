@@ -113,7 +113,7 @@ def _create_chessboard_texture(self, f_values: np.ndarray) -> np.ndarray:
         
     else:  # polar
         # Polar chessboard
-        n_phi = params.get('n_phi', 12)
+        n_phi = params.get('phase_sectors', 12)
         n_r = params.get('n_r', 8)
         
         phase = np.angle(f_values)
@@ -270,7 +270,7 @@ gen = OrnamentGenerator(
     texture_mode='chessboard',
     texture_params={
         'pattern': 'polar',
-        'n_phi': 12,
+        'phase_sectors': 12,
         'n_r': 6,
         'height_diff': 0.6  # 0.6mm difference
     }

@@ -8,7 +8,12 @@ import pytest
 
 from complexplorer.core.colormap import Chessboard, LogRings, Phase, PolarChessboard
 
-CMAPS = [Phase(n_phi=6, v_base=0.6), Chessboard(spacing=0.5), PolarChessboard(n_phi=6), LogRings()]
+CMAPS = [
+    Phase(phase_sectors=6, v_base=0.6),
+    Chessboard(spacing=0.5),
+    PolarChessboard(phase_sectors=6),
+    LogRings(),
+]
 _GRID = np.add.outer(np.linspace(-2, 2, 25), 1j * np.linspace(-2, 2, 25))
 
 
@@ -55,11 +60,11 @@ def test_pole_function_rgb_is_finite():
     z = np.add.outer(np.linspace(-1.5, 1.5, 25), 1j * np.linspace(-1.5, 1.5, 25))
     with np.errstate(all="ignore"):
         f = 1 / z  # non-finite at the origin grid node
-    rgb = Phase(n_phi=6).rgb(f)
+    rgb = Phase(phase_sectors=6).rgb(f)
     assert np.all(np.isfinite(rgb)) and rgb.min() >= 0 and rgb.max() <= 1
 
 
 def test_scalar_nonfinite():
     warnings.simplefilter("ignore")
-    hsv = Phase(n_phi=6).hsv(np.asarray(np.nan + 0j))
-    np.testing.assert_allclose(hsv, np.array(Phase(n_phi=6).out_of_domain_hsv))
+    hsv = Phase(phase_sectors=6).hsv(np.asarray(np.nan + 0j))
+    np.testing.assert_allclose(hsv, np.array(Phase(phase_sectors=6).out_of_domain_hsv))

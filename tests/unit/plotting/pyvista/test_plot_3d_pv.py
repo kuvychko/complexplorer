@@ -94,7 +94,7 @@ class TestPlotLandscapePV:
         p = plot_landscape_pv(
             Disk(2),
             lambda z: (z - 1) / (z + 1),
-            cmap=Phase(n_phi=6, auto_scale_r=True),
+            cmap=Phase(phase_sectors=6, auto_scale_r=True),
             resolution=40,
             interactive=False,
             return_plotter=True,

@@ -70,7 +70,7 @@ Create traditional domain coloring visualizations too:
 ```python
 # Classic phase portrait
 domain = cp.Rectangle(4, 4)
-cp.plot(domain, f, cmap=cp.Phase(n_phi=12, auto_scale_r=True))
+cp.plot(domain, f, cmap=cp.Phase(phase_sectors=12, auto_scale_r=True))
 ```
 
 ## ⚡ One-Liners, a Function Catalog, a CLI, and Engineering Mode
@@ -153,7 +153,7 @@ Explore the full range of visualizations in our [**Gallery**](https://github.com
 ```python
 # Create an enhanced phase portrait with auto-scaling for square cells
 domain = cp.Annulus(0.5, 2, center=1j)  # Annular domain
-cmap = cp.Phase(n_phi=6, auto_scale_r=True, v_base=0.4)  # Auto-scaled enhanced phase
+cmap = cp.Phase(phase_sectors=6, auto_scale_r=True, v_base=0.4)  # Auto-scaled enhanced phase
 
 # 2D visualization with domain and codomain side-by-side
 cp.pair_plot(domain, f, cmap=cmap, figsize=(10, 5))
@@ -247,7 +247,7 @@ ornament = OrnamentGenerator(
     func=lambda z: (z - 1) / (z**2 + z + 1),
     resolution=150,
     scaling='arctan',  # Creates beautiful topographic relief
-    cmap=cp.Phase(n_phi=12, auto_scale_r=True)
+    cmap=cp.Phase(phase_sectors=12, auto_scale_r=True)
 )
 
 # Generate print-ready STL file

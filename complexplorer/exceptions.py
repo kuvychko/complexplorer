@@ -23,3 +23,12 @@ class ValidationError(ComplexplorerError, ValueError):
 
 
 __all__ = ["ComplexplorerError", "ValidationError"]
+
+
+class ColormapError(ValidationError):
+    """Raised for invalid colormap configuration.
+
+    A ``ValidationError`` (and therefore a ``ComplexplorerError`` and a ``ValueError``), so
+    handlers written against either contract keep working. Restored in 3.0 for parity with
+    2.0.0, which raised it for invalid colormap parameters.
+    """

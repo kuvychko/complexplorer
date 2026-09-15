@@ -11,7 +11,22 @@ from complexplorer._version import __version__
 
 # High-level API
 from complexplorer.api import Presets, quick_plot
-from complexplorer.core.colormap import Chessboard, Colormap, LogRings, Phase, PolarChessboard
+from complexplorer.core.colormap import (
+    AnalogousWedge,
+    Chessboard,
+    Colormap,
+    CubehelixPhase,
+    DivergingWarmCool,
+    EarthTopographic,
+    FourQuadrant,
+    InkPaper,
+    Isoluminant,
+    LogRings,
+    OklabPhase,
+    PerceptualPastel,
+    Phase,
+    PolarChessboard,
+)
 
 # Core functionality
 from complexplorer.core.domain import Annulus, CompositeDomain, Disk, Domain, Rectangle
@@ -23,7 +38,7 @@ from complexplorer.core.functions import (
 )
 from complexplorer.core.presets import FunctionPreset, catalog
 from complexplorer.core.scaling import ModulusScaling, get_scaling_preset
-from complexplorer.exceptions import ComplexplorerError, ValidationError
+from complexplorer.exceptions import ColormapError, ComplexplorerError, ValidationError
 
 # PyVista is a required core dependency as of 3.0 (the sole 3D backend; also powers STL
 # export), so these imports are unconditional.
@@ -50,6 +65,7 @@ __all__ = [
     # Exceptions
     "ComplexplorerError",
     "ValidationError",
+    "ColormapError",
     # Core classes
     "Domain",
     "Rectangle",
@@ -61,6 +77,15 @@ __all__ = [
     "Chessboard",
     "PolarChessboard",
     "LogRings",
+    "OklabPhase",
+    "PerceptualPastel",
+    "AnalogousWedge",
+    "DivergingWarmCool",
+    "Isoluminant",
+    "CubehelixPhase",
+    "InkPaper",
+    "EarthTopographic",
+    "FourQuadrant",
     "ModulusScaling",
     "get_scaling_preset",
     # Function preset registry (distinct from api.Presets / plot configs)

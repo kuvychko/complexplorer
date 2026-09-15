@@ -94,22 +94,22 @@ COLOR_SCHEMES = {
     },
     "2": {
         "name": "Phase with 6 sectors",
-        "cmap": cp.Phase(n_phi=6),
+        "cmap": cp.Phase(phase_sectors=6),
         "best_for": "simple structure"
     },
     "3": {
         "name": "Phase with 12 sectors",
-        "cmap": cp.Phase(n_phi=12),
+        "cmap": cp.Phase(phase_sectors=12),
         "best_for": "detailed phase"
     },
     "4": {
         "name": "Enhanced phase (auto-scaled)",
-        "cmap": cp.Phase(n_phi=12, auto_scale_r=True, v_base=0.4),
+        "cmap": cp.Phase(phase_sectors=12, auto_scale_r=True, v_base=0.4),
         "best_for": "phase and modulus"
     },
     "5": {
         "name": "Fine enhanced phase",
-        "cmap": cp.Phase(n_phi=24, auto_scale_r=True, scale_radius=0.5),
+        "cmap": cp.Phase(phase_sectors=24, auto_scale_r=True, scale_radius=0.5),
         "best_for": "high detail"
     },
     "6": {
@@ -119,7 +119,7 @@ COLOR_SCHEMES = {
     },
     "7": {
         "name": "Polar chessboard",
-        "cmap": cp.PolarChessboard(n_phi=16, spacing=0.3),
+        "cmap": cp.PolarChessboard(phase_sectors=16, spacing=0.3),
         "best_for": "radial structure"
     },
     "8": {

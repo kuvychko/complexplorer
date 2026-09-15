@@ -125,7 +125,7 @@ def build_riemann_surface(
     resolution : int, default=60
         Radial sample count (angular samples are derived to keep cells well-shaped).
     cmap : Colormap, optional
-        Colormap for the phase of the value. Defaults to ``Phase(n_phi=6, v_base=0.6)``.
+        Colormap for the phase of the value. Defaults to ``Phase(phase_sectors=6, v_base=0.6)``.
 
     Returns
     -------
@@ -136,7 +136,7 @@ def build_riemann_surface(
     if family not in RIEMANN_FAMILIES:
         raise ValidationError(f"Unknown family {family!r}; supported: {RIEMANN_FAMILIES}")
     if cmap is None:
-        cmap = Phase(n_phi=6, v_base=0.6)
+        cmap = Phase(phase_sectors=6, v_base=0.6)
 
     if family == "algebraic":
         return _build_algebraic_surface(p, r_max, resolution, cmap)

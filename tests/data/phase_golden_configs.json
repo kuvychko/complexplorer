@@ -1,0 +1,37 @@
+[
+  {},
+  {
+    "phase_sectors": 6
+  },
+  {
+    "r_linear_step": 0.5
+  },
+  {
+    "r_log_base": 2.0
+  },
+  {
+    "phase_sectors": 6,
+    "r_linear_step": 0.5
+  },
+  {
+    "phase_sectors": 6,
+    "r_linear_step": 0.4,
+    "r_log_base": 3.0
+  },
+  {
+    "phase_sectors": 6,
+    "auto_scale_r": true
+  },
+  {
+    "phase_sectors": 8,
+    "auto_scale_r": true,
+    "scale_radius": 0.8
+  },
+  {
+    "phase_sectors": 12,
+    "v_base": 0.3
+  },
+  {
+    "v_base": 0.0
+  }
+]

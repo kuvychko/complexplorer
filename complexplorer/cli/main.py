@@ -51,7 +51,7 @@ def _parse_cmap(text: str) -> dict:
     type_name = aliases.get(name.lower(), name)
     spec: dict = {"type": type_name}
     if type_name == "Phase" and rest:
-        spec["n_phi"] = int(rest[0])
+        spec["phase_sectors"] = int(rest[0])
     return spec
 
 

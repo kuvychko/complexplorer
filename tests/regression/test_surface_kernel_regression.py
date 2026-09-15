@@ -55,7 +55,7 @@ def _check_or_save(name: str, sig: dict) -> None:
 
 
 def _cmap():
-    return cp.Phase(n_phi=6, v_base=0.6)
+    return cp.Phase(phase_sectors=6, v_base=0.6)
 
 
 # --- 1.1 landscape (create_complex_surface backs plot_landscape_pv + pair_plot) ---

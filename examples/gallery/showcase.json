@@ -9,7 +9,7 @@
         "name": "phase_basic"
       },
       {
-        "ctor": "cp.Phase(n_phi=6)",
+        "ctor": "cp.Phase(phase_sectors=6)",
         "file": "_colormaps/phase_enhanced.png",
         "name": "phase_enhanced"
       },
@@ -19,9 +19,54 @@
         "name": "phase_modulus"
       },
       {
-        "ctor": "cp.Phase(n_phi=6, auto_scale_r=True)",
+        "ctor": "cp.Phase(phase_sectors=6, auto_scale_r=True)",
         "file": "_colormaps/phase_full.png",
         "name": "phase_full"
+      },
+      {
+        "ctor": "cp.OklabPhase(phase_sectors=6)",
+        "file": "_colormaps/oklab_phase.png",
+        "name": "oklab_phase"
+      },
+      {
+        "ctor": "cp.PerceptualPastel(phase_sectors=6)",
+        "file": "_colormaps/perceptual_pastel.png",
+        "name": "perceptual_pastel"
+      },
+      {
+        "ctor": "cp.AnalogousWedge(phase_sectors=6)",
+        "file": "_colormaps/analogous_wedge.png",
+        "name": "analogous_wedge"
+      },
+      {
+        "ctor": "cp.DivergingWarmCool(phase_sectors=6)",
+        "file": "_colormaps/diverging_warm_cool.png",
+        "name": "diverging_warm_cool"
+      },
+      {
+        "ctor": "cp.Isoluminant(phase_sectors=6)",
+        "file": "_colormaps/isoluminant.png",
+        "name": "isoluminant"
+      },
+      {
+        "ctor": "cp.CubehelixPhase(phase_sectors=6)",
+        "file": "_colormaps/cubehelix_phase.png",
+        "name": "cubehelix_phase"
+      },
+      {
+        "ctor": "cp.InkPaper(phase_sectors=6)",
+        "file": "_colormaps/ink_paper.png",
+        "name": "ink_paper"
+      },
+      {
+        "ctor": "cp.EarthTopographic(phase_sectors=6)",
+        "file": "_colormaps/earth_topographic.png",
+        "name": "earth_topographic"
+      },
+      {
+        "ctor": "cp.FourQuadrant(phase_sectors=6)",
+        "file": "_colormaps/four_quadrant.png",
+        "name": "four_quadrant"
       },
       {
         "ctor": "cp.Chessboard(spacing=0.25)",
@@ -29,12 +74,12 @@
         "name": "chessboard"
       },
       {
-        "ctor": "cp.PolarChessboard(n_phi=6, spacing=0.25)",
+        "ctor": "cp.PolarChessboard(phase_sectors=6, spacing=0.25)",
         "file": "_colormaps/polar_linear.png",
         "name": "polar_linear"
       },
       {
-        "ctor": "cp.PolarChessboard(n_phi=6, r_log=np.e)",
+        "ctor": "cp.PolarChessboard(phase_sectors=6, r_log=np.e)",
         "file": "_colormaps/polar_log.png",
         "name": "polar_log"
       },

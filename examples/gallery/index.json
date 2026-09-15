@@ -12,7 +12,7 @@
       },
       "cmap_spec": {
         "auto_scale_r": true,
-        "n_phi": 6,
+        "phase_sectors": 6,
         "type": "Phase"
       },
       "domain_spec": {
@@ -26,7 +26,7 @@
       },
       "id": "cbrt",
       "scaling_spec": "balanced",
-      "schema_version": 2,
+      "schema_version": 3,
       "singularities": [
         {
           "at": [
@@ -54,7 +54,7 @@
       },
       "cmap_spec": {
         "auto_scale_r": true,
-        "n_phi": 6,
+        "phase_sectors": 6,
         "type": "Phase"
       },
       "domain_spec": {
@@ -68,7 +68,7 @@
       },
       "id": "cubic_real_roots",
       "scaling_spec": "balanced",
-      "schema_version": 2,
+      "schema_version": 3,
       "singularities": [
         {
           "at": [
@@ -112,7 +112,7 @@
       },
       "cmap_spec": {
         "auto_scale_r": true,
-        "n_phi": 6,
+        "phase_sectors": 6,
         "type": "Phase"
       },
       "domain_spec": {
@@ -126,7 +126,7 @@
       },
       "id": "essential_exp_inv",
       "scaling_spec": "balanced",
-      "schema_version": 2,
+      "schema_version": 3,
       "singularities": [
         {
           "at": [
@@ -152,7 +152,7 @@
       },
       "cmap_spec": {
         "auto_scale_r": true,
-        "n_phi": 6,
+        "phase_sectors": 6,
         "type": "Phase"
       },
       "domain_spec": {
@@ -166,7 +166,7 @@
       },
       "id": "exp",
       "scaling_spec": "balanced",
-      "schema_version": 2,
+      "schema_version": 3,
       "singularities": [],
       "story": "Entire and never zero: no finite zeros or poles (an empty answer key).",
       "tags": [
@@ -185,7 +185,7 @@
       },
       "cmap_spec": {
         "auto_scale_r": true,
-        "n_phi": 6,
+        "phase_sectors": 6,
         "type": "Phase"
       },
       "domain_spec": {
@@ -199,7 +199,7 @@
       },
       "id": "identity",
       "scaling_spec": "balanced",
-      "schema_version": 2,
+      "schema_version": 3,
       "singularities": [
         {
           "at": [
@@ -228,7 +228,7 @@
       },
       "cmap_spec": {
         "auto_scale_r": true,
-        "n_phi": 6,
+        "phase_sectors": 6,
         "type": "Phase"
       },
       "domain_spec": {
@@ -242,7 +242,7 @@
       },
       "id": "log",
       "scaling_spec": "balanced",
-      "schema_version": 2,
+      "schema_version": 3,
       "singularities": [
         {
           "at": [
@@ -272,7 +272,7 @@
       },
       "cmap_spec": {
         "auto_scale_r": true,
-        "n_phi": 6,
+        "phase_sectors": 6,
         "type": "Phase"
       },
       "domain_spec": {
@@ -286,7 +286,7 @@
       },
       "id": "mobius_cayley",
       "scaling_spec": "balanced",
-      "schema_version": 2,
+      "schema_version": 3,
       "singularities": [
         {
           "at": [
@@ -324,7 +324,7 @@
       },
       "cmap_spec": {
         "auto_scale_r": true,
-        "n_phi": 6,
+        "phase_sectors": 6,
         "type": "Phase"
       },
       "domain_spec": {
@@ -338,7 +338,7 @@
       },
       "id": "newton_cubic",
       "scaling_spec": "balanced",
-      "schema_version": 2,
+      "schema_version": 3,
       "singularities": [
         {
           "at": [
@@ -391,7 +391,7 @@
       },
       "cmap_spec": {
         "auto_scale_r": true,
-        "n_phi": 6,
+        "phase_sectors": 6,
         "type": "Phase"
       },
       "domain_spec": {
@@ -405,7 +405,7 @@
       },
       "id": "pole_flower_10",
       "scaling_spec": "poles_emphasis",
-      "schema_version": 2,
+      "schema_version": 3,
       "singularities": [
         {
           "at": [
@@ -515,7 +515,7 @@
       },
       "cmap_spec": {
         "auto_scale_r": true,
-        "n_phi": 6,
+        "phase_sectors": 6,
         "type": "Phase"
       },
       "domain_spec": {
@@ -529,7 +529,7 @@
       },
       "id": "pole_order_2",
       "scaling_spec": "balanced",
-      "schema_version": 2,
+      "schema_version": 3,
       "singularities": [
         {
           "at": [
@@ -557,7 +557,7 @@
       },
       "cmap_spec": {
         "auto_scale_r": true,
-        "n_phi": 6,
+        "phase_sectors": 6,
         "type": "Phase"
       },
       "domain_spec": {
@@ -571,7 +571,7 @@
       },
       "id": "pole_order_3",
       "scaling_spec": "balanced",
-      "schema_version": 2,
+      "schema_version": 3,
       "singularities": [
         {
           "at": [
@@ -600,7 +600,7 @@
       },
       "cmap_spec": {
         "auto_scale_r": true,
-        "n_phi": 6,
+        "phase_sectors": 6,
         "type": "Phase"
       },
       "domain_spec": {
@@ -614,7 +614,7 @@
       },
       "id": "rational_zeros_poles",
       "scaling_spec": "balanced",
-      "schema_version": 2,
+      "schema_version": 3,
       "singularities": [
         {
           "at": [
@@ -668,7 +668,7 @@
       },
       "cmap_spec": {
         "auto_scale_r": true,
-        "n_phi": 6,
+        "phase_sectors": 6,
         "type": "Phase"
       },
       "domain_spec": {
@@ -682,7 +682,7 @@
       },
       "id": "reciprocal",
       "scaling_spec": "balanced",
-      "schema_version": 2,
+      "schema_version": 3,
       "singularities": [
         {
           "at": [
@@ -712,7 +712,7 @@
       },
       "cmap_spec": {
         "auto_scale_r": true,
-        "n_phi": 6,
+        "phase_sectors": 6,
         "type": "Phase"
       },
       "domain_spec": {
@@ -726,7 +726,7 @@
       },
       "id": "sine",
       "scaling_spec": "balanced",
-      "schema_version": 2,
+      "schema_version": 3,
       "singularities": [
         {
           "at": [
@@ -772,7 +772,7 @@
       },
       "cmap_spec": {
         "auto_scale_r": true,
-        "n_phi": 6,
+        "phase_sectors": 6,
         "type": "Phase"
       },
       "domain_spec": {
@@ -786,7 +786,7 @@
       },
       "id": "sqrt",
       "scaling_spec": "balanced",
-      "schema_version": 2,
+      "schema_version": 3,
       "singularities": [
         {
           "at": [
@@ -815,7 +815,7 @@
       },
       "cmap_spec": {
         "auto_scale_r": true,
-        "n_phi": 6,
+        "phase_sectors": 6,
         "type": "Phase"
       },
       "domain_spec": {
@@ -829,7 +829,7 @@
       },
       "id": "square",
       "scaling_spec": "balanced",
-      "schema_version": 2,
+      "schema_version": 3,
       "singularities": [
         {
           "at": [
@@ -859,7 +859,7 @@
       },
       "cmap_spec": {
         "auto_scale_r": true,
-        "n_phi": 6,
+        "phase_sectors": 6,
         "type": "Phase"
       },
       "domain_spec": {
@@ -873,7 +873,7 @@
       },
       "id": "tangent",
       "scaling_spec": "balanced",
-      "schema_version": 2,
+      "schema_version": 3,
       "singularities": [
         {
           "at": [
@@ -910,5 +910,5 @@
       "title": "Tangent"
     }
   ],
-  "schema_version": 2
+  "schema_version": 3
 }

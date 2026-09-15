@@ -103,8 +103,7 @@ def sawtooth_log(x: float | np.ndarray, base: float = np.e) -> float | np.ndarra
             log_x = np.log(x)
         else:
             log_x = np.log(x) / np.log(base)
-
-    result = np.mod(log_x, 1.0)
+        result = np.mod(log_x, 1.0)
 
     # Handle x=0 case
     if np.isscalar(x):
@@ -238,3 +237,62 @@ def inverse_stereographic(
 
     result = real_part + 1j * imag_part
     return complex(result) if scalar_input else result
+
+
+def sigmoid(x: float | np.ndarray, center: float = 0.0, scale: float = 1.0) -> float | np.ndarray:
+    """Sigmoid (logistic) function for smooth transitions.
+
+    Maps input values to [0, 1]; used by the perceptual colormaps for smooth modulus-based
+    transitions.
+
+    Parameters
+    ----------
+    x : float or np.ndarray
+        Input values.
+    center : float, optional
+        Center point of the sigmoid.
+    scale : float, optional
+        Scale factor controlling steepness.
+
+    Returns
+    -------
+    float or np.ndarray
+        Sigmoid values in [0, 1].
+    """
+    z = (x - center) / scale
+    return 1.0 / (1.0 + np.exp(-z))
+
+
+def circular_interpolate(theta1: float, theta2: float, t: float | np.ndarray) -> float | np.ndarray:
+    """Interpolate between two angles along the shortest path on the circle.
+
+    Interpolation happens in the complex plane, so the wraparound at 2*pi is handled
+    correctly.
+
+    Parameters
+    ----------
+    theta1 : float
+        Start angle in radians.
+    theta2 : float
+        End angle in radians.
+    t : float or np.ndarray
+        Interpolation parameter(s) in [0, 1].
+
+    Returns
+    -------
+    float or np.ndarray
+        Interpolated angle(s) in [0, 2*pi).
+    """
+    z1 = np.exp(1j * theta1)
+    z2 = np.exp(1j * theta2)
+    z_interp = (1 - t) * z1 + t * z2
+
+    # np.angle returns (-pi, pi]; normalise into [0, 2*pi). This deviates from the 2.0.0
+    # implementation only at the boundary: an angle a hair below zero wrapped to exactly
+    # 2*pi there (float rounding swallows the epsilon), which is outside the documented
+    # half-open range, so it is snapped to 0.
+    result = np.mod(np.angle(z_interp), 2 * np.pi)
+    if np.ndim(result) == 0:
+        return 0.0 if result >= 2 * np.pi else float(result)
+    result[result >= 2 * np.pi] = 0.0
+    return result

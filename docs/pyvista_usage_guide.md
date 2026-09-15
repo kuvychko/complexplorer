@@ -64,7 +64,7 @@ cp.pair_plot_landscape_pv(
     n=200,
     z_max=10,
     show_orientation=True,
-    cmap=cp.Phase(n_phi=12, auto_scale_r=True)  # Auto-scaled enhanced phase
+    cmap=cp.Phase(phase_sectors=12, auto_scale_r=True)  # Auto-scaled enhanced phase
 )
 ```
 
@@ -75,7 +75,7 @@ Riemann sphere visualization with modulus scaling.
 cp.riemann_pv(
     func,
     n_theta=200,              # Latitude resolution
-    n_phi=200,                # Longitude resolution
+    phase_sectors=200,                # Longitude resolution
     scaling='arctan',         # Modulus scaling method
     show_orientation=True,
     show_grid=True           # Latitude/longitude grid
@@ -119,7 +119,7 @@ cp.plot_landscape_pv(
     my_complex_function,
     n=300,
     z_max=20,
-    cmap=cp.Phase(n_phi=12, auto_scale_r=True),
+    cmap=cp.Phase(phase_sectors=12, auto_scale_r=True),
     show_orientation=True,
     title="sin(z)/z",
     interactive=True

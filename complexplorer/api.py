@@ -41,7 +41,7 @@ def quick_plot(
         domain = Rectangle(4, 4)
 
     if "cmap" not in kwargs:
-        kwargs["cmap"] = Phase(n_phi=6, auto_scale_r=True)
+        kwargs["cmap"] = Phase(phase_sectors=6, auto_scale_r=True)
 
     # Pop the backend selector so it never leaks into the renderer. 2D is matplotlib;
     # 3D/Riemann are PyVista-only (the matplotlib 3D backend was removed in 3.0).
@@ -81,17 +81,23 @@ class Presets:
     @staticmethod
     def publication_ready():
         """Settings for publication-quality figures."""
-        return {"cmap": Phase(n_phi=12, auto_scale_r=True, scale_radius=0.8), "resolution": 800}
+        return {
+            "cmap": Phase(phase_sectors=12, auto_scale_r=True, scale_radius=0.8),
+            "resolution": 800,
+        }
 
     @staticmethod
     def interactive():
         """Settings for interactive exploration."""
-        return {"cmap": Phase(n_phi=6, auto_scale_r=True), "resolution": 400}
+        return {"cmap": Phase(phase_sectors=6, auto_scale_r=True), "resolution": 400}
 
     @staticmethod
     def high_contrast():
         """Settings for high contrast visualization."""
-        return {"cmap": Phase(n_phi=16, auto_scale_r=True, scale_radius=0.5), "resolution": 600}
+        return {
+            "cmap": Phase(phase_sectors=16, auto_scale_r=True, scale_radius=0.5),
+            "resolution": 600,
+        }
 
 
 __all__ = [

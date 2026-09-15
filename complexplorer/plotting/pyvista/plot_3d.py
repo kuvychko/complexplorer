@@ -70,7 +70,7 @@ def create_complex_surface(
         RGB color array.
     """
     if cmap is None:
-        cmap = Phase(n_phi=6, v_base=0.6)
+        cmap = Phase(phase_sectors=6, v_base=0.6)
 
     # Resolve the sampling grid, values, and out-of-domain mask (shared with the 2D backend).
     z, f, mask = resolve_plane_inputs(domain, func, z, f, resolution)
