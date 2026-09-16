@@ -6,7 +6,8 @@ Rendered `portrait.png` files SHALL be written with image metadata stripped (no 
 timestamp tags) so they are reproducible within an environment. Pixel bytes are NOT guaranteed
 across environments or rendering-library versions; the byte-stable guarantee applies to the
 manifest, not the images. Portraits SHALL be framed so that every axis label and tick label they
-draw lies inside the image.
+draw lies inside the image, and SHALL be sampled at a resolution the caller may set, defaulting to
+one sample per output pixel so a high-dpi portrait is not an upscaled low-resolution render.
 
 #### Scenario: Portrait metadata carries no timestamp
 
@@ -17,3 +18,8 @@ draw lies inside the image.
 
 - **WHEN** a portrait is written for a domain whose axes are labelled
 - **THEN** the image contains the whole label (the `Im(z)` label is not cut off at the left edge) and carries no excessive empty margin
+
+#### Scenario: Sampling matches the output size by default
+
+- **WHEN** a portrait is rendered at a given dpi without an explicit resolution
+- **THEN** the domain is sampled at one point per output pixel (bounded by a sane maximum), and a caller-supplied resolution overrides that

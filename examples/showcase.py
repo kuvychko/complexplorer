@@ -73,6 +73,7 @@ RENDER_PROFILES = {
         "kind": "matplotlib",
         "dpi": PORTRAIT_DPI,
         "figsize": (4.0, 4.0),
+        "resolution": 1200,  # samples per axis; 400 upscaled and stair-stepped the bands
         "tight": True,  # keeps the Im(z) label inside the image
     },
     "landscape": {
@@ -243,7 +244,9 @@ def _render_portrait_mpl(domain, func, cmap, path: Path, legend: bool = False) -
     profile = RENDER_PROFILES["portrait"]
     fig, ax = plt.subplots(figsize=profile["figsize"])
     try:
-        plot_2d(domain, func, cmap=cmap, ax=ax, legend=legend)
+        plot_2d(
+            domain, func, cmap=cmap, ax=ax, legend=legend, resolution=profile["resolution"]
+        )
         path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(
             path,
@@ -408,7 +411,12 @@ def _existing_manifest(gallery_dir: Path) -> dict:
 def _render_presets(gallery_dir: Path) -> list[dict]:
     """Deterministic 2D portraits + index.json, then the PyVista screenshots by tag policy."""
     print("Rendering 2D portraits + index.json (cp.gallery) ...")
-    generate_gallery(gallery_dir, selection=None, dpi=PORTRAIT_DPI)
+    generate_gallery(
+        gallery_dir,
+        selection=None,
+        dpi=PORTRAIT_DPI,
+        resolution=RENDER_PROFILES["portrait"]["resolution"],
+    )
 
     records = []
     for pid in catalog.list():

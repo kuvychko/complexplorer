@@ -24,6 +24,18 @@ from .plotting.matplotlib.plot_2d import plot as plot_2d
 
 SCHEMA_VERSION = 3  # v3: cmap_spec uses 'phase_sectors' (reconcile-with-2-0-release)
 _FIGSIZE = (4.0, 4.0)
+_MAX_PORTRAIT_RESOLUTION = 2000  # keeps a high-dpi request from sampling absurdly
+
+
+def _portrait_resolution(dpi: int, resolution: int | None) -> int:
+    """Samples per axis for a portrait: the caller's value, else one per output pixel.
+
+    The saved image is ``dpi * _FIGSIZE`` pixels wide; sampling below that upscales the
+    portrait and stair-steps the phase-sector boundaries.
+    """
+    if resolution is not None:
+        return resolution
+    return min(int(round(dpi * _FIGSIZE[0])), _MAX_PORTRAIT_RESOLUTION)
 
 
 def _resolve(selection: str | Iterable[str] | None) -> list[FunctionPreset]:
@@ -44,7 +56,9 @@ def _write_json(path: Path, obj: dict) -> None:
         f.write("\n")
 
 
-def _render_portrait(preset: FunctionPreset, path: Path, dpi: int) -> None:
+def _render_portrait(
+    preset: FunctionPreset, path: Path, dpi: int, resolution: int | None = None
+) -> None:
     """Render the preset's 2D phase portrait to ``path`` with metadata stripped.
 
     Owns the figure (``plt.subplots`` + an explicit ``ax``) so renders never accumulate on
@@ -52,7 +66,13 @@ def _render_portrait(preset: FunctionPreset, path: Path, dpi: int) -> None:
     """
     fig, ax = plt.subplots(figsize=_FIGSIZE)
     try:
-        plot_2d(preset.domain(), preset.func, cmap=preset.colormap(), ax=ax)
+        plot_2d(
+            preset.domain(),
+            preset.func,
+            cmap=preset.colormap(),
+            ax=ax,
+            resolution=_portrait_resolution(dpi, resolution),
+        )
         # bbox_inches="tight" keeps the axis labels inside the image; without it the Im(z)
         # label is clipped at the left edge and a wide empty margin sits above the plot.
         fig.savefig(
@@ -72,7 +92,11 @@ def _card(preset: FunctionPreset) -> dict:
 
 
 def generate_gallery(
-    out_dir: str | Path, *, selection: str | Iterable[str] | None = None, dpi: int = 150
+    out_dir: str | Path,
+    *,
+    selection: str | Iterable[str] | None = None,
+    dpi: int = 150,
+    resolution: int | None = None,
 ) -> dict:
     """Render a selection of catalog presets into ``out_dir`` and return the manifest.
 
@@ -82,6 +106,8 @@ def generate_gallery(
         Directory to write the bundle into (created if needed).
     selection : str | iterable of str | None
         A tag, an iterable of preset ids, or None for the whole catalog.
+    resolution : int, optional
+        Samples per axis for the portraits. Defaults to one sample per output pixel.
     dpi : int
         Portrait resolution.
 
@@ -100,7 +126,7 @@ def generate_gallery(
     for p in presets:
         pdir = out / p.id
         pdir.mkdir(exist_ok=True)
-        _render_portrait(p, pdir / "portrait.png", dpi)
+        _render_portrait(p, pdir / "portrait.png", dpi, resolution)
         rec = _card(p)
         _write_json(pdir / "card.json", rec)
         records.append(rec)

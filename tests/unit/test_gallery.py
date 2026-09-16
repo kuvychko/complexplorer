@@ -114,3 +114,29 @@ def test_portrait_keeps_its_axis_labels(tmp_path):
 
     left_margin = np.asarray(image.crop((0, 0, max(1, width // 8), height)))
     assert left_margin.min() < 100, "no y-axis label ink in the left margin: it is still clipped"
+
+
+def test_portrait_sampling_defaults_to_one_sample_per_pixel():
+    """A 400-sample portrait saved at ~1500 px is an upscale; the default follows the dpi."""
+    from complexplorer.gallery import _MAX_PORTRAIT_RESOLUTION, _portrait_resolution
+
+    assert _portrait_resolution(150, None) == 600
+    assert _portrait_resolution(390, None) == 1560
+    assert _portrait_resolution(390, 1200) == 1200, "an explicit resolution wins"
+    assert _portrait_resolution(100000, None) == _MAX_PORTRAIT_RESOLUTION, "bounded"
+
+
+def test_generate_gallery_honours_an_explicit_resolution(tmp_path, monkeypatch):
+    """The showcase pins the sampling resolution chosen in visual-review round R0b."""
+    import complexplorer.gallery as gallery_module
+
+    seen = {}
+    original = gallery_module.plot_2d
+
+    def spy(*args, **kwargs):
+        seen["resolution"] = kwargs.get("resolution")
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(gallery_module, "plot_2d", spy)
+    gallery_module.generate_gallery(tmp_path, selection=["identity"], dpi=390, resolution=1200)
+    assert seen["resolution"] == 1200

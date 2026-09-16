@@ -87,10 +87,25 @@ Review board: https://claude.ai/artifact/L8avJ54troJqabjh8iERHw
 - window: 1560 x 1560 px
 - 2D portraits: axes and ticks kept, phase-wheel legend inset, tight bounding box
 
-**Open follow-up (owner note on the sphere):** "We need to increase the sphere's resolution - the
-figure is blocky. Main benefit of PyVista is excellent visual quality, we don't want to lose it in
-the gallery - where it matters most." Round R0b renders a resolution ladder per family to set the
-production mesh resolution before the tour is produced.
+### R0b — resolution (decided 2026-09-16)
+
+Owner note from R0: "We need to increase the sphere's resolution - the figure is blocky. Main
+benefit of PyVista is excellent visual quality, we don't want to lose it in the gallery - where it
+matters most." A ladder per family settled it; cost is ~1 s and a few hundred KB at every step, so
+the choice was purely about quality.
+
+| Family | Resolution | Was |
+|---|---|---|
+| 2D portrait (samples per axis) | **1200** | 400 |
+| Riemann sphere | **1000** | 260 |
+| Relief / ornament | **800** | 260 |
+| Analytic landscape | **600** | 260 |
+| Riemann surface | **312** | 104 |
+
+The portrait ladder was added during R0b after the fix to the clipped labels exposed a second
+defect: portraits sampled the domain at 400 x 400 while being saved near 1500 px, so they were
+upscaled about 3.75x and their phase-sector boundaries stair-stepped. `generate_gallery` now takes
+a `resolution` argument, defaulting to one sample per output pixel.
 
 **Defects found during R0, owned by `curate-rev3-visual-tour`:**
 
