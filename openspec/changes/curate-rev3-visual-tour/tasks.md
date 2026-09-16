@@ -27,19 +27,19 @@
 
 ## 4. Tour recipes — review round R1
 
-- [ ] 4.1 Add the tour recipe record (id, title, section, inputs, profile, caption, alt text,
+- [x] 4.1 Add the tour recipe record (id, title, section, inputs, profile, caption, alt text,
   snippet) and the dispatch that renders one.
-- [ ] 4.2 Legend portrait and the matching analytic landscape (the 2D → 3D pair).
-- [ ] 4.3 Engineering figure: `transfer_portrait` with poles/zeros/stability boundary, plus
+- [x] 4.2 Legend portrait and the matching analytic landscape (the 2D → 3D pair).
+- [x] 4.3 Engineering figure: `transfer_portrait` with poles/zeros/stability boundary, plus
   `pole_zero_plot`, `bode_plot` and `nyquist_plot` for one nontrivial stable transfer function.
-- [ ] 4.4 Composition proof: the same `TransferFunction` through `cp.ee` and through
+- [x] 4.4 Composition proof: the same `TransferFunction` through `cp.ee` and through
   `plot_landscape_pv`.
-- [ ] 4.5 Composite-domain portrait whose geometry visibly depends on a union, intersection or
+- [x] 4.5 Composite-domain portrait whose geometry visibly depends on a union, intersection or
   difference.
-- [ ] 4.6 Riemann sphere beside Riemann surface, framed so the sheet structure is legible.
-- [ ] 4.7 Physical-output triptych: relief render, STL mesh render (clay shading), and the photo
+- [x] 4.6 Riemann sphere beside Riemann surface, framed so the sheet structure is legible.
+- [x] 4.7 Physical-output triptych: relief render, STL mesh render (clay shading), and the photo
   slot.
-- [ ] 4.8 Orbit loop GIF of one surface or relief, within the ~3 MB budget.
+- [x] 4.8 Orbit loop GIF of one surface or relief, within the ~3 MB budget.
 - [ ] 4.9 Render R1 into staging, publish it to the review page, and iterate until every tour asset
   is approved.
 

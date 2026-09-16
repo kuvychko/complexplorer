@@ -41,6 +41,8 @@ from complexplorer._version import __version__
 from complexplorer.core.presets import catalog
 from complexplorer.plotting.matplotlib.plot_2d import plot as plot_2d
 
+import tour
+
 import matplotlib
 
 matplotlib.use("Agg")
@@ -305,11 +307,28 @@ def _render_ornament(preset, path: Path) -> None:
     _shoot(plotter, path)
 
 
-def _render_surface(preset, path: Path) -> None:
+def _render_surface_family(family: str, kw: dict, path: Path) -> None:
     profile = RENDER_PROFILES["surface"]
-    family, kw = SURFACE_FAMILY[preset.id]
     plotter = cp.riemann_surface_pv(
         family, **kw,
+        resolution=profile["resolution"], window_size=profile["window"],
+        interactive=False, return_plotter=True,
+        show_orientation=profile["orientation_widget"],
+    )
+    _style(plotter, profile)
+    _shoot(plotter, path)
+
+
+def _render_surface(preset, path: Path) -> None:
+    family, kw = SURFACE_FAMILY[preset.id]
+    _render_surface_family(family, kw, path)
+
+
+def _render_callable(family: str, func, domain, path: Path, modulus_mode: str = "none") -> None:
+    """Render an arbitrary callable (not a catalog preset) in a family's profile."""
+    profile = RENDER_PROFILES[family]
+    plotter = cp.plot_landscape_pv(
+        domain, func, modulus_mode=modulus_mode,
         resolution=profile["resolution"], window_size=profile["window"],
         interactive=False, return_plotter=True,
         show_orientation=profile["orientation_widget"],
@@ -473,6 +492,25 @@ def _render_colormaps(gallery_dir: Path) -> list[dict]:
     return records
 
 
+def _tour_context(gallery_dir: Path, curated: list[dict]) -> dict:
+    """Everything examples/tour.py needs to render in the gallery's locked profiles."""
+    photo = next(
+        (gallery_dir / c["file"] for c in curated if c["kind"] == "photograph"),
+        None,
+    )
+    return {
+        "profiles": RENDER_PROFILES,
+        "style": _style,
+        "shoot": _shoot,
+        "thumbnail": _thumbnail,
+        "portrait_mpl": _render_portrait_mpl,
+        "render_family": lambda family, preset, path: _RENDERERS[family](preset, path),
+        "render_callable": _render_callable,
+        "render_surface": _render_surface_family,
+        "photo": photo,
+    }
+
+
 def _curated_records(gallery_dir: Path) -> list[dict]:
     """Assets that are committed but never regenerated: the banner and printed-object photos.
 
@@ -526,21 +564,28 @@ def main(only: str = "all", out: str | None = None) -> None:
     else:
         colormap_records = previous.get("colormaps", {}).get("renders", [])
 
+    curated = _curated_records(gallery_dir)
+    if only in ("all", "tour"):
+        print("Rendering the curated tour ...")
+        tour_records = tour.render_tour(gallery_dir, _tour_context(gallery_dir, curated))
+    else:
+        tour_records = previous.get("tour", [])
+
     manifest = {
         "schema_version": SCHEMA_VERSION,
         "complexplorer_version": __version__,
         "generator": "complexplorer showcase",
         "banner": HERO_BANNER,  # kept until the docs page stops reading it
-        "curated": _curated_records(gallery_dir),
+        "curated": curated,
         "colormaps": {"reference_preset": COLORMAP_REFERENCE, "renders": colormap_records},
         "presets": preset_records,
-        "tour": previous.get("tour", []),
+        "tour": tour_records,
     }
     _write_json(gallery_dir / "showcase.json", manifest)
     _generate_docs_page(manifest, docs_dir)
     print(
         f"Done. {len(preset_records)} presets, {len(colormap_records)} colormaps, "
-        f"{len(manifest['curated'])} curated -> {gallery_dir}"
+        f"{len(tour_records)} tour, {len(curated)} curated -> {gallery_dir}"
     )
 
 
