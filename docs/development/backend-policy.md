@@ -32,8 +32,12 @@ mathematical design to fit the weaker backend.
   equivalents (`plot_landscape_pv`, `pair_plot_landscape_pv`, `riemann_pv`). PyVista
   remained optional, installable via `complexplorer[pyvista]` or its alias
   `complexplorer[3d]`. New 3D features were PyVista-only.
-- **3.0 (current):** PyVista is a **required** dependency. The matplotlib 3D paths above are
-  **removed**. matplotlib remains the 2D backend, including the 2D stereographic charts.
+- **3.0 (current):** PyVista is a **required** dependency and the sole 3D backend. The matplotlib
+  3D paths above are **removed**, along with the `HAS_PYVISTA` / `HAS_STL_EXPORT` capability flags
+  that existed to guard them — those features are now always available. The `[pyvista]` and `[3d]`
+  extras survive only as empty no-op aliases, so an existing
+  `pip install complexplorer[pyvista]` keeps working; they install nothing. matplotlib remains the
+  2D backend, including the 2D stereographic charts.
 
 The 2D stereographic charts `riemann_chart` and `riemann_hemispheres` are matplotlib **2D**
 features and are **not** affected by this policy — they are supported indefinitely.
@@ -42,5 +46,40 @@ features and are **not** affected by this policy — they are supported indefini
 
 - Add new 3D functionality to `complexplorer/plotting/pyvista/` (and the forthcoming 3D
   surface kernel), never to the matplotlib 3D modules.
-- Do not extend `complexplorer/plotting/matplotlib/plot_3d.py`; it is frozen pending
-  removal at 3.0.
+- There is no matplotlib 3D module to extend; `plotting/matplotlib/` is 2D only.
+- Do not reintroduce a capability flag or a `try: import pyvista` guard. PyVista is a hard
+  dependency, so importing it unconditionally is correct, and a guard would recreate the
+  two-backend branching this policy exists to remove.
+
+## What requiring PyVista costs
+
+The question of whether a required PyVista is too heavy was settled with measurements rather than
+estimates, taken from the release artifact gate: a fresh virtual environment containing only the
+built wheel and its runtime dependencies (Windows, CPython 3.12, complexplorer 3.0.0). The same
+numbers are printed by the `artifact` job in CI on every run, so they can be re-checked rather than
+trusted.
+
+| Measurement | Value |
+|---|---|
+| Wheel | 92 KB |
+| Installed `site-packages`, everything | 533 MB |
+| VTK (`vtk.libs` + `vtkmodules`) | 296 MB — 56% of the install |
+| scipy | 87 MB |
+| matplotlib + numpy + their bundled libraries | 74 MB |
+| pyvista itself | 14 MB |
+| Cold `import complexplorer` | 0.54 s |
+| Cold `import pyvista` alone | 0.27 s |
+| Cold `import matplotlib.pyplot` alone | 0.38 s |
+
+`import complexplorer` loads pyvista, 32 `vtkmodules` submodules and `matplotlib.pyplot` eagerly.
+
+**The decision: PyVista stays required.** The install is dominated by VTK, and that is real — but
+the alternative is worse in the ways that matter here. Making it optional means every 3D entry
+point, the STL export and the CLI acquire an import guard and a second failure mode ("installed,
+but the interesting half does nothing"), and the capability flags come back. The library's stated
+purpose includes 3D landscapes, Riemann surfaces and 3D-printable ornaments; an install that cannot
+do those is not a smaller complexplorer, it is a different one. Half a second of import time is not
+the constraint, and anyone who wants only 2D phase portraits is well served by matplotlib directly.
+
+This is revisited only if the numbers change materially — a VTK that ships slimmer wheels, or an
+import cost that grows past a second or two.

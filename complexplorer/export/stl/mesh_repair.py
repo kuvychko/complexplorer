@@ -128,9 +128,9 @@ def repair_mesh_simple(
         # Check if watertight
         edges = repaired.extract_feature_edges(boundary_edges=True)
         if edges.n_points == 0:
-            print("✓ Mesh is watertight")
+            print("[ok] Mesh is watertight")
         else:
-            print(f"✗ Mesh still has {edges.n_points} boundary points")
+            print(f"[fail] Mesh still has {edges.n_points} boundary points")
 
     return repaired
 

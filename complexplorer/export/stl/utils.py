@@ -115,24 +115,24 @@ def validate_printability(
             print(f"\nAt {size_mm}mm size:")
             print(f"Estimated min wall thickness: {results['estimated_min_wall_mm']:.2f}mm")
             if results["wall_thickness_ok"]:
-                print("✓ Wall thickness OK for printing")
+                print("[ok] Wall thickness OK for printing")
             else:
-                print(f"✗ Too thin! Recommend at least {results['recommended_size_mm']:.1f}mm")
+                print(f"[fail] Too thin! Recommend at least {results['recommended_size_mm']:.1f}mm")
 
         # Overall assessment
         print("\n=== Overall Assessment ===")
         if results["is_watertight"] and results["is_manifold"]:
             if "wall_thickness_ok" in results and results["wall_thickness_ok"]:
-                print("✓ Mesh is ready for 3D printing!")
+                print("[ok] Mesh is ready for 3D printing!")
             else:
-                print("✓ Mesh topology OK, but check wall thickness")
+                print("[ok] Mesh topology OK, but check wall thickness")
         elif results["n_boundary_edges"] < 200:  # Small number of boundary edges
-            print("⚠ Mesh has small gaps (typical for Riemann sphere)")
+            print("[warn] Mesh has small gaps (typical for Riemann sphere)")
             print("  These are usually acceptable for 3D printing")
             if "wall_thickness_ok" in results and results["wall_thickness_ok"]:
                 print("  Wall thickness is OK - should print successfully")
         else:
-            print("✗ Mesh needs significant repair before printing")
+            print("[fail] Mesh needs significant repair before printing")
 
     return results
 

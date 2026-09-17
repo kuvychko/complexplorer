@@ -2,6 +2,9 @@
 
 import json
 import warnings
+from pathlib import Path
+
+import pytest
 
 from complexplorer import generate_gallery
 from complexplorer.cli.main import main
@@ -140,3 +143,38 @@ def test_generate_gallery_honours_an_explicit_resolution(tmp_path, monkeypatch):
     monkeypatch.setattr(gallery_module, "plot_2d", spy)
     gallery_module.generate_gallery(tmp_path, selection=["identity"], dpi=390, resolution=1200)
     assert seen["resolution"] == 1200
+
+
+def test_committed_index_json_is_reproducible(tmp_path):
+    """The committed manifest must be exactly what the library generates today.
+
+    ``index.json`` is the byte-stable contract: it describes the catalog, not the pixels, so a
+    regeneration at any resolution must reproduce it byte for byte. Portrait PNGs are excluded —
+    they are reproducible only best-effort and differ across platforms. A failure here means the
+    committed bundle drifted from the catalog, or the manifest schema changed without the bundle
+    being regenerated with ``python examples/showcase.py``.
+    """
+    committed_path = Path(__file__).resolve().parents[2] / "examples" / "gallery" / "index.json"
+    if not committed_path.exists():  # pragma: no cover - only in a stripped checkout
+        pytest.skip("no committed gallery in this checkout")
+
+    # A small resolution keeps the test fast; the manifest does not depend on it.
+    generate_gallery(tmp_path, selection=None, dpi=50, resolution=60)
+    fresh = (tmp_path / "index.json").read_bytes()
+    committed = committed_path.read_bytes()
+
+    if fresh != committed:
+        fresh_manifest = json.loads(fresh)
+        committed_manifest = json.loads(committed)
+        fresh_ids = [p["id"] for p in fresh_manifest["presets"]]
+        committed_ids = [p["id"] for p in committed_manifest["presets"]]
+        assert fresh_ids == committed_ids, (
+            f"the catalog changed: {sorted(set(fresh_ids) ^ set(committed_ids))}"
+        )
+        assert fresh_manifest == committed_manifest, (
+            "the manifest content changed; regenerate with `python examples/showcase.py`"
+        )
+        raise AssertionError(
+            "index.json differs only in its serialization (key order, separators or trailing "
+            "newline); the byte-stability contract is broken"
+        )

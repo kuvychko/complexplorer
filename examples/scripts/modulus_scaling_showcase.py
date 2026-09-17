@@ -20,6 +20,7 @@ from pathlib import Path
 
 import complexplorer as cp
 
+
 # A function with diverse behavior: zeros from the cubic, a pair of poles.
 def f(z):
     return (z**3 - 1) / (z**2 + 0.5)
@@ -42,7 +43,9 @@ MODES = [
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--save", metavar="DIR", default=None,
+        "--save",
+        metavar="DIR",
+        default=None,
         help="save a screenshot per mode into DIR instead of showing interactively",
     )
     parser.add_argument("--resolution", type=int, default=120, help="mesh resolution")
@@ -57,7 +60,9 @@ def main() -> None:
         print(f"Rendering: {title}")
         filename = str(out_dir / f"modulus_{mode}.png") if out_dir else None
         cp.plot_landscape_pv(
-            DOMAIN, f, cmap=CMAP,
+            DOMAIN,
+            f,
+            cmap=CMAP,
             resolution=args.resolution,
             modulus_mode=mode,
             title=title,

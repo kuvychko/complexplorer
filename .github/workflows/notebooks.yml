@@ -1,0 +1,58 @@
+name: Notebooks
+
+# The notebooks drive PyVista and take minutes, so they stay out of the per-push suite. They are
+# tutorials, though: a notebook that stopped working is a broken first experience, and that must
+# not ship. So they run on a schedule, on demand, and on every release tag.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "41 4 * * 1"
+  push:
+    tags: ["v*"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  execute:
+    name: Execute the example notebooks
+    runs-on: ubuntu-latest
+    # Generous, because these render; a hang still fails rather than burning an hour.
+    timeout-minutes: 45
+    env:
+      PYVISTA_OFF_SCREEN: "true"
+      MPLBACKEND: "Agg"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Create venv
+        run: uv venv
+
+      # The [examples] extra is the notebook toolchain (nbmake, ipykernel, colorspacious, imageio).
+      - name: Install
+        run: uv pip install -e ".[dev,examples]"
+
+      - uses: pyvista/setup-headless-display-action@v3
+
+      # --nbmake-timeout bounds a single cell, so one stuck render is reported as that cell rather
+      # than as a job timeout with nothing to read.
+      - name: Run the notebooks
+        run: uv run --no-sync pytest --nbmake --nbmake-timeout=600 examples/notebooks/ -v
+
+      # Notebooks write ornaments and figures next to themselves; keeping them makes a failure
+      # inspectable without rerunning locally.
+      - name: Upload what the notebooks produced
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: notebook-output
+          path: |
+            examples/notebooks/**/*.stl
+            examples/notebooks/**/*.png
+            examples/notebooks/**/*.pdf
+          if-no-files-found: ignore

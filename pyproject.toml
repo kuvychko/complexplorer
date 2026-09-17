@@ -65,11 +65,14 @@ dev = [
     "pytest>=7.0.0",
     "pytest-cov>=3.0.0",
     "pytest-timeout>=2.1.0",
-    "ruff>=0.6",
+    # Pinned to a minor: 0.16 began formatting Markdown code blocks, which failed the
+    # gate without any change to this repository. Upgrading is a deliberate commit.
+    "ruff>=0.16.7,<0.17",
     "complexplorer[examples]",
 ]
-# Notebook tooling for running and verifying the example notebooks (a local, opt-in gate:
-# `pytest --nbmake examples/notebooks/`). Not used by the default test suite or CI.
+# Notebook tooling for running and verifying the example notebooks
+# (`pytest --nbmake examples/notebooks/`). Not collected by the default test suite; run by the
+# Notebooks workflow on a schedule, on demand and on every release tag.
 examples = [
     "nbmake>=1.5",
     "nbconvert>=7.0",
@@ -101,7 +104,9 @@ complexplorer = "complexplorer.cli.main:main"
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-extend-exclude = ["site", "docs", "examples"]
+# Example SCRIPTS are shipped code and are linted; notebook cells legitimately break
+# import-order and unused-expression rules, so they stay exempt.
+extend-exclude = ["site", "docs", "examples/**/*.ipynb"]
 
 [tool.ruff.lint]
 # Start conservative: pyflakes (F), pycodestyle errors (E), import sorting (I),
@@ -122,3 +127,8 @@ ignore = [
 # Colour-space math ported from 2.0.0: `l`, `m`, `s` are the standard LMS cone-response names
 # in the OKLab conversion, so the "ambiguous name" rule is wrong here.
 "complexplorer/core/color_utils.py" = ["E741"]
+# The gallery producers must select the Agg backend before importing pyplot, so their imports
+# cannot all sit at the top of the file.
+"examples/showcase.py" = ["E402"]
+"examples/tour.py" = ["E402"]
+"examples/scripts/*.py" = ["E402"]

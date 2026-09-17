@@ -4,11 +4,20 @@ on:
   push:
     branches: ["**"]
   pull_request:
+  # Weekly run against the newest compatible dependencies: an upstream VTK/PyVista change should
+  # surface here, not during a release sprint.
+  schedule:
+    - cron: "17 4 * * 1"
 
 # Cancel superseded runs on the same ref.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  # Pinned to a minor: 0.16 began formatting Markdown code blocks, which failed this gate
+  # without any change to the repository. Upgrading is a deliberate commit.
+  RUFF_VERSION: ">=0.16.7,<0.17"
 
 jobs:
   lint:
@@ -23,23 +32,27 @@ jobs:
       - name: Install ruff
         run: |
           uv venv
-          uv pip install "ruff>=0.6"
+          uv pip install "ruff${{ env.RUFF_VERSION }}"
+      # The example SCRIPTS are shipped code and are linted too; notebooks are exempt in
+      # pyproject.toml, where their cell structure conflicts with import-order rules.
       - name: ruff check
-        run: uv run --no-sync ruff check complexplorer/ tests/
+        run: uv run --no-sync ruff check complexplorer/ tests/ examples/ scripts/
       - name: ruff format --check
-        run: uv run --no-sync ruff format --check complexplorer/ tests/
+        run: uv run --no-sync ruff format --check complexplorer/ tests/ examples/ scripts/
 
   test:
     name: Test (${{ matrix.os }}, py${{ matrix.python }})
     runs-on: ${{ matrix.os }}
-    # vtk wheels for new Python releases often lag; do not let 3.13 block the matrix until
-    # those wheels are confirmed available.
-    continue-on-error: ${{ matrix.python == '3.13' }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
         python: ["3.11", "3.12", "3.13"]
+        # macOS matters because VTK wheels are platform-specific, but it is slow: one lane on
+        # the current Python rather than a third dimension of the grid.
+        include:
+          - os: macos-latest
+            python: "3.12"
     env:
       PYVISTA_OFF_SCREEN: "true"
     steps:
@@ -57,10 +70,118 @@ jobs:
       - name: Install
         run: uv pip install -e ".[dev]"
 
-      # xvfb for real offscreen rendering on Linux; Windows renders offscreen natively.
+      # xvfb for real offscreen rendering on Linux; Windows and macOS render offscreen natively.
       - name: Headless display (Linux)
         if: runner.os == 'Linux'
         uses: pyvista/setup-headless-display-action@v3
 
       - name: Run tests
         run: uv run --no-sync pytest tests/ -q
+
+  minimum-dependencies:
+    name: Test (minimum dependencies, py3.11)
+    runs-on: ubuntu-latest
+    env:
+      PYVISTA_OFF_SCREEN: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.11"
+          enable-cache: true
+      - name: Create venv
+        run: uv venv
+      # Resolve every declared direct dependency to its LOWEST allowed version, so the floors in
+      # pyproject.toml are exercised rather than assumed. A failure here means a floor is wrong.
+      - name: Install the declared floors
+        run: uv pip install --resolution lowest-direct -e ".[dev]"
+      - name: Show what resolved
+        run: uv pip list
+      - uses: pyvista/setup-headless-display-action@v3
+      - name: Run tests
+        run: uv run --no-sync pytest tests/ -q
+
+  next-python:
+    name: Test (py3.14, not yet supported)
+    runs-on: ubuntu-latest
+    # Visible, never blocking: the classifier is added only once this lane is green.
+    continue-on-error: true
+    env:
+      PYVISTA_OFF_SCREEN: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.14"
+          enable-cache: true
+      - name: Create venv
+        run: uv venv
+      - name: Install
+        run: uv pip install -e ".[dev]"
+      - uses: pyvista/setup-headless-display-action@v3
+      - name: Run tests
+        run: uv run --no-sync pytest tests/ -q
+
+  artifact:
+    name: Artifact (build, inspect, install, smoke)
+    runs-on: ubuntu-latest
+    env:
+      PYVISTA_OFF_SCREEN: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - uses: pyvista/setup-headless-display-action@v3
+
+      - name: Build wheel and sdist
+        run: uv build
+
+      - name: Validate metadata (twine)
+        run: |
+          uv venv .twine
+          uv pip install --python .twine twine
+          .twine/bin/twine check dist/*
+
+      - name: Inspect the distributions
+        run: uv run --no-project python scripts/check_distribution.py dist
+
+      # A throwaway environment with neither the checkout nor the dev dependencies: the point is
+      # to exercise what a user installs, so the smoke run happens from another directory.
+      - name: Install the wheel into a clean environment
+        run: |
+          uv venv /tmp/smoke --python 3.12
+          uv pip install --python /tmp/smoke/bin/python dist/*.whl
+
+      - name: Smoke-test the installed wheel
+        working-directory: /tmp
+        run: /tmp/smoke/bin/python "$GITHUB_WORKSPACE/scripts/smoke_wheel.py"
+
+      # The numbers behind the mandatory-PyVista decision in docs/development/backend-policy.md.
+      # Printed on every run so the decision can be re-checked rather than trusted; the cold
+      # import time comes from the smoke step above.
+      - name: Measure the installed footprint
+        run: |
+          site="/tmp/smoke/lib/python3.12/site-packages"
+          echo "total:      $(du -sm "$site" | cut -f1) MB"
+          for part in vtkmodules vtk.libs pyvista scipy matplotlib numpy; do
+            if [ -e "$site/$part" ]; then
+              echo "$part: $(du -sm "$site/$part" | cut -f1) MB"
+            fi
+          done
+          echo "largest:"
+          du -sm "$site"/* | sort -rn | head -8
+
+      # The sdist must be buildable, or a source install is broken for anyone without a wheel.
+      - name: Build a wheel from the sdist
+        run: |
+          uv venv /tmp/fromsdist --python 3.12
+          uv pip install --python /tmp/fromsdist/bin/python dist/*.tar.gz
+          cd /tmp && /tmp/fromsdist/bin/python -c "import complexplorer; print('sdist install ok', complexplorer.__version__)"
+
+      - name: Upload the distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/

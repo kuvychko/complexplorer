@@ -50,6 +50,13 @@ Two `packaging` requirements also still describe a world that ended at 3.0: a CI
 - Assert that a freshly generated `index.json` is byte-identical to the committed one, which is
   the manifest contract stated as a test rather than a habit.
 
+**Defects the gate found**
+- The first real run of the wheel smoke test found two shipped bugs, both `UnicodeEncodeError` on a
+  Windows console using a legacy code page: `complexplorer list` died on the preset title `z³ - z`
+  under cp437, and an STL export died on a `✗` status marker under cp1252, after building the mesh
+  and before writing the file. Both are fixed here, with regression tests, because the gate that
+  found them is the gate this change is adding.
+
 **Decisions recorded**
 - Measure the installed footprint and cold `import complexplorer` time, and record the
   mandatory-PyVista decision in the backend policy with those numbers, closing the question the
@@ -73,6 +80,10 @@ _None._
   - **Modified**: linting covers the executable examples, and the tool version is pinned.
 - `examples`: the notebook execution harness is required before a release (scheduled and
   pre-release), while staying out of the per-push suite.
+- `cli`: **Added** — console output survives a legacy console encoding, degrading characters the
+  code page cannot represent rather than raising.
+- `stl-export`: **Added** — the status output printed during export, repair and printability
+  validation is ASCII, so a verbose export cannot abort on the console encoding.
 
 ## Impact
 
@@ -81,6 +92,8 @@ _None._
 - **Packaging:** `pyproject.toml` — pinned ruff, ruff's `extend-exclude` narrowed so example
   scripts are linted.
 - **Code:** whatever lint findings the newly covered `examples/**/*.py` surface.
+- **Code:** `complexplorer/cli/main.py`, `complexplorer/export/stl/mesh_repair.py` and
+  `complexplorer/export/stl/utils.py` — the two console-encoding defects the gate found.
 - **Tests:** a committed-vs-fresh `index.json` comparison; a small script that inspects a built
   distribution, reusable locally and in CI.
 - **Docs:** `docs/development/backend-policy.md` records the mandatory-PyVista decision with

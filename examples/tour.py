@@ -95,12 +95,14 @@ def _trim(path: Path, margin: int = 12, tol: int = 12) -> None:
     ys, xs = np.where(mask)
     if not len(ys):
         return
-    img.crop((
-        max(0, int(xs.min()) - margin),
-        max(0, int(ys.min()) - margin),
-        min(img.width, int(xs.max()) + 1 + margin),
-        min(img.height, int(ys.max()) + 1 + margin),
-    )).save(path)
+    img.crop(
+        (
+            max(0, int(xs.min()) - margin),
+            max(0, int(ys.min()) - margin),
+            min(img.width, int(xs.max()) + 1 + margin),
+            min(img.height, int(ys.max()) + 1 + margin),
+        )
+    ).save(path)
 
 
 def _mpl_panel(draw, path: Path, *, figsize=PANEL_FIGSIZE, cell: int = CELL) -> None:
@@ -181,8 +183,10 @@ def _portrait_to_landscape(ctx, out: Path) -> None:
         )
         ctx["render_family"]("landscape", preset, relief)
         _compose(
-            [(flat, "2D phase portrait — cp.plot(..., legend=True)"),
-             (relief, "the same function as a landscape — cp.plot_landscape_pv(...)")],
+            [
+                (flat, "2D phase portrait — cp.plot(..., legend=True)"),
+                (relief, "the same function as a landscape — cp.plot_landscape_pv(...)"),
+            ],
             out,
             columns=2,
         )
@@ -241,8 +245,10 @@ def _composition_proof(ctx, out: Path) -> None:
         _mpl_panel(lambda ax: cp.ee.transfer_portrait(H, ax=ax, legend=True), flat)
         ctx["render_callable"]("landscape", H, cp.Rectangle(6, 6), relief, modulus_mode="arctan")
         _compose(
-            [(flat, "cp.ee.transfer_portrait(H) — the engineering view"),
-             (relief, "cp.plot_landscape_pv(domain, H) — the same object, a general renderer")],
+            [
+                (flat, "cp.ee.transfer_portrait(H) — the engineering view"),
+                (relief, "cp.plot_landscape_pv(domain, H) — the same object, a general renderer"),
+            ],
             out,
             columns=2,
         )
@@ -267,8 +273,16 @@ def _sphere_vs_surface(ctx, out: Path) -> None:
         ctx["render_family"]("sphere", preset, sphere)
         ctx["render_surface"]("power", {"n": 2}, surface)
         _compose(
-            [(sphere, "Riemann SPHERE — one single-valued function, including the point at infinity"),
-             (surface, "Riemann SURFACE — the two-sheeted cover on which sqrt(z) is single-valued")],
+            [
+                (
+                    sphere,
+                    "Riemann SPHERE — one single-valued function, including the point at infinity",
+                ),
+                (
+                    surface,
+                    "Riemann SURFACE — the two-sheeted cover on which sqrt(z) is single-valued",
+                ),
+            ],
             out,
             columns=2,
         )
@@ -367,8 +381,12 @@ def _hero_panels(ctx, tmp_dir: Path) -> dict[str, Path]:
 
     # text-bearing panels: rendered natively so nothing shrinks their labels
     ctx["portrait_mpl"](
-        reference.domain(), reference.func, reference.colormap(),
-        paths["portrait"], legend=True, dpi=HERO_CELL / 4,
+        reference.domain(),
+        reference.func,
+        reference.colormap(),
+        paths["portrait"],
+        legend=True,
+        dpi=HERO_CELL / 4,
     )
     H = cp.ee.TransferFunction(NOTCH_NUM, NOTCH_DEN)
 
@@ -562,9 +580,7 @@ TOUR = [
             "renderer are looking at the same object. Nothing converts between them: the notch "
             "that reads as a dark point on the left is the valley on the right."
         ),
-        "alt": (
-            "Transfer portrait beside a 3D analytic landscape of the same transfer function"
-        ),
+        "alt": ("Transfer portrait beside a 3D analytic landscape of the same transfer function"),
         "snippet": (
             "import complexplorer as cp\n"
             "H = cp.ee.TransferFunction([1, 0, 4], [1, 1.2, 5, 2])\n"

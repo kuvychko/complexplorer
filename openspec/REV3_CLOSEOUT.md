@@ -187,6 +187,49 @@ The plan's sections map onto these OpenSpec changes (status tracked in `ROADMAP.
 
 ---
 
+## Running the release gate locally (C4)
+
+Until `CONTRIBUTING.md` exists (C6 writes it, and this section moves there), this is how to run the
+artifact gate on a workstation before tagging. It is the same sequence the `artifact` job runs, and
+it is worth running once by hand because it exercises what a user installs rather than the working
+tree.
+
+```bash
+# 1. Build, and check the metadata the way PyPI will.
+uv build
+uv run --no-project --with twine twine check dist/*
+
+# 2. Inspect the built distributions: contents, licences, py.typed, metadata, entry point.
+python scripts/check_distribution.py dist
+
+# 3. Install the WHEEL into a throwaway environment - not the checkout.
+uv venv /tmp/smoke --python 3.12
+uv pip install --python /tmp/smoke/bin/python dist/*.whl
+
+# 4. Smoke it from somewhere else: import, CLI, 2D render, off-screen 3D render, STL export.
+#    The script refuses to run against a source tree, because that is the mistake it exists to
+#    catch. On Windows use /tmp/smoke/Scripts/python.exe.
+cd /tmp && /tmp/smoke/bin/python "$OLDPWD/scripts/smoke_wheel.py"
+```
+
+The rest of the gate is the ordinary suite: `pytest tests/ -q`, `ruff check` and
+`ruff format --check` over `complexplorer/ tests/ examples/ scripts/`, `openspec validate --specs`,
+and — before a release, not on every push — `pytest --nbmake examples/notebooks/`.
+
+**What the gate caught on its first run (2026-09-17).** Two shipped defects, both
+`UnicodeEncodeError` on a Windows console using a legacy code page, both fixed in C4 with
+regression tests in `tests/unit/test_console_encoding.py`:
+
+- `complexplorer list` died on the preset title `z³ - z` under cp437, the default in a stock
+  `cmd.exe`. That is the first command in the quickstart.
+- An STL export died on a `✗` status marker under cp1252 — after building the mesh, before
+  writing the file.
+
+Neither was reachable from the test suite, which never encodes output for a console. This is the
+argument for the gate: the tests cover the library, the gate covers the product.
+
+---
+
 # P0 — complete before release
 
 ## 1. Make the visual showcase a release gate

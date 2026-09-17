@@ -35,15 +35,14 @@ from pathlib import Path
 
 os.environ.setdefault("PYVISTA_OFF_SCREEN", "true")
 
+import matplotlib
+import tour
+
 import complexplorer as cp
 from complexplorer import generate_gallery
 from complexplorer._version import __version__
 from complexplorer.core.presets import catalog
 from complexplorer.plotting.matplotlib.plot_2d import plot as plot_2d
-
-import tour
-
-import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -140,27 +139,51 @@ def _colormap_family() -> list[tuple[str, cp.Colormap, str]]:
         ("phase_basic", cp.Phase(), "cp.Phase()"),
         ("phase_enhanced", cp.Phase(phase_sectors=6), "cp.Phase(phase_sectors=6)"),
         ("phase_modulus", cp.Phase(r_linear_step=0.6), "cp.Phase(r_linear_step=0.6)"),
-        ("phase_full", cp.Phase(phase_sectors=6, auto_scale_r=True),
-         "cp.Phase(phase_sectors=6, auto_scale_r=True)"),
+        (
+            "phase_full",
+            cp.Phase(phase_sectors=6, auto_scale_r=True),
+            "cp.Phase(phase_sectors=6, auto_scale_r=True)",
+        ),
         ("oklab_phase", cp.OklabPhase(phase_sectors=6), "cp.OklabPhase(phase_sectors=6)"),
-        ("perceptual_pastel", cp.PerceptualPastel(phase_sectors=6),
-         "cp.PerceptualPastel(phase_sectors=6)"),
-        ("analogous_wedge", cp.AnalogousWedge(phase_sectors=6),
-         "cp.AnalogousWedge(phase_sectors=6)"),
-        ("diverging_warm_cool", cp.DivergingWarmCool(phase_sectors=6),
-         "cp.DivergingWarmCool(phase_sectors=6)"),
+        (
+            "perceptual_pastel",
+            cp.PerceptualPastel(phase_sectors=6),
+            "cp.PerceptualPastel(phase_sectors=6)",
+        ),
+        (
+            "analogous_wedge",
+            cp.AnalogousWedge(phase_sectors=6),
+            "cp.AnalogousWedge(phase_sectors=6)",
+        ),
+        (
+            "diverging_warm_cool",
+            cp.DivergingWarmCool(phase_sectors=6),
+            "cp.DivergingWarmCool(phase_sectors=6)",
+        ),
         ("isoluminant", cp.Isoluminant(phase_sectors=6), "cp.Isoluminant(phase_sectors=6)"),
-        ("cubehelix_phase", cp.CubehelixPhase(phase_sectors=6),
-         "cp.CubehelixPhase(phase_sectors=6)"),
+        (
+            "cubehelix_phase",
+            cp.CubehelixPhase(phase_sectors=6),
+            "cp.CubehelixPhase(phase_sectors=6)",
+        ),
         ("ink_paper", cp.InkPaper(phase_sectors=6), "cp.InkPaper(phase_sectors=6)"),
-        ("earth_topographic", cp.EarthTopographic(phase_sectors=6),
-         "cp.EarthTopographic(phase_sectors=6)"),
+        (
+            "earth_topographic",
+            cp.EarthTopographic(phase_sectors=6),
+            "cp.EarthTopographic(phase_sectors=6)",
+        ),
         ("four_quadrant", cp.FourQuadrant(phase_sectors=6), "cp.FourQuadrant(phase_sectors=6)"),
         ("chessboard", cp.Chessboard(spacing=0.25), "cp.Chessboard(spacing=0.25)"),
-        ("polar_linear", cp.PolarChessboard(phase_sectors=6, spacing=0.25),
-         "cp.PolarChessboard(phase_sectors=6, spacing=0.25)"),
-        ("polar_log", cp.PolarChessboard(phase_sectors=6, r_log=np.e),
-         "cp.PolarChessboard(phase_sectors=6, r_log=np.e)"),
+        (
+            "polar_linear",
+            cp.PolarChessboard(phase_sectors=6, spacing=0.25),
+            "cp.PolarChessboard(phase_sectors=6, spacing=0.25)",
+        ),
+        (
+            "polar_log",
+            cp.PolarChessboard(phase_sectors=6, r_log=np.e),
+            "cp.PolarChessboard(phase_sectors=6, r_log=np.e)",
+        ),
         ("logrings", cp.LogRings(log_spacing=0.2), "cp.LogRings(log_spacing=0.2)"),
     ]
 
@@ -186,6 +209,7 @@ SURFACE_FAMILY = {
 # ---------------------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------------------
+
 
 def _write_json(path: Path, obj: dict) -> None:
     """Deterministic JSON: sorted keys, stable indent, LF, trailing newline."""
@@ -270,9 +294,7 @@ def _render_portrait_mpl(
     profile = RENDER_PROFILES["portrait"]
     fig, ax = plt.subplots(figsize=profile["figsize"])
     try:
-        plot_2d(
-            domain, func, cmap=cmap, ax=ax, legend=legend, resolution=profile["resolution"]
-        )
+        plot_2d(domain, func, cmap=cmap, ax=ax, legend=legend, resolution=profile["resolution"])
         path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(
             path,
@@ -289,14 +311,20 @@ def _render_portrait_mpl(
 # Per-preset 3D renders
 # ---------------------------------------------------------------------------------------
 
+
 def _render_landscape(preset, path: Path) -> None:
     profile = RENDER_PROFILES["landscape"]
     sc = preset.scaling()
     plotter = cp.plot_landscape_pv(
-        preset.domain(), preset.func, cmap=preset.colormap(),
-        modulus_mode=sc["method"], modulus_params=sc["params"],
-        resolution=profile["resolution"], window_size=profile["window"],
-        interactive=False, return_plotter=True,
+        preset.domain(),
+        preset.func,
+        cmap=preset.colormap(),
+        modulus_mode=sc["method"],
+        modulus_params=sc["params"],
+        resolution=profile["resolution"],
+        window_size=profile["window"],
+        interactive=False,
+        return_plotter=True,
         show_orientation=profile["orientation_widget"],
     )
     _style(plotter, profile)
@@ -307,9 +335,13 @@ def _render_sphere(preset, path: Path) -> None:
     # domain=None -> no stereographic mask -> the FULL sphere (both poles), no "cup".
     profile = RENDER_PROFILES["sphere"]
     plotter = cp.riemann_pv(
-        preset.func, cmap=preset.colormap(), modulus_mode="constant",
-        resolution=profile["resolution"], window_size=profile["window"],
-        interactive=False, return_plotter=True,
+        preset.func,
+        cmap=preset.colormap(),
+        modulus_mode="constant",
+        resolution=profile["resolution"],
+        window_size=profile["window"],
+        interactive=False,
+        return_plotter=True,
         show_orientation=profile["orientation_widget"],
     )
     _style(plotter, profile)
@@ -321,10 +353,14 @@ def _render_ornament(preset, path: Path) -> None:
     profile = RENDER_PROFILES["ornament"]
     sc = preset.scaling()
     plotter = cp.riemann_pv(
-        preset.func, cmap=preset.colormap(),
-        modulus_mode=sc["method"], modulus_params=sc["params"],
-        resolution=profile["resolution"], window_size=profile["window"],
-        interactive=False, return_plotter=True,
+        preset.func,
+        cmap=preset.colormap(),
+        modulus_mode=sc["method"],
+        modulus_params=sc["params"],
+        resolution=profile["resolution"],
+        window_size=profile["window"],
+        interactive=False,
+        return_plotter=True,
         show_orientation=profile["orientation_widget"],
     )
     _style(plotter, profile)
@@ -340,9 +376,12 @@ SURFACE_CAMERA = {"log": (2.5, 2.5, 3.5)}
 def _render_surface_family(family: str, kw: dict, path: Path) -> None:
     profile = RENDER_PROFILES["surface"]
     plotter = cp.riemann_surface_pv(
-        family, **kw,
-        resolution=profile["resolution"], window_size=profile["window"],
-        interactive=False, return_plotter=True,
+        family,
+        **kw,
+        resolution=profile["resolution"],
+        window_size=profile["window"],
+        interactive=False,
+        return_plotter=True,
         show_orientation=profile["orientation_widget"],
         camera_position=SURFACE_CAMERA.get(family, (2.5, 2.5, 2.5)),
     )
@@ -359,9 +398,13 @@ def _render_callable(family: str, func, domain, path: Path, modulus_mode: str = 
     """Render an arbitrary callable (not a catalog preset) in a family's profile."""
     profile = RENDER_PROFILES[family]
     plotter = cp.plot_landscape_pv(
-        domain, func, modulus_mode=modulus_mode,
-        resolution=profile["resolution"], window_size=profile["window"],
-        interactive=False, return_plotter=True,
+        domain,
+        func,
+        modulus_mode=modulus_mode,
+        resolution=profile["resolution"],
+        window_size=profile["window"],
+        interactive=False,
+        return_plotter=True,
         show_orientation=profile["orientation_widget"],
     )
     _style(plotter, profile)
@@ -380,21 +423,22 @@ _RENDERERS = {
 # Snippets (registry-driven — the expression strings are math notation, not runnable code)
 # ---------------------------------------------------------------------------------------
 
+
 def _snippet(preset, rtype: str) -> str:
     head = f'preset = cp.catalog.get("{preset.id}")   # f(z) = {preset.expression}'
     if rtype == "portrait":
         body = "cp.plot(preset.domain(), preset.func, cmap=preset.colormap())"
     elif rtype == "landscape":
         body = (
-            'sc = preset.scaling()\n'
+            "sc = preset.scaling()\n"
             "cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),\n"
             '                     modulus_mode=sc["method"], modulus_params=sc["params"])'
         )
     elif rtype == "sphere":
-        body = 'cp.riemann_pv(preset.func, cmap=preset.colormap())   # full sphere'
+        body = "cp.riemann_pv(preset.func, cmap=preset.colormap())   # full sphere"
     elif rtype == "ornament":
         body = (
-            'sc = preset.scaling()\n'
+            "sc = preset.scaling()\n"
             "cp.riemann_pv(preset.func, cmap=preset.colormap(),\n"
             '              modulus_mode=sc["method"], modulus_params=sc["params"])  # relief'
         )
@@ -422,25 +466,52 @@ def _colormap_snippet(ctor: str) -> str:
 # Sections are ordered by idea, not by registry id. A preset lands in the first section whose
 # tag it carries, so each one appears exactly once.
 PAGE_SECTIONS = [
-    ("phase-portraits", "Phase portraits", None,
-     "Hue is the phase of f(z); the shaded cells are contour bands of |f(z)|. Zeros and poles "
-     "read as opposite winding directions."),
-    ("mapping-and-topology", "Mapping and topology", "canonical",
-     "The same functions lifted off the plane: magnitude as height, and the sphere that "
-     "compactifies the plane so infinity has a place to sit."),
-    ("riemann-surfaces", "Riemann surfaces", "branches",
-     "Multivalued families become single-valued on their covering surface. Branch points and "
-     "cuts are geometry here, not bookkeeping."),
-    ("engineering", "Engineering mode", None,
-     "A transfer function is a complex function, so the whole library applies to it."),
-    ("colormaps", "Colormaps", None,
-     "One reference function under every colormap the package exports."),
-    ("physical-output", "Physical output", "ornament",
-     "Modulus-scaled relief, exported as a watertight mesh and printed."),
+    (
+        "phase-portraits",
+        "Phase portraits",
+        None,
+        "Hue is the phase of f(z); the shaded cells are contour bands of |f(z)|. Zeros and poles "
+        "read as opposite winding directions.",
+    ),
+    (
+        "mapping-and-topology",
+        "Mapping and topology",
+        "canonical",
+        "The same functions lifted off the plane: magnitude as height, and the sphere that "
+        "compactifies the plane so infinity has a place to sit.",
+    ),
+    (
+        "riemann-surfaces",
+        "Riemann surfaces",
+        "branches",
+        "Multivalued families become single-valued on their covering surface. Branch points and "
+        "cuts are geometry here, not bookkeeping.",
+    ),
+    (
+        "engineering",
+        "Engineering mode",
+        None,
+        "A transfer function is a complex function, so the whole library applies to it.",
+    ),
+    (
+        "colormaps",
+        "Colormaps",
+        None,
+        "One reference function under every colormap the package exports.",
+    ),
+    (
+        "physical-output",
+        "Physical output",
+        "ornament",
+        "Modulus-scaled relief, exported as a watertight mesh and printed.",
+    ),
 ]
 
-_TAG_SECTION = {"branches": "riemann-surfaces", "ornament": "physical-output",
-                "canonical": "mapping-and-topology"}
+_TAG_SECTION = {
+    "branches": "riemann-surfaces",
+    "ornament": "physical-output",
+    "canonical": "mapping-and-topology",
+}
 
 RENDER_ALT = {
     "portrait": "2D phase portrait",
@@ -489,8 +560,17 @@ def _entry(title: str, caption: str, figures: list[str], snippet: str) -> str:
         lines += [caption, ""]
     lines += ["<p>" + " ".join(figures) + "</p>", ""]
     if snippet:
-        lines += ["<details>", "<summary>Show the code</summary>", "", "```python", snippet,
-                  "```", "", "</details>", ""]
+        lines += [
+            "<details>",
+            "<summary>Show the code</summary>",
+            "",
+            "```python",
+            snippet,
+            "```",
+            "",
+            "</details>",
+            "",
+        ]
     return "\n".join(lines)
 
 
@@ -499,9 +579,13 @@ def _generate_docs_page(manifest: dict, docs_dir: Path) -> None:
     tour_by_section: dict[str, list[dict]] = {}
     for rec in manifest.get("tour", []):
         key = rec["section"].replace(" ", "-").replace("and-", "and-")
-        key = {"phase-portraits": "phase-portraits", "mapping-and-topology": "mapping-and-topology",
-               "riemann-surfaces": "riemann-surfaces", "engineering": "engineering",
-               "physical-output": "physical-output"}.get(key, key)
+        key = {
+            "phase-portraits": "phase-portraits",
+            "mapping-and-topology": "mapping-and-topology",
+            "riemann-surfaces": "riemann-surfaces",
+            "engineering": "engineering",
+            "physical-output": "physical-output",
+        }.get(key, key)
         tour_by_section.setdefault(key, []).append(rec)
 
     presets_by_section: dict[str, list[dict]] = {}
@@ -523,9 +607,13 @@ def _generate_docs_page(manifest: dict, docs_dir: Path) -> None:
     if hero:
         pick = next((h for h in hero if h["id"].endswith(tour.HERO_VARIANT)), hero[0])
         out += [
-            _figure(pick["file"], pick,
-                    "Six-panel montage: domain coloring, analytic landscape, Riemann relief, "
-                    "Riemann surface, transfer functions and a 3D-printable ornament", VIEW_PX),
+            _figure(
+                pick["file"],
+                pick,
+                "Six-panel montage: domain coloring, analytic landscape, Riemann relief, "
+                "Riemann surface, transfer functions and a 3D-printable ornament",
+                VIEW_PX,
+            ),
             "",
         ]
 
@@ -541,8 +629,12 @@ def _generate_docs_page(manifest: dict, docs_dir: Path) -> None:
         entries = []
         for rec in tour_by_section.get(key, []):
             entries.append(
-                _entry(rec["title"], rec["caption"],
-                       [_figure(rec["file"], rec, rec["alt"], 620)], rec["snippet"])
+                _entry(
+                    rec["title"],
+                    rec["caption"],
+                    [_figure(rec["file"], rec, rec["alt"], 620)],
+                    rec["snippet"],
+                )
             )
         if key == "colormaps":
             ref = catalog.get(manifest["colormaps"]["reference_preset"])
@@ -551,18 +643,24 @@ def _generate_docs_page(manifest: dict, docs_dir: Path) -> None:
                 for r in manifest["colormaps"]["renders"]
             ]
             entries.append(
-                _entry(f"Every colormap on {ref.expression}",
-                       "The same function under each colormap the package exports.",
-                       figures,
-                       _colormap_snippet(manifest["colormaps"]["renders"][0]["ctor"]))
+                _entry(
+                    f"Every colormap on {ref.expression}",
+                    "The same function under each colormap the package exports.",
+                    figures,
+                    _colormap_snippet(manifest["colormaps"]["renders"][0]["ctor"]),
+                )
             )
         for rec in presets_by_section.get(key, []):
             preset = catalog.get(rec["id"])
             figures = [
-                _figure(rel,
-                        {"thumb": (rec.get("thumbs") or {}).get(rtype),
-                         "view": (rec.get("views") or {}).get(rtype)},
-                        f"{RENDER_ALT.get(rtype, rtype)} of {preset.expression}")
+                _figure(
+                    rel,
+                    {
+                        "thumb": (rec.get("thumbs") or {}).get(rtype),
+                        "view": (rec.get("views") or {}).get(rtype),
+                    },
+                    f"{RENDER_ALT.get(rtype, rtype)} of {preset.expression}",
+                )
                 for rtype, rel in rec["renders"].items()
             ]
             snippet = "\n\n# ---\n".join(_snippet(preset, rt) for rt in rec["renders"])
@@ -579,6 +677,7 @@ def _generate_docs_page(manifest: dict, docs_dir: Path) -> None:
 # ---------------------------------------------------------------------------------------
 # Sections
 # ---------------------------------------------------------------------------------------
+
 
 def _existing_manifest(gallery_dir: Path) -> dict:
     path = gallery_dir / "showcase.json"
@@ -621,8 +720,7 @@ def _render_presets(gallery_dir: Path) -> list[dict]:
                     for rtype, rel in renders.items()
                 },
                 "views": {
-                    rtype: _view(gallery_dir / rel, gallery_dir)
-                    for rtype, rel in renders.items()
+                    rtype: _view(gallery_dir / rel, gallery_dir) for rtype, rel in renders.items()
                 },
                 "profiles": {
                     rtype: {

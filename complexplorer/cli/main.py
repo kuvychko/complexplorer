@@ -206,7 +206,26 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _tolerate_a_legacy_console() -> None:
+    """Keep a legacy code page from turning printed output into a crash.
+
+    A stock Windows console is cp437, which cannot encode the ``z³ - z`` in a preset title, so
+    a plain ``complexplorer list`` ends in ``UnicodeEncodeError`` on the platform least likely to
+    have changed its code page. Preset titles and descriptions are mathematical text; the fix is to
+    degrade the few characters a console cannot show, not to drop the mathematics from the text.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is None:  # a stream something else already replaced
+            continue
+        try:
+            reconfigure(errors="backslashreplace")
+        except (ValueError, OSError):  # a stream that cannot be reconfigured is left alone
+            pass
+
+
 def main(argv: list[str] | None = None) -> int:
+    _tolerate_a_legacy_console()
     args = build_parser().parse_args(argv)
     handler: Callable[[argparse.Namespace], int] = args.handler
     try:
