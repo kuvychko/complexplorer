@@ -345,6 +345,10 @@ def _orbit_loop(ctx, out: Path) -> None:
 # The hero montage
 # ---------------------------------------------------------------------------------------
 
+# Chosen in visual-review round R2: captions sit on the sheet under each panel, leaving the art
+# uninterrupted. `_compose_overlay` keeps the alternative (a band on each panel) available.
+HERO_VARIANT = "labels_below"
+
 HERO_PANELS = [
     ("domain coloring", "portrait"),
     ("analytic landscape", "landscape"),
@@ -423,13 +427,17 @@ def _compose_overlay(panels: list[tuple[Path, str]], out: Path, *, columns: int)
     sheet.save(out)
 
 
-def render_hero(gallery_dir: Path, ctx: dict) -> list[dict]:
-    """Two candidate hero montages (labels below the panels, or on them)."""
+def render_hero(
+    gallery_dir: Path, ctx: dict, variants: tuple[str, ...] = (HERO_VARIANT,)
+) -> list[dict]:
+    """The hero montage in the layout chosen in round R2 (or any variant asked for)."""
+    layouts = {"labels_below": _compose, "labels_on_panel": _compose_overlay}
     records = []
     with tempfile.TemporaryDirectory() as tmp:
         paths = _hero_panels(ctx, Path(tmp))
         panels = [(paths[kind], label) for label, kind in HERO_PANELS]
-        for variant, compose in (("labels_below", _compose), ("labels_on_panel", _compose_overlay)):
+        for variant in variants:
+            compose = layouts[variant]
             rel = f"_tour/hero_{variant}.png"
             print(f"  hero: {variant}")
             if compose is _compose:

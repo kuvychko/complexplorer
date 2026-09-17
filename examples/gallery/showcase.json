@@ -173,34 +173,6 @@
       "thumb": "thumb/_tour/hero_labels_below.png",
       "variant": "labels_below",
       "view": "view/_tour/hero_labels_below.png"
-    },
-    {
-      "file": "_tour/hero_labels_on_panel.png",
-      "id": "hero_labels_on_panel",
-      "panels": [
-        "domain coloring",
-        "analytic landscape",
-        "Riemann relief",
-        "Riemann surface",
-        "transfer functions",
-        "3D-printable"
-      ],
-      "photo_used": true,
-      "px": [
-        1900,
-        1270
-      ],
-      "sources": {
-        "engineering": "engineering.png",
-        "landscape": "landscape.png",
-        "physical": "printed_ornament.png",
-        "portrait": "portrait.png",
-        "relief": "relief.png",
-        "surface": "surface.png"
-      },
-      "thumb": "thumb/_tour/hero_labels_on_panel.png",
-      "variant": "labels_on_panel",
-      "view": "view/_tour/hero_labels_on_panel.png"
     }
   ],
   "presets": [

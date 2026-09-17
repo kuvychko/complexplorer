@@ -133,11 +133,13 @@ Checked on the pushed branch: the hero, the section figures and the collapsed sn
 GitHub, and the table-of-contents anchors resolve. Found there and fixed: the page pulled about
 45 MB because figures above thumbnail width served full renders.
 
-### R2 — hero montage (in review)
+### R2 — hero montage (decided 2026-09-17)
 
-Two layouts, labels under the panels or in a band on each panel, both at ~1900 px so they stay
-sharp at GitHub's ~830 px README width. Every render is trimmed to its subject, because the
-untrimmed 3D panels carried wide margins that made the surface and landscape look small.
+**Labels below the panels**, chosen over the band-on-panel variant: the art stays uninterrupted.
+The montage is ~1972 x 1406 px, so it holds up at GitHub's ~830 px README column, and every panel
+is trimmed to its subject (untrimmed, the 3D panels carried wide margins that made the surface and
+landscape look small). The alternative layout remains available in `examples/tour.py`, but only
+the chosen one is produced and committed.
 
 ### R3 — full regeneration (2026-09-17)
 
@@ -152,6 +154,14 @@ all three levels, and was approved on the re-look.
 **Physical output:** the author supplied a photograph of the printed pole-flower ornament and a
 captioned composite of the relief beside it. Both are curated assets; the photograph now fills the
 hero's physical panel and the third panel of the triptych, replacing the clay-mesh placeholder.
+
+### CI finding (2026-09-17)
+
+The `Phase` golden fixture was recorded on Windows and compared with `np.array_equal`, so it
+failed all ten cases on Linux CI while the local difference was exactly 0.0 — platform-level
+last-bit variation in the trigonometric and logarithmic work, not a change in `Phase`. The
+comparison now allows half an 8-bit level (1/512), below which a saved PNG pixel cannot change.
+Rendered pixel data is environment-sensitive; only the manifests are byte-stable.
 
 **Defects found during R0, owned by `curate-rev3-visual-tour`:**
 

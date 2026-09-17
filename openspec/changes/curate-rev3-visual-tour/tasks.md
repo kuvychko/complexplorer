@@ -53,7 +53,7 @@
 
 - [x] 6.1 Generate the 2 × 3 montage from already-rendered assets, with consistent crops, labels
   and dimensions, and the mesh-render fallback for the physical-output panel.
-- [ ] 6.2 Preview the montage at GitHub README and PyPI widths in light and dark, publish R2, and
+- [x] 6.2 Preview the montage at GitHub README and PyPI widths in light and dark, publish R2, and
   iterate to approval.
 
 ## 7. The gallery page

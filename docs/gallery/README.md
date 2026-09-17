@@ -6,7 +6,7 @@ reproduces from one command.
 
 <p align="center">
   <a href="gallery.generated.md">
-    <img src="../../examples/gallery/_tour/hero_labels_on_panel.png" width="90%"
+    <img src="../../examples/gallery/_tour/hero_labels_below.png" width="90%"
          alt="Six-panel montage: domain coloring, analytic landscape, Riemann relief, Riemann surface, transfer functions and a 3D-printable ornament">
   </a>
 </p>

@@ -521,7 +521,7 @@ def _generate_docs_page(manifest: dict, docs_dir: Path) -> None:
     ]
 
     if hero:
-        pick = next((h for h in hero if h["id"].endswith("labels_on_panel")), hero[0])
+        pick = next((h for h in hero if h["id"].endswith(tour.HERO_VARIANT)), hero[0])
         out += [
             _figure(pick["file"], pick,
                     "Six-panel montage: domain coloring, analytic landscape, Riemann relief, "

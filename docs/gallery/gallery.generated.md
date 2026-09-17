@@ -7,7 +7,7 @@ Every image here is produced by `examples/showcase.py` from the curated preset r
 (`cp.catalog`) and the tour recipes in `examples/tour.py`. Thumbnails link to the
 full-resolution render.
 
-<a href="../../examples/gallery/_tour/hero_labels_on_panel.png"><img src="../../examples/gallery/view/_tour/hero_labels_on_panel.png" alt="Six-panel montage: domain coloring, analytic landscape, Riemann relief, Riemann surface, transfer functions and a 3D-printable ornament" width="900"></a>
+<a href="../../examples/gallery/_tour/hero_labels_below.png"><img src="../../examples/gallery/view/_tour/hero_labels_below.png" alt="Six-panel montage: domain coloring, analytic landscape, Riemann relief, Riemann surface, transfer functions and a 3D-printable ornament" width="900"></a>
 
 ## What is here
 
