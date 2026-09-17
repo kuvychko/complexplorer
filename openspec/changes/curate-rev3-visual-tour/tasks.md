@@ -75,13 +75,14 @@
   - the hero montage is recorded with its source assets
   - every snippet parses and references only exported names
   - the orbit loop stays within its size budget
-- [ ] 8.3 Round R4: check the rendered page and the montage in context on the pushed branch, and
-  confirm the long description renders.
+- [x] 8.3 Round R4: checked on the pushed branch — the hero, section figures and collapsed
+  snippets render on GitHub and the table-of-contents anchors resolve. The README's own rendering
+  is checked by `prepare-3-0-release-notes`, which rewrites it.
 
 ## 9. Verification and bookkeeping
 
-- [ ] 9.1 Run the gate: `pytest`, `ruff check`/`format`, `openspec validate --specs`,
+- [x] 9.1 Run the gate: `pytest`, `ruff check`/`format`, `openspec validate --specs`,
   `openspec validate curate-rev3-visual-tour`, a clean `python examples/showcase.py` with the diff
   reviewed, and `index.json` byte-stability.
-- [ ] 9.2 Record the R0b outcome and the final profile table in `openspec/REV3_CLOSEOUT.md`, and
+- [x] 9.2 Record the R0b outcome and the final profile table in `openspec/REV3_CLOSEOUT.md`, and
   flip C2's status in `openspec/ROADMAP.md`.

@@ -86,6 +86,11 @@ Review board: https://claude.ai/artifact/L8avJ54troJqabjh8iERHw
   corners stay inside the frame)
 - window: 1560 x 1560 px
 - 2D portraits: axes and ticks kept, phase-wheel legend inset, tight bounding box
+- camera: every render refits the camera to its subject before zooming, so framing is
+  consistent per family (landscape zoom 0.95 — above 1.0 the domain corners clip)
+- log Riemann surfaces render at `r_max=3.0` from (2.5, 2.5, 3.5)
+- page images are served as 400 px `thumb/` and 900 px `view/` derivatives (6.8 MB per page
+  instead of 45 MB); each figure links its full render
 
 ### R0b — resolution (decided 2026-09-16)
 
@@ -121,6 +126,12 @@ blurry. let's make sure we are not downsampling somewhere."* Correct on both cou
   the Bode panel is rendered at the grid's exact width.
 - the review page itself showed each ~3700 px asset through a 400 px gallery thumbnail; its cards
   now use 1400 px previews.
+
+### R4 — in context (2026-09-17)
+
+Checked on the pushed branch: the hero, the section figures and the collapsed snippets render on
+GitHub, and the table-of-contents anchors resolve. Found there and fixed: the page pulled about
+45 MB because figures above thumbnail width served full renders.
 
 ### R2 — hero montage (in review)
 
