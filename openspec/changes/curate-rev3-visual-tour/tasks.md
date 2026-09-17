@@ -40,7 +40,7 @@
 - [x] 4.7 Physical-output triptych: relief render, STL mesh render (clay shading), and the photo
   slot.
 - [x] 4.8 Orbit loop GIF of one surface or relief, within the ~3 MB budget.
-- [ ] 4.9 Render R1 into staging, publish it to the review page, and iterate until every tour asset
+- [x] 4.9 Render R1 into staging, publish it to the review page, and iterate until every tour asset
   is approved.
 
 ## 5. Curated physical-output assets
@@ -51,7 +51,7 @@
 
 ## 6. Hero montage — review round R2
 
-- [ ] 6.1 Generate the 2 × 3 montage from already-rendered assets, with consistent crops, labels
+- [x] 6.1 Generate the 2 × 3 montage from already-rendered assets, with consistent crops, labels
   and dimensions, and the mesh-render fallback for the physical-output panel.
 - [ ] 6.2 Preview the montage at GitHub README and PyPI widths in light and dark, publish R2, and
   iterate to approval.

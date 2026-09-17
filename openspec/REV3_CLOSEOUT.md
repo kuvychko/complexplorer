@@ -107,6 +107,27 @@ defect: portraits sampled the domain at 400 x 400 while being saved near 1500 px
 upscaled about 3.75x and their phase-sector boundaries stair-stepped. `generate_gallery` now takes
 a `resolution` argument, defaulting to one sample per output pixel.
 
+### R1 — curated tour (approved 2026-09-17)
+
+All eight tour assets approved: legend portrait, portrait-to-landscape pair, engineering figure
+(notch filter), composition proof, composite domain, sphere-vs-surface, physical triptych, and the
+orbit loop.
+
+Owner note on the first pass: *"The images look good - but the text (axis labels, any text) is
+blurry. let's make sure we are not downsampling somewhere."* Correct on both counts:
+
+- the composition step pasted finished panels into a 760 px cell, halving matplotlib's already
+  rasterised text. Panels are now rendered AT their final size (`CELL = 1200`) and pasted 1:1;
+  the Bode panel is rendered at the grid's exact width.
+- the review page itself showed each ~3700 px asset through a 400 px gallery thumbnail; its cards
+  now use 1400 px previews.
+
+### R2 — hero montage (in review)
+
+Two layouts, labels under the panels or in a band on each panel, both at ~1900 px so they stay
+sharp at GitHub's ~830 px README width. Every render is trimmed to its subject, because the
+untrimmed 3D panels carried wide margins that made the surface and landscape look small.
+
 **Defects found during R0, owned by `curate-rev3-visual-tour`:**
 
 - The committed gallery portraits clip the `Im(z)` axis label at the left edge and carry a wide top

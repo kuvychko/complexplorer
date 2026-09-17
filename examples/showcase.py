@@ -571,11 +571,18 @@ def main(only: str = "all", out: str | None = None) -> None:
         colormap_records = previous.get("colormaps", {}).get("renders", [])
 
     curated = _curated_records(gallery_dir)
+    ctx = _tour_context(gallery_dir, curated)
     if only in ("all", "tour"):
         print("Rendering the curated tour ...")
-        tour_records = tour.render_tour(gallery_dir, _tour_context(gallery_dir, curated))
+        tour_records = tour.render_tour(gallery_dir, ctx)
     else:
         tour_records = previous.get("tour", [])
+
+    if only in ("all", "hero"):
+        print("Rendering the hero montage ...")
+        hero_records = tour.render_hero(gallery_dir, ctx)
+    else:
+        hero_records = previous.get("hero", [])
 
     manifest = {
         "schema_version": SCHEMA_VERSION,
@@ -586,12 +593,14 @@ def main(only: str = "all", out: str | None = None) -> None:
         "colormaps": {"reference_preset": COLORMAP_REFERENCE, "renders": colormap_records},
         "presets": preset_records,
         "tour": tour_records,
+        "hero": hero_records,
     }
     _write_json(gallery_dir / "showcase.json", manifest)
     _generate_docs_page(manifest, docs_dir)
     print(
         f"Done. {len(preset_records)} presets, {len(colormap_records)} colormaps, "
-        f"{len(tour_records)} tour, {len(curated)} curated -> {gallery_dir}"
+        f"{len(tour_records)} tour, {len(hero_records)} hero, {len(curated)} curated "
+        f"-> {gallery_dir}"
     )
 
 

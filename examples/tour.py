@@ -43,6 +43,11 @@ PANEL_INK = (26, 30, 36)
 CELL = 1200
 PANEL_FIGSIZE = (5.0, 5.0)
 
+# The hero is displayed about 830px wide on GitHub, so ~1900px across is sharp on a high-dpi
+# screen without being a heavy download. Text-bearing panels are rendered AT the cell size;
+# the PyVista panels are rendered large and shrunk, which only improves them.
+HERO_CELL = 620
+
 
 # ---------------------------------------------------------------------------------------
 # Composition helpers
@@ -70,6 +75,30 @@ def _wrap(draw, text: str, font, max_width: int) -> list[str]:
     if line:
         lines.append(line)
     return lines
+
+
+def _trim(path: Path, margin: int = 12) -> None:
+    """Crop a render down to its subject, so panels do not carry unequal empty margins.
+
+    The PyVista grounds are near-uniform, so the background colour is taken from a corner and
+    everything close to it is treated as empty space.
+    """
+    from PIL import ImageChops
+
+    with Image.open(path) as raw:
+        img = raw.convert("RGB")
+    background = Image.new("RGB", img.size, img.getpixel((2, 2)))
+    diff = ImageChops.difference(img, background).convert("L").point(lambda v: 255 if v > 10 else 0)
+    box = diff.getbbox()
+    if not box:
+        return
+    left, top, right, bottom = box
+    img.crop((
+        max(0, left - margin),
+        max(0, top - margin),
+        min(img.width, right + margin),
+        min(img.height, bottom + margin),
+    )).save(path)
 
 
 def _mpl_panel(draw, path: Path, *, figsize=PANEL_FIGSIZE, cell: int = CELL) -> None:
@@ -308,6 +337,118 @@ def _orbit_loop(ctx, out: Path) -> None:
     path = plotter.generate_orbital_path(n_points=36, shift=1.1, factor=2.4)
     plotter.orbit_on_path(path, write_frames=True, step=0.0, progress_bar=False)
     plotter.close()
+
+
+# ---------------------------------------------------------------------------------------
+# The hero montage
+# ---------------------------------------------------------------------------------------
+
+HERO_PANELS = [
+    ("domain coloring", "portrait"),
+    ("analytic landscape", "landscape"),
+    ("Riemann relief", "relief"),
+    ("Riemann surface", "surface"),
+    ("transfer functions", "engineering"),
+    ("3D-printable", "physical"),
+]
+
+
+def _hero_panels(ctx, tmp_dir: Path) -> dict[str, Path]:
+    """Render the six hero panels, each at the size it will occupy."""
+    reference = catalog.get(REFERENCE)
+    flower = catalog.get("pole_flower_10")
+    paths = {kind: tmp_dir / f"{kind}.png" for _, kind in HERO_PANELS}
+
+    # text-bearing panels: rendered natively so nothing shrinks their labels
+    ctx["portrait_mpl"](
+        reference.domain(), reference.func, reference.colormap(),
+        paths["portrait"], legend=True, dpi=HERO_CELL / 4,
+    )
+    H = cp.ee.TransferFunction(NOTCH_NUM, NOTCH_DEN)
+
+    def _transfer_no_title(ax):
+        cp.ee.transfer_portrait(H, ax=ax, legend=True)
+        ax.set_title("")  # the montage supplies the label
+
+    _mpl_panel(_transfer_no_title, paths["engineering"], cell=HERO_CELL)
+
+    # 3D panels: rendered at full profile size, shrunk by the composition
+    ctx["render_family"]("landscape", reference, paths["landscape"])
+    ctx["render_family"]("ornament", flower, paths["relief"])
+    ctx["render_surface"]("power", {"n": 2}, paths["surface"])
+
+    for kind in ("landscape", "relief", "surface"):
+        _trim(paths[kind])
+
+    photo = ctx.get("photo")
+    if photo:
+        paths["physical"] = Path(photo)
+    else:
+        scaling = flower.scaling()
+        generator = OrnamentGenerator(
+            flower.func,
+            resolution=150,
+            scaling=scaling["method"],
+            scaling_params=scaling["params"],
+            cmap=flower.colormap(),
+        )
+        _clay_mesh(ctx, generator.generate_ornament(), paths["physical"])
+        _trim(paths["physical"])
+    return paths
+
+
+def _compose_overlay(panels: list[tuple[Path, str]], out: Path, *, columns: int) -> None:
+    """Variant B: labels sit on the panel itself, so the grid reads as one image."""
+    cell, pad = HERO_CELL, 10
+    font = _font(23)
+    rows = (len(panels) + columns - 1) // columns
+    sheet = Image.new(
+        "RGB", (columns * cell + pad * (columns + 1), rows * cell + pad * (rows + 1)), PANEL_BG
+    )
+    draw = ImageDraw.Draw(sheet)
+    for index, (path, label) in enumerate(panels):
+        row, col = divmod(index, columns)
+        x, y = pad + col * (cell + pad), pad + row * (cell + pad)
+        with Image.open(path) as raw:
+            img = raw.convert("RGB")
+        if img.width > cell or img.height > cell:
+            img.thumbnail((cell, cell), Image.LANCZOS)
+        band = font.size + 18
+        sheet.paste(img, (x + (cell - img.width) // 2, y + (cell - band - img.height) // 2))
+        draw.rectangle([x, y + cell - band, x + cell, y + cell], fill=(238, 241, 245))
+        draw.text((x + 12, y + cell - band + 8), label, fill=PANEL_INK, font=font)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    sheet.save(out)
+
+
+def render_hero(gallery_dir: Path, ctx: dict) -> list[dict]:
+    """Two candidate hero montages (labels below the panels, or on them)."""
+    records = []
+    with tempfile.TemporaryDirectory() as tmp:
+        paths = _hero_panels(ctx, Path(tmp))
+        panels = [(paths[kind], label) for label, kind in HERO_PANELS]
+        for variant, compose in (("labels_below", _compose), ("labels_on_panel", _compose_overlay)):
+            rel = f"_tour/hero_{variant}.png"
+            print(f"  hero: {variant}")
+            if compose is _compose:
+                compose(panels, gallery_dir / rel, columns=3, cell=HERO_CELL)
+            else:
+                compose(panels, gallery_dir / rel, columns=3)
+            with Image.open(gallery_dir / rel) as img:
+                size = list(img.size)
+            records.append(
+                {
+                    "id": f"hero_{variant}",
+                    "variant": variant,
+                    "file": rel,
+                    "px": size,
+                    "panels": [label for label, _ in HERO_PANELS],
+                    "sources": {kind: str(Path(p).name) for kind, p in paths.items()},
+                    "photo_used": bool(ctx.get("photo")),
+                    "thumb": ctx["thumbnail"](gallery_dir / rel, gallery_dir),
+                }
+            )
+    return records
 
 
 # ---------------------------------------------------------------------------------------
