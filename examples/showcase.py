@@ -87,8 +87,9 @@ RENDER_PROFILES = {
         "specular": 0.3,
         "anti_aliasing": "ssaa",
         "orientation_widget": False,
-        # Looser than the other families: at 1.22 the domain's corners left the frame.
-        "zoom": 0.94,
+        # The refit already frames the domain tightly (about a 1% margin), so anything above
+        # 1.0 clips the corners. This leaves a small, even border.
+        "zoom": 0.95,
     },
     "sphere": {
         "kind": "pyvista",
@@ -99,7 +100,7 @@ RENDER_PROFILES = {
         "specular": 0.3,
         "anti_aliasing": "ssaa",
         "orientation_widget": False,
-        "zoom": 1.22,
+        "zoom": 1.1,
     },
     "ornament": {
         "kind": "pyvista",
@@ -110,7 +111,7 @@ RENDER_PROFILES = {
         "specular": 0.3,
         "anti_aliasing": "ssaa",
         "orientation_widget": False,
-        "zoom": 1.22,
+        "zoom": 1.1,
     },
     "surface": {
         "kind": "pyvista",
@@ -121,7 +122,7 @@ RENDER_PROFILES = {
         "specular": 0.3,
         "anti_aliasing": "ssaa",
         "orientation_widget": False,
-        "zoom": 1.22,
+        "zoom": 1.1,
     },
 }
 
@@ -219,6 +220,9 @@ def _style(plotter, profile: dict) -> None:
             plotter.enable_anti_aliasing(profile["anti_aliasing"])
         except Exception as exc:  # pragma: no cover - driver dependent
             print(f"    (anti-aliasing unavailable: {exc})")
+    # Fit the camera to the subject first, then zoom. Without this each family framed its
+    # subject differently: the landscapes sat small inside wide empty margins.
+    plotter.reset_camera()
     if profile["zoom"] != 1.0:
         plotter.camera.zoom(profile["zoom"])
 
@@ -313,6 +317,11 @@ def _render_ornament(preset, path: Path) -> None:
     _shoot(plotter, path)
 
 
+# The log surface is a tall spiral ramp: from the default camera its turns are edge-on and
+# read as disconnected crescents, so it gets a higher viewpoint.
+SURFACE_CAMERA = {"log": (1.5, 1.5, 5.0)}
+
+
 def _render_surface_family(family: str, kw: dict, path: Path) -> None:
     profile = RENDER_PROFILES["surface"]
     plotter = cp.riemann_surface_pv(
@@ -320,6 +329,7 @@ def _render_surface_family(family: str, kw: dict, path: Path) -> None:
         resolution=profile["resolution"], window_size=profile["window"],
         interactive=False, return_plotter=True,
         show_orientation=profile["orientation_widget"],
+        camera_position=SURFACE_CAMERA.get(family, (2.5, 2.5, 2.5)),
     )
     _style(plotter, profile)
     _shoot(plotter, path)
@@ -394,31 +404,149 @@ def _colormap_snippet(ctor: str) -> str:
 # Docs page generation
 # ---------------------------------------------------------------------------------------
 
-def _md_entry(title: str, story: str, images: list[str], snippet: str) -> str:
+# Sections are ordered by idea, not by registry id. A preset lands in the first section whose
+# tag it carries, so each one appears exactly once.
+PAGE_SECTIONS = [
+    ("phase-portraits", "Phase portraits", None,
+     "Hue is the phase of f(z); the shaded cells are contour bands of |f(z)|. Zeros and poles "
+     "read as opposite winding directions."),
+    ("mapping-and-topology", "Mapping and topology", "canonical",
+     "The same functions lifted off the plane: magnitude as height, and the sphere that "
+     "compactifies the plane so infinity has a place to sit."),
+    ("riemann-surfaces", "Riemann surfaces", "branches",
+     "Multivalued families become single-valued on their covering surface. Branch points and "
+     "cuts are geometry here, not bookkeeping."),
+    ("engineering", "Engineering mode", None,
+     "A transfer function is a complex function, so the whole library applies to it."),
+    ("colormaps", "Colormaps", None,
+     "One reference function under every colormap the package exports."),
+    ("physical-output", "Physical output", "ornament",
+     "Modulus-scaled relief, exported as a watertight mesh and printed."),
+]
+
+_TAG_SECTION = {"branches": "riemann-surfaces", "ornament": "physical-output",
+                "canonical": "mapping-and-topology"}
+
+RENDER_ALT = {
+    "portrait": "2D phase portrait",
+    "landscape": "3D analytic landscape",
+    "sphere": "Riemann sphere",
+    "ornament": "Riemann relief (ornament)",
+    "surface": "Riemann surface",
+}
+
+
+def _section_of(preset) -> str:
+    for tag in ("branches", "ornament", "canonical"):
+        if tag in preset.tags:
+            return _TAG_SECTION[tag]
+    return "phase-portraits"
+
+
+def _slug(title: str) -> str:
+    """GitHub's heading anchor: lowercased, spaces to hyphens."""
+    return title.lower().replace(" ", "-")
+
+
+def _figure(full: str, thumb: str | None, alt: str, width: int = 420) -> str:
+    """A figure that links to the full-resolution render.
+
+    The thumbnail is only used when it is at least as wide as the display size; above that the
+    full render is served and the browser scales it down, which stays sharp.
+    """
+    src = thumb if (thumb and width <= THUMB_PX) else full
+    return (
+        f'<a href="../../examples/gallery/{full}">'
+        f'<img src="../../examples/gallery/{src}" alt="{alt}" width="{width}"></a>'
+    )
+
+
+def _entry(title: str, caption: str, figures: list[str], snippet: str) -> str:
     lines = [f"### {title}", ""]
-    if story:
-        lines += [story, ""]
-    for img in images:
-        lines.append(f"![{title}](../../examples/gallery/{img})")
-    lines += ["", "```python", snippet, "```", ""]
+    if caption:
+        lines += [caption, ""]
+    lines += ["<p>" + " ".join(figures) + "</p>", ""]
+    if snippet:
+        lines += ["<details>", "<summary>Show the code</summary>", "", "```python", snippet,
+                  "```", "", "</details>", ""]
     return "\n".join(lines)
 
 
 def _generate_docs_page(manifest: dict, docs_dir: Path) -> None:
-    out = ["<!-- GENERATED by examples/showcase.py — do not edit by hand. -->", ""]
-    out += ["# Gallery (generated)", "", "## Functions", ""]
-    for rec in manifest["presets"]:
-        preset = catalog.get(rec["id"])
-        imgs = [rec["renders"][rt] for rt in rec["renders"]]
-        # one snippet per distinct render type, concatenated
-        snip = "\n\n# ---\n".join(_snippet(preset, rt) for rt in rec["renders"])
-        out.append(_md_entry(rec["title"], rec.get("story", ""), imgs, snip))
+    hero = manifest.get("hero") or []
+    tour_by_section: dict[str, list[dict]] = {}
+    for rec in manifest.get("tour", []):
+        key = rec["section"].replace(" ", "-").replace("and-", "and-")
+        key = {"phase-portraits": "phase-portraits", "mapping-and-topology": "mapping-and-topology",
+               "riemann-surfaces": "riemann-surfaces", "engineering": "engineering",
+               "physical-output": "physical-output"}.get(key, key)
+        tour_by_section.setdefault(key, []).append(rec)
 
-    out += ["## Colormaps", ""]
-    ref = catalog.get(manifest["colormaps"]["reference_preset"])
-    out.append(f"*Reference function:* `{ref.expression}` (`{ref.id}`)\n")
-    for r in manifest["colormaps"]["renders"]:
-        out.append(_md_entry(r["name"], "", [r["file"]], _colormap_snippet(r["ctor"])))
+    presets_by_section: dict[str, list[dict]] = {}
+    for rec in manifest["presets"]:
+        presets_by_section.setdefault(_section_of(catalog.get(rec["id"])), []).append(rec)
+
+    out = [
+        "<!-- GENERATED by examples/showcase.py — do not edit by hand.",
+        "     Regenerate with:  python examples/showcase.py  -->",
+        "",
+        "# Gallery",
+        "",
+        "Every image here is produced by `examples/showcase.py` from the curated preset registry",
+        "(`cp.catalog`) and the tour recipes in `examples/tour.py`. Thumbnails link to the",
+        "full-resolution render.",
+        "",
+    ]
+
+    if hero:
+        pick = next((h for h in hero if h["id"].endswith("labels_on_panel")), hero[0])
+        out += [
+            _figure(pick["file"], pick.get("thumb"),
+                    "Six-panel montage: domain coloring, analytic landscape, Riemann relief, "
+                    "Riemann surface, transfer functions and a 3D-printable ornament", 900),
+            "",
+        ]
+
+    out += ["## What is here", ""]
+    for key, title, _tag, _blurb in PAGE_SECTIONS:
+        count = len(presets_by_section.get(key, [])) + len(tour_by_section.get(key, []))
+        if key == "colormaps":
+            count = len(manifest["colormaps"]["renders"])
+        out.append(f"- [{title}](#{_slug(title)}) — {count} figures")
+    out.append("")
+
+    for key, title, _tag, blurb in PAGE_SECTIONS:
+        entries = []
+        for rec in tour_by_section.get(key, []):
+            entries.append(
+                _entry(rec["title"], rec["caption"],
+                       [_figure(rec["file"], rec.get("thumb"), rec["alt"], 620)], rec["snippet"])
+            )
+        if key == "colormaps":
+            ref = catalog.get(manifest["colormaps"]["reference_preset"])
+            figures = [
+                _figure(r["file"], r.get("thumb"), f"{ref.expression} rendered with {r['ctor']}", 260)
+                for r in manifest["colormaps"]["renders"]
+            ]
+            entries.append(
+                _entry(f"Every colormap on {ref.expression}",
+                       "The same function under each colormap the package exports.",
+                       figures,
+                       _colormap_snippet(manifest["colormaps"]["renders"][0]["ctor"]))
+            )
+        for rec in presets_by_section.get(key, []):
+            preset = catalog.get(rec["id"])
+            figures = [
+                _figure(rel, (rec.get("thumbs") or {}).get(rtype),
+                        f"{RENDER_ALT.get(rtype, rtype)} of {preset.expression}")
+                for rtype, rel in rec["renders"].items()
+            ]
+            snippet = "\n\n# ---\n".join(_snippet(preset, rt) for rt in rec["renders"])
+            entries.append(_entry(rec["title"], rec.get("story", ""), figures, snippet))
+
+        if not entries:
+            continue
+        out += [f"## {title}", "", blurb, ""] + entries
 
     docs_dir.mkdir(parents=True, exist_ok=True)
     (docs_dir / "gallery.generated.md").write_text("\n".join(out), encoding="utf-8", newline="\n")

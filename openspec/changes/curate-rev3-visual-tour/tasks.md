@@ -58,16 +58,16 @@
 
 ## 7. The gallery page
 
-- [ ] 7.1 Rewrite the generated page: thumbnail grid / table of contents, idea-ordered sections,
+- [x] 7.1 Rewrite the generated page: thumbnail grid / table of contents, idea-ordered sections,
   per-figure interpretation, alt text naming the render type, snippets inside `<details>`, and a
   header naming the producer and its command.
-- [ ] 7.2 Update `docs/gallery/README.md` to frame the new page.
+- [x] 7.2 Update `docs/gallery/README.md` to frame the new page.
 
 ## 8. Full regeneration — review round R3 — and tests
 
 - [ ] 8.1 Regenerate every asset under the locked profiles, review the diff, publish R3, and
   iterate to approval.
-- [ ] 8.2 Extend `tests/unit/test_showcase_bundle.py`:
+- [x] 8.2 Extend `tests/unit/test_showcase_bundle.py`:
   - the tour covers the required capability set and every file exists
   - every tour entry has a recipe, caption and alt text
   - every render has a thumbnail

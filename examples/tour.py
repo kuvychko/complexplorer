@@ -77,27 +77,29 @@ def _wrap(draw, text: str, font, max_width: int) -> list[str]:
     return lines
 
 
-def _trim(path: Path, margin: int = 12) -> None:
+def _trim(path: Path, margin: int = 12, tol: int = 12) -> None:
     """Crop a render down to its subject, so panels do not carry unequal empty margins.
 
-    The PyVista grounds are near-uniform, so the background colour is taken from a corner and
-    everything close to it is treated as empty space.
+    The ground is a vertical GRADIENT, so each row's background is taken from that row's own
+    edge pixels; comparing against a single corner colour would flag the gradient itself as
+    content and trim nothing.
     """
-    from PIL import ImageChops
+    import numpy as np
 
     with Image.open(path) as raw:
         img = raw.convert("RGB")
-    background = Image.new("RGB", img.size, img.getpixel((2, 2)))
-    diff = ImageChops.difference(img, background).convert("L").point(lambda v: 255 if v > 10 else 0)
-    box = diff.getbbox()
-    if not box:
+    arr = np.asarray(img).astype(int)
+    edges = np.concatenate([arr[:, :3, :], arr[:, -3:, :]], axis=1)
+    row_bg = np.median(edges, axis=1)[:, None, :]
+    mask = np.abs(arr - row_bg).max(axis=2) > tol
+    ys, xs = np.where(mask)
+    if not len(ys):
         return
-    left, top, right, bottom = box
     img.crop((
-        max(0, left - margin),
-        max(0, top - margin),
-        min(img.width, right + margin),
-        min(img.height, bottom + margin),
+        max(0, int(xs.min()) - margin),
+        max(0, int(ys.min()) - margin),
+        min(img.width, int(xs.max()) + 1 + margin),
+        min(img.height, int(ys.max()) + 1 + margin),
     )).save(path)
 
 
