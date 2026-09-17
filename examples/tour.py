@@ -38,6 +38,11 @@ NOTCH_DEN = [1.0, 1.2, 5.0, 2.0]
 PANEL_BG = (251, 252, 253)
 PANEL_INK = (26, 30, 36)
 
+# Every panel is rendered AT this size and pasted 1:1. Scaling a finished panel down is what
+# blurred the axis labels in the first pass of round R1, so nothing is resampled here.
+CELL = 1200
+PANEL_FIGSIZE = (5.0, 5.0)
+
 
 # ---------------------------------------------------------------------------------------
 # Composition helpers
@@ -67,14 +72,24 @@ def _wrap(draw, text: str, font, max_width: int) -> list[str]:
     return lines
 
 
-def _compose(panels: list[tuple[Path, str]], out: Path, *, columns: int, cell: int = 760) -> None:
-    """Lay labelled panels out on a grid, each scaled to fit a square cell."""
-    font = _font(24)
-    line_h = 30
+def _mpl_panel(draw, path: Path, *, figsize=PANEL_FIGSIZE, cell: int = CELL) -> None:
+    """Render one matplotlib panel at the pixel size it will occupy in the composition."""
+    fig, ax = plt.subplots(figsize=figsize)
+    try:
+        draw(ax)
+        fig.savefig(path, dpi=cell / figsize[0], bbox_inches="tight", pad_inches=0.06)
+    finally:
+        plt.close(fig)
+
+
+def _compose(panels: list[tuple[Path, str]], out: Path, *, columns: int, cell: int = CELL) -> None:
+    """Lay labelled panels out on a grid at native size (panels are never upscaled)."""
+    font = _font(max(20, round(cell * 0.030)))
+    line_h = round(font.size * 1.25)
     probe = ImageDraw.Draw(Image.new("RGB", (1, 1)))
     wrapped = [_wrap(probe, label, font, cell - 8) for _, label in panels]
-    label_h = 12 + line_h * max(len(w) for w in wrapped)
-    pad = 20
+    label_h = 16 + line_h * max(len(w) for w in wrapped)
+    pad = 28
     rows = (len(panels) + columns - 1) // columns
     width = columns * cell + pad * (columns + 1)
     height = rows * (cell + label_h) + pad * (rows + 1)
@@ -87,7 +102,8 @@ def _compose(panels: list[tuple[Path, str]], out: Path, *, columns: int, cell: i
         y = pad + row * (cell + label_h + pad)
         with Image.open(path) as raw:
             img = raw.convert("RGB")
-        img.thumbnail((cell, cell), Image.LANCZOS)
+        if img.width > cell or img.height > cell:  # only ever shrink an oversized panel
+            img.thumbnail((cell, cell), Image.LANCZOS)
         sheet.paste(img, (x + (cell - img.width) // 2, y + (cell - img.height) // 2))
         for line_no, line in enumerate(wrapped[index]):
             draw.text((x + 4, y + cell + 8 + line_no * line_h), line, fill=PANEL_INK, font=font)
@@ -96,26 +112,22 @@ def _compose(panels: list[tuple[Path, str]], out: Path, *, columns: int, cell: i
     sheet.save(out)
 
 
-def _wide(panels: list[tuple[Path, str]], out: Path, *, top_columns: int) -> None:
-    """A grid of square panels with one full-width panel underneath (the Bode plot)."""
-    *square, wide_panel = panels
-    with tempfile.TemporaryDirectory() as tmp:
-        grid = Path(tmp) / "grid.png"
-        _compose(square, grid, columns=top_columns)
-        with Image.open(grid) as top_img, Image.open(wide_panel[0]) as bottom_raw:
-            top = top_img.convert("RGB")
-            bottom = bottom_raw.convert("RGB")
-            scale = top.width / bottom.width
-            bottom = bottom.resize((top.width, int(bottom.height * scale)), Image.LANCZOS)
-            label_h = 46
-            sheet = Image.new("RGB", (top.width, top.height + bottom.height + label_h), PANEL_BG)
-            sheet.paste(top, (0, 0))
-            sheet.paste(bottom, (0, top.height))
-            ImageDraw.Draw(sheet).text(
-                (24, top.height + bottom.height + 8), wide_panel[1], fill=PANEL_INK, font=_font(26)
-            )
-            out.parent.mkdir(parents=True, exist_ok=True)
-            sheet.save(out)
+def _stack_wide(grid: Path, wide: Path, label: str, out: Path) -> None:
+    """Put one already-correctly-sized wide panel under a grid, with its caption."""
+    font = _font(max(20, round(CELL * 0.030)))
+    with Image.open(grid) as top_img, Image.open(wide) as bottom_raw:
+        top = top_img.convert("RGB")
+        bottom = bottom_raw.convert("RGB")
+        label_h = 16 + round(font.size * 1.25)
+        width = max(top.width, bottom.width)
+        sheet = Image.new("RGB", (width, top.height + bottom.height + label_h), PANEL_BG)
+        sheet.paste(top, ((width - top.width) // 2, 0))
+        sheet.paste(bottom, ((width - bottom.width) // 2, top.height))
+        ImageDraw.Draw(sheet).text(
+            (28, top.height + bottom.height + 8), label, fill=PANEL_INK, font=font
+        )
+        out.parent.mkdir(parents=True, exist_ok=True)
+        sheet.save(out)
 
 
 # ---------------------------------------------------------------------------------------
@@ -133,7 +145,9 @@ def _portrait_to_landscape(ctx, out: Path) -> None:
     with tempfile.TemporaryDirectory() as tmp:
         flat = Path(tmp) / "flat.png"
         relief = Path(tmp) / "relief.png"
-        ctx["portrait_mpl"](preset.domain(), preset.func, preset.colormap(), flat, legend=True)
+        ctx["portrait_mpl"](
+            preset.domain(), preset.func, preset.colormap(), flat, legend=True, dpi=CELL / 4
+        )
         ctx["render_family"]("landscape", preset, relief)
         _compose(
             [(flat, "2D phase portrait — cp.plot(..., legend=True)"),
@@ -158,29 +172,34 @@ def _engineering_figure(ctx, out: Path) -> None:
             (poles, lambda ax: cp.ee.pole_zero_plot(H, ax=ax)),
             (nyquist, lambda ax: cp.ee.nyquist_plot(H, ax=ax)),
         ):
-            fig, ax = plt.subplots(figsize=(5.0, 5.0))
-            try:
-                draw(ax)
-                fig.savefig(path, dpi=200, bbox_inches="tight", pad_inches=0.08)
-            finally:
-                plt.close(fig)
+            _mpl_panel(draw, path)
 
-        fig = cp.ee.bode_plot(H)
-        try:
-            fig.savefig(bode, dpi=200, bbox_inches="tight", pad_inches=0.08)
-        finally:
-            plt.close(fig)
-
-        _wide(
+        grid = tmp_dir / "grid.png"
+        _compose(
             [
                 (portrait, "transfer portrait — poles, zeros and the jw axis"),
                 (poles, "pole-zero map"),
                 (nyquist, "Nyquist"),
-                (bode, "Bode — magnitude and phase"),
             ],
-            out,
-            top_columns=3,
+            grid,
+            columns=3,
         )
+
+        # Bode owns its figure, so render it at the grid's width rather than upscaling into it.
+        fig = cp.ee.bode_plot(H)
+        try:
+            with Image.open(grid) as grid_img:
+                target_width = grid_img.width
+            fig.savefig(
+                bode,
+                dpi=target_width / fig.get_size_inches()[0],
+                bbox_inches="tight",
+                pad_inches=0.06,
+            )
+        finally:
+            plt.close(fig)
+
+        _stack_wide(grid, bode, "Bode — magnitude and phase", out)
 
 
 def _composition_proof(ctx, out: Path) -> None:
@@ -188,12 +207,7 @@ def _composition_proof(ctx, out: Path) -> None:
     with tempfile.TemporaryDirectory() as tmp:
         flat = Path(tmp) / "flat.png"
         relief = Path(tmp) / "relief.png"
-        fig, ax = plt.subplots(figsize=(5.0, 5.0))
-        try:
-            cp.ee.transfer_portrait(H, ax=ax, legend=True)
-            fig.savefig(flat, dpi=200, bbox_inches="tight", pad_inches=0.08)
-        finally:
-            plt.close(fig)
+        _mpl_panel(lambda ax: cp.ee.transfer_portrait(H, ax=ax, legend=True), flat)
         ctx["render_callable"]("landscape", H, cp.Rectangle(6, 6), relief, modulus_mode="arctan")
         _compose(
             [(flat, "cp.ee.transfer_portrait(H) — the engineering view"),

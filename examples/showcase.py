@@ -241,8 +241,14 @@ def _thumbnail(path: Path, gallery_dir: Path) -> str:
     return str(Path("thumb") / rel).replace("\\", "/")
 
 
-def _render_portrait_mpl(domain, func, cmap, path: Path, legend: bool = False) -> None:
-    """A 2D portrait via matplotlib (used for the colormap gallery and the tour)."""
+def _render_portrait_mpl(
+    domain, func, cmap, path: Path, legend: bool = False, dpi: int | None = None
+) -> None:
+    """A 2D portrait via matplotlib (used for the colormap gallery and the tour).
+
+    ``dpi`` overrides the profile so a panel of a composed figure can be rendered at exactly
+    the size it will occupy: downscaling a finished panel is what made its text blurry.
+    """
     profile = RENDER_PROFILES["portrait"]
     fig, ax = plt.subplots(figsize=profile["figsize"])
     try:
@@ -252,7 +258,7 @@ def _render_portrait_mpl(domain, func, cmap, path: Path, legend: bool = False) -
         path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(
             path,
-            dpi=profile["dpi"],
+            dpi=dpi or profile["dpi"],
             metadata={"Software": None},
             bbox_inches="tight" if profile["tight"] else None,
             pad_inches=0.05,
