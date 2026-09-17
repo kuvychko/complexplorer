@@ -2,7 +2,8 @@
 
 The fixture was first recorded from the pre-rebase implementation (which took `n_phi`); the
 configs are written in the canonical `phase_sectors` naming, so re-running this against the
-current code must reproduce byte-identical arrays.
+current code must reproduce the same arrays to within half an 8-bit level (the test's
+tolerance: the fixture is recorded on one platform and checked on others).
 """
 
 import json
