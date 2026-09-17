@@ -7,7 +7,7 @@ Every image here is produced by `examples/showcase.py` from the curated preset r
 (`cp.catalog`) and the tour recipes in `examples/tour.py`. Thumbnails link to the
 full-resolution render.
 
-<a href="../../examples/gallery/_tour/hero_labels_on_panel.png"><img src="../../examples/gallery/_tour/hero_labels_on_panel.png" alt="Six-panel montage: domain coloring, analytic landscape, Riemann relief, Riemann surface, transfer functions and a 3D-printable ornament" width="900"></a>
+<a href="../../examples/gallery/_tour/hero_labels_on_panel.png"><img src="../../examples/gallery/view/_tour/hero_labels_on_panel.png" alt="Six-panel montage: domain coloring, analytic landscape, Riemann relief, Riemann surface, transfer functions and a 3D-printable ornament" width="900"></a>
 
 ## What is here
 
@@ -26,7 +26,7 @@ Hue is the phase of f(z); the shaded cells are contour bands of |f(z)|. Zeros an
 
 Hue is the phase of f(z) and the shaded cells are its contour bands, so zeros and poles read as opposite winding directions. The inset legend is the same colormap applied to the identity map, which is what makes the picture decodable.
 
-<p><a href="../../examples/gallery/_tour/legend_portrait.png"><img src="../../examples/gallery/_tour/legend_portrait.png" alt="2D phase portrait of (z^2-1)/(z^2+1) with a phase-wheel legend inset" width="620"></a></p>
+<p><a href="../../examples/gallery/_tour/legend_portrait.png"><img src="../../examples/gallery/view/_tour/legend_portrait.png" alt="2D phase portrait of (z^2-1)/(z^2+1) with a phase-wheel legend inset" width="620"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -43,7 +43,7 @@ cp.plot(preset.domain(), preset.func, cmap=preset.colormap(), legend=True)
 
 exp(1/z) has an essential singularity at 0 — infinitely dense structure nearby.
 
-<p><a href="../../examples/gallery/essential_exp_inv/portrait.png"><img src="../../examples/gallery/essential_exp_inv/portrait.png" alt="2D phase portrait of exp(1 / z)" width="420"></a></p>
+<p><a href="../../examples/gallery/essential_exp_inv/portrait.png"><img src="../../examples/gallery/thumb/essential_exp_inv/portrait.png" alt="2D phase portrait of exp(1 / z)" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -60,7 +60,7 @@ cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 Entire and never zero: no finite zeros or poles (an empty answer key).
 
-<p><a href="../../examples/gallery/exp/portrait.png"><img src="../../examples/gallery/exp/portrait.png" alt="2D phase portrait of exp(z)" width="420"></a></p>
+<p><a href="../../examples/gallery/exp/portrait.png"><img src="../../examples/gallery/thumb/exp/portrait.png" alt="2D phase portrait of exp(z)" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -77,7 +77,7 @@ cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 The Newton iteration map for z³ - 1: an order-2 pole at 0 and three simple zeros at the cube roots of -1/2.
 
-<p><a href="../../examples/gallery/newton_cubic/portrait.png"><img src="../../examples/gallery/newton_cubic/portrait.png" alt="2D phase portrait of (2*z**3 + 1) / (3*z**2)" width="420"></a></p>
+<p><a href="../../examples/gallery/newton_cubic/portrait.png"><img src="../../examples/gallery/thumb/newton_cubic/portrait.png" alt="2D phase portrait of (2*z**3 + 1) / (3*z**2)" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -94,7 +94,7 @@ cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 An order-2 pole at the origin; phase winds backward twice.
 
-<p><a href="../../examples/gallery/pole_order_2/portrait.png"><img src="../../examples/gallery/pole_order_2/portrait.png" alt="2D phase portrait of 1 / z**2" width="420"></a></p>
+<p><a href="../../examples/gallery/pole_order_2/portrait.png"><img src="../../examples/gallery/thumb/pole_order_2/portrait.png" alt="2D phase portrait of 1 / z**2" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -111,7 +111,7 @@ cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 An order-3 pole at the origin.
 
-<p><a href="../../examples/gallery/pole_order_3/portrait.png"><img src="../../examples/gallery/pole_order_3/portrait.png" alt="2D phase portrait of 1 / z**3" width="420"></a></p>
+<p><a href="../../examples/gallery/pole_order_3/portrait.png"><img src="../../examples/gallery/thumb/pole_order_3/portrait.png" alt="2D phase portrait of 1 / z**3" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -128,7 +128,7 @@ cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 Simple zeros at integer multiples of pi (−pi, 0, pi shown).
 
-<p><a href="../../examples/gallery/sine/portrait.png"><img src="../../examples/gallery/sine/portrait.png" alt="2D phase portrait of sin(z)" width="420"></a></p>
+<p><a href="../../examples/gallery/sine/portrait.png"><img src="../../examples/gallery/thumb/sine/portrait.png" alt="2D phase portrait of sin(z)" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -145,7 +145,7 @@ cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 Zero at 0; simple poles at ±pi/2 (within the shown window).
 
-<p><a href="../../examples/gallery/tangent/portrait.png"><img src="../../examples/gallery/tangent/portrait.png" alt="2D phase portrait of tan(z)" width="420"></a></p>
+<p><a href="../../examples/gallery/tangent/portrait.png"><img src="../../examples/gallery/thumb/tangent/portrait.png" alt="2D phase portrait of tan(z)" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -166,7 +166,7 @@ The same functions lifted off the plane: magnitude as height, and the sphere tha
 
 The same function twice: flat, then with |f(z)| lifted into height. The zeros sink and the poles rise, while the colours stay put — the landscape adds magnitude without changing what the hue means.
 
-<p><a href="../../examples/gallery/_tour/portrait_to_landscape.png"><img src="../../examples/gallery/_tour/portrait_to_landscape.png" alt="Side-by-side 2D phase portrait and 3D analytic landscape of the same function" width="620"></a></p>
+<p><a href="../../examples/gallery/_tour/portrait_to_landscape.png"><img src="../../examples/gallery/view/_tour/portrait_to_landscape.png" alt="Side-by-side 2D phase portrait and 3D analytic landscape of the same function" width="620"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -186,7 +186,7 @@ cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
 
 The outline is two overlapping disks unioned together, with a third punched out of the middle. Excluding a neighbourhood of the pole is not cosmetic: it keeps the huge values near z = 0 out of the sampling entirely.
 
-<p><a href="../../examples/gallery/_tour/composite_domain.png"><img src="../../examples/gallery/_tour/composite_domain.png" alt="Phase portrait of 1/z on a peanut-shaped union of two disks with a disk removed around the pole" width="620"></a></p>
+<p><a href="../../examples/gallery/_tour/composite_domain.png"><img src="../../examples/gallery/view/_tour/composite_domain.png" alt="Phase portrait of 1/z on a peanut-shaped union of two disks with a disk removed around the pole" width="620"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -204,7 +204,7 @@ cp.plot(domain, lambda z: 1 / z,
 
 Three simple zeros at -1, 0, 1.
 
-<p><a href="../../examples/gallery/cubic_real_roots/landscape.png"><img src="../../examples/gallery/cubic_real_roots/landscape.png" alt="3D analytic landscape of z**3 - z" width="420"></a> <a href="../../examples/gallery/cubic_real_roots/portrait.png"><img src="../../examples/gallery/cubic_real_roots/portrait.png" alt="2D phase portrait of z**3 - z" width="420"></a> <a href="../../examples/gallery/cubic_real_roots/sphere.png"><img src="../../examples/gallery/cubic_real_roots/sphere.png" alt="Riemann sphere of z**3 - z" width="420"></a></p>
+<p><a href="../../examples/gallery/cubic_real_roots/landscape.png"><img src="../../examples/gallery/thumb/cubic_real_roots/landscape.png" alt="3D analytic landscape of z**3 - z" width="400"></a> <a href="../../examples/gallery/cubic_real_roots/portrait.png"><img src="../../examples/gallery/thumb/cubic_real_roots/portrait.png" alt="2D phase portrait of z**3 - z" width="400"></a> <a href="../../examples/gallery/cubic_real_roots/sphere.png"><img src="../../examples/gallery/thumb/cubic_real_roots/sphere.png" alt="Riemann sphere of z**3 - z" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -233,7 +233,7 @@ cp.riemann_pv(preset.func, cmap=preset.colormap())   # full sphere
 
 The identity map. A single simple zero at the origin; phase winds once.
 
-<p><a href="../../examples/gallery/identity/landscape.png"><img src="../../examples/gallery/identity/landscape.png" alt="3D analytic landscape of z" width="420"></a> <a href="../../examples/gallery/identity/portrait.png"><img src="../../examples/gallery/identity/portrait.png" alt="2D phase portrait of z" width="420"></a> <a href="../../examples/gallery/identity/sphere.png"><img src="../../examples/gallery/identity/sphere.png" alt="Riemann sphere of z" width="420"></a></p>
+<p><a href="../../examples/gallery/identity/landscape.png"><img src="../../examples/gallery/thumb/identity/landscape.png" alt="3D analytic landscape of z" width="400"></a> <a href="../../examples/gallery/identity/portrait.png"><img src="../../examples/gallery/thumb/identity/portrait.png" alt="2D phase portrait of z" width="400"></a> <a href="../../examples/gallery/identity/sphere.png"><img src="../../examples/gallery/thumb/identity/sphere.png" alt="Riemann sphere of z" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -262,7 +262,7 @@ cp.riemann_pv(preset.func, cmap=preset.colormap())   # full sphere
 
 One zero at +1, one pole at -1. Maps the right half-plane to the unit disk.
 
-<p><a href="../../examples/gallery/mobius_cayley/landscape.png"><img src="../../examples/gallery/mobius_cayley/landscape.png" alt="3D analytic landscape of (z - 1) / (z + 1)" width="420"></a> <a href="../../examples/gallery/mobius_cayley/portrait.png"><img src="../../examples/gallery/mobius_cayley/portrait.png" alt="2D phase portrait of (z - 1) / (z + 1)" width="420"></a> <a href="../../examples/gallery/mobius_cayley/sphere.png"><img src="../../examples/gallery/mobius_cayley/sphere.png" alt="Riemann sphere of (z - 1) / (z + 1)" width="420"></a></p>
+<p><a href="../../examples/gallery/mobius_cayley/landscape.png"><img src="../../examples/gallery/thumb/mobius_cayley/landscape.png" alt="3D analytic landscape of (z - 1) / (z + 1)" width="400"></a> <a href="../../examples/gallery/mobius_cayley/portrait.png"><img src="../../examples/gallery/thumb/mobius_cayley/portrait.png" alt="2D phase portrait of (z - 1) / (z + 1)" width="400"></a> <a href="../../examples/gallery/mobius_cayley/sphere.png"><img src="../../examples/gallery/thumb/mobius_cayley/sphere.png" alt="Riemann sphere of (z - 1) / (z + 1)" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -291,7 +291,7 @@ cp.riemann_pv(preset.func, cmap=preset.colormap())   # full sphere
 
 Zeros at ±1, poles at ±i.
 
-<p><a href="../../examples/gallery/rational_zeros_poles/landscape.png"><img src="../../examples/gallery/rational_zeros_poles/landscape.png" alt="3D analytic landscape of (z**2 - 1) / (z**2 + 1)" width="420"></a> <a href="../../examples/gallery/rational_zeros_poles/portrait.png"><img src="../../examples/gallery/rational_zeros_poles/portrait.png" alt="2D phase portrait of (z**2 - 1) / (z**2 + 1)" width="420"></a> <a href="../../examples/gallery/rational_zeros_poles/sphere.png"><img src="../../examples/gallery/rational_zeros_poles/sphere.png" alt="Riemann sphere of (z**2 - 1) / (z**2 + 1)" width="420"></a></p>
+<p><a href="../../examples/gallery/rational_zeros_poles/landscape.png"><img src="../../examples/gallery/thumb/rational_zeros_poles/landscape.png" alt="3D analytic landscape of (z**2 - 1) / (z**2 + 1)" width="400"></a> <a href="../../examples/gallery/rational_zeros_poles/portrait.png"><img src="../../examples/gallery/thumb/rational_zeros_poles/portrait.png" alt="2D phase portrait of (z**2 - 1) / (z**2 + 1)" width="400"></a> <a href="../../examples/gallery/rational_zeros_poles/sphere.png"><img src="../../examples/gallery/thumb/rational_zeros_poles/sphere.png" alt="Riemann sphere of (z**2 - 1) / (z**2 + 1)" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -320,7 +320,7 @@ cp.riemann_pv(preset.func, cmap=preset.colormap())   # full sphere
 
 A simple pole at the origin (Möbius inversion); phase winds backward.
 
-<p><a href="../../examples/gallery/reciprocal/landscape.png"><img src="../../examples/gallery/reciprocal/landscape.png" alt="3D analytic landscape of 1 / z" width="420"></a> <a href="../../examples/gallery/reciprocal/portrait.png"><img src="../../examples/gallery/reciprocal/portrait.png" alt="2D phase portrait of 1 / z" width="420"></a> <a href="../../examples/gallery/reciprocal/sphere.png"><img src="../../examples/gallery/reciprocal/sphere.png" alt="Riemann sphere of 1 / z" width="420"></a></p>
+<p><a href="../../examples/gallery/reciprocal/landscape.png"><img src="../../examples/gallery/thumb/reciprocal/landscape.png" alt="3D analytic landscape of 1 / z" width="400"></a> <a href="../../examples/gallery/reciprocal/portrait.png"><img src="../../examples/gallery/thumb/reciprocal/portrait.png" alt="2D phase portrait of 1 / z" width="400"></a> <a href="../../examples/gallery/reciprocal/sphere.png"><img src="../../examples/gallery/thumb/reciprocal/sphere.png" alt="Riemann sphere of 1 / z" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -349,7 +349,7 @@ cp.riemann_pv(preset.func, cmap=preset.colormap())   # full sphere
 
 A double zero at the origin; phase winds twice.
 
-<p><a href="../../examples/gallery/square/landscape.png"><img src="../../examples/gallery/square/landscape.png" alt="3D analytic landscape of z**2" width="420"></a> <a href="../../examples/gallery/square/portrait.png"><img src="../../examples/gallery/square/portrait.png" alt="2D phase portrait of z**2" width="420"></a> <a href="../../examples/gallery/square/sphere.png"><img src="../../examples/gallery/square/sphere.png" alt="Riemann sphere of z**2" width="420"></a></p>
+<p><a href="../../examples/gallery/square/landscape.png"><img src="../../examples/gallery/thumb/square/landscape.png" alt="3D analytic landscape of z**2" width="400"></a> <a href="../../examples/gallery/square/portrait.png"><img src="../../examples/gallery/thumb/square/portrait.png" alt="2D phase portrait of z**2" width="400"></a> <a href="../../examples/gallery/square/sphere.png"><img src="../../examples/gallery/thumb/square/sphere.png" alt="Riemann sphere of z**2" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -382,7 +382,7 @@ Multivalued families become single-valued on their covering surface. Branch poin
 
 Two different objects that are easy to confuse. The sphere compactifies the plane so one single-valued function can include the point at infinity. The surface is the two-sheeted cover on which the multivalued sqrt(z) becomes single-valued.
 
-<p><a href="../../examples/gallery/_tour/sphere_vs_surface.png"><img src="../../examples/gallery/_tour/sphere_vs_surface.png" alt="Riemann sphere of 1/z beside the two-sheeted Riemann surface of the square root" width="620"></a></p>
+<p><a href="../../examples/gallery/_tour/sphere_vs_surface.png"><img src="../../examples/gallery/view/_tour/sphere_vs_surface.png" alt="Riemann sphere of 1/z beside the two-sheeted Riemann surface of the square root" width="620"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -400,7 +400,7 @@ cp.riemann_surface_pv("power", n=2)                  # the SURFACE
 
 Principal-branch cube root; an order-3 branch point at 0 (three sheets).
 
-<p><a href="../../examples/gallery/cbrt/portrait.png"><img src="../../examples/gallery/cbrt/portrait.png" alt="2D phase portrait of z**(1/3)" width="420"></a> <a href="../../examples/gallery/cbrt/surface.png"><img src="../../examples/gallery/cbrt/surface.png" alt="Riemann surface of z**(1/3)" width="420"></a></p>
+<p><a href="../../examples/gallery/cbrt/portrait.png"><img src="../../examples/gallery/thumb/cbrt/portrait.png" alt="2D phase portrait of z**(1/3)" width="400"></a> <a href="../../examples/gallery/cbrt/surface.png"><img src="../../examples/gallery/thumb/cbrt/surface.png" alt="Riemann surface of z**(1/3)" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -421,7 +421,7 @@ cp.riemann_surface_pv("power", n=3)   # z**(1/3)
 
 Principal-branch logarithm; a logarithmic (infinite-order) branch point at 0.
 
-<p><a href="../../examples/gallery/log/portrait.png"><img src="../../examples/gallery/log/portrait.png" alt="2D phase portrait of log(z)" width="420"></a> <a href="../../examples/gallery/log/surface.png"><img src="../../examples/gallery/log/surface.png" alt="Riemann surface of log(z)" width="420"></a></p>
+<p><a href="../../examples/gallery/log/portrait.png"><img src="../../examples/gallery/thumb/log/portrait.png" alt="2D phase portrait of log(z)" width="400"></a> <a href="../../examples/gallery/log/surface.png"><img src="../../examples/gallery/thumb/log/surface.png" alt="Riemann surface of log(z)" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -442,7 +442,7 @@ cp.riemann_surface_pv("log", r_max=3.0)   # log(z)
 
 Principal-branch square root; an order-2 branch point at 0 (two sheets).
 
-<p><a href="../../examples/gallery/sqrt/ornament.png"><img src="../../examples/gallery/sqrt/ornament.png" alt="Riemann relief (ornament) of sqrt(z)" width="420"></a> <a href="../../examples/gallery/sqrt/portrait.png"><img src="../../examples/gallery/sqrt/portrait.png" alt="2D phase portrait of sqrt(z)" width="420"></a> <a href="../../examples/gallery/sqrt/surface.png"><img src="../../examples/gallery/sqrt/surface.png" alt="Riemann surface of sqrt(z)" width="420"></a></p>
+<p><a href="../../examples/gallery/sqrt/ornament.png"><img src="../../examples/gallery/thumb/sqrt/ornament.png" alt="Riemann relief (ornament) of sqrt(z)" width="400"></a> <a href="../../examples/gallery/sqrt/portrait.png"><img src="../../examples/gallery/thumb/sqrt/portrait.png" alt="2D phase portrait of sqrt(z)" width="400"></a> <a href="../../examples/gallery/sqrt/surface.png"><img src="../../examples/gallery/thumb/sqrt/surface.png" alt="Riemann surface of sqrt(z)" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -474,7 +474,7 @@ A transfer function is a complex function, so the whole library applies to it.
 
 One stable transfer function in four views. The zeros sit exactly on the jw axis at +-2j — the notch — while the poles stay inside the left half-plane. The portrait shows where they are; Bode and Nyquist show what they do to a signal.
 
-<p><a href="../../examples/gallery/_tour/engineering_figure.png"><img src="../../examples/gallery/_tour/engineering_figure.png" alt="Four-panel engineering figure: transfer portrait, pole-zero map, Nyquist plot and Bode magnitude/phase for a notch filter" width="620"></a></p>
+<p><a href="../../examples/gallery/_tour/engineering_figure.png"><img src="../../examples/gallery/view/_tour/engineering_figure.png" alt="Four-panel engineering figure: transfer portrait, pole-zero map, Nyquist plot and Bode magnitude/phase for a notch filter" width="620"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -494,7 +494,7 @@ cp.ee.nyquist_plot(H)
 
 `TransferFunction` is a plain callable, so the engineering view and the general 3D renderer are looking at the same object. Nothing converts between them: the notch that reads as a dark point on the left is the valley on the right.
 
-<p><a href="../../examples/gallery/_tour/composition_proof.png"><img src="../../examples/gallery/_tour/composition_proof.png" alt="Transfer portrait beside a 3D analytic landscape of the same transfer function" width="620"></a></p>
+<p><a href="../../examples/gallery/_tour/composition_proof.png"><img src="../../examples/gallery/view/_tour/composition_proof.png" alt="Transfer portrait beside a 3D analytic landscape of the same transfer function" width="620"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -537,7 +537,7 @@ Modulus-scaled relief, exported as a watertight mesh and printed.
 
 The relief is the mathematics, the mesh is the geometry that survives losing the colour, and the print is the object on a desk. Ten poles become ten spikes around the central zero.
 
-<p><a href="../../examples/gallery/_tour/physical_triptych.png"><img src="../../examples/gallery/_tour/physical_triptych.png" alt="Three panels: Riemann relief render, untextured STL mesh, and the printed ornament" width="620"></a></p>
+<p><a href="../../examples/gallery/_tour/physical_triptych.png"><img src="../../examples/gallery/view/_tour/physical_triptych.png" alt="Three panels: Riemann relief render, untextured STL mesh, and the printed ornament" width="620"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -579,7 +579,7 @@ cp.riemann_pv(preset.func, cmap=preset.colormap(),
 
 A ring of ten simple poles (the 10th roots of unity) around a central simple zero. The signature printable ornament.
 
-<p><a href="../../examples/gallery/pole_flower_10/landscape.png"><img src="../../examples/gallery/pole_flower_10/landscape.png" alt="3D analytic landscape of z / (z**10 - 1)" width="420"></a> <a href="../../examples/gallery/pole_flower_10/ornament.png"><img src="../../examples/gallery/pole_flower_10/ornament.png" alt="Riemann relief (ornament) of z / (z**10 - 1)" width="420"></a> <a href="../../examples/gallery/pole_flower_10/portrait.png"><img src="../../examples/gallery/pole_flower_10/portrait.png" alt="2D phase portrait of z / (z**10 - 1)" width="420"></a> <a href="../../examples/gallery/pole_flower_10/sphere.png"><img src="../../examples/gallery/pole_flower_10/sphere.png" alt="Riemann sphere of z / (z**10 - 1)" width="420"></a></p>
+<p><a href="../../examples/gallery/pole_flower_10/landscape.png"><img src="../../examples/gallery/thumb/pole_flower_10/landscape.png" alt="3D analytic landscape of z / (z**10 - 1)" width="400"></a> <a href="../../examples/gallery/pole_flower_10/ornament.png"><img src="../../examples/gallery/thumb/pole_flower_10/ornament.png" alt="Riemann relief (ornament) of z / (z**10 - 1)" width="400"></a> <a href="../../examples/gallery/pole_flower_10/portrait.png"><img src="../../examples/gallery/thumb/pole_flower_10/portrait.png" alt="2D phase portrait of z / (z**10 - 1)" width="400"></a> <a href="../../examples/gallery/pole_flower_10/sphere.png"><img src="../../examples/gallery/thumb/pole_flower_10/sphere.png" alt="Riemann sphere of z / (z**10 - 1)" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>

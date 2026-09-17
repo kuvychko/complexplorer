@@ -61,7 +61,8 @@ SCHEMA_VERSION = 2  # v2: adds the `tour` and `curated` sections (independent of
 HERO_BANNER = "Riemann_relief_map_20250726.png"  # curated, kept (not regenerated)
 
 PORTRAIT_DPI = 390  # 2D portraits / colormaps (figsize 4x4 -> ~1560px)
-THUMB_PX = 400      # gallery thumbnails; PNG for README/PyPI compatibility
+THUMB_PX = 400  # grid thumbnails; PNG for README/PyPI compatibility
+VIEW_PX = 900  # in-page figures: the full renders add up to ~45 MB, far too heavy for a page
 
 COLORMAP_REFERENCE = "rational_zeros_poles"  # zeros at +-1, poles at +-i — good contrast
 
@@ -236,16 +237,26 @@ def _shoot(plotter, path: Path) -> None:
     plotter.close()
 
 
-def _thumbnail(path: Path, gallery_dir: Path) -> str:
-    """Write a THUMB_PX-wide PNG mirroring the render's path under thumb/."""
+def _derivative(path: Path, gallery_dir: Path, size: int, subdir: str) -> str:
+    """Write a size-bounded copy mirroring the render's path under ``subdir``."""
     rel = path.relative_to(gallery_dir)
-    dst = gallery_dir / "thumb" / rel
+    dst = gallery_dir / subdir / rel
     dst.parent.mkdir(parents=True, exist_ok=True)
     with Image.open(path) as img:
-        thumb = img.copy()
-    thumb.thumbnail((THUMB_PX, THUMB_PX), Image.LANCZOS)
-    thumb.save(dst)
-    return str(Path("thumb") / rel).replace("\\", "/")
+        small = img.copy()
+    small.thumbnail((size, size), Image.LANCZOS)
+    small.save(dst)
+    return str(Path(subdir) / rel).replace("\\", "/")
+
+
+def _thumbnail(path: Path, gallery_dir: Path) -> str:
+    """A THUMB_PX grid thumbnail."""
+    return _derivative(path, gallery_dir, THUMB_PX, "thumb")
+
+
+def _view(path: Path, gallery_dir: Path) -> str:
+    """A VIEW_PX copy for in-page figures, so a page never pulls the full renders."""
+    return _derivative(path, gallery_dir, VIEW_PX, "view")
 
 
 def _render_portrait_mpl(
@@ -452,13 +463,20 @@ def _slug(title: str) -> str:
     return title.lower().replace(" ", "-")
 
 
-def _figure(full: str, thumb: str | None, alt: str, width: int = 420) -> str:
+def _figure(full: str, sources: dict | None, alt: str, width: int = THUMB_PX) -> str:
     """A figure that links to the full-resolution render.
 
-    The thumbnail is only used when it is at least as wide as the display size; above that the
-    full render is served and the browser scales it down, which stays sharp.
+    The smallest derivative that still covers the display width is served: a 400 px thumbnail,
+    else a 900 px view, else the render itself. Serving full renders everywhere would make the
+    page pull tens of megabytes.
     """
-    src = thumb if (thumb and width <= THUMB_PX) else full
+    sources = sources or {}
+    if width <= THUMB_PX and sources.get("thumb"):
+        src = sources["thumb"]
+    elif width <= VIEW_PX and sources.get("view"):
+        src = sources["view"]
+    else:
+        src = full
     return (
         f'<a href="../../examples/gallery/{full}">'
         f'<img src="../../examples/gallery/{src}" alt="{alt}" width="{width}"></a>'
@@ -505,9 +523,9 @@ def _generate_docs_page(manifest: dict, docs_dir: Path) -> None:
     if hero:
         pick = next((h for h in hero if h["id"].endswith("labels_on_panel")), hero[0])
         out += [
-            _figure(pick["file"], pick.get("thumb"),
+            _figure(pick["file"], pick,
                     "Six-panel montage: domain coloring, analytic landscape, Riemann relief, "
-                    "Riemann surface, transfer functions and a 3D-printable ornament", 900),
+                    "Riemann surface, transfer functions and a 3D-printable ornament", VIEW_PX),
             "",
         ]
 
@@ -524,12 +542,12 @@ def _generate_docs_page(manifest: dict, docs_dir: Path) -> None:
         for rec in tour_by_section.get(key, []):
             entries.append(
                 _entry(rec["title"], rec["caption"],
-                       [_figure(rec["file"], rec.get("thumb"), rec["alt"], 620)], rec["snippet"])
+                       [_figure(rec["file"], rec, rec["alt"], 620)], rec["snippet"])
             )
         if key == "colormaps":
             ref = catalog.get(manifest["colormaps"]["reference_preset"])
             figures = [
-                _figure(r["file"], r.get("thumb"), f"{ref.expression} rendered with {r['ctor']}", 260)
+                _figure(r["file"], r, f"{ref.expression} rendered with {r['ctor']}", 260)
                 for r in manifest["colormaps"]["renders"]
             ]
             entries.append(
@@ -541,7 +559,9 @@ def _generate_docs_page(manifest: dict, docs_dir: Path) -> None:
         for rec in presets_by_section.get(key, []):
             preset = catalog.get(rec["id"])
             figures = [
-                _figure(rel, (rec.get("thumbs") or {}).get(rtype),
+                _figure(rel,
+                        {"thumb": (rec.get("thumbs") or {}).get(rtype),
+                         "view": (rec.get("views") or {}).get(rtype)},
                         f"{RENDER_ALT.get(rtype, rtype)} of {preset.expression}")
                 for rtype, rel in rec["renders"].items()
             ]
@@ -600,6 +620,10 @@ def _render_presets(gallery_dir: Path) -> list[dict]:
                     rtype: _thumbnail(gallery_dir / rel, gallery_dir)
                     for rtype, rel in renders.items()
                 },
+                "views": {
+                    rtype: _view(gallery_dir / rel, gallery_dir)
+                    for rtype, rel in renders.items()
+                },
                 "profiles": {
                     rtype: {
                         "profile": name,
@@ -625,6 +649,7 @@ def _render_colormaps(gallery_dir: Path) -> list[dict]:
                 "file": rel,
                 "ctor": ctor,
                 "thumb": _thumbnail(gallery_dir / rel, gallery_dir),
+                "view": _view(gallery_dir / rel, gallery_dir),
             }
         )
     return records
@@ -641,6 +666,7 @@ def _tour_context(gallery_dir: Path, curated: list[dict]) -> dict:
         "style": _style,
         "shoot": _shoot,
         "thumbnail": _thumbnail,
+        "view": _view,
         "portrait_mpl": _render_portrait_mpl,
         "render_family": lambda family, preset, path: _RENDERERS[family](preset, path),
         "render_callable": _render_callable,
@@ -704,6 +730,30 @@ def _curated_records(gallery_dir: Path) -> list[dict]:
 SECTIONS = ("presets", "colormaps", "tour", "hero", "thumbs")
 
 
+def _refresh_derivatives(records: dict, gallery_dir: Path) -> None:
+    """Rebuild the thumbnail and view copies of already-rendered assets, in place.
+
+    Lets `--only thumbs` re-derive every page image without re-rendering anything.
+    """
+    for rec in records.get("presets", []):
+        rec["thumbs"] = {
+            rtype: _thumbnail(gallery_dir / rel, gallery_dir)
+            for rtype, rel in rec["renders"].items()
+        }
+        rec["views"] = {
+            rtype: _view(gallery_dir / rel, gallery_dir) for rtype, rel in rec["renders"].items()
+        }
+    for entry in records.get("colormaps", {}).get("renders", []):
+        entry["thumb"] = _thumbnail(gallery_dir / entry["file"], gallery_dir)
+        entry["view"] = _view(gallery_dir / entry["file"], gallery_dir)
+    for group in ("tour", "hero"):
+        for rec in records.get(group, []):
+            if rec["file"].endswith(".gif"):
+                continue
+            rec["thumb"] = _thumbnail(gallery_dir / rec["file"], gallery_dir)
+            rec["view"] = _view(gallery_dir / rec["file"], gallery_dir)
+
+
 def main(only: str = "all", out: str | None = None) -> None:
     gallery_dir = Path(out).resolve() if out else GALLERY_DIR
     docs_dir = (gallery_dir / "docs") if out else DOCS_GALLERY
@@ -711,6 +761,10 @@ def main(only: str = "all", out: str | None = None) -> None:
 
     # Sections that are not re-rendered keep the records they already have.
     previous = _existing_manifest(GALLERY_DIR if out else gallery_dir)
+
+    if only == "thumbs":
+        print("Rebuilding thumbnails and page views ...")
+        _refresh_derivatives(previous, gallery_dir)
 
     if only in ("all", "presets"):
         preset_records = _render_presets(gallery_dir)

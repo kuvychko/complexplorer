@@ -7,103 +7,120 @@
         "ctor": "cp.Phase()",
         "file": "_colormaps/phase_basic.png",
         "name": "phase_basic",
-        "thumb": "thumb/_colormaps/phase_basic.png"
+        "thumb": "thumb/_colormaps/phase_basic.png",
+        "view": "view/_colormaps/phase_basic.png"
       },
       {
         "ctor": "cp.Phase(phase_sectors=6)",
         "file": "_colormaps/phase_enhanced.png",
         "name": "phase_enhanced",
-        "thumb": "thumb/_colormaps/phase_enhanced.png"
+        "thumb": "thumb/_colormaps/phase_enhanced.png",
+        "view": "view/_colormaps/phase_enhanced.png"
       },
       {
         "ctor": "cp.Phase(r_linear_step=0.6)",
         "file": "_colormaps/phase_modulus.png",
         "name": "phase_modulus",
-        "thumb": "thumb/_colormaps/phase_modulus.png"
+        "thumb": "thumb/_colormaps/phase_modulus.png",
+        "view": "view/_colormaps/phase_modulus.png"
       },
       {
         "ctor": "cp.Phase(phase_sectors=6, auto_scale_r=True)",
         "file": "_colormaps/phase_full.png",
         "name": "phase_full",
-        "thumb": "thumb/_colormaps/phase_full.png"
+        "thumb": "thumb/_colormaps/phase_full.png",
+        "view": "view/_colormaps/phase_full.png"
       },
       {
         "ctor": "cp.OklabPhase(phase_sectors=6)",
         "file": "_colormaps/oklab_phase.png",
         "name": "oklab_phase",
-        "thumb": "thumb/_colormaps/oklab_phase.png"
+        "thumb": "thumb/_colormaps/oklab_phase.png",
+        "view": "view/_colormaps/oklab_phase.png"
       },
       {
         "ctor": "cp.PerceptualPastel(phase_sectors=6)",
         "file": "_colormaps/perceptual_pastel.png",
         "name": "perceptual_pastel",
-        "thumb": "thumb/_colormaps/perceptual_pastel.png"
+        "thumb": "thumb/_colormaps/perceptual_pastel.png",
+        "view": "view/_colormaps/perceptual_pastel.png"
       },
       {
         "ctor": "cp.AnalogousWedge(phase_sectors=6)",
         "file": "_colormaps/analogous_wedge.png",
         "name": "analogous_wedge",
-        "thumb": "thumb/_colormaps/analogous_wedge.png"
+        "thumb": "thumb/_colormaps/analogous_wedge.png",
+        "view": "view/_colormaps/analogous_wedge.png"
       },
       {
         "ctor": "cp.DivergingWarmCool(phase_sectors=6)",
         "file": "_colormaps/diverging_warm_cool.png",
         "name": "diverging_warm_cool",
-        "thumb": "thumb/_colormaps/diverging_warm_cool.png"
+        "thumb": "thumb/_colormaps/diverging_warm_cool.png",
+        "view": "view/_colormaps/diverging_warm_cool.png"
       },
       {
         "ctor": "cp.Isoluminant(phase_sectors=6)",
         "file": "_colormaps/isoluminant.png",
         "name": "isoluminant",
-        "thumb": "thumb/_colormaps/isoluminant.png"
+        "thumb": "thumb/_colormaps/isoluminant.png",
+        "view": "view/_colormaps/isoluminant.png"
       },
       {
         "ctor": "cp.CubehelixPhase(phase_sectors=6)",
         "file": "_colormaps/cubehelix_phase.png",
         "name": "cubehelix_phase",
-        "thumb": "thumb/_colormaps/cubehelix_phase.png"
+        "thumb": "thumb/_colormaps/cubehelix_phase.png",
+        "view": "view/_colormaps/cubehelix_phase.png"
       },
       {
         "ctor": "cp.InkPaper(phase_sectors=6)",
         "file": "_colormaps/ink_paper.png",
         "name": "ink_paper",
-        "thumb": "thumb/_colormaps/ink_paper.png"
+        "thumb": "thumb/_colormaps/ink_paper.png",
+        "view": "view/_colormaps/ink_paper.png"
       },
       {
         "ctor": "cp.EarthTopographic(phase_sectors=6)",
         "file": "_colormaps/earth_topographic.png",
         "name": "earth_topographic",
-        "thumb": "thumb/_colormaps/earth_topographic.png"
+        "thumb": "thumb/_colormaps/earth_topographic.png",
+        "view": "view/_colormaps/earth_topographic.png"
       },
       {
         "ctor": "cp.FourQuadrant(phase_sectors=6)",
         "file": "_colormaps/four_quadrant.png",
         "name": "four_quadrant",
-        "thumb": "thumb/_colormaps/four_quadrant.png"
+        "thumb": "thumb/_colormaps/four_quadrant.png",
+        "view": "view/_colormaps/four_quadrant.png"
       },
       {
         "ctor": "cp.Chessboard(spacing=0.25)",
         "file": "_colormaps/chessboard.png",
         "name": "chessboard",
-        "thumb": "thumb/_colormaps/chessboard.png"
+        "thumb": "thumb/_colormaps/chessboard.png",
+        "view": "view/_colormaps/chessboard.png"
       },
       {
         "ctor": "cp.PolarChessboard(phase_sectors=6, spacing=0.25)",
         "file": "_colormaps/polar_linear.png",
         "name": "polar_linear",
-        "thumb": "thumb/_colormaps/polar_linear.png"
+        "thumb": "thumb/_colormaps/polar_linear.png",
+        "view": "view/_colormaps/polar_linear.png"
       },
       {
         "ctor": "cp.PolarChessboard(phase_sectors=6, r_log=np.e)",
         "file": "_colormaps/polar_log.png",
         "name": "polar_log",
-        "thumb": "thumb/_colormaps/polar_log.png"
+        "thumb": "thumb/_colormaps/polar_log.png",
+        "view": "view/_colormaps/polar_log.png"
       },
       {
         "ctor": "cp.LogRings(log_spacing=0.2)",
         "file": "_colormaps/logrings.png",
         "name": "logrings",
-        "thumb": "thumb/_colormaps/logrings.png"
+        "thumb": "thumb/_colormaps/logrings.png",
+        "view": "view/_colormaps/logrings.png"
       }
     ]
   },
@@ -154,7 +171,8 @@
         "surface": "surface.png"
       },
       "thumb": "thumb/_tour/hero_labels_below.png",
-      "variant": "labels_below"
+      "variant": "labels_below",
+      "view": "view/_tour/hero_labels_below.png"
     },
     {
       "file": "_tour/hero_labels_on_panel.png",
@@ -181,7 +199,8 @@
         "surface": "surface.png"
       },
       "thumb": "thumb/_tour/hero_labels_on_panel.png",
-      "variant": "labels_on_panel"
+      "variant": "labels_on_panel",
+      "view": "view/_tour/hero_labels_on_panel.png"
     }
   ],
   "presets": [
@@ -211,7 +230,11 @@
         "portrait": "thumb/cbrt/portrait.png",
         "surface": "thumb/cbrt/surface.png"
       },
-      "title": "Cube root"
+      "title": "Cube root",
+      "views": {
+        "portrait": "view/cbrt/portrait.png",
+        "surface": "view/cbrt/surface.png"
+      }
     },
     {
       "expression": "z**3 - z",
@@ -245,7 +268,12 @@
         "portrait": "thumb/cubic_real_roots/portrait.png",
         "sphere": "thumb/cubic_real_roots/sphere.png"
       },
-      "title": "z³ - z"
+      "title": "z³ - z",
+      "views": {
+        "landscape": "view/cubic_real_roots/landscape.png",
+        "portrait": "view/cubic_real_roots/portrait.png",
+        "sphere": "view/cubic_real_roots/sphere.png"
+      }
     },
     {
       "expression": "exp(1 / z)",
@@ -267,7 +295,10 @@
       "thumbs": {
         "portrait": "thumb/essential_exp_inv/portrait.png"
       },
-      "title": "Essential singularity"
+      "title": "Essential singularity",
+      "views": {
+        "portrait": "view/essential_exp_inv/portrait.png"
+      }
     },
     {
       "expression": "exp(z)",
@@ -289,7 +320,10 @@
       "thumbs": {
         "portrait": "thumb/exp/portrait.png"
       },
-      "title": "Exponential"
+      "title": "Exponential",
+      "views": {
+        "portrait": "view/exp/portrait.png"
+      }
     },
     {
       "expression": "z",
@@ -324,7 +358,12 @@
         "portrait": "thumb/identity/portrait.png",
         "sphere": "thumb/identity/sphere.png"
       },
-      "title": "Identity"
+      "title": "Identity",
+      "views": {
+        "landscape": "view/identity/landscape.png",
+        "portrait": "view/identity/portrait.png",
+        "sphere": "view/identity/sphere.png"
+      }
     },
     {
       "expression": "log(z)",
@@ -352,7 +391,11 @@
         "portrait": "thumb/log/portrait.png",
         "surface": "thumb/log/surface.png"
       },
-      "title": "Natural log"
+      "title": "Natural log",
+      "views": {
+        "portrait": "view/log/portrait.png",
+        "surface": "view/log/surface.png"
+      }
     },
     {
       "expression": "(z - 1) / (z + 1)",
@@ -387,7 +430,12 @@
         "portrait": "thumb/mobius_cayley/portrait.png",
         "sphere": "thumb/mobius_cayley/sphere.png"
       },
-      "title": "Cayley transform"
+      "title": "Cayley transform",
+      "views": {
+        "landscape": "view/mobius_cayley/landscape.png",
+        "portrait": "view/mobius_cayley/portrait.png",
+        "sphere": "view/mobius_cayley/sphere.png"
+      }
     },
     {
       "expression": "(2*z**3 + 1) / (3*z**2)",
@@ -409,7 +457,10 @@
       "thumbs": {
         "portrait": "thumb/newton_cubic/portrait.png"
       },
-      "title": "Newton map (z³ - 1)"
+      "title": "Newton map (z³ - 1)",
+      "views": {
+        "portrait": "view/newton_cubic/portrait.png"
+      }
     },
     {
       "expression": "z / (z**10 - 1)",
@@ -451,7 +502,13 @@
         "portrait": "thumb/pole_flower_10/portrait.png",
         "sphere": "thumb/pole_flower_10/sphere.png"
       },
-      "title": "Pole Flower 10"
+      "title": "Pole Flower 10",
+      "views": {
+        "landscape": "view/pole_flower_10/landscape.png",
+        "ornament": "view/pole_flower_10/ornament.png",
+        "portrait": "view/pole_flower_10/portrait.png",
+        "sphere": "view/pole_flower_10/sphere.png"
+      }
     },
     {
       "expression": "1 / z**2",
@@ -473,7 +530,10 @@
       "thumbs": {
         "portrait": "thumb/pole_order_2/portrait.png"
       },
-      "title": "Double pole"
+      "title": "Double pole",
+      "views": {
+        "portrait": "view/pole_order_2/portrait.png"
+      }
     },
     {
       "expression": "1 / z**3",
@@ -495,7 +555,10 @@
       "thumbs": {
         "portrait": "thumb/pole_order_3/portrait.png"
       },
-      "title": "Triple pole"
+      "title": "Triple pole",
+      "views": {
+        "portrait": "view/pole_order_3/portrait.png"
+      }
     },
     {
       "expression": "(z**2 - 1) / (z**2 + 1)",
@@ -529,7 +592,12 @@
         "portrait": "thumb/rational_zeros_poles/portrait.png",
         "sphere": "thumb/rational_zeros_poles/sphere.png"
       },
-      "title": "(z² - 1)/(z² + 1)"
+      "title": "(z² - 1)/(z² + 1)",
+      "views": {
+        "landscape": "view/rational_zeros_poles/landscape.png",
+        "portrait": "view/rational_zeros_poles/portrait.png",
+        "sphere": "view/rational_zeros_poles/sphere.png"
+      }
     },
     {
       "expression": "1 / z",
@@ -565,7 +633,12 @@
         "portrait": "thumb/reciprocal/portrait.png",
         "sphere": "thumb/reciprocal/sphere.png"
       },
-      "title": "1 / z"
+      "title": "1 / z",
+      "views": {
+        "landscape": "view/reciprocal/landscape.png",
+        "portrait": "view/reciprocal/portrait.png",
+        "sphere": "view/reciprocal/sphere.png"
+      }
     },
     {
       "expression": "sin(z)",
@@ -587,7 +660,10 @@
       "thumbs": {
         "portrait": "thumb/sine/portrait.png"
       },
-      "title": "Sine"
+      "title": "Sine",
+      "views": {
+        "portrait": "view/sine/portrait.png"
+      }
     },
     {
       "expression": "sqrt(z)",
@@ -622,7 +698,12 @@
         "portrait": "thumb/sqrt/portrait.png",
         "surface": "thumb/sqrt/surface.png"
       },
-      "title": "Square root"
+      "title": "Square root",
+      "views": {
+        "ornament": "view/sqrt/ornament.png",
+        "portrait": "view/sqrt/portrait.png",
+        "surface": "view/sqrt/surface.png"
+      }
     },
     {
       "expression": "z**2",
@@ -657,7 +738,12 @@
         "portrait": "thumb/square/portrait.png",
         "sphere": "thumb/square/sphere.png"
       },
-      "title": "z squared"
+      "title": "z squared",
+      "views": {
+        "landscape": "view/square/landscape.png",
+        "portrait": "view/square/portrait.png",
+        "sphere": "view/square/sphere.png"
+      }
     },
     {
       "expression": "tan(z)",
@@ -679,7 +765,10 @@
       "thumbs": {
         "portrait": "thumb/tangent/portrait.png"
       },
-      "title": "Tangent"
+      "title": "Tangent",
+      "views": {
+        "portrait": "view/tangent/portrait.png"
+      }
     }
   ],
   "schema_version": 2,
@@ -701,7 +790,8 @@
       "section": "phase portraits",
       "snippet": "import complexplorer as cp\npreset = cp.catalog.get(\"rational_zeros_poles\")\ncp.plot(preset.domain(), preset.func, cmap=preset.colormap(), legend=True)",
       "thumb": "thumb/_tour/legend_portrait.png",
-      "title": "Reading a phase portrait"
+      "title": "Reading a phase portrait",
+      "view": "view/_tour/legend_portrait.png"
     },
     {
       "alt": "Side-by-side 2D phase portrait and 3D analytic landscape of the same function",
@@ -721,7 +811,8 @@
       "section": "mapping and topology",
       "snippet": "import complexplorer as cp\npreset = cp.catalog.get(\"rational_zeros_poles\")\ncp.plot(preset.domain(), preset.func, cmap=preset.colormap(), legend=True)\nsc = preset.scaling()\ncp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),\n                     modulus_mode=sc[\"method\"], modulus_params=sc[\"params\"])",
       "thumb": "thumb/_tour/portrait_to_landscape.png",
-      "title": "From the plane to a landscape"
+      "title": "From the plane to a landscape",
+      "view": "view/_tour/portrait_to_landscape.png"
     },
     {
       "alt": "Four-panel engineering figure: transfer portrait, pole-zero map, Nyquist plot and Bode magnitude/phase for a notch filter",
@@ -740,7 +831,8 @@
       "section": "engineering",
       "snippet": "import complexplorer as cp\nH = cp.ee.TransferFunction([1, 0, 4], [1, 1.2, 5, 2])   # a notch at w = 2\ncp.ee.transfer_portrait(H, legend=True)\ncp.ee.pole_zero_plot(H)\ncp.ee.bode_plot(H)\ncp.ee.nyquist_plot(H)",
       "thumb": "thumb/_tour/engineering_figure.png",
-      "title": "Engineering mode: a notch filter"
+      "title": "Engineering mode: a notch filter",
+      "view": "view/_tour/engineering_figure.png"
     },
     {
       "alt": "Transfer portrait beside a 3D analytic landscape of the same transfer function",
@@ -759,7 +851,8 @@
       "section": "engineering",
       "snippet": "import complexplorer as cp\nH = cp.ee.TransferFunction([1, 0, 4], [1, 1.2, 5, 2])\ncp.ee.transfer_portrait(H, legend=True)      # the engineering view\ncp.plot_landscape_pv(cp.Rectangle(6, 6), H)  # the same object, a general renderer",
       "thumb": "thumb/_tour/composition_proof.png",
-      "title": "A transfer function is just a complex function"
+      "title": "A transfer function is just a complex function",
+      "view": "view/_tour/composition_proof.png"
     },
     {
       "alt": "Phase portrait of 1/z on a peanut-shaped union of two disks with a disk removed around the pole",
@@ -778,7 +871,8 @@
       "section": "mapping and topology",
       "snippet": "import complexplorer as cp\ndomain = (cp.Disk(1.6, center=-0.7) & cp.Disk(1.6, center=0.7)) - cp.Disk(0.35)\ncp.plot(domain, lambda z: 1 / z,\n        cmap=cp.Phase(phase_sectors=12, auto_scale_r=True), legend=True)",
       "thumb": "thumb/_tour/composite_domain.png",
-      "title": "Domains compose"
+      "title": "Domains compose",
+      "view": "view/_tour/composite_domain.png"
     },
     {
       "alt": "Riemann sphere of 1/z beside the two-sheeted Riemann surface of the square root",
@@ -797,7 +891,8 @@
       "section": "riemann surfaces",
       "snippet": "import complexplorer as cp\npreset = cp.catalog.get(\"reciprocal\")\ncp.riemann_pv(preset.func, cmap=preset.colormap())   # the SPHERE\ncp.riemann_surface_pv(\"power\", n=2)                  # the SURFACE",
       "thumb": "thumb/_tour/sphere_vs_surface.png",
-      "title": "Sphere versus surface"
+      "title": "Sphere versus surface",
+      "view": "view/_tour/sphere_vs_surface.png"
     },
     {
       "alt": "Three panels: Riemann relief render, untextured STL mesh, and the printed ornament",
@@ -817,7 +912,8 @@
       "section": "physical output",
       "snippet": "import complexplorer as cp\nfrom complexplorer.export.stl import OrnamentGenerator\npreset = cp.catalog.get(\"pole_flower_10\")\nsc = preset.scaling()\ncp.riemann_pv(preset.func, cmap=preset.colormap(),\n              modulus_mode=sc[\"method\"], modulus_params=sc[\"params\"])\nOrnamentGenerator(preset.func, resolution=150, scaling=sc[\"method\"]).generate_and_save(\n    \"pole_flower.stl\", size_mm=80)",
       "thumb": "thumb/_tour/physical_triptych.png",
-      "title": "From function to printed object"
+      "title": "From function to printed object",
+      "view": "view/_tour/physical_triptych.png"
     },
     {
       "alt": "Animated loop of the pole-flower relief rotating on the Riemann sphere",

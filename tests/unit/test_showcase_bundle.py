@@ -6,6 +6,7 @@ a local concern. They enforce that the committed bundle matches the catalog and 
 """
 
 import json
+import re
 from pathlib import Path
 
 from complexplorer.core.presets import catalog
@@ -143,15 +144,32 @@ def test_every_tour_entry_carries_its_recipe_and_prose():
         assert rec["alt"] != rec["title"], f"{rec['id']} alt text just repeats the title"
 
 
-def test_every_render_has_a_thumbnail():
+def test_every_render_has_a_thumbnail_and_a_page_view():
+    """The page serves derivatives, never the full renders: those total about 45 MB."""
     manifest = _manifest()
     for rec in manifest["presets"]:
-        thumbs = rec.get("thumbs", {})
-        assert set(thumbs) == set(rec["renders"]), rec["id"]
-        for rel in thumbs.values():
-            assert (GALLERY / rel).is_file(), rel
+        for key in ("thumbs", "views"):
+            derived = rec.get(key, {})
+            assert set(derived) == set(rec["renders"]), f"{rec['id']} {key}"
+            for rel in derived.values():
+                assert (GALLERY / rel).is_file(), rel
     for entry in manifest["colormaps"]["renders"]:
         assert (GALLERY / entry["thumb"]).is_file(), entry["name"]
+        assert (GALLERY / entry["view"]).is_file(), entry["name"]
+    for rec in manifest["tour"]:
+        if rec["file"].endswith(".gif"):
+            continue
+        assert (GALLERY / rec["view"]).is_file(), rec["id"]
+
+
+def test_the_page_serves_no_full_resolution_render():
+    page = (REPO_ROOT / "docs" / "gallery" / "gallery.generated.md").read_text(encoding="utf-8")
+    sources = re.findall(r'img src="\.\./\.\./examples/gallery/([^"]+)"', page)
+    assert sources, "no figures found on the generated page"
+    # The animated loop is served as itself - a still derivative would not animate; its size
+    # is bounded by its own budget test.
+    full = [s for s in sources if not s.startswith(("thumb/", "view/")) and not s.endswith(".gif")]
+    assert not full, f"page serves full renders: {full[:5]}"
 
 
 def test_curated_assets_are_recorded_and_carry_no_recipe():

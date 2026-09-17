@@ -130,14 +130,13 @@ untrimmed 3D panels carried wide margins that made the surface and landscape loo
 
 ### R3 — full regeneration (2026-09-17)
 
-Five of six sections approved: phase portraits, mapping and topology, physical output, colormaps,
-and the re-rendered tour. Riemann surfaces sent back: *"log * surface is too skinny - increasing
+All six sections approved. Riemann surfaces was sent back once: *"log * surface is too skinny - increasing
 the diameter by at least 2x will help."*
 
 The helicoid's height is `2*pi*turns` (about 19) while its radius defaulted to 1.5, so it was six
 times taller than wide. It now renders at `r_max=3.0` (double the diameter, the point past which
 the upper sheets simply occlude the lower ones) from a camera that shows the ramp turning through
-all three levels.
+all three levels, and was approved on the re-look.
 
 **Physical output:** the author supplied a photograph of the printed pole-flower ornament and a
 captioned composite of the relief beside it. Both are curated assets; the photograph now fills the

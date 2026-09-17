@@ -448,6 +448,7 @@ def render_hero(gallery_dir: Path, ctx: dict) -> list[dict]:
                     "sources": {kind: str(Path(p).name) for kind, p in paths.items()},
                     "photo_used": bool(ctx.get("photo")),
                     "thumb": ctx["thumbnail"](gallery_dir / rel, gallery_dir),
+                    "view": ctx["view"](gallery_dir / rel, gallery_dir),
                 }
             )
     return records
@@ -699,5 +700,6 @@ def render_tour(gallery_dir: Path, ctx: dict) -> list[dict]:
         }
         if not rel.endswith(".gif"):
             record["thumb"] = ctx["thumbnail"](path, gallery_dir)
+            record["view"] = ctx["view"](path, gallery_dir)
         records.append(record)
     return records

@@ -65,7 +65,7 @@
 
 ## 8. Full regeneration — review round R3 — and tests
 
-- [ ] 8.1 Regenerate every asset under the locked profiles, review the diff, publish R3, and
+- [x] 8.1 Regenerate every asset under the locked profiles, review the diff, publish R3, and
   iterate to approval.
 - [x] 8.2 Extend `tests/unit/test_showcase_bundle.py`:
   - the tour covers the required capability set and every file exists
