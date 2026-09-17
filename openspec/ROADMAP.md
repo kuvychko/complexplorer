@@ -186,7 +186,7 @@ Phase 5  add-transfer-function-explorer                 —       no         →
          C3 publish-rev3-docs-site                      3.0     no         planned
             · MkDocs Material (continuity with the live v2 site) + mkdocstrings
               API reference; new `docs` capability; tag-triggered deploy
-         C4 gate-release-artifacts-and-ci               3.0     no         planned
+         C4 gate-release-artifacts-and-ci               3.0     no         proposed
             · wheel/sdist smoke, macOS, min-deps, blocking 3.13, nbmake, gallery
               structure; retire the stale no-PyVista packaging reqs; record the
               mandatory-PyVista decision
