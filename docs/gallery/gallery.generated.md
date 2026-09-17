@@ -433,7 +433,7 @@ cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 # ---
 import complexplorer as cp
-cp.riemann_surface_pv("log")   # log(z)
+cp.riemann_surface_pv("log", r_max=3.0)   # log(z)
 ```
 
 </details>

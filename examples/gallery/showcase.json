@@ -113,6 +113,18 @@
       "file": "Riemann_relief_map_20250726.png",
       "kind": "banner",
       "origin": "hand-composed relief render, kept from the 2.x gallery"
+    },
+    {
+      "file": "_curated/printed_ornament.png",
+      "kind": "photograph",
+      "origin": "supplied by the author: the printed pole-flower ornament (z / (z**10 - 1))",
+      "thumb": "thumb/_curated/printed_ornament.png"
+    },
+    {
+      "file": "_curated/relief_and_print.jpg",
+      "kind": "composite",
+      "origin": "supplied by the author: the Riemann relief beside the printed ornament, captioned with the function",
+      "thumb": "thumb/_curated/relief_and_print.jpg"
     }
   ],
   "generator": "complexplorer showcase",
@@ -128,7 +140,7 @@
         "transfer functions",
         "3D-printable"
       ],
-      "photo_used": false,
+      "photo_used": true,
       "px": [
         1972,
         1406
@@ -136,7 +148,7 @@
       "sources": {
         "engineering": "engineering.png",
         "landscape": "landscape.png",
-        "physical": "physical.png",
+        "physical": "printed_ornament.png",
         "portrait": "portrait.png",
         "relief": "relief.png",
         "surface": "surface.png"
@@ -155,7 +167,7 @@
         "transfer functions",
         "3D-printable"
       ],
-      "photo_used": false,
+      "photo_used": true,
       "px": [
         1900,
         1270
@@ -163,7 +175,7 @@
       "sources": {
         "engineering": "engineering.png",
         "landscape": "landscape.png",
-        "physical": "physical.png",
+        "physical": "printed_ornament.png",
         "portrait": "portrait.png",
         "relief": "relief.png",
         "surface": "surface.png"

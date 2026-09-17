@@ -45,7 +45,7 @@
 
 ## 5. Curated physical-output assets
 
-- [ ] 5.1 Add the `_curated/` section: ingest the owner's photographs (crop and size them to match
+- [x] 5.1 Add the `_curated/` section: ingest the owner's photographs (crop and size them to match
   the render panels), record kind and origin in `showcase.json`, and keep them out of every
   regeneration path. Absent photographs must not break the build.
 

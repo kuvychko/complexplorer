@@ -175,7 +175,10 @@ TAG_RENDERS = {
 SURFACE_FAMILY = {
     "sqrt": ("power", {"n": 2}),
     "cbrt": ("power", {"n": 3}),
-    "log": ("log", {}),
+    # The helicoid's height is 2*pi*turns (about 19), so at the default r_max=1.5 it is six
+    # times taller than it is wide and reads as a thin ribbon. Double the radius: wider than
+    # this and the upper sheets simply occlude the lower ones.
+    "log": ("log", {"r_max": 3.0}),
 }
 
 
@@ -317,9 +320,10 @@ def _render_ornament(preset, path: Path) -> None:
     _shoot(plotter, path)
 
 
-# The log surface is a tall spiral ramp: from the default camera its turns are edge-on and
-# read as disconnected crescents, so it gets a higher viewpoint.
-SURFACE_CAMERA = {"log": (1.5, 1.5, 5.0)}
+# The log surface is a tall spiral ramp. Seen from the default camera its turns are edge-on
+# and read as disconnected crescents; from straight above they occlude each other. This angle
+# shows the ramp turning through all three levels.
+SURFACE_CAMERA = {"log": (2.5, 2.5, 3.5)}
 
 
 def _render_surface_family(family: str, kw: dict, path: Path) -> None:
@@ -645,6 +649,21 @@ def _tour_context(gallery_dir: Path, curated: list[dict]) -> dict:
     }
 
 
+# Curated assets are committed but never regenerated; the kind decides how they are used
+# (only a `photograph` stands in for the physical-output panel).
+CURATED_KINDS = {
+    "printed_ornament.png": (
+        "photograph",
+        "supplied by the author: the printed pole-flower ornament (z / (z**10 - 1))",
+    ),
+    "relief_and_print.jpg": (
+        "composite",
+        "supplied by the author: the Riemann relief beside the printed ornament, captioned "
+        "with the function",
+    ),
+}
+
+
 def _curated_records(gallery_dir: Path) -> list[dict]:
     """Assets that are committed but never regenerated: the banner and printed-object photos.
 
@@ -660,16 +679,21 @@ def _curated_records(gallery_dir: Path) -> list[dict]:
     ]
     photo_dir = gallery_dir / "_curated"
     if photo_dir.is_dir():
-        for photo in sorted(photo_dir.glob("*")):
-            if photo.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}:
-                records.append(
-                    {
-                        "file": f"_curated/{photo.name}",
-                        "kind": "photograph",
-                        "origin": "supplied by the author; a printed ornament, not a render",
-                        "thumb": _thumbnail(photo, gallery_dir),
-                    }
-                )
+        for asset in sorted(photo_dir.glob("*")):
+            if asset.suffix.lower() not in {".jpg", ".jpeg", ".png", ".webp"}:
+                continue
+            kind, origin = CURATED_KINDS.get(
+                asset.name,
+                ("photograph", "supplied by the author; a physical object, not a render"),
+            )
+            records.append(
+                {
+                    "file": f"_curated/{asset.name}",
+                    "kind": kind,
+                    "origin": origin,
+                    "thumb": _thumbnail(asset, gallery_dir),
+                }
+            )
     return records
 
 

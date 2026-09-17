@@ -128,6 +128,21 @@ Two layouts, labels under the panels or in a band on each panel, both at ~1900 p
 sharp at GitHub's ~830 px README width. Every render is trimmed to its subject, because the
 untrimmed 3D panels carried wide margins that made the surface and landscape look small.
 
+### R3 — full regeneration (2026-09-17)
+
+Five of six sections approved: phase portraits, mapping and topology, physical output, colormaps,
+and the re-rendered tour. Riemann surfaces sent back: *"log * surface is too skinny - increasing
+the diameter by at least 2x will help."*
+
+The helicoid's height is `2*pi*turns` (about 19) while its radius defaulted to 1.5, so it was six
+times taller than wide. It now renders at `r_max=3.0` (double the diameter, the point past which
+the upper sheets simply occlude the lower ones) from a camera that shows the ramp turning through
+all three levels.
+
+**Physical output:** the author supplied a photograph of the printed pole-flower ornament and a
+captioned composite of the relief beside it. Both are curated assets; the photograph now fills the
+hero's physical panel and the third panel of the triptych, replacing the clay-mesh placeholder.
+
 **Defects found during R0, owned by `curate-rev3-visual-tour`:**
 
 - The committed gallery portraits clip the `Im(z)` axis label at the left edge and carry a wide top
