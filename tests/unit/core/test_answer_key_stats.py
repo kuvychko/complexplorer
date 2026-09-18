@@ -3,7 +3,7 @@
 import json
 import math
 
-from complexplorer.core.presets import FunctionPreset, catalog, singularity
+from complexplorer.core.presets import FunctionPreset, _stable, catalog, singularity
 
 
 def test_multi_singularity_stats():
@@ -44,7 +44,13 @@ def test_count_by_type_is_sorted():
 
 
 def test_to_dict_includes_stats_and_is_json_serializable():
-    rec = catalog.get("pole_flower_10").to_dict()
+    preset = catalog.get("pole_flower_10")
+    rec = preset.to_dict()
     assert "answer_key_stats" in rec
-    assert rec["answer_key_stats"] == catalog.get("pole_flower_10").answer_key_stats()
+    # to_dict() quantizes floats so the manifest is byte-identical across platforms; the record
+    # therefore carries the quantized stats rather than the live ones bit for bit.
+    assert rec["answer_key_stats"] == _stable(preset.answer_key_stats())
+    assert rec["answer_key_stats"]["count"] == preset.answer_key_stats()["count"], (
+        "quantization must leave the integer fields alone"
+    )
     json.dumps(rec)  # must not raise

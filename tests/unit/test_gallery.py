@@ -178,3 +178,39 @@ def test_committed_index_json_is_reproducible(tmp_path):
             "index.json differs only in its serialization (key order, separators or trailing "
             "newline); the byte-stability contract is broken"
         )
+
+
+def test_manifest_floats_survive_a_one_ulp_platform_difference():
+    """The defect the committed-vs-fresh check found: libm disagrees by an ULP across platforms.
+
+    The 10th root of unity is -0.8090169943749475 on Windows and -0.8090169943749476 on Linux, so
+    a manifest generated on one machine could not reproduce on another. Quantizing the record
+    absorbs that. This drives the property directly: every derived coordinate in the catalog, moved
+    one ULP in either direction, must still quantize to the value the manifest carries.
+    """
+    import numpy as np
+
+    from complexplorer.core.presets import _stable, catalog
+
+    checked = 0
+    for preset_id in catalog.list():
+        preset = catalog.get(preset_id)
+        published = {s["type"]: s for s in preset.to_dict()["singularities"]}
+        for live in preset.singularities:
+            expected = _stable([float(c) for c in live["at"]])
+            for index, coordinate in enumerate(live["at"]):
+                # An exact 0.0 is a literal, not libm output, and its neighbour is a subnormal --
+                # not a difference any platform actually produces. Only computed values drift.
+                if float(coordinate) == 0.0:
+                    continue
+                for direction in (-np.inf, np.inf):
+                    neighbour = list(live["at"])
+                    neighbour[index] = float(np.nextafter(float(coordinate), direction))
+                    assert _stable(neighbour) == expected, (
+                        f"{preset_id}: a one-ULP difference in {live['type']} coordinate "
+                        f"{index} changes the manifest ({neighbour} -> {_stable(neighbour)})"
+                    )
+                    checked += 1
+        assert published or not preset.singularities
+
+    assert checked > 50, f"only {checked} coordinates exercised; the catalog should give more"

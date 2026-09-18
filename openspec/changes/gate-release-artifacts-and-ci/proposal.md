@@ -84,6 +84,8 @@ _None._
   code page cannot represent rather than raising.
 - `stl-export`: **Added** — the status output printed during export, repair and printability
   validation is ASCII, so a verbose export cannot abort on the console encoding.
+- `gallery`: **Modified** — manifests are byte-identical across platforms, not only across runs
+  on one machine; derived floats are quantized when serialized.
 
 ## Impact
 

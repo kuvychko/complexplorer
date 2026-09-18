@@ -4,7 +4,7 @@
     "count_by_type": {
       "zero": 3
     },
-    "min_separation": 3.141592653589793
+    "min_separation": 3.14159265359
   },
   "cmap_spec": {
     "auto_scale_r": true,
@@ -26,7 +26,7 @@
   "singularities": [
     {
       "at": [
-        -3.141592653589793,
+        -3.14159265359,
         0.0
       ],
       "label": "-pi",
@@ -43,7 +43,7 @@
     },
     {
       "at": [
-        3.141592653589793,
+        3.14159265359,
         0.0
       ],
       "label": "pi",

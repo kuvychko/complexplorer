@@ -118,6 +118,27 @@ def scaling_from_spec(spec: str | dict) -> dict:
 # --------------------------------------------------------------------------------------
 
 
+# Derived coordinates (roots of unity, cube roots, pi multiples) come out of libm, which differs
+# by an ULP between platforms: the 10th root of unity that is -0.8090169943749475 on Windows is
+# -0.8090169943749476 on Linux. The record is an interchange format that is committed, diffed and
+# compared, so it is quantized to a precision no platform disagrees about. 12 significant digits is
+# ~4 digits clear of double precision's noise floor and far finer than any position needs.
+MANIFEST_SIGNIFICANT_DIGITS = 12
+
+
+def _stable(value):
+    """Quantize floats anywhere in a JSON-ready record; everything else passes through."""
+    if isinstance(value, bool):  # bool is an int subclass, and must stay a bool
+        return value
+    if isinstance(value, float):
+        return float(f"{value:.{MANIFEST_SIGNIFICANT_DIGITS}g}")
+    if isinstance(value, dict):
+        return {key: _stable(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_stable(item) for item in value]
+    return value
+
+
 def singularity(
     type_: str, at: complex | tuple[float, float], order: int | None, label: str = ""
 ) -> dict:
@@ -203,19 +224,25 @@ class FunctionPreset:
 
     # -- serialization (Godot interchange record) --
     def to_dict(self) -> dict:
-        """JSON-ready record of everything EXCEPT the live ``func``."""
-        return {
-            "id": self.id,
-            "title": self.title,
-            "expression": self.expression,
-            "domain_spec": dict(self.domain_spec),
-            "cmap_spec": dict(self.cmap_spec),
-            "scaling_spec": self.scaling_spec,
-            "singularities": [dict(s) for s in self.singularities],
-            "answer_key_stats": self.answer_key_stats(),
-            "story": self.story,
-            "tags": list(self.tags),
-        }
+        """JSON-ready record of everything EXCEPT the live ``func``.
+
+        Floats are quantized to `MANIFEST_SIGNIFICANT_DIGITS`, so the record is identical on
+        every platform. The live attributes keep full precision; only this record is quantized.
+        """
+        return _stable(
+            {
+                "id": self.id,
+                "title": self.title,
+                "expression": self.expression,
+                "domain_spec": dict(self.domain_spec),
+                "cmap_spec": dict(self.cmap_spec),
+                "scaling_spec": self.scaling_spec,
+                "singularities": [dict(s) for s in self.singularities],
+                "answer_key_stats": self.answer_key_stats(),
+                "story": self.story,
+                "tags": list(self.tags),
+            }
+        )
 
 
 # --------------------------------------------------------------------------------------

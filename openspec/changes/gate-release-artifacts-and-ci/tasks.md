@@ -81,7 +81,13 @@ legacy code page.
   while printing a `✗` status marker from `export/stl/mesh_repair.py` — after building the mesh and
   before writing the file. Replace the status symbols in `mesh_repair.py` and `utils.py` with ASCII
   markers.
-- [x] 8.3 Add `tests/unit/test_console_encoding.py`: a static check that the package prints only
+- [x] 8.3 The committed-vs-fresh `index.json` check (task 5.2) failed on every Linux and Windows
+  lane while passing locally and on macOS: the 10th root of unity is `-0.8090169943749475` on the
+  machine that generated the committed manifest and `-0.8090169943749476` on the runner. The
+  manifest is an interchange record that is committed and diffed, so quantize the serialized preset
+  record to 12 significant digits, making it byte-identical on any platform, and regenerate the six
+  affected manifest files without re-rendering the portraits.
+- [x] 8.4 Add `tests/unit/test_console_encoding.py`: a static check that the package prints only
   ASCII literals, and runtime checks that drive `complexplorer list` and the verbose printability
   report through a strict cp437/cp1252/ascii stream. Confirm the tests fail against the unfixed
   code before keeping them.

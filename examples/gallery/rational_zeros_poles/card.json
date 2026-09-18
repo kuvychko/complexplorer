@@ -5,7 +5,7 @@
       "pole": 2,
       "zero": 2
     },
-    "min_separation": 1.4142135623730951
+    "min_separation": 1.41421356237
   },
   "cmap_spec": {
     "auto_scale_r": true,
