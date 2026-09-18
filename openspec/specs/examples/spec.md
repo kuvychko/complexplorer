@@ -9,9 +9,7 @@ parallel hand-rolled generator, follows a documented directory layout (`notebook
 nor any missing file. It also owns the curated visual tour: the assets that demonstrate
 capabilities the registry cannot express, the hero montage, and the navigable gallery page. It is the contract that
 keeps the user-facing demos and general documentation consistent with the live API.
-
 ## Requirements
-
 ### Requirement: Examples derive from the curated registry
 
 The `examples/` tree SHALL treat the function preset registry (`cp.catalog`) and the library
@@ -289,7 +287,6 @@ committed — the gallery shows a relief render and links the generation code in
 - **THEN** it contains no `.stl` files; ornament presets are represented by a relief PNG plus a
   link to the generation code
 
-
 ### Requirement: The gallery showcases the colormap family
 
 Because the curated presets all use `Phase`, the showcase SHALL additionally render a colormap
@@ -328,7 +325,6 @@ colormaps, and it SHALL NOT omit a public one.
 - **THEN** it uses the registry reference function (`cp.catalog.get(<id>)`) and constructs the
   colormap explicitly (e.g. `cp.Chessboard(spacing=0.25)`, `cp.Phase(phase_sectors=6)`), runs as
   shown, and references only 3.0-surface APIs
-
 
 ### Requirement: The docs gallery is generated from the registry
 
@@ -419,14 +415,14 @@ types, and how to choose one.
 - **WHEN** the notebook sources are scanned for colormap class names
 - **THEN** every referenced colormap is exported by `complexplorer`, and phase-sector counts are passed as `phase_sectors` (never `n_phi`)
 
-
 ### Requirement: A notebook execution harness verifies the tutorials
 
-The project SHALL provide a documented, repeatable way to verify notebook execution using
-`nbmake` (`pytest --nbmake examples/notebooks/`). The notebook tooling (`nbmake`, `nbconvert`,
-`ipykernel`) SHALL be declared as installable dependencies (an `[examples]` extra). The harness
-SHALL be opt-in — it SHALL NOT be collected by the default `pytest` run and SHALL NOT be required
-in CI.
+The project SHALL provide a documented, repeatable way to verify notebook execution using `nbmake`
+(`pytest --nbmake examples/notebooks/`). The notebook tooling (`nbmake`, `nbconvert`, `ipykernel`)
+SHALL be declared as installable dependencies (an `[examples]` extra). The harness SHALL NOT be
+collected by the default `pytest` run and SHALL NOT run on every push, because the notebooks drive
+PyVista and take minutes. It SHALL, however, run automatically on a schedule and before a release,
+so a tutorial that stopped working cannot ship.
 
 #### Scenario: The harness verifies all notebooks on demand
 
@@ -438,5 +434,10 @@ in CI.
 #### Scenario: The default test run does not execute notebooks
 
 - **WHEN** the default `pytest` suite is collected
-- **THEN** it does not execute the notebooks (the nbmake harness is opt-in, keeping the default
-  suite fast and CI free of PyVista-heavy notebook execution)
+- **THEN** it does not execute the notebooks, keeping the per-push suite fast
+
+#### Scenario: Notebooks are verified before a release
+
+- **WHEN** a release tag is pushed, or the scheduled notebook run fires
+- **THEN** the notebooks are executed headlessly and a cell error fails that run
+

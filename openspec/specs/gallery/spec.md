@@ -7,9 +7,7 @@ relocatable asset bundle. It provides a `generate_gallery` function and a `galle
 subcommand that produce a deterministic manifest (`index.json`) and per-preset records
 (`card.json`) alongside reproducible-best-effort portrait images, so a curated set of
 complexplorer presets can be exported, shared, and consumed by downstream tooling.
-
 ## Requirements
-
 ### Requirement: Gallery generation from a preset selection
 
 The library SHALL provide a `generate_gallery` function that renders a selection of catalog
@@ -35,6 +33,14 @@ sorted by id. The manifest SHALL contain no timestamps. Per-preset `card.json` S
 `preset.to_dict()` plus a `files` mapping. All file references SHALL be relative to the
 bundle root, so the bundle is relocatable.
 
+Manifests SHALL be byte-identical for the same selection and library version **on any platform**,
+not only across repeated runs on one machine. Floating-point values in a preset record are derived
+from libm (roots of unity, cube roots, multiples of pi), which disagrees by one unit in the last
+place between platforms, so records SHALL be quantized to a fixed number of significant digits when
+serialized. The quantization applies to the serialized record only; live preset attributes SHALL
+keep full precision. The manifest SHALL NOT depend on render settings such as `dpi` or
+`resolution`, because it describes the catalog rather than the rendered pixels.
+
 #### Scenario: index.json is self-contained and relocatable
 
 - **WHEN** `index.json` is read
@@ -44,6 +50,18 @@ bundle root, so the bundle is relocatable.
 
 - **WHEN** `generate_gallery` runs twice for the same selection and library version into two directories
 - **THEN** `index.json` and every `card.json` are byte-for-byte identical between the two runs
+
+#### Scenario: Manifests are byte-identical across platforms
+
+- **WHEN** the committed `index.json` is compared against one freshly generated on a different
+  operating system with the same library version
+- **THEN** the two are byte-for-byte identical, and a one-unit-in-the-last-place difference in any
+  derived coordinate does not change the serialized record
+
+#### Scenario: The manifest does not depend on render settings
+
+- **WHEN** `generate_gallery` runs at different `dpi` or `resolution` settings
+- **THEN** `index.json` is unchanged
 
 ### Requirement: Images are reproducible best-effort
 
@@ -69,7 +87,6 @@ one sample per output pixel so a high-dpi portrait is not an upscaled low-resolu
 - **WHEN** a portrait is rendered at a given dpi without an explicit resolution
 - **THEN** the domain is sampled at one point per output pixel (bounded by a sane maximum), and a caller-supplied resolution overrides that
 
-
 ### Requirement: Gallery is exposed as a CLI subcommand
 
 The CLI SHALL expose a `gallery` subcommand that drives `generate_gallery`, accepting a tag
@@ -89,3 +106,4 @@ or explicit preset ids and an output directory.
 
 - **WHEN** `complexplorer gallery` is run with a tag (or ids) that matches no presets
 - **THEN** it exits non-zero with a "0 presets matched" message rather than writing an empty bundle
+

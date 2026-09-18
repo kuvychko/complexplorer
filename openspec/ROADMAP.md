@@ -186,10 +186,13 @@ Phase 5  add-transfer-function-explorer                 —       no         →
          C3 publish-rev3-docs-site                      3.0     no         planned
             · MkDocs Material (continuity with the live v2 site) + mkdocstrings
               API reference; new `docs` capability; tag-triggered deploy
-         C4 gate-release-artifacts-and-ci               3.0     no         proposed
+         C4 gate-release-artifacts-and-ci               3.0     no         archived
             · wheel/sdist smoke, macOS, min-deps, blocking 3.13, nbmake, gallery
               structure; retire the stale no-PyVista packaging reqs; record the
               mandatory-PyVista decision
+            · found and fixed 4 defects no previous lane could see: a Unicode crash
+              in `list` and STL export on legacy Windows code pages, a manifest that
+              was not byte-stable across platforms, and two knife-edge tests
          C5 finalize-public-api-contract                3.0     YES        planned
             · Presets → PlotPresets (to confirm), ComplexFunction Protocol,
               TypedDict specs, pyright gate, API map

@@ -63,9 +63,9 @@
 - [x] 7.1 Run the gate locally: `pytest`, `ruff check`/`format` over package, tests and examples,
   `openspec validate --specs`, `openspec validate gate-release-artifacts-and-ci`, `uv build`,
   `twine check`, and the distribution inspector.
-- [ ] 7.2 Push and confirm on CI: every lane green, the artifact job green, 3.13 blocking, the
+- [x] 7.2 Push and confirm on CI: every lane green, the artifact job green, 3.13 blocking, the
   minimum-dependency lane resolved and passing, and the 3.14 lane reporting without blocking.
-- [ ] 7.3 Flip C4's status in `openspec/ROADMAP.md` and record the outcome in
+- [x] 7.3 Flip C4's status in `openspec/ROADMAP.md` and record the outcome in
   `openspec/REV3_CLOSEOUT.md`.
 
 ## 8. Defects the gate found

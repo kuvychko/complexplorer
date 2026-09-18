@@ -216,6 +216,34 @@ The rest of the gate is the ordinary suite: `pytest tests/ -q`, `ruff check` and
 `ruff format --check` over `complexplorer/ tests/ examples/ scripts/`, `openspec validate --specs`,
 and — before a release, not on every push — `pytest --nbmake examples/notebooks/`.
 
+**Outcome (2026-09-17).** C4 is archived. CI run #35 is green on all eleven jobs: lint, Linux and
+Windows on 3.11/3.12/3.13, macOS on 3.12, the minimum-dependency lane, the non-blocking 3.14 lane,
+and the artifact job (build, twine, inspect, wheel install, five-check smoke, sdist to wheel).
+
+**What the gate caught, over three runs.** Four defects, none of which the previous CI could see,
+because it only ever tested the source tree on two platforms:
+
+1. `complexplorer list` died with `UnicodeEncodeError` on a stock `cmd.exe` (cp437) printing the
+   preset title `z³ - z` — the first command in the quickstart, on Windows.
+2. An STL export died the same way on cp1252, printing a `✗` marker — after building the mesh
+   and before writing the file, so the work was lost and the user got a traceback.
+3. `index.json` was not byte-stable across platforms: a derived coordinate was
+   `-0.8090169943749475` on Windows and `-0.8090169943749476` on Linux. The serialized record is
+   now quantized, and the capability promises identical manifests on any platform.
+4. Two knife-edge tests: the manifest comparison could not survive git's CRLF conversion in a
+   Windows working tree (now pinned in `.gitattributes`), and `sawtooth_log(e)` was asserted at a
+   discontinuity, which an older libm falls the other side of (found by the new
+   minimum-dependency lane on its first run).
+
+Only the first two are user-facing bugs; the rest are contract and test fragility. All four were
+invisible to a suite that passes 695 tests locally.
+
+**One decision left open: the Python 3.14 classifier.** Task 4.4 says to add it once the lane is
+green, and the lane passed on its first run. It is deliberately not added yet, for two reasons: one
+green run on a lane designed to be unreliable is not evidence of support, and claiming 3.14 on PyPI
+while its lane cannot fail the build would contradict the matrix requirement this change just
+established. Claiming it means also making that lane blocking. Worth revisiting at tag time.
+
 **What the gate caught on its first run (2026-09-17).** Two shipped defects, both
 `UnicodeEncodeError` on a Windows console using a legacy code page, both fixed in C4 with
 regression tests in `tests/unit/test_console_encoding.py`:

@@ -56,8 +56,8 @@ features and are **not** affected by this policy — they are supported indefini
 The question of whether a required PyVista is too heavy was settled with measurements rather than
 estimates, taken from the release artifact gate: a fresh virtual environment containing only the
 built wheel and its runtime dependencies (Windows, CPython 3.12, complexplorer 3.0.0). The same
-numbers are printed by the `artifact` job in CI on every run, so they can be re-checked rather than
-trusted.
+`artifact` job prints its own Linux equivalents on every CI run — the same measurements, taken the
+same way — so these can be re-checked rather than trusted.
 
 | Measurement | Value |
 |---|---|
