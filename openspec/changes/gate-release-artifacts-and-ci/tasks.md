@@ -87,6 +87,15 @@ legacy code page.
   manifest is an interchange record that is committed and diffed, so quantize the serialized preset
   record to 12 significant digits, making it byte-identical on any platform, and regenerate the six
   affected manifest files without re-rendering the portraits.
+- [x] 8.5 With the manifest quantized, the Linux lanes passed and the **Windows** lanes failed on
+  the same check with identical content but different bytes: git checks the manifests out with
+  CRLF under `core.autocrlf`, while the generator writes LF. It passed locally only because a
+  working tree written directly still holds LF. Pin these paths to LF in `.gitattributes`, and make
+  the test name line endings as the cause instead of reporting a vague serialization difference.
+- [x] 8.6 The new minimum-dependency lane found its own defect: `sawtooth_log(e)` returned
+  `0.9999999999999999` rather than `0.0`. A sawtooth is discontinuous at a period boundary, so both
+  ends are correct and the test was pinning a knife edge that an older libm falls off. Accept
+  either end at a period boundary, and leave the mid-period assertions exact.
 - [x] 8.4 Add `tests/unit/test_console_encoding.py`: a static check that the package prints only
   ASCII literals, and runtime checks that drive `complexplorer list` and the verbose printability
   report through a strict cp437/cp1252/ascii stream. Confirm the tests fail against the unfixed

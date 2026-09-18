@@ -87,23 +87,33 @@ class TestSawtooth:
 class TestSawtoothLog:
     """Test logarithmic sawtooth function."""
 
+    @staticmethod
+    def _at_a_period_boundary(value, tolerance=1e-10):
+        """A sawtooth jumps from 1 back to 0 at a period boundary, so both ends are correct.
+
+        ``sawtooth_log(e)`` is ``mod(log(e), 1)``. Where ``log(e)`` is exactly 1.0 that is 0.0;
+        where the platform's libm returns one ULP less it is 0.9999999999999999. Asserting only
+        the 0 end pins a knife edge, and the minimum-dependency lane fell off it.
+        """
+        return min(float(value), 1.0 - float(value)) < tolerance
+
     def test_sawtooth_log_base_e(self):
         """Test with natural logarithm."""
         # e^0 = 1, log(1) = 0
         assert sawtooth_log(1.0) == 0.0
 
-        # e^1 = e, log(e) = 1 -> 0
-        assert abs(sawtooth_log(np.e) - 0.0) < 1e-10
+        # e^1 = e, log(e) = 1 -> a period boundary, so 0 or just under 1
+        assert self._at_a_period_boundary(sawtooth_log(np.e))
 
-        # e^0.5, log(e^0.5) = 0.5
+        # e^0.5, log(e^0.5) = 0.5 -- mid-period, so an ordinary comparison
         assert abs(sawtooth_log(np.exp(0.5)) - 0.5) < 1e-10
 
     def test_sawtooth_log_base_2(self):
         """Test with base 2."""
-        # Powers of 2
-        assert sawtooth_log(1.0, base=2.0) == 0.0  # 2^0
-        assert sawtooth_log(2.0, base=2.0) == 0.0  # 2^1
-        assert sawtooth_log(4.0, base=2.0) == 0.0  # 2^2
+        # Powers of 2 all land on a period boundary
+        assert sawtooth_log(1.0, base=2.0) == 0.0  # 2^0: log(1) is exactly 0
+        assert self._at_a_period_boundary(sawtooth_log(2.0, base=2.0))  # 2^1
+        assert self._at_a_period_boundary(sawtooth_log(4.0, base=2.0))  # 2^2
 
         # Between powers
         assert abs(sawtooth_log(np.sqrt(2), base=2.0) - 0.5) < 1e-10

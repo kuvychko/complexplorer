@@ -1,0 +1,5 @@
+# The gallery manifests are a byte-stable contract: tests/unit/test_gallery.py compares the
+# committed copy against a freshly generated one byte for byte, and the generator always writes
+# LF. Without this, a Windows checkout rewrites them to CRLF and that comparison fails there and
+# only there -- invisibly, because a working tree that was written directly still holds LF.
+examples/gallery/**/*.json text eol=lf

@@ -174,6 +174,11 @@ def test_committed_index_json_is_reproducible(tmp_path):
         assert fresh_manifest == committed_manifest, (
             "the manifest content changed; regenerate with `python examples/showcase.py`"
         )
+        if fresh.replace(b"\r\n", b"\n") == committed.replace(b"\r\n", b"\n"):
+            raise AssertionError(
+                "index.json differs only in its line endings: the checkout rewrote LF to CRLF. "
+                "The generator always writes LF; see the rule for this path in .gitattributes"
+            )
         raise AssertionError(
             "index.json differs only in its serialization (key order, separators or trailing "
             "newline); the byte-stability contract is broken"
