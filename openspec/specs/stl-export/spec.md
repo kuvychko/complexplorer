@@ -1,0 +1,100 @@
+# STL Export
+
+## Purpose
+
+The stl-export capability turns a complex function into a 3D-printable mathematical ornament: a
+modulus-scaled Riemann sphere whose surface relief encodes `|f(z)|`, exported as an STL file sized
+in millimeters and repaired for printability. It is built on PyVista and is the bridge from
+mathematics to a physical object.
+## Requirements
+### Requirement: STL export is always available
+
+STL export SHALL be available whenever `complexplorer` is importable, because PyVista is a
+required dependency. The export modules SHALL import PyVista unconditionally and SHALL NOT define
+or expose any PyVista-availability flag or gating check.
+
+#### Scenario: Ornament export works without any availability guard
+
+- **WHEN** an `OrnamentGenerator` is constructed and used in a normal installation
+- **THEN** it generates and saves an STL mesh without consulting any capability flag, and no `HAS_PYVISTA` / `check_pyvista_available` symbol is importable from the library
+
+### Requirement: Ornament mesh generation
+
+The library SHALL generate a 3D mesh from a complex function by distorting a Riemann sphere
+radially according to `|f(z)|` and attaching per-point color, magnitude, phase, and radius data.
+
+#### Scenario: Generate the ornament mesh
+
+- **WHEN** an ornament's mesh is generated for a function at a resolution and modulus mode
+- **THEN** a sphere mesh is produced whose radius is scaled by the modulus mode applied to `|f(z)|`, carrying RGB color, magnitude, phase, and radius arrays
+
+#### Scenario: Saving before generation is rejected
+
+- **WHEN** validation or saving is requested before the mesh has been generated
+- **THEN** an error is raised directing the caller to generate the mesh first
+
+### Requirement: Printability repair and validation
+
+The library SHALL repair and validate the ornament mesh for 3D printing, attempting to make it
+watertight and reporting topology, dimensions, and wall-thickness checks, while tolerating the
+small polar gaps inherent to a rectangular sphere mesh.
+
+#### Scenario: Repair attempts to close holes
+
+- **WHEN** the mesh is saved with repair enabled
+- **THEN** cleaning and hole-filling are applied to make the mesh as watertight as possible before export
+
+#### Scenario: Small residual gaps are tolerated
+
+- **WHEN** validation finds a small number of boundary edges typical of a Riemann sphere
+- **THEN** the mesh is reported as printable with a note rather than treated as a hard failure
+
+#### Scenario: Wall thickness is checked against print size
+
+- **WHEN** validation runs for a given target print size
+- **THEN** an estimated minimum wall thickness is computed and compared against the printable minimum, recommending a larger size if too thin
+
+### Requirement: Sized STL file output
+
+The library SHALL write the ornament to an STL file centered at the origin and uniformly scaled so
+its largest dimension equals a requested size in millimeters, in binary or ASCII form.
+
+#### Scenario: Export at a target size
+
+- **WHEN** the ornament is saved with a target size in millimeters
+- **THEN** the mesh is centered, scaled so its maximum dimension equals that size, and written to the STL path, creating the output directory if needed
+
+#### Scenario: One-call generate-and-save
+
+- **WHEN** the combined generate-and-save entry point (or the `create_ornament` convenience function) is called
+- **THEN** the mesh is generated and then exported in a single step, returning the saved file path
+
+### Requirement: Non-destructive operations
+
+Mesh operations that scale, center, or repair SHALL operate on copies so the generator's internal
+mesh is not mutated by an export.
+
+#### Scenario: Export leaves the source mesh intact
+
+- **WHEN** an ornament is saved
+- **THEN** the centering and scaling apply to a copy, and the generator's stored mesh is unchanged for reuse
+
+### Requirement: Status output is encodable on any console
+
+The progress and validation messages printed by STL export, mesh repair and printability
+validation SHALL be ASCII. These messages are emitted by the library itself during
+`generate_and_save`, so a character the console cannot encode aborts the export with
+`UnicodeEncodeError` after the mesh has been built and before the file is written. Status markers
+SHALL therefore be written as ASCII markers rather than as symbols.
+
+#### Scenario: A verbose export on a legacy code page
+
+- **WHEN** an ornament is generated and saved with verbose output on a console using a legacy code
+  page
+- **THEN** the repair and validation report is printed in full and the STL file is written
+
+#### Scenario: Markers carry the same meaning
+
+- **WHEN** the repair or validation report reports success, a warning or a failure
+- **THEN** each is marked distinguishably in ASCII, so the report stays readable
+

@@ -64,5 +64,11 @@ desktop.ini
 pip-log.txt
 pip-delete-this-directory.txt
 
-# MkDocs
+# Generated STL meshes (3D-print artifacts, never committed — see roadmap STL policy)
+*.stl
+
+# Notebook-generated figure artifacts (regenerable; the inline output is in the .ipynb)
+examples/notebooks/publication_figure.*
+
+# MkDocs build output (77 MB; built by CI and by `mkdocs build`, never committed)
 site/

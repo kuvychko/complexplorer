@@ -5,25 +5,49 @@ Each colormap converts complex values to colors using different techniques.
 
 The module includes:
 - Base Colormap class
+- BasePhasePortrait: shared enhanced-phase modulation (phase sectors, modulus rings)
 - Phase colormap (regular and enhanced)
 - Chessboard patterns (Cartesian and polar)
 - Logarithmic rings
+- Perceptual phase portraits built on OkLCh / cubehelix (ported from 2.0.0)
 """
 
+import functools
 from abc import ABC, abstractmethod
-from typing import Optional, Tuple, Union
-import numpy as np
+
 import matplotlib.colors as mcolors
-from complexplorer.utils.validation import ValidationError
-from complexplorer.core.functions import (
-    phase as phase_func, sawtooth, sawtooth_log,
-    sigmoid, circular_interpolate
+import numpy as np
+
+from ..exceptions import ColormapError, ValidationError
+from .color_utils import (
+    cubehelix,
+    interpolate_hue,
+    oklch_to_srgb,
 )
-from complexplorer.core.color_utils import (
-    oklch_to_srgb, hsl_to_rgb, cubehelix,
-    interpolate_hue, clip_to_gamut
-)
-from complexplorer.core import constants
+from .functions import phase as phase_func
+from .functions import sawtooth, sawtooth_log, sigmoid
+
+
+def _rejects_n_phi(cls):
+    """Reject the pre-2.0 ``n_phi`` keyword with the name that replaced it.
+
+    2.0.0 renamed the phase-sector count to ``phase_sectors``; 3.0 keeps that name. Accepting
+    ``n_phi`` silently would mis-render, and letting it fall through raises a bare ``TypeError``
+    that does not say what to do, so it is rejected here with the replacement named.
+    """
+    original = cls.__init__
+
+    @functools.wraps(original)
+    def __init__(self, *args, n_phi=None, **kwargs):
+        if n_phi is not None:
+            raise ValidationError(
+                f"{cls.__name__} no longer accepts 'n_phi'; it was renamed to 'phase_sectors' "
+                f"in 2.0. Use {cls.__name__}(phase_sectors={n_phi!r})."
+            )
+        original(self, *args, **kwargs)
+
+    cls.__init__ = __init__
+    return cls
 
 
 # Default color for out-of-domain points
@@ -32,82 +56,91 @@ OUT_OF_DOMAIN_COLOR_HSV = (0.0, 0.01, 0.9)  # Light gray
 
 class Colormap(ABC):
     """Abstract base class for complex-to-color mappings.
-    
+
     A colormap defines how complex values are mapped to colors.
     Subclasses must implement the hsv_tuple method.
-    
+
     Parameters
     ----------
     out_of_domain_hsv : tuple[float, float, float], optional
         HSV color for points outside the domain.
     """
-    
-    def __init__(self, 
-                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+
+    def __init__(self, out_of_domain_hsv: tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
         """Initialize colormap with out-of-domain color."""
         self.out_of_domain_hsv = out_of_domain_hsv
-    
+
     @abstractmethod
-    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def hsv_tuple(self, z: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Convert complex values to HSV components.
-        
+
         Parameters
         ----------
         z : np.ndarray
             Complex values.
-            
+
         Returns
         -------
         H, S, V : tuple of np.ndarray
             Hue, saturation, and value arrays (each in [0, 1]).
         """
         pass
-    
-    def hsv(self, z: np.ndarray, outmask: Optional[np.ndarray] = None) -> np.ndarray:
+
+    def hsv(self, z: np.ndarray, outmask: np.ndarray | None = None) -> np.ndarray:
         """Convert complex values to HSV array.
-        
+
         Parameters
         ----------
         z : np.ndarray
             Complex values.
         outmask : np.ndarray, optional
             Boolean mask (True for out-of-domain points).
-            
+
         Returns
         -------
         np.ndarray
             HSV values with shape (*z.shape, 3).
         """
         z = np.asarray(z)
-        H, S, V = self.hsv_tuple(z)
-        
-        # Apply out-of-domain coloring
-        if outmask is not None and z.ndim > 0:
+
+        # Substitute non-finite z (in-domain poles / essential singularities) with a
+        # placeholder before computing colors, so subclass index math never sees NaN/inf.
+        # These points are recolored with the out-of-domain color below, which keeps rgb()
+        # finite, within [0, 1], and deterministic for any input (a NaN hue would otherwise
+        # cast to run-varying garbage in hsv_to_rgb).
+        nonfinite = ~np.isfinite(z)
+        z_safe = np.where(nonfinite, 0, z) if nonfinite.any() else z
+        H, S, V = self.hsv_tuple(z_safe)
+
+        # Scalar case
+        if z.ndim == 0:
+            if bool(nonfinite) or (outmask is not None and bool(outmask)):
+                H, S, V = self.out_of_domain_hsv
+            return np.array([H, S, V])
+
+        # Paint non-finite points and out-of-domain points with the out-of-domain color.
+        mask = nonfinite if outmask is None else (nonfinite | outmask)
+        if mask.any():
             H = H.copy()
             S = S.copy()
             V = V.copy()
-            H[outmask] = self.out_of_domain_hsv[0]
-            S[outmask] = self.out_of_domain_hsv[1]
-            V[outmask] = self.out_of_domain_hsv[2]
-        
-        # Stack along last axis
-        if z.ndim == 0:
-            # Scalar case
-            return np.array([H, S, V])
-        else:
-            # Use stack instead of dstack to preserve shape
-            return np.stack((H, S, V), axis=-1)
-    
-    def rgb(self, z: np.ndarray, outmask: Optional[np.ndarray] = None) -> np.ndarray:
+            H[mask] = self.out_of_domain_hsv[0]
+            S[mask] = self.out_of_domain_hsv[1]
+            V[mask] = self.out_of_domain_hsv[2]
+
+        # Use stack instead of dstack to preserve shape
+        return np.stack((H, S, V), axis=-1)
+
+    def rgb(self, z: np.ndarray, outmask: np.ndarray | None = None) -> np.ndarray:
         """Convert complex values to RGB array.
-        
+
         Parameters
         ----------
         z : np.ndarray
             Complex values.
         outmask : np.ndarray, optional
             Boolean mask (True for out-of-domain points).
-            
+
         Returns
         -------
         np.ndarray
@@ -117,6 +150,7 @@ class Colormap(ABC):
         return mcolors.hsv_to_rgb(hsv)
 
 
+@_rejects_n_phi
 class BasePhasePortrait(Colormap):
     """Base class for phase portrait colormaps with shared modulation logic.
 
@@ -146,20 +180,58 @@ class BasePhasePortrait(Colormap):
         Color for out-of-domain points.
     """
 
-    def __init__(self,
-                 phase_sectors: Optional[int] = None,
-                 r_linear_step: Optional[float] = None,
-                 r_log_base: Optional[float] = None,
-                 v_base: float = 0.5,
-                 auto_scale_r: bool = False,
-                 scale_radius: float = 1.0,
-                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+    def __init__(
+        self,
+        phase_sectors: int | None = None,
+        r_linear_step: float | None = None,
+        r_log_base: float | None = None,
+        v_base: float = 0.5,
+        auto_scale_r: bool = False,
+        scale_radius: float = 1.0,
+        out_of_domain_hsv: tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV,
+    ):
         """Initialize base phase portrait colormap."""
         super().__init__(out_of_domain_hsv)
 
         # Validate v_base
         if not 0 <= v_base < 1:
             raise ValidationError("v_base must be in [0, 1)")
+
+        # phase_sectors counts sectors, so it must be a positive integer. Unvalidated, 0 reached
+        # the divisions below as a ZeroDivisionError raised from inside a constructor, while -1
+        # and 2.5 were accepted and produced a meaningless sector count. bool is excluded
+        # deliberately: it is an int subclass, and Phase(phase_sectors=True) means nothing.
+        if phase_sectors is not None:
+            valid = (
+                not isinstance(phase_sectors, bool)
+                and isinstance(phase_sectors, (int, np.integer))
+                and phase_sectors >= 1
+            )
+            if not valid:
+                raise ValidationError(
+                    f"phase_sectors must be a positive integer (1 or more); got "
+                    f"{phase_sectors!r}. It is the number of phase sectors the colour wheel is "
+                    f"divided into; pass None for an unsectored portrait."
+                )
+
+        # The modulus parameters have the same problem phase_sectors had: out-of-range values were
+        # accepted and produced nonsense. r_log_base=1 is the worst -- log(x)/log(1) divides by
+        # zero, so every pixel comes out NaN and the portrait is blank with no error raised.
+        if r_linear_step is not None and r_linear_step <= 0:
+            raise ValidationError(
+                f"r_linear_step must be positive; got {r_linear_step!r}. It is the modulus step "
+                f"between contour bands."
+            )
+        if r_log_base is not None and r_log_base <= 1:
+            raise ValidationError(
+                f"r_log_base must be greater than 1; got {r_log_base!r}. A base of 1 makes the "
+                f"logarithm undefined and every colour non-finite."
+            )
+        if scale_radius <= 0:
+            raise ValidationError(
+                f"scale_radius must be positive; got {scale_radius!r}. It scales the cell size "
+                f"chosen by auto_scale_r."
+            )
 
         # Handle auto-scaling
         if auto_scale_r:
@@ -241,8 +313,9 @@ class BasePhasePortrait(Colormap):
         return (V_phi + V_r) * V_scaler / 2 + self.v_base
 
     @abstractmethod
-    def _compute_colors(self, z: np.ndarray, phi: np.ndarray, r: np.ndarray,
-                       V_phi: np.ndarray, V_r: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def _compute_colors(
+        self, z: np.ndarray, phi: np.ndarray, r: np.ndarray, V_phi: np.ndarray, V_r: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Compute HSV colors from complex values and modulations.
 
         This method must be implemented by subclasses to define their
@@ -268,7 +341,7 @@ class BasePhasePortrait(Colormap):
         """
         pass
 
-    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def hsv_tuple(self, z: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Convert complex values to HSV components.
 
         This method handles the shared modulation logic and delegates
@@ -286,6 +359,7 @@ class BasePhasePortrait(Colormap):
         return self._compute_colors(z, phi, r, V_phi, V_r)
 
 
+@_rejects_n_phi
 class Phase(BasePhasePortrait):
     """Phase colormap with optional enhancement.
 
@@ -317,20 +391,29 @@ class Phase(BasePhasePortrait):
         Color for out-of-domain points.
     """
 
-    def __init__(self,
-                 phase_sectors: Optional[int] = None,
-                 r_linear_step: Optional[float] = None,
-                 r_log_base: Optional[float] = None,
-                 v_base: float = 0.5,
-                 auto_scale_r: bool = False,
-                 scale_radius: float = 1.0,
-                 emphasize_unit_circle: bool = False,
-                 unit_circle_strength: float = 0.3,
-                 unit_circle_color: Optional[Tuple[float, float, float]] = None,
-                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+    def __init__(
+        self,
+        phase_sectors: int | None = None,
+        r_linear_step: float | None = None,
+        r_log_base: float | None = None,
+        v_base: float = 0.5,
+        auto_scale_r: bool = False,
+        scale_radius: float = 1.0,
+        emphasize_unit_circle: bool = False,
+        unit_circle_strength: float = 0.3,
+        unit_circle_color: tuple[float, float, float] | None = None,
+        out_of_domain_hsv: tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV,
+    ):
         """Initialize phase colormap."""
-        super().__init__(phase_sectors, r_linear_step, r_log_base, v_base,
-                        auto_scale_r, scale_radius, out_of_domain_hsv)
+        super().__init__(
+            phase_sectors,
+            r_linear_step,
+            r_log_base,
+            v_base,
+            auto_scale_r,
+            scale_radius,
+            out_of_domain_hsv,
+        )
 
         # Validate unit circle parameters
         if not 0 <= unit_circle_strength <= 1:
@@ -340,8 +423,9 @@ class Phase(BasePhasePortrait):
         self.unit_circle_strength = unit_circle_strength
         self.unit_circle_color = unit_circle_color
 
-    def _compute_colors(self, z: np.ndarray, phi: np.ndarray, r: np.ndarray,
-                       V_phi: np.ndarray, V_r: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def _compute_colors(
+        self, z: np.ndarray, phi: np.ndarray, r: np.ndarray, V_phi: np.ndarray, V_r: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Compute HSV colors for Phase colormap."""
         # Phase determines hue
         H = phi / (2 * np.pi)  # Map [0, 2π] to [0, 1]
@@ -359,8 +443,14 @@ class Phase(BasePhasePortrait):
             if self.unit_circle_color is not None:
                 # Blend towards specified color
                 H_unit, S_unit, V_unit = self.unit_circle_color
-                H = H * (1 - self.unit_circle_strength * unit_emphasis) + H_unit * self.unit_circle_strength * unit_emphasis
-                S = S * (1 - self.unit_circle_strength * unit_emphasis) + S_unit * self.unit_circle_strength * unit_emphasis
+                H = (
+                    H * (1 - self.unit_circle_strength * unit_emphasis)
+                    + H_unit * self.unit_circle_strength * unit_emphasis
+                )
+                S = (
+                    S * (1 - self.unit_circle_strength * unit_emphasis)
+                    + S_unit * self.unit_circle_strength * unit_emphasis
+                )
             else:
                 # Just boost brightness near unit circle
                 V_r = V_r * (1 + self.unit_circle_strength * unit_emphasis)
@@ -372,14 +462,15 @@ class Phase(BasePhasePortrait):
         return H, S, V
 
 
+@_rejects_n_phi
 class OklabPhase(BasePhasePortrait):
     """Pure OKLAB phase colormap with optional enhancement.
-    
+
     Implements a perceptually uniform phase portrait using the OKLAB
     color space. Maps complex phase directly to OKLAB hue angle while
     maintaining consistent lightness and chroma. Supports enhanced
     phase/modulus visualization through sawtooth modulation.
-    
+
     Parameters
     ----------
     phase_sectors : int, optional
@@ -410,36 +501,45 @@ class OklabPhase(BasePhasePortrait):
         color mapping (green for arg=0, blue for arg=π/2, orange for arg=-π/2, pink for arg=π).
     out_of_domain_hsv : tuple, optional
         Color for out-of-domain points.
-        
+
     Notes
     -----
     The OKLAB color space provides perceptually uniform color gradients,
     meaning equal steps in the color values correspond to equal perceptual
     differences. This is particularly useful for accurate interpretation
     of complex function behavior.
-    
+
     When enhanced=True, the colormap uses sawtooth functions to create
     discontinuous edges at phase and modulus boundaries, dramatically
     improving the visibility of mathematical structures.
     """
-    
-    def __init__(self,
-                 phase_sectors: Optional[int] = None,
-                 r_linear_step: Optional[float] = None,
-                 r_log_base: Optional[float] = None,
-                 auto_scale_r: bool = False,
-                 scale_radius: float = 1.0,
-                 enhanced: bool = False,
-                 L: float = 0.7,
-                 C: float = 0.35,
-                 v_base: float = 0.5,
-                 emphasize_unit_circle: bool = False,
-                 unit_circle_strength: float = 0.3,
-                 phase_offset: float = 0.8936868 * np.pi,
-                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+
+    def __init__(
+        self,
+        phase_sectors: int | None = None,
+        r_linear_step: float | None = None,
+        r_log_base: float | None = None,
+        auto_scale_r: bool = False,
+        scale_radius: float = 1.0,
+        enhanced: bool = False,
+        L: float = 0.7,
+        C: float = 0.35,
+        v_base: float = 0.5,
+        emphasize_unit_circle: bool = False,
+        unit_circle_strength: float = 0.3,
+        phase_offset: float = 0.8936868 * np.pi,
+        out_of_domain_hsv: tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV,
+    ):
         """Initialize OKLAB phase colormap."""
-        super().__init__(phase_sectors, r_linear_step, r_log_base, v_base,
-                        auto_scale_r, scale_radius, out_of_domain_hsv)
+        super().__init__(
+            phase_sectors,
+            r_linear_step,
+            r_log_base,
+            v_base,
+            auto_scale_r,
+            scale_radius,
+            out_of_domain_hsv,
+        )
 
         # Validate OklabPhase-specific parameters
         if not 0 <= L <= 1:
@@ -455,10 +555,12 @@ class OklabPhase(BasePhasePortrait):
         self.emphasize_unit_circle = emphasize_unit_circle
         self.unit_circle_strength = unit_circle_strength
         self.phase_offset = phase_offset
-    
-    def _oklab_to_rgb(self, L: np.ndarray, a: np.ndarray, b: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+
+    def _oklab_to_rgb(
+        self, L: np.ndarray, a: np.ndarray, b: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Convert OKLAB to RGB directly (not via OkLCh).
-        
+
         This is the direct OKLAB to RGB conversion, maintaining
         the cylindrical nature of the color space.
         """
@@ -466,35 +568,36 @@ class OklabPhase(BasePhasePortrait):
         l_ = L + 0.3963377774 * a + 0.2158037573 * b
         m_ = L - 0.1055613458 * a - 0.0638541728 * b
         s_ = L - 0.0894841775 * a - 1.2914855480 * b
-        
-        l = l_ * l_ * l_
+
+        l = l_ * l_ * l_  # noqa: E741
         m = m_ * m_ * m_
         s = s_ * s_ * s_
-        
+
         r_linear = +4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s
         g_linear = -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s
         b_linear = -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s
-        
+
         # Linear to sRGB (gamma correction)
         def linear_to_srgb(c: np.ndarray) -> np.ndarray:
             c_safe = np.maximum(c, 0)
-            return np.where(c_safe <= 0.0031308,
-                           12.92 * c_safe,
-                           1.055 * np.power(c_safe, 1/2.4) - 0.055)
-        
+            return np.where(
+                c_safe <= 0.0031308, 12.92 * c_safe, 1.055 * np.power(c_safe, 1 / 2.4) - 0.055
+            )
+
         R = linear_to_srgb(r_linear)
         G = linear_to_srgb(g_linear)
         B = linear_to_srgb(b_linear)
-        
+
         # Clip to valid range
         R = np.clip(R, 0, 1)
         G = np.clip(G, 0, 1)
         B = np.clip(B, 0, 1)
-        
+
         return R, G, B
-    
-    def _compute_colors(self, z: np.ndarray, phi: np.ndarray, r: np.ndarray,
-                       V_phi: np.ndarray, V_r: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+
+    def _compute_colors(
+        self, z: np.ndarray, phi: np.ndarray, r: np.ndarray, V_phi: np.ndarray, V_r: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Compute HSV colors for OklabPhase colormap."""
         if self.enhanced:
             # Enhanced mode with sawtooth modulation (complexplorer style)
@@ -540,10 +643,10 @@ class OklabPhase(BasePhasePortrait):
 
 class Chessboard(Colormap):
     """Cartesian chessboard pattern.
-    
+
     Creates a black and white chessboard pattern aligned with
     real and imaginary axes.
-    
+
     Parameters
     ----------
     spacing : float, optional
@@ -553,49 +656,48 @@ class Chessboard(Colormap):
     out_of_domain_hsv : tuple, optional
         Color for out-of-domain points.
     """
-    
-    def __init__(self,
-                 spacing: float = 1.0,
-                 center: complex = 0+0j,
-                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+
+    def __init__(
+        self,
+        spacing: float = 1.0,
+        center: complex = 0 + 0j,
+        out_of_domain_hsv: tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV,
+    ):
         """Initialize chessboard colormap."""
         super().__init__(out_of_domain_hsv)
-
-        # Validate parameters
         if spacing <= 0:
-            from complexplorer.exceptions import ColormapError
-            raise ColormapError("spacing must be positive")
-
+            raise ColormapError(f"spacing must be positive, got {spacing!r}")
         self.spacing = spacing
         self.center = center
-    
-    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+
+    def hsv_tuple(self, z: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Convert complex values to HSV components."""
         # No hue or saturation (grayscale)
         H = np.zeros_like(z, dtype=float)
         S = np.zeros_like(z, dtype=float)
-        
+
         # Shift and scale
         z_shifted = (z - self.center) / self.spacing
-        
+
         # Check which square each point is in
         # Suppress warnings for NaN/inf values
-        with np.errstate(invalid='ignore'):
+        with np.errstate(invalid="ignore"):
             real_idx = np.floor(np.real(z_shifted)).astype(int)
             imag_idx = np.floor(np.imag(z_shifted)).astype(int)
-        
+
         # Chessboard pattern: white if indices have same parity
         V = ((real_idx + imag_idx) % 2 == 0).astype(float)
-        
+
         return H, S, V
 
 
+@_rejects_n_phi
 class PolarChessboard(Colormap):
     """Polar chessboard pattern.
-    
+
     Creates a black and white pattern in polar coordinates,
     with sectors in phase and rings in modulus.
-    
+
     Parameters
     ----------
     phase_sectors : int, optional
@@ -607,59 +709,58 @@ class PolarChessboard(Colormap):
     out_of_domain_hsv : tuple, optional
         Color for out-of-domain points.
     """
-    
-    def __init__(self,
-                 phase_sectors: int = 6,
-                 spacing: float = 1.0,
-                 r_log: Optional[float] = None,
-                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+
+    def __init__(
+        self,
+        phase_sectors: int = 6,
+        spacing: float = 1.0,
+        r_log: float | None = None,
+        out_of_domain_hsv: tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV,
+    ):
         """Initialize polar chessboard."""
         super().__init__(out_of_domain_hsv)
-
-        # Validate parameters
         if phase_sectors <= 0:
-            from complexplorer.exceptions import ColormapError
-            raise ColormapError("phase_sectors must be positive")
+            raise ColormapError(f"phase_sectors must be positive, got {phase_sectors!r}")
         if spacing <= 0:
-            from complexplorer.exceptions import ColormapError
-            raise ColormapError("spacing must be positive")
+            raise ColormapError(f"spacing must be positive, got {spacing!r}")
         if r_log is not None and r_log <= 0:
-            from complexplorer.exceptions import ColormapError
-            raise ColormapError("r_log must be positive")
-
+            raise ColormapError(f"r_log must be positive, got {r_log!r}")
         self.phase_sectors = phase_sectors
         self.phi = np.pi / phase_sectors
         self.spacing = spacing
         self.r_log = r_log
-    
-    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+
+    def hsv_tuple(self, z: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Convert complex values to HSV components."""
         # No hue or saturation (grayscale)
         H = np.zeros_like(z, dtype=float)
         S = np.zeros_like(z, dtype=float)
-        
+
         # Phase sectors
         angle = np.angle(z)
         angle_idx = np.floor((angle + np.pi) / self.phi).astype(int)
-        
+
         # Radial rings
         r = np.abs(z) / self.spacing
         if self.r_log is not None:
-            with np.errstate(divide='ignore', invalid='ignore'):
+            with np.errstate(divide="ignore", invalid="ignore"):
                 r = np.log(r) / np.log(self.r_log)
+            # log(0) is -inf, and casting that to int is undefined (and platform-varying).
+            # The origin is a single ring boundary; pin it to 0 so rgb() stays deterministic.
+            r = np.nan_to_num(r, nan=0.0, posinf=0.0, neginf=0.0)
         r_idx = np.floor(r).astype(int)
-        
+
         # Chessboard pattern
         V = ((angle_idx + r_idx) % 2 == 0).astype(float)
-        
+
         return H, S, V
 
 
 class LogRings(Colormap):
     """Logarithmic black and white rings.
-    
+
     Creates concentric rings with logarithmic spacing.
-    
+
     Parameters
     ----------
     log_spacing : float, optional
@@ -667,44 +768,43 @@ class LogRings(Colormap):
     out_of_domain_hsv : tuple, optional
         Color for out-of-domain points.
     """
-    
-    def __init__(self,
-                 log_spacing: float = 0.2,
-                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+
+    def __init__(
+        self,
+        log_spacing: float = 0.2,
+        out_of_domain_hsv: tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV,
+    ):
         """Initialize logarithmic rings."""
         super().__init__(out_of_domain_hsv)
-
-        # Validate parameters
         if log_spacing <= 0:
-            from complexplorer.exceptions import ColormapError
-            raise ColormapError("log_spacing must be positive")
-
+            raise ColormapError(f"log_spacing must be positive, got {log_spacing!r}")
         self.log_spacing = log_spacing
-    
-    def hsv_tuple(self, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+
+    def hsv_tuple(self, z: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Convert complex values to HSV components."""
         # No hue or saturation (grayscale)
         H = np.zeros_like(z, dtype=float)
         S = np.zeros_like(z, dtype=float)
-        
+
         # Logarithmic rings
-        with np.errstate(divide='ignore', invalid='ignore'):
+        with np.errstate(divide="ignore", invalid="ignore"):
             r_log = np.log(np.abs(z)) / self.log_spacing
             # Alternate black and white
             V = (np.floor(r_log) % 2 == 0).astype(float)
-        
+
         # Handle r=0 (log undefined)
         V[np.abs(z) == 0] = 1.0  # White at origin
-        
+
         return H, S, V
 
 
+@_rejects_n_phi
 class PerceptualPastel(BasePhasePortrait):
     """Perceptually uniform pastel colormap using OkLCh color space.
-    
+
     Creates elegant, non-fluorescent colors with uniform perceived lightness
     as hue cycles. Phase determines hue, modulus creates lightness bands.
-    
+
     Parameters
     ----------
     phase_sectors : int, optional
@@ -728,39 +828,52 @@ class PerceptualPastel(BasePhasePortrait):
     out_of_domain_hsv : tuple, optional
         Color for out-of-domain points.
     """
-    
-    def __init__(self,
-                 phase_sectors: Optional[int] = None,
-                 r_linear_step: Optional[float] = None,
-                 r_log_base: Optional[float] = None,
-                 L_center: float = 0.55,
-                 L_range: float = 0.3,
-                 C: float = 0.1,
-                 v_base: float = 0.5,
-                 auto_scale_r: bool = False,
-                 scale_radius: float = 1.0,
-                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+
+    def __init__(
+        self,
+        phase_sectors: int | None = None,
+        r_linear_step: float | None = None,
+        r_log_base: float | None = None,
+        L_center: float = 0.55,
+        L_range: float = 0.3,
+        C: float = 0.1,
+        v_base: float = 0.5,
+        auto_scale_r: bool = False,
+        scale_radius: float = 1.0,
+        out_of_domain_hsv: tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV,
+    ):
         """Initialize perceptual pastel colormap."""
-        super().__init__(phase_sectors, r_linear_step, r_log_base, v_base,
-                        auto_scale_r, scale_radius, out_of_domain_hsv)
+        super().__init__(
+            phase_sectors,
+            r_linear_step,
+            r_log_base,
+            v_base,
+            auto_scale_r,
+            scale_radius,
+            out_of_domain_hsv,
+        )
 
         # Validate parameters
         if not 0 <= L_center <= 1:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("L_center must be in [0, 1]")
         if not 0 <= L_range <= 1:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("L_range must be in [0, 1]")
         if not 0 <= C <= 0.5:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("C (chroma) must be in [0, 0.5]")
 
         self.L_center = L_center
         self.L_range = L_range
         self.C = C
-    
-    def _compute_colors(self, z: np.ndarray, phi: np.ndarray, r: np.ndarray,
-                       V_phi: np.ndarray, V_r: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+
+    def _compute_colors(
+        self, z: np.ndarray, phi: np.ndarray, r: np.ndarray, V_phi: np.ndarray, V_r: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Compute HSV colors for PerceptualPastel colormap."""
         # Phase to hue (in degrees for OkLCh)
         H_deg = phi * 180 / np.pi  # Convert to degrees
@@ -780,12 +893,13 @@ class PerceptualPastel(BasePhasePortrait):
         return hsv[..., 0], hsv[..., 1], hsv[..., 2]
 
 
+@_rejects_n_phi
 class AnalogousWedge(BasePhasePortrait):
     """Analogous color scheme with compressed hue range.
-    
+
     Maps phase to a wedge of the color wheel (20-50% range) for
     harmonious color schemes while preserving phase winding information.
-    
+
     Parameters
     ----------
     phase_sectors : int, optional
@@ -813,37 +927,50 @@ class AnalogousWedge(BasePhasePortrait):
     out_of_domain_hsv : tuple, optional
         Color for out-of-domain points.
     """
-    
-    def __init__(self,
-                 phase_sectors: Optional[int] = None,
-                 r_linear_step: Optional[float] = None,
-                 r_log_base: Optional[float] = None,
-                 H_center: float = 0.55,
-                 H_wedge: float = 0.2,
-                 S: float = 0.35,
-                 V_base: float = 0.55,
-                 V_range: float = 0.35,
-                 auto_scale_r: bool = False,
-                 scale_radius: float = 1.0,
-                 use_sigmoid: bool = True,
-                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+
+    def __init__(
+        self,
+        phase_sectors: int | None = None,
+        r_linear_step: float | None = None,
+        r_log_base: float | None = None,
+        H_center: float = 0.55,
+        H_wedge: float = 0.2,
+        S: float = 0.35,
+        V_base: float = 0.55,
+        V_range: float = 0.35,
+        auto_scale_r: bool = False,
+        scale_radius: float = 1.0,
+        use_sigmoid: bool = True,
+        out_of_domain_hsv: tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV,
+    ):
         """Initialize analogous wedge colormap."""
         # Note: V_base parameter maps to v_base in BasePhasePortrait
-        super().__init__(phase_sectors, r_linear_step, r_log_base, V_base,
-                        auto_scale_r, scale_radius, out_of_domain_hsv)
+        super().__init__(
+            phase_sectors,
+            r_linear_step,
+            r_log_base,
+            V_base,
+            auto_scale_r,
+            scale_radius,
+            out_of_domain_hsv,
+        )
 
         # Validate parameters
         if not 0 <= H_center <= 1:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("H_center must be in [0, 1]")
         if not 0.2 <= H_wedge <= 0.5:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("H_wedge must be in [0.2, 0.5]")
         if not 0 <= S <= 1:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("S (saturation) must be in [0, 1]")
         if not 0 <= V_range <= 1:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("V_range must be in [0, 1]")
 
         self.H_center = H_center
@@ -864,13 +991,14 @@ class AnalogousWedge(BasePhasePortrait):
         else:
             # Use sigmoid or tanh for smooth modulus mapping
             if self.use_sigmoid:
-                with np.errstate(divide='ignore', invalid='ignore'):
+                with np.errstate(divide="ignore", invalid="ignore"):
                     return sigmoid(np.log(r), center=0, scale=2)
             else:
                 return np.tanh(r / 2)  # Maps [0, ∞) to [0, 1)
 
-    def _compute_colors(self, z: np.ndarray, phi: np.ndarray, r: np.ndarray,
-                       V_phi: np.ndarray, V_r: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def _compute_colors(
+        self, z: np.ndarray, phi: np.ndarray, r: np.ndarray, V_phi: np.ndarray, V_r: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Compute HSV colors for AnalogousWedge colormap."""
         # Phase to compressed hue range
         H = self.H_center + self.H_wedge * (phi / (2 * np.pi) - 0.5)
@@ -886,13 +1014,14 @@ class AnalogousWedge(BasePhasePortrait):
         return H, S, V
 
 
+@_rejects_n_phi
 class DivergingWarmCool(BasePhasePortrait):
     """Diverging warm-cool colormap based on phase sign.
-    
+
     Positive phases lean toward warm colors, negative toward cool.
     Creates refined, cartographic appearance with natural emphasis
     on real/imaginary axes.
-    
+
     Parameters
     ----------
     phase_sectors : int, optional
@@ -924,41 +1053,55 @@ class DivergingWarmCool(BasePhasePortrait):
     out_of_domain_hsv : tuple, optional
         Color for out-of-domain points.
     """
-    
-    def __init__(self,
-                 phase_sectors: Optional[int] = None,
-                 r_linear_step: Optional[float] = None,
-                 r_log_base: Optional[float] = None,
-                 auto_scale_r: bool = False,
-                 scale_radius: float = 1.0,
-                 H_warm: float = 30,
-                 H_cool: float = 220,
-                 L_center: float = 0.5,
-                 L_range: float = 0.3,
-                 C_min: float = 0.04,
-                 C_max: float = 0.14,
-                 v_base: float = 0.5,
-                 use_oklch: bool = True,
-                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+
+    def __init__(
+        self,
+        phase_sectors: int | None = None,
+        r_linear_step: float | None = None,
+        r_log_base: float | None = None,
+        auto_scale_r: bool = False,
+        scale_radius: float = 1.0,
+        H_warm: float = 30,
+        H_cool: float = 220,
+        L_center: float = 0.5,
+        L_range: float = 0.3,
+        C_min: float = 0.04,
+        C_max: float = 0.14,
+        v_base: float = 0.5,
+        use_oklch: bool = True,
+        out_of_domain_hsv: tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV,
+    ):
         """Initialize diverging warm-cool colormap."""
-        super().__init__(phase_sectors, r_linear_step, r_log_base, v_base,
-                        auto_scale_r, scale_radius, out_of_domain_hsv)
+        super().__init__(
+            phase_sectors,
+            r_linear_step,
+            r_log_base,
+            v_base,
+            auto_scale_r,
+            scale_radius,
+            out_of_domain_hsv,
+        )
 
         # Validate parameters
         if not 0 <= L_center <= 1:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("L_center must be in [0, 1]")
         if not 0 <= L_range <= 1:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("L_range must be in [0, 1]")
         if not 0 <= C_min <= 0.5:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("C_min must be in [0, 0.5]")
         if not 0 <= C_max <= 0.5:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("C_max must be in [0, 0.5]")
         if C_min > C_max:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("C_min must be less than or equal to C_max")
 
         self.H_warm = H_warm
@@ -968,7 +1111,7 @@ class DivergingWarmCool(BasePhasePortrait):
         self.C_min = C_min
         self.C_max = C_max
         self.use_oklch = use_oklch
-    
+
     def _compute_modulus_modulation(self, r: np.ndarray, z: np.ndarray) -> np.ndarray:
         """Compute modulus-based value modulation with sigmoid default."""
         if self.r_linear_step is not None:
@@ -976,11 +1119,12 @@ class DivergingWarmCool(BasePhasePortrait):
         elif self.r_log_base is not None:
             return sawtooth_log(r, self.r_log_base)
         else:
-            with np.errstate(divide='ignore', invalid='ignore'):
+            with np.errstate(divide="ignore", invalid="ignore"):
                 return sigmoid(np.log(r), center=0, scale=2)
 
-    def _compute_colors(self, z: np.ndarray, phi: np.ndarray, r: np.ndarray,
-                       V_phi: np.ndarray, V_r: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def _compute_colors(
+        self, z: np.ndarray, phi: np.ndarray, r: np.ndarray, V_phi: np.ndarray, V_r: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Compute HSV colors for DivergingWarmCool colormap."""
         # Map phase to warm-cool interpolation parameter
         a = np.sin(phi)  # in [-1, 1]
@@ -1018,12 +1162,13 @@ class DivergingWarmCool(BasePhasePortrait):
             return H, S, V
 
 
+@_rejects_n_phi
 class Isoluminant(BasePhasePortrait):
     """Isoluminant colormap with optional contour lines.
-    
+
     Maintains constant lightness with hue encoding phase only.
     Optionally overlays thin contour lines to show modulus information.
-    
+
     Parameters
     ----------
     phase_sectors : int, optional
@@ -1055,44 +1200,59 @@ class Isoluminant(BasePhasePortrait):
     out_of_domain_hsv : tuple, optional
         Color for out-of-domain points.
     """
-    
-    def __init__(self,
-                 phase_sectors: Optional[int] = None,
-                 r_linear_step: Optional[float] = None,
-                 r_log_base: Optional[float] = None,
-                 auto_scale_r: bool = False,
-                 scale_radius: float = 1.0,
-                 L: float = 0.6,
-                 C_min: float = 0.12,
-                 C_max: float = 0.18,
-                 v_base: float = 0.5,
-                 show_contours: bool = True,
-                 contour_period: float = 1.0,
-                 contour_width: float = 0.05,
-                 use_oklch: bool = True,
-                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+
+    def __init__(
+        self,
+        phase_sectors: int | None = None,
+        r_linear_step: float | None = None,
+        r_log_base: float | None = None,
+        auto_scale_r: bool = False,
+        scale_radius: float = 1.0,
+        L: float = 0.6,
+        C_min: float = 0.12,
+        C_max: float = 0.18,
+        v_base: float = 0.5,
+        show_contours: bool = True,
+        contour_period: float = 1.0,
+        contour_width: float = 0.05,
+        use_oklch: bool = True,
+        out_of_domain_hsv: tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV,
+    ):
         """Initialize isoluminant colormap."""
-        super().__init__(phase_sectors, r_linear_step, r_log_base, v_base,
-                        auto_scale_r, scale_radius, out_of_domain_hsv)
+        super().__init__(
+            phase_sectors,
+            r_linear_step,
+            r_log_base,
+            v_base,
+            auto_scale_r,
+            scale_radius,
+            out_of_domain_hsv,
+        )
 
         # Validate parameters
         if not 0 <= L <= 1:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("L (lightness) must be in [0, 1]")
         if not 0 <= C_min <= 0.5:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("C_min must be in [0, 0.5]")
         if not 0 <= C_max <= 0.5:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("C_max must be in [0, 0.5]")
         if C_min > C_max:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("C_min must be less than or equal to C_max")
         if contour_period <= 0:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("contour_period must be positive")
         if contour_width <= 0:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("contour_width must be positive")
 
         self.L = L
@@ -1117,8 +1277,9 @@ class Isoluminant(BasePhasePortrait):
         else:
             return np.ones_like(z, dtype=float)
 
-    def _compute_colors(self, z: np.ndarray, phi: np.ndarray, r: np.ndarray,
-                       V_phi: np.ndarray, V_r: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def _compute_colors(
+        self, z: np.ndarray, phi: np.ndarray, r: np.ndarray, V_phi: np.ndarray, V_r: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Compute HSV colors for Isoluminant colormap."""
         if self.use_oklch:
             # Phase to hue in degrees
@@ -1130,16 +1291,19 @@ class Isoluminant(BasePhasePortrait):
                 # Include modulus modulation
                 L_mod = (V_phi + V_r) * V_scaler / 2 + self.v_base
                 # Map L_mod (which ranges v_base to 1.0) to subtle lightness variation
-                L_normalized = (L_mod - self.v_base) / (1 - self.v_base) if self.v_base < 1 else L_mod
+                L_normalized = (
+                    (L_mod - self.v_base) / (1 - self.v_base) if self.v_base < 1 else L_mod
+                )
                 L = self.L + (L_normalized - 0.5) * 0.2  # Subtle modulation
             else:
                 L_base = self.L + (V_phi - 0.5) * V_scaler * 0.2  # Subtle phase modulation
                 L = np.full_like(z, L_base, dtype=float)
 
             if self.show_contours:
-                with np.errstate(divide='ignore', invalid='ignore'):
+                with np.errstate(divide="ignore", invalid="ignore"):
                     rho = np.log(r) / np.log(np.e)
-                T_rho = np.mod(rho / self.contour_period, 1.0)
+                    T_rho = np.mod(rho / self.contour_period, 1.0)
+                T_rho = np.nan_to_num(T_rho, nan=0.0, posinf=0.0, neginf=0.0)
                 # Gaussian-like contour lines
                 contour = 1 - np.exp(-np.power(T_rho / self.contour_width, 2))
                 L = L * (0.8 + 0.2 * contour)  # Darken at contours
@@ -1168,21 +1332,23 @@ class Isoluminant(BasePhasePortrait):
                 V = np.full_like(z, self.L, dtype=float)
 
             if self.show_contours:
-                with np.errstate(divide='ignore', invalid='ignore'):
+                with np.errstate(divide="ignore", invalid="ignore"):
                     rho = np.log(r) / np.log(np.e)
-                T_rho = np.mod(rho / self.contour_period, 1.0)
+                    T_rho = np.mod(rho / self.contour_period, 1.0)
+                T_rho = np.nan_to_num(T_rho, nan=0.0, posinf=0.0, neginf=0.0)
                 contour = 1 - np.exp(-np.power(T_rho / self.contour_width, 2))
                 V = V * (0.8 + 0.2 * contour)
 
             return H, S, V
 
 
+@_rejects_n_phi
 class CubehelixPhase(BasePhasePortrait):
     """Cubehelix colormap driven by complex phase.
-    
+
     Uses Dave Green's cubehelix color scheme which maintains
     monotonic perceived brightness and prints well in grayscale.
-    
+
     Parameters
     ----------
     phase_sectors : int, optional
@@ -1214,41 +1380,55 @@ class CubehelixPhase(BasePhasePortrait):
     out_of_domain_hsv : tuple, optional
         Color for out-of-domain points.
     """
-    
-    def __init__(self,
-                 phase_sectors: Optional[int] = None,
-                 r_linear_step: Optional[float] = None,
-                 r_log_base: Optional[float] = None,
-                 auto_scale_r: bool = False,
-                 scale_radius: float = 1.0,
-                 start: float = 0.5,
-                 rotations: float = -1.5,
-                 saturation: float = 0.8,
-                 L_min: float = 0.15,
-                 L_max: float = 0.85,
-                 v_base: float = 0.5,
-                 gamma: float = 1.0,
-                 modulate_with_r: bool = True,
-                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+
+    def __init__(
+        self,
+        phase_sectors: int | None = None,
+        r_linear_step: float | None = None,
+        r_log_base: float | None = None,
+        auto_scale_r: bool = False,
+        scale_radius: float = 1.0,
+        start: float = 0.5,
+        rotations: float = -1.5,
+        saturation: float = 0.8,
+        L_min: float = 0.15,
+        L_max: float = 0.85,
+        v_base: float = 0.5,
+        gamma: float = 1.0,
+        modulate_with_r: bool = True,
+        out_of_domain_hsv: tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV,
+    ):
         """Initialize cubehelix phase colormap."""
-        super().__init__(phase_sectors, r_linear_step, r_log_base, v_base,
-                        auto_scale_r, scale_radius, out_of_domain_hsv)
+        super().__init__(
+            phase_sectors,
+            r_linear_step,
+            r_log_base,
+            v_base,
+            auto_scale_r,
+            scale_radius,
+            out_of_domain_hsv,
+        )
 
         # Validate parameters
         if not 0 <= saturation <= 1:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("saturation must be in [0, 1]")
         if not 0 <= L_min <= 1:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("L_min must be in [0, 1]")
         if not 0 <= L_max <= 1:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("L_max must be in [0, 1]")
         if L_min > L_max:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("L_min must be less than or equal to L_max")
         if gamma <= 0:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("gamma must be positive")
 
         self.start = start
@@ -1266,11 +1446,12 @@ class CubehelixPhase(BasePhasePortrait):
         elif self.r_log_base is not None:
             return sawtooth_log(r, self.r_log_base)
         else:
-            with np.errstate(divide='ignore', invalid='ignore'):
+            with np.errstate(divide="ignore", invalid="ignore"):
                 return sigmoid(np.log(r), center=0, scale=2)
 
-    def _compute_colors(self, z: np.ndarray, phi: np.ndarray, r: np.ndarray,
-                       V_phi: np.ndarray, V_r: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def _compute_colors(
+        self, z: np.ndarray, phi: np.ndarray, r: np.ndarray, V_phi: np.ndarray, V_r: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Compute HSV colors for CubehelixPhase colormap."""
         # Phase determines position along helix
         h = phi / (2 * np.pi)  # Normalize to [0, 1]
@@ -1293,12 +1474,13 @@ class CubehelixPhase(BasePhasePortrait):
         return hsv[..., 0], hsv[..., 1], hsv[..., 2]
 
 
+@_rejects_n_phi
 class InkPaper(BasePhasePortrait):
     """Nearly monochrome colormap with subtle phase tints.
-    
+
     Creates a classy, etching-like appearance that's almost grayscale
     with just enough color to read phase information.
-    
+
     Parameters
     ----------
     phase_sectors : int, optional
@@ -1332,51 +1514,68 @@ class InkPaper(BasePhasePortrait):
     out_of_domain_hsv : tuple, optional
         Color for out-of-domain points.
     """
-    
-    def __init__(self,
-                 phase_sectors: Optional[int] = None,
-                 r_linear_step: Optional[float] = None,
-                 r_log_base: Optional[float] = None,
-                 auto_scale_r: bool = False,
-                 scale_radius: float = 1.0,
-                 L_min: float = 0.35,
-                 L_max: float = 0.85,
-                 C_min: float = 0.02,
-                 C_max: float = 0.06,
-                 v_base: float = 0.5,
-                 add_phase_stripes: bool = False,
-                 stripe_count: int = 8,
-                 stripe_amplitude: float = 0.03,
-                 use_oklch: bool = True,
-                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+
+    def __init__(
+        self,
+        phase_sectors: int | None = None,
+        r_linear_step: float | None = None,
+        r_log_base: float | None = None,
+        auto_scale_r: bool = False,
+        scale_radius: float = 1.0,
+        L_min: float = 0.35,
+        L_max: float = 0.85,
+        C_min: float = 0.02,
+        C_max: float = 0.06,
+        v_base: float = 0.5,
+        add_phase_stripes: bool = False,
+        stripe_count: int = 8,
+        stripe_amplitude: float = 0.03,
+        use_oklch: bool = True,
+        out_of_domain_hsv: tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV,
+    ):
         """Initialize ink & paper colormap."""
-        super().__init__(phase_sectors, r_linear_step, r_log_base, v_base,
-                        auto_scale_r, scale_radius, out_of_domain_hsv)
+        super().__init__(
+            phase_sectors,
+            r_linear_step,
+            r_log_base,
+            v_base,
+            auto_scale_r,
+            scale_radius,
+            out_of_domain_hsv,
+        )
 
         # Validate parameters
         if not 0 <= L_min <= 1:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("L_min must be in [0, 1]")
         if not 0 <= L_max <= 1:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("L_max must be in [0, 1]")
         if L_min > L_max:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("L_min must be less than or equal to L_max")
         if not 0 <= C_min <= 0.5:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("C_min must be in [0, 0.5]")
         if not 0 <= C_max <= 0.5:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("C_max must be in [0, 0.5]")
         if C_min > C_max:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("C_min must be less than or equal to C_max")
         if stripe_count <= 0:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("stripe_count must be positive")
         if not 0 <= stripe_amplitude <= 1:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("stripe_amplitude must be in [0, 1]")
 
         self.L_min = L_min
@@ -1395,11 +1594,12 @@ class InkPaper(BasePhasePortrait):
         elif self.r_log_base is not None:
             return sawtooth_log(r, self.r_log_base)
         else:
-            with np.errstate(divide='ignore', invalid='ignore'):
+            with np.errstate(divide="ignore", invalid="ignore"):
                 return sigmoid(np.log(r), center=0, scale=2)
 
-    def _compute_colors(self, z: np.ndarray, phi: np.ndarray, r: np.ndarray,
-                       V_phi: np.ndarray, V_r: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def _compute_colors(
+        self, z: np.ndarray, phi: np.ndarray, r: np.ndarray, V_phi: np.ndarray, V_r: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Compute HSV colors for InkPaper colormap."""
         if self.use_oklch:
             # Phase to hue (degrees)
@@ -1449,12 +1649,13 @@ class InkPaper(BasePhasePortrait):
             return H, S, V
 
 
+@_rejects_n_phi
 class EarthTopographic(BasePhasePortrait):
     """Earth-tone topographic colormap.
-    
+
     Creates a terrain-inspired aesthetic where modulus appears as
     elevation with phase providing subtle earth-tone tints.
-    
+
     Parameters
     ----------
     phase_sectors : int, optional
@@ -1490,49 +1691,65 @@ class EarthTopographic(BasePhasePortrait):
     out_of_domain_hsv : tuple, optional
         Color for out-of-domain points.
     """
-    
-    def __init__(self,
-                 phase_sectors: Optional[int] = None,
-                 r_linear_step: Optional[float] = None,
-                 r_log_base: Optional[float] = None,
-                 auto_scale_r: bool = False,
-                 scale_radius: float = 1.0,
-                 L_min: float = 0.4,
-                 L_max: float = 0.8,
-                 H_water: float = 200,
-                 H_land: float = 30,
-                 C_min: float = 0.05,
-                 C_max: float = 0.12,
-                 add_hillshade: bool = True,
-                 hillshade_amplitude: float = 0.07,
-                 v_base: float = 0.5,
-                 use_oklch: bool = True,
-                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+
+    def __init__(
+        self,
+        phase_sectors: int | None = None,
+        r_linear_step: float | None = None,
+        r_log_base: float | None = None,
+        auto_scale_r: bool = False,
+        scale_radius: float = 1.0,
+        L_min: float = 0.4,
+        L_max: float = 0.8,
+        H_water: float = 200,
+        H_land: float = 30,
+        C_min: float = 0.05,
+        C_max: float = 0.12,
+        add_hillshade: bool = True,
+        hillshade_amplitude: float = 0.07,
+        v_base: float = 0.5,
+        use_oklch: bool = True,
+        out_of_domain_hsv: tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV,
+    ):
         """Initialize earth topographic colormap."""
-        super().__init__(phase_sectors, r_linear_step, r_log_base, v_base,
-                        auto_scale_r, scale_radius, out_of_domain_hsv)
+        super().__init__(
+            phase_sectors,
+            r_linear_step,
+            r_log_base,
+            v_base,
+            auto_scale_r,
+            scale_radius,
+            out_of_domain_hsv,
+        )
 
         # Validate parameters
         if not 0 <= L_min <= 1:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("L_min must be in [0, 1]")
         if not 0 <= L_max <= 1:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("L_max must be in [0, 1]")
         if L_min > L_max:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("L_min must be less than or equal to L_max")
         if not 0 <= C_min <= 0.5:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("C_min must be in [0, 0.5]")
         if not 0 <= C_max <= 0.5:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("C_max must be in [0, 0.5]")
         if C_min > C_max:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("C_min must be less than or equal to C_max")
         if not 0 <= hillshade_amplitude <= 1:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("hillshade_amplitude must be in [0, 1]")
 
         self.L_min = L_min
@@ -1552,11 +1769,12 @@ class EarthTopographic(BasePhasePortrait):
         elif self.r_log_base is not None:
             return sawtooth_log(r, self.r_log_base)
         else:
-            with np.errstate(divide='ignore', invalid='ignore'):
+            with np.errstate(divide="ignore", invalid="ignore"):
                 return sigmoid(np.log(r), center=0, scale=2)
 
-    def _compute_colors(self, z: np.ndarray, phi: np.ndarray, r: np.ndarray,
-                       V_phi: np.ndarray, V_r: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def _compute_colors(
+        self, z: np.ndarray, phi: np.ndarray, r: np.ndarray, V_phi: np.ndarray, V_r: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Compute HSV colors for EarthTopographic colormap."""
         if self.use_oklch:
             # Map phase to water/land hues
@@ -1576,9 +1794,10 @@ class EarthTopographic(BasePhasePortrait):
 
             # Add hillshade effect
             if self.add_hillshade:
-                with np.errstate(divide='ignore', invalid='ignore'):
+                with np.errstate(divide="ignore", invalid="ignore"):
                     rho = np.log(r) / np.log(np.e)
-                T_rho = np.mod(rho, 1.0)
+                    T_rho = np.mod(rho, 1.0)
+                T_rho = np.nan_to_num(T_rho, nan=0.0, posinf=0.0, neginf=0.0)
                 hillshade = np.cos(2 * np.pi * T_rho)
                 L = L + self.hillshade_amplitude * hillshade
                 L = np.clip(L, 0, 1)
@@ -1611,9 +1830,10 @@ class EarthTopographic(BasePhasePortrait):
                 V = V_base
 
             if self.add_hillshade:
-                with np.errstate(divide='ignore', invalid='ignore'):
+                with np.errstate(divide="ignore", invalid="ignore"):
                     rho = np.log(r) / np.log(np.e)
-                T_rho = np.mod(rho, 1.0)
+                    T_rho = np.mod(rho, 1.0)
+                T_rho = np.nan_to_num(T_rho, nan=0.0, posinf=0.0, neginf=0.0)
                 hillshade = np.cos(2 * np.pi * T_rho)
                 V = V + self.hillshade_amplitude * hillshade
                 V = np.clip(V, 0, 1)
@@ -1621,12 +1841,13 @@ class EarthTopographic(BasePhasePortrait):
             return H, S, V
 
 
+@_rejects_n_phi
 class FourQuadrant(BasePhasePortrait):
     """Four-quadrant colormap with smooth circular interpolation.
-    
+
     Maps the four principal phase angles to four color anchors
     and smoothly interpolates between them on the circle.
-    
+
     Parameters
     ----------
     phase_sectors : int, optional
@@ -1657,40 +1878,54 @@ class FourQuadrant(BasePhasePortrait):
     out_of_domain_hsv : tuple, optional
         Color for out-of-domain points.
     """
-    
-    def __init__(self,
-                 phase_sectors: Optional[int] = None,
-                 r_linear_step: Optional[float] = None,
-                 r_log_base: Optional[float] = None,
-                 auto_scale_r: bool = False,
-                 scale_radius: float = 1.0,
-                 H_anchors: Tuple[float, float, float, float] = (10, 120, 210, 300),
-                 C: float = 0.10,
-                 L_min: float = 0.4,
-                 L_max: float = 0.8,
-                 use_oklch: bool = True,
-                 smooth_interpolation: bool = True,
-                 v_base: float = 0.5,
-                 out_of_domain_hsv: Tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV):
+
+    def __init__(
+        self,
+        phase_sectors: int | None = None,
+        r_linear_step: float | None = None,
+        r_log_base: float | None = None,
+        auto_scale_r: bool = False,
+        scale_radius: float = 1.0,
+        H_anchors: tuple[float, float, float, float] = (10, 120, 210, 300),
+        C: float = 0.10,
+        L_min: float = 0.4,
+        L_max: float = 0.8,
+        use_oklch: bool = True,
+        smooth_interpolation: bool = True,
+        v_base: float = 0.5,
+        out_of_domain_hsv: tuple[float, float, float] = OUT_OF_DOMAIN_COLOR_HSV,
+    ):
         """Initialize four-quadrant colormap."""
-        super().__init__(phase_sectors, r_linear_step, r_log_base, v_base,
-                        auto_scale_r, scale_radius, out_of_domain_hsv)
+        super().__init__(
+            phase_sectors,
+            r_linear_step,
+            r_log_base,
+            v_base,
+            auto_scale_r,
+            scale_radius,
+            out_of_domain_hsv,
+        )
 
         # Validate parameters
         if len(H_anchors) != 4:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("H_anchors must have exactly 4 elements")
         if not 0 <= C <= 0.5:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("C (chroma) must be in [0, 0.5]")
         if not 0 <= L_min <= 1:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("L_min must be in [0, 1]")
         if not 0 <= L_max <= 1:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("L_max must be in [0, 1]")
         if L_min > L_max:
             from complexplorer.exceptions import ColormapError
+
             raise ColormapError("L_min must be less than or equal to L_max")
 
         self.H_anchors = H_anchors
@@ -1707,11 +1942,12 @@ class FourQuadrant(BasePhasePortrait):
         elif self.r_log_base is not None:
             return sawtooth_log(r, self.r_log_base)
         else:
-            with np.errstate(divide='ignore', invalid='ignore'):
+            with np.errstate(divide="ignore", invalid="ignore"):
                 return sigmoid(np.log(r), center=0, scale=2)
 
-    def _compute_colors(self, z: np.ndarray, phi: np.ndarray, r: np.ndarray,
-                       V_phi: np.ndarray, V_r: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def _compute_colors(
+        self, z: np.ndarray, phi: np.ndarray, r: np.ndarray, V_phi: np.ndarray, V_r: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Compute HSV colors for FourQuadrant colormap."""
         # Map phase to hue via 4-point interpolation
         phi_norm = phi / (2 * np.pi)  # Normalize to [0, 1]
@@ -1726,7 +1962,7 @@ class FourQuadrant(BasePhasePortrait):
 
         # Interpolate within each quadrant
         for q in range(4):
-            mask = (quadrant == q)
+            mask = quadrant == q
             if np.any(mask):
                 h1 = self.H_anchors[q]
                 h2 = self.H_anchors[(q + 1) % 4]

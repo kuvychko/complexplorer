@@ -2,49 +2,91 @@
 
 ## Project Overview
 
-Complexplorer is a Python library for visualization of complex functions, inspired by Elias Wegert's book "Visual Complex Functions - An Introduction with Phase Portraits". The library provides tools to create beautiful visualizations of complex-valued functions using various color mapping techniques and plot types.
+Complexplorer is a Python library for visualization of complex functions, inspired by Elias Wegert's book "Visual Complex Functions - An Introduction with Phase Portraits". The library provides tools to create beautiful visualizations of complex-valued functions using various color mapping techniques and plot types, and can export 3D-printable mathematical ornaments (STL).
 
 ## Key Concepts
 
-- **Complex Domains**: Rectangular, disk, and annular regions in the complex plane
-- **Color Maps**: Various schemes to visualize complex values (Phase portraits, Chessboard patterns, Logarithmic rings)
-- **Visualization Types**: 2D plots, 3D analytic landscapes, and Riemann sphere projections
+- **Complex Domains**: Rectangular, disk, and annular regions in the complex plane, plus composite domains built via set operations (union, intersection, difference)
+- **Color Maps**: 13 schemes for visualizing complex values — classic/enhanced `Phase` portraits, the perceptual family built on OkLCh/cubehelix, and grayscale `Chessboard`/`PolarChessboard`/`LogRings` patterns
+- **Modulus Scaling**: ~10 transfer functions mapping `|f(z)|` to radius/height, used by 3D landscapes, Riemann relief, and STL export
+- **Visualization Types**: 2D plots, 3D analytic landscapes, and Riemann sphere projections (matplotlib and PyVista backends)
+- **STL Export**: Modulus-scaled Riemann sphere ornaments for 3D printing
 
 ## Project Structure
 
 ```
 complexplorer/
-├── complexplorer/          # Main library package
-│   ├── __init__.py        # Package initialization
-│   ├── domain.py          # Domain classes (Rectangle, Disk, Annulus)
-│   ├── cmap.py            # Color map classes (Phase, Chessboard, etc.)
-│   ├── funcs.py           # Supporting functions (phase, sawtooth, stereographic)
-│   ├── plots_2d.py        # 2D plotting functions
-│   ├── plots_3d.py        # 3D plotting functions (matplotlib)
-│   ├── plots_3d_pyvista.py # 3D plotting functions (PyVista)
-│   ├── mesh_utils.py      # Mesh generation utilities for Riemann sphere
-│   └── utils.py           # Backend detection and setup utilities
-├── examples/              # Example notebooks and output images
-├── tests/                 # Unit tests
-│   └── unit/              # Unit tests with comprehensive coverage
-├── pyproject.toml         # Project configuration
-└── README.md              # Project documentation
+├── complexplorer/              # Main library package
+│   ├── __init__.py             # Public API surface (see __all__)
+│   ├── _version.py
+│   ├── api.py                  # High-level API: quick_plot(), PlotPresets
+│   ├── exceptions.py           # ComplexplorerError base + ValidationError + ColormapError
+│   ├── gallery.py              # generate_gallery (byte-stable index.json manifest)
+│   ├── core/
+│   │   ├── domain.py           # Domain, Rectangle, Disk, Annulus, CompositeDomain
+│   │   ├── colormap.py         # Colormap base + Phase, Chessboard, PolarChessboard, LogRings (4 colormaps)
+│   │   ├── scaling.py          # ModulusScaling modes + get_scaling_preset()
+│   │   ├── functions.py        # phase, sawtooth, stereographic_projection, …
+│   │   ├── field.py            # ComplexField sampling (planar/sphere)
+│   │   ├── expression.py       # Safe expression-string → callable evaluation
+│   │   └── presets.py          # FunctionPreset + cp.catalog registry (answer keys)
+│   ├── ee/
+│   │   └── transfer_function.py # TransferFunction + pole_zero/bode/nyquist/transfer_portrait
+│   ├── mesh/
+│   │   ├── surface.py          # SurfaceMesh kernel (shared 3D mesh pipeline)
+│   │   ├── builders.py         # build_landscape, build_relief
+│   │   └── riemann_surface.py  # build_riemann_surface (power/log/algebraic)
+│   ├── plotting/
+│   │   ├── matplotlib/
+│   │   │   └── plot_2d.py       # plot, pair_plot (legend= phase wheel), riemann_chart, riemann_hemispheres
+│   │   └── pyvista/
+│   │       ├── plot_3d.py       # plot_landscape_pv, pair_plot_landscape_pv
+│   │       ├── riemann.py       # riemann_pv
+│   │       └── riemann_surface.py # riemann_surface_pv
+│   ├── cli/                    # `complexplorer render | stl | list | gallery`
+│   ├── export/
+│   │   └── stl/                # OrnamentGenerator, create_ornament, mesh repair
+│   └── utils/
+│       ├── backend.py          # Matplotlib backend detection/setup
+│       ├── mesh.py             # Mesh generation (incl. Riemann sphere)
+│       ├── mesh_distortion.py
+│       └── validation.py       # Validation helpers (re-exports ValidationError)
+├── openspec/                   # OpenSpec specs and change proposals (see below)
+├── examples/                   # notebooks/, scripts/, gallery/, showcase.py
+├── tests/                      # unit/, integration/, regression/ (pytest)
+├── pyproject.toml
+└── README.md
 ```
+
+> Note: the public API is re-exported flat from the top-level package (e.g. `cp.Rectangle`, `cp.Phase`, `cp.plot`) — except engineering mode, which is namespaced under `cp.ee`. Import from `complexplorer` directly; the submodule layout above is internal organization.
+
+## Spec-Driven Development (OpenSpec)
+
+This project uses **OpenSpec** for managing changes. Behavioral-contract specs live in `openspec/specs/`, organized into 19 capabilities: `domains`, `colormaps`, `modulus-scaling`, `core-functions`, `plotting-2d`, `plotting-3d-pyvista`, `riemann-sphere`, `riemann-surfaces`, `stl-export`, `high-level-api`, `exceptions`, `transfer-functions`, `expression`, `function-presets`, `gallery`, `cli`, `surface-mesh`, `packaging`, `examples`.
+
+For any non-trivial change, create an OpenSpec change proposal (`/opsx:propose` or `/opsx:explore`) rather than editing code directly, then implement against it. Project context for artifact generation lives in `openspec/config.yaml`. Validate specs with `openspec validate --specs`.
 
 ## Dependencies
 
 - Python >= 3.11
 - numpy >= 1.26.0
-- matplotlib >= 3.8.0
+- matplotlib >= 3.8.0 (2D backend)
 - scipy >= 1.11.0 (for mesh interpolation and signal processing)
+- asteval >= 1.0 (safe expression-string evaluation for `core/expression.py` and the CLI)
+- PyVista >= 0.47 (the 3D backend **and STL export** — a required dependency as of 3.0)
 
 Optional dependencies:
 - PyQt6 >= 6.5.0 (for interactive matplotlib plots in CLI scripts)
-- PyVista >= 0.45.0 (for high-performance 3D visualizations)
+- `[examples]` extra: nbmake, nbconvert, ipykernel, colorspacious (CVD simulation in the
+  colour/accessibility notebook)
+
+As of 3.0 PyVista is a required core dependency (the sole 3D backend), so the former
+`HAS_PYVISTA` / `HAS_STL_EXPORT` capability flags have been removed — those features are
+always available.
 
 ## Development Setup
 
-The project uses `uv` for fast Python package management. To set up the development environment:
+The project uses `uv` for fast Python package management:
 
 ```bash
 # Create and activate virtual environment (if not already done)
@@ -58,8 +100,7 @@ uv pip install -e ".[dev]"
 uv pip install -e ".[all]"
 
 # Or install specific optional features
-uv pip install -e ".[qt]"     # For interactive matplotlib plots
-uv pip install -e ".[pyvista]" # For high-performance 3D
+uv pip install -e ".[qt]"      # For interactive matplotlib plots
 ```
 
 ### Running Tests
@@ -79,7 +120,7 @@ pytest tests/unit/test_domain.py -v
 
 ### Testing
 
-The project has a comprehensive unit test suite covering all major functionality. Tests are located in the `tests/unit/` directory and can be run using pytest.
+The project has a comprehensive unit test suite in `tests/unit/`, run with pytest.
 
 ### Code Style
 
@@ -88,44 +129,47 @@ The project has a comprehensive unit test suite covering all major functionality
 - Add comprehensive docstrings for all public functions and classes
 - Include mathematical formulas in docstrings where applicable
 - Use type hints
+- Raise the library's domain-specific exceptions (subclasses of `ComplexplorerError` in `exceptions.py`) rather than bare `ValueError`/`RuntimeError`
 
 ### Common Tasks
 
-1. **Adding a new color map**: Create a new class in `cmap.py` that inherits from `Cmap` and implements `hsv()` and `rgb()` methods
-2. **Adding a new domain type**: Create a new class in `domain.py` that inherits from `Domain` and implements the `contains()` method
-3. **Adding a new plot type**: Add functions to either `plots_2d.py` or `plots_3d.py` following existing patterns
+1. **Adding a new color map**: Create a new class in `core/colormap.py` that inherits from `Colormap` (or `BasePhasePortrait` for enhanced phase portraits) and implements the HSV/RGB conversion contract
+2. **Adding a new domain type**: Create a new class in `core/domain.py` that inherits from `Domain` and implements the `contains()` method
+3. **Adding a new modulus scaling mode**: Add a static method to `ModulusScaling` in `core/scaling.py` (and a preset in `get_scaling_preset()` if warranted)
+4. **Adding a new plot type**: Add functions to `plotting/matplotlib/` or `plotting/pyvista/` following existing patterns
+5. **Remember**: capture the intended behavior in an OpenSpec change first (see above)
 
 ### Mathematical Background
 
-The library deals with complex functions f: ℂ → ℂ. Key mathematical concepts:
-- Phase: arg(z) mapped to colors
-- Modulus: |z| used for brightness or patterns
-- Stereographic projection: Maps complex plane to Riemann sphere
-- Enhanced phase portraits: Show both phase and modulus information
+The library deals with complex functions f: ℂ → ℂ. Key conventions:
+- **Phase**: `arg(z)` normalized to `[0, 2π)`, mapped to hue
+- **Modulus**: `|z|` used for brightness, contour patterns, or 3D height/radius
+- **Stereographic projection**: maps the complex plane to the unit Riemann sphere; the origin and ∞ occupy opposite poles, the unit circle maps to the equator
+- **Enhanced phase portraits**: show both phase and modulus information via sawtooth-modulated brightness
+- **Domain membership** boundaries are inclusive; colormap RGB/HSV channels are in `[0, 1]`
 
 ### Performance Considerations
 
-- Matplotlib is not optimized for 3D rendering, so 3D plots can be slow
-- PyVista provides 15-30x faster 3D rendering with better quality
-- The Riemann sphere plot uses a rectangular mesh which is inefficient at poles
+- All 3D rendering goes through PyVista (the matplotlib 3D backend was removed in 3.0),
+  which is high-quality and fast
+- The Riemann sphere mesh is rectangular, which is inefficient at poles
 - Domain meshing is deferred until plot time for flexibility
 
 ### PyVista Integration
 
-The project includes high-performance PyVista-based 3D plotting functions:
+High-performance PyVista-based functions:
 - `plot_landscape_pv()`: Fast 3D landscape visualization
 - `pair_plot_landscape_pv()`: Side-by-side domain/codomain comparison
 - `riemann_pv()`: Riemann sphere with multiple modulus scaling options
 
-**Important**: For best quality, use PyVista functions via command-line scripts rather than Jupyter notebooks. The Jupyter trame backend has severe aliasing issues. See `examples/interactive_demo.py` for an optimal interactive experience.
+**Important**: For best quality, use PyVista functions via command-line scripts rather than Jupyter notebooks. The Jupyter trame backend has severe aliasing issues. See the `examples/` directory for interactive demos.
 
 ### Future Improvements
 
-- STL file export for 3D printing
 - Animation capabilities for parameter exploration
 - Optimized viewing windows for domain intersections
 - Documentation framework (Sphinx/MkDocs)
-- Additional mesh generation options
+- Additional mesh generation options (e.g. geodesic spheres to avoid polar artifacts)
 
 ## Quick Reference
 
@@ -142,31 +186,72 @@ def f(z):
     return (z - 1) / (z**2 + z + 1)
 
 # Choose color map (auto-scaled enhanced phase)
-cmap = cp.Phase(n_phi=6, auto_scale_r=True)
+cmap = cp.Phase(phase_sectors=6, auto_scale_r=True)
 
-# Create visualization
-cp.plot(domain, f, cmap)
+# Create visualization (note: cmap is a keyword argument)
+cp.plot(domain, f, cmap=cmap)
+```
+
+### Quick Exploration (high-level API)
+
+```python
+import complexplorer as cp
+
+# One-liner with sensible defaults (modes: "2d", "3d", "riemann")
+cp.quick_plot(lambda z: (z**2 - 1) / (z**2 + 1))
+
+# Bundled plot-config presets (distinct from the cp.catalog function registry)
+cp.quick_plot(lambda z: 1/z, **cp.PlotPlotPresets.publication_ready())
+
+# Add a phase-wheel legend to any 2D portrait
+cp.plot(cp.Rectangle(4, 4), lambda z: 1/z, legend=True)
+```
+
+### Engineering Mode (cp.ee)
+
+```python
+H = cp.ee.TransferFunction([1], [1, 0.2, 1])   # 1 / (s² + 0.2s + 1)
+H.poles, H.is_stable                            # math kernel
+cp.ee.transfer_portrait(H, legend=True)         # phase portrait + poles/zeros + jω axis
+cp.ee.bode_plot(H); cp.ee.nyquist_plot(H)       # canonical companion views
+cp.plot_landscape_pv(cp.Rectangle(6, 6), H)     # H is a plain callable — all renderers work
 ```
 
 ### Common Color Maps
 
 - `Phase()`: Basic or enhanced phase portraits
   - Use `auto_scale_r=True` for automatic square cell sizing
-  - Set `n_phi` for number of phase sectors
+  - Set `phase_sectors` for the number of phase sectors (renamed from `n_phi` in 2.0; passing
+    `n_phi` raises `ValidationError`)
   - Adjust `scale_radius` to control cell size
+  - `emphasize_unit_circle=True` highlights `|z| = 1`
+- Perceptual family (OkLCh / cubehelix, restored from 2.0.0): `OklabPhase()`,
+  `PerceptualPastel()`, `AnalogousWedge()`, `DivergingWarmCool()`, `Isoluminant()`,
+  `CubehelixPhase()`, `InkPaper()`, `EarthTopographic()`, `FourQuadrant()`
+  - See `examples/notebooks/color_and_accessibility.ipynb` for the tour and the
+    colour-vision-deficiency comparison
 - `Chessboard()`: Cartesian grid pattern
 - `PolarChessboard()`: Polar grid pattern
 - `LogRings()`: Logarithmic black/white rings
 
 ### Plot Types
 
-#### Matplotlib-based:
+#### Matplotlib-based (2D only):
 - `plot()`: Basic 2D visualization
 - `pair_plot()`: Side-by-side domain and codomain
-- `plot_landscape()`: 3D surface plot
-- `riemann()`: Riemann sphere visualization
+- `riemann_chart()` / `riemann_hemispheres()`: Flat stereographic hemisphere charts
 
-#### PyVista-based (high-performance):
-- `plot_landscape_pv()`: Fast 3D landscape
-- `pair_plot_landscape_pv()`: Fast side-by-side 3D
-- `riemann_pv()`: Interactive Riemann sphere with modulus scaling
+#### PyVista-based (all 3D; the matplotlib 3D functions were removed in 3.0):
+- `plot_landscape_pv()`: 3D analytic landscape
+- `pair_plot_landscape_pv()`: Side-by-side domain/codomain 3D
+- `riemann_pv()`: Interactive Riemann **sphere** (a single-valued function on the compactified plane)
+- `riemann_surface_pv()`: Riemann **surface** of a multivalued family — the multi-sheeted cover (`power` roots `z^(1/n)`, `log`, or `algebraic` curves `w² = P(z)` via `p=` polynomial coefficients). Distinct from the sphere: this is the surface on which a multivalued function becomes single-valued.
+
+### STL Export (3D printing)
+
+```python
+from complexplorer.export.stl import OrnamentGenerator
+
+ornament = OrnamentGenerator(lambda z: z / (z**10 - 1), resolution=200)
+ornament.generate_and_save("ornament.stl", size_mm=80)
+```

@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=77.0.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
@@ -10,26 +10,50 @@ where = ["."]
 include = ["complexplorer", "complexplorer.*"]
 exclude = ["examples*", "tests*", "docs*", "build*", "*.egg-info"]
 
+[tool.setuptools.package-data]
+# PEP 561 marker so downstream type checkers honor the inline annotations.
+complexplorer = ["py.typed"]
+
+[tool.setuptools.dynamic]
+version = {attr = "complexplorer._version.__version__"}
+
 [project]
 name = "complexplorer"
-version = "2.0.0"
+dynamic = ["version"]
 authors = [
   { name="Igor Kuvychko", email="igor.kuvychko@gmail.com" },
 ]
 description = "Complex function visualizations inspired by Elias Wegert's 'Visual Complex Functions - An Introduction with Phase Portraits'"
 readme = "README.md"
 requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE", "LICENSE.art"]
+keywords = [
+    "complex analysis",
+    "visualization",
+    "phase portrait",
+    "domain coloring",
+    "riemann sphere",
+    "riemann surface",
+    "stl",
+    "3d printing",
+    "pyvista",
+]
 dependencies = [
     "numpy>=1.26.0",
     "matplotlib>=3.8.0",
     "scipy>=1.11.0",
+    "asteval>=1.0",
+    # PyVista is the sole 3D backend as of 3.0 (matplotlib 3D removed); it also powers STL
+    # export, so it is a required core dependency rather than an optional extra.
+    "pyvista>=0.47",
 ]
 classifiers = [
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
-    "License :: OSI Approved :: BSD License",
     "Topic :: Scientific/Engineering :: Visualization",
     "Topic :: Multimedia :: Graphics",
     "Operating System :: OS Independent",
@@ -41,17 +65,93 @@ dev = [
     "pytest>=7.0.0",
     "pytest-cov>=3.0.0",
     "pytest-timeout>=2.1.0",
+    # Pinned to a minor: 0.16 began formatting Markdown code blocks, which failed the
+    # gate without any change to this repository. Upgrading is a deliberate commit.
+    "ruff>=0.16.7,<0.17",
+    "complexplorer[examples]",
 ]
-pyvista = [
-    "pyvista>=0.45.0",
+# Notebook tooling for running and verifying the example notebooks
+# (`pytest --nbmake examples/notebooks/`). Not collected by the default test suite; run by the
+# Notebooks workflow on a schedule, on demand and on every release tag.
+examples = [
+    "nbmake>=1.5",
+    "nbconvert>=7.0",
+    "ipykernel>=6.0",
+    # CVD simulation in examples/notebooks/color_and_accessibility.ipynb
+    "colorspacious>=1.1",
+    # PyVista writes the gallery's rotating loop through imageio
+    "imageio>=2.31",
 ]
+# The documentation site. Pinned to minors for the same reason ruff is: `mkdocs build --strict`
+# is a release gate, and a gate that breaks on someone else's release teaches people to ignore it.
+docs = [
+    "mkdocs-material>=9.5,<10",
+    "mkdocstrings[python]>=0.27,<0.31",
+    "mkdocs-jupyter>=0.25,<0.26",
+]
+# PyVista is a core dependency as of 3.0; these are kept as empty no-op aliases so existing
+# `pip install complexplorer[pyvista]` / `[3d]` commands continue to work.
+pyvista = []
+"3d" = []
 qt = [
     "PyQt6>=6.5.0",
 ]
+# User-facing "everything" extra: optional runtime features only (not dev/test tooling).
 all = [
-    "complexplorer[dev,pyvista,qt]",
+    "complexplorer[qt]",
 ]
+
+[project.scripts]
+complexplorer = "complexplorer.cli.main:main"
 
 [project.urls]
 "Homepage" = "https://github.com/kuvychko/complexplorer"
+"Documentation" = "https://kuvychko.github.io/complexplorer/"
+"Source" = "https://github.com/kuvychko/complexplorer"
+"Changelog" = "https://github.com/kuvychko/complexplorer/blob/main/CHANGELOG.md"
+"Release notes" = "https://github.com/kuvychko/complexplorer/releases"
 "Bug Tracker" = "https://github.com/kuvychko/complexplorer/issues"
+
+# The typing gate covers what a user can see: the public entry points and a program that imports
+# complexplorer the way a consumer does. It deliberately does NOT cover the whole package -- that
+# is 86 errors in basic mode, dominated by `float | ndarray` unions and third-party stub
+# imprecision, and the three most suspicious were each checked and found to be false positives.
+# A gate that fails for non-defects teaches people to add ignores. See
+# openspec/changes/archive/*-finalize-public-api-contract/design.md.
+[tool.pyright]
+include = ["complexplorer/api.py", "complexplorer/typing.py", "tests/typing"]
+pythonVersion = "3.11"
+typeCheckingMode = "basic"
+reportMissingImports = "warning"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+# Example SCRIPTS are shipped code and are linted; notebook cells legitimately break
+# import-order and unused-expression rules, so they stay exempt.
+extend-exclude = ["site", "docs", "examples/**/*.ipynb"]
+
+[tool.ruff.lint]
+# Start conservative: pyflakes (F), pycodestyle errors (E), import sorting (I),
+# pyupgrade (UP), flake8-bugbear (B). Expand over time.
+select = ["E", "F", "I", "UP", "B"]
+ignore = [
+    "E501",  # line length handled by the formatter
+    "E731",  # `f = lambda z: ...` is idiomatic for this complex-function domain
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Package __init__ files re-export the public API surface (and use star imports);
+# "unused"/star-import findings there are intentional.
+"**/__init__.py" = ["F401", "F403", "F405"]
+# Tests: E402 is the required `pytest.importorskip(...)`-before-imports idiom; F841
+# unused locals are common, intentional test scaffolding.
+"tests/**" = ["E402", "F841"]
+# Colour-space math ported from 2.0.0: `l`, `m`, `s` are the standard LMS cone-response names
+# in the OKLab conversion, so the "ambiguous name" rule is wrong here.
+"complexplorer/core/color_utils.py" = ["E741"]
+# The gallery producers must select the Agg backend before importing pyplot, so their imports
+# cannot all sit at the top of the file.
+"examples/showcase.py" = ["E402"]
+"examples/tour.py" = ["E402"]
+"examples/scripts/*.py" = ["E402"]

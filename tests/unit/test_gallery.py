@@ -1,0 +1,221 @@
+"""Tests for the gallery generator (add-gallery-generator)."""
+
+import json
+import warnings
+from pathlib import Path
+
+import pytest
+
+from complexplorer import generate_gallery
+from complexplorer.cli.main import main
+from complexplorer.core.presets import catalog
+
+_TAG = "ornament"  # a tag the catalog carries (a handful of presets)
+
+
+def _matching_ids(tag):
+    return sorted(p.id for p in catalog.filter(tag=tag))
+
+
+def test_generates_bundle_structure(tmp_path):
+    warnings.simplefilter("ignore")
+    manifest = generate_gallery(tmp_path, selection=_TAG, dpi=60)
+    ids = _matching_ids(_TAG)
+    assert [r["id"] for r in manifest["presets"]] == ids  # id-sorted
+    assert (tmp_path / "index.json").exists()
+    for pid in ids:
+        assert (tmp_path / pid / "portrait.png").stat().st_size > 0
+        card = json.loads((tmp_path / pid / "card.json").read_text(encoding="utf-8"))
+        assert card["files"]["portrait"] == f"{pid}/portrait.png"  # relative, forward-slash
+        # record keys == to_dict() keys + the gallery-added fields
+        expected = set(catalog.get(pid).to_dict()) | {"files", "schema_version"}
+        assert set(card) == expected
+
+
+def test_index_is_self_contained(tmp_path):
+    warnings.simplefilter("ignore")
+    generate_gallery(tmp_path, selection=_TAG, dpi=60)
+    index = json.loads((tmp_path / "index.json").read_text(encoding="utf-8"))
+    assert index["schema_version"] == 3
+    assert "complexplorer_version" in index and "generator" in index
+    # each index record equals the corresponding card.json
+    for rec in index["presets"]:
+        card = json.loads((tmp_path / rec["id"] / "card.json").read_text(encoding="utf-8"))
+        assert rec == card
+
+
+def test_manifest_and_portraits_byte_identical_across_runs(tmp_path):
+    """The determinism contract: two runs produce byte-identical output (within env)."""
+    warnings.simplefilter("ignore")
+    a, b = tmp_path / "a", tmp_path / "b"
+    generate_gallery(a, selection=_TAG, dpi=60)
+    generate_gallery(b, selection=_TAG, dpi=60)
+    files = ["index.json"] + [
+        f"{pid}/{name}" for pid in _matching_ids(_TAG) for name in ("card.json", "portrait.png")
+    ]
+    for rel in files:
+        assert (a / rel).read_bytes() == (b / rel).read_bytes(), f"differs: {rel}"
+
+
+def test_no_timestamp_in_portrait(tmp_path):
+    warnings.simplefilter("ignore")
+    pid = _matching_ids(_TAG)[0]
+    generate_gallery(tmp_path, selection=[pid], dpi=60)
+    png = (tmp_path / pid / "portrait.png").read_bytes()
+    assert b"Software" not in png and b"tIME" not in png
+
+
+def test_selection_forms(tmp_path):
+    warnings.simplefilter("ignore")
+    # explicit id list
+    m = generate_gallery(tmp_path / "ids", selection=["identity"], dpi=60)
+    assert [r["id"] for r in m["presets"]] == ["identity"]
+    # all presets (None)
+    m_all = generate_gallery(tmp_path / "all", selection=None, dpi=60)
+    assert [r["id"] for r in m_all["presets"]] == sorted(catalog.list())
+
+
+# ---- CLI ----
+
+
+def test_cli_gallery(tmp_path):
+    warnings.simplefilter("ignore")
+    rc = main(["gallery", "--tag", _TAG, "-o", str(tmp_path)])
+    assert rc == 0
+    assert (tmp_path / "index.json").exists()
+
+
+def test_cli_gallery_requires_output():
+    assert main(["gallery", "--tag", _TAG]) == 2
+
+
+def test_cli_gallery_unmatched_tag_exits_2(tmp_path, capsys):
+    rc = main(["gallery", "--tag", "no-such-tag-xyz", "-o", str(tmp_path)])
+    assert rc == 2
+    assert "0 presets matched" in capsys.readouterr().err
+
+
+def test_portrait_keeps_its_axis_labels(tmp_path):
+    """The committed portraits used to clip the Im(z) label at the left edge.
+
+    `curate-rev3-visual-tour` saves with a tight bounding box. The check is functional: the
+    left margin must contain the dark ink of the y-axis label, and the image must no longer be
+    the nominal figure rectangle (which cropped the labels away).
+    """
+    import numpy as np
+    from PIL import Image
+
+    from complexplorer.gallery import _FIGSIZE, generate_gallery
+
+    dpi = 150
+    generate_gallery(tmp_path, selection=["identity"], dpi=dpi)
+    image = Image.open(tmp_path / "identity" / "portrait.png").convert("L")
+    width, height = image.size
+
+    nominal = (round(_FIGSIZE[0] * dpi), round(_FIGSIZE[1] * dpi))
+    assert (width, height) != nominal, "portrait still saved at the label-clipping figure size"
+
+    left_margin = np.asarray(image.crop((0, 0, max(1, width // 8), height)))
+    assert left_margin.min() < 100, "no y-axis label ink in the left margin: it is still clipped"
+
+
+def test_portrait_sampling_defaults_to_one_sample_per_pixel():
+    """A 400-sample portrait saved at ~1500 px is an upscale; the default follows the dpi."""
+    from complexplorer.gallery import _MAX_PORTRAIT_RESOLUTION, _portrait_resolution
+
+    assert _portrait_resolution(150, None) == 600
+    assert _portrait_resolution(390, None) == 1560
+    assert _portrait_resolution(390, 1200) == 1200, "an explicit resolution wins"
+    assert _portrait_resolution(100000, None) == _MAX_PORTRAIT_RESOLUTION, "bounded"
+
+
+def test_generate_gallery_honours_an_explicit_resolution(tmp_path, monkeypatch):
+    """The showcase pins the sampling resolution chosen in visual-review round R0b."""
+    import complexplorer.gallery as gallery_module
+
+    seen = {}
+    original = gallery_module.plot_2d
+
+    def spy(*args, **kwargs):
+        seen["resolution"] = kwargs.get("resolution")
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(gallery_module, "plot_2d", spy)
+    gallery_module.generate_gallery(tmp_path, selection=["identity"], dpi=390, resolution=1200)
+    assert seen["resolution"] == 1200
+
+
+def test_committed_index_json_is_reproducible(tmp_path):
+    """The committed manifest must be exactly what the library generates today.
+
+    ``index.json`` is the byte-stable contract: it describes the catalog, not the pixels, so a
+    regeneration at any resolution must reproduce it byte for byte. Portrait PNGs are excluded —
+    they are reproducible only best-effort and differ across platforms. A failure here means the
+    committed bundle drifted from the catalog, or the manifest schema changed without the bundle
+    being regenerated with ``python examples/showcase.py``.
+    """
+    committed_path = Path(__file__).resolve().parents[2] / "examples" / "gallery" / "index.json"
+    if not committed_path.exists():  # pragma: no cover - only in a stripped checkout
+        pytest.skip("no committed gallery in this checkout")
+
+    # A small resolution keeps the test fast; the manifest does not depend on it.
+    generate_gallery(tmp_path, selection=None, dpi=50, resolution=60)
+    fresh = (tmp_path / "index.json").read_bytes()
+    committed = committed_path.read_bytes()
+
+    if fresh != committed:
+        fresh_manifest = json.loads(fresh)
+        committed_manifest = json.loads(committed)
+        fresh_ids = [p["id"] for p in fresh_manifest["presets"]]
+        committed_ids = [p["id"] for p in committed_manifest["presets"]]
+        assert fresh_ids == committed_ids, (
+            f"the catalog changed: {sorted(set(fresh_ids) ^ set(committed_ids))}"
+        )
+        assert fresh_manifest == committed_manifest, (
+            "the manifest content changed; regenerate with `python examples/showcase.py`"
+        )
+        if fresh.replace(b"\r\n", b"\n") == committed.replace(b"\r\n", b"\n"):
+            raise AssertionError(
+                "index.json differs only in its line endings: the checkout rewrote LF to CRLF. "
+                "The generator always writes LF; see the rule for this path in .gitattributes"
+            )
+        raise AssertionError(
+            "index.json differs only in its serialization (key order, separators or trailing "
+            "newline); the byte-stability contract is broken"
+        )
+
+
+def test_manifest_floats_survive_a_one_ulp_platform_difference():
+    """The defect the committed-vs-fresh check found: libm disagrees by an ULP across platforms.
+
+    The 10th root of unity is -0.8090169943749475 on Windows and -0.8090169943749476 on Linux, so
+    a manifest generated on one machine could not reproduce on another. Quantizing the record
+    absorbs that. This drives the property directly: every derived coordinate in the catalog, moved
+    one ULP in either direction, must still quantize to the value the manifest carries.
+    """
+    import numpy as np
+
+    from complexplorer.core.presets import _stable, catalog
+
+    checked = 0
+    for preset_id in catalog.list():
+        preset = catalog.get(preset_id)
+        published = {s["type"]: s for s in preset.to_dict()["singularities"]}
+        for live in preset.singularities:
+            expected = _stable([float(c) for c in live["at"]])
+            for index, coordinate in enumerate(live["at"]):
+                # An exact 0.0 is a literal, not libm output, and its neighbour is a subnormal --
+                # not a difference any platform actually produces. Only computed values drift.
+                if float(coordinate) == 0.0:
+                    continue
+                for direction in (-np.inf, np.inf):
+                    neighbour = list(live["at"])
+                    neighbour[index] = float(np.nextafter(float(coordinate), direction))
+                    assert _stable(neighbour) == expected, (
+                        f"{preset_id}: a one-ULP difference in {live['type']} coordinate "
+                        f"{index} changes the manifest ({neighbour} -> {_stable(neighbour)})"
+                    )
+                    checked += 1
+        assert published or not preset.singularities
+
+    assert checked > 50, f"only {checked} coordinates exercised; the catalog should give more"

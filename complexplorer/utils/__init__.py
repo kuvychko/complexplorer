@@ -1,6 +1,5 @@
 """Utility modules for complexplorer."""
 
-from complexplorer.utils.validation import *
-from complexplorer.utils.mesh import *
+from .validation import ValidationError, validate_resolution
 
-__all__ = ['validation', 'mesh']
+__all__ = ["ValidationError", "validate_resolution"]

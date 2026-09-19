@@ -1,90 +1,101 @@
 # Complexplorer
 
-**Transform complex mathematics into tangible art.** Complexplorer brings complex function visualization into the physical world through stunning Riemann relief maps and 3D-printable mathematical ornaments.
+Complexplorer turns a complex function into something you can look at — and, if you want, hold.
+It draws phase portraits, lifts them into 3D analytic landscapes, wraps them onto the Riemann
+sphere, unfolds multivalued functions onto their Riemann surfaces, and exports any of it as an STL
+you can print.
 
-!!! info "Version 2.0 Released!"
-    Major improvements include 8 new perceptually-optimized colormaps, cleaner API, and enhanced performance.
-    See the [Migration Guide](https://github.com/kuvychko/complexplorer/blob/main/MIGRATION_GUIDE_V2.md) if upgrading from v1.x.
+[![The six things complexplorer makes](examples/gallery/view/_tour/hero_labels_below.png)](examples/gallery/_tour/hero_labels_below.png)
 
-## What Makes Complexplorer Unique
-
-Unlike other domain coloring libraries, Complexplorer offers:
-
-- **🎨 Riemann Relief Maps**: First library to offer modulus-scaled Riemann sphere visualizations of complex functions (Riemann relief maps)
-- **🖨️ Direct STL Export**: Transform any complex function into a 3D-printable mathematical ornament
-- **🚀 PyVista Integration**: 15-30x faster 3D rendering with cinema-quality output
-- **🔧 Advanced Domain Composition**: Create complex domains through set operations (union, intersection, difference)
-- **📊 Flexible Modulus Mapping**: 10+ scaling modes to highlight different function features
-
-## Quick Start
+```bash
+pip install complexplorer
+```
 
 ```python
 import complexplorer as cp
 
-# Define your complex function
-f = lambda z: (z**2 - 1) / (z**2 + 1)
-
-# Visualize as an interactive Riemann relief map
-cp.riemann_pv(f, modulus_mode='arctan', resolution=800)
-
-# Export as a 3D-printable mathematical ornament
-from complexplorer.export.stl import OrnamentGenerator
-
-ornament = OrnamentGenerator(f, resolution=200)
-ornament.generate_and_save('my_mathematical_ornament.stl', size_mm=80)
+cp.plot(
+    cp.Rectangle(4, 4),
+    lambda z: (z**2 - 1) / (z**2 + 1),
+    cmap=cp.Phase(phase_sectors=6, auto_scale_r=True),
+    legend=True,
+)
 ```
 
-## Installation
+That is the whole first step. [Installation and a first portrait](getting-started/first-portrait.md)
+takes it slowly.
 
-**Requirements**: Python 3.11 or higher
+## The idea, in six pictures
 
-```bash
-pip install complexplorer
+### A portrait is a decodable picture, not a pretty one
 
-# Optional: For interactive matplotlib plots
-pip install "complexplorer[qt]"
+[![2D phase portrait of (z^2-1)/(z^2+1) with a phase-wheel legend inset](examples/gallery/view/_tour/legend_portrait.png)](examples/gallery/_tour/legend_portrait.png)
 
-# Optional: For high-performance 3D visualizations
-pip install "complexplorer[pyvista]"
+Hue is the phase of `f(z)` and the shaded cells are its contour bands, so zeros and poles read as
+opposite winding directions. The inset legend is the same colormap applied to the identity map,
+which is what makes the picture decodable.
 
-# Optional: Install everything
-pip install "complexplorer[all]"
-```
+→ [Reading a phase portrait](guide/reading-a-portrait.md)
 
-For detailed installation instructions, see the [Installation Guide](getting-started/installation.md).
+### Height adds magnitude without changing the colours
 
-## The Magic of Complex Numbers
+[![Side-by-side 2D phase portrait and 3D analytic landscape of the same function](examples/gallery/view/_tour/portrait_to_landscape.png)](examples/gallery/_tour/portrait_to_landscape.png)
 
-> *We cannot directly see the minute details of a Dedekind cut, nor is it clear that arbitrarily great or
-> arbitrarily tiny times or lengths actually exist in nature. One could say that
-> the so-called 'real numbers' are as much a product of mathematicians'
-> imaginations as are the complex numbers. Yet we shall find that complex
-> numbers, as much as reals, and perhaps even more, find a unity with
-> nature that is truly remarkable.*
->
-> — Sir Roger Penrose, [Road to Reality](https://www.ams.org/notices/200606/rev-blank.pdf), Chapter 4
+The same function twice: flat, then with `|f(z)|` lifted into height. The zeros sink and the poles
+rise, while the colours stay put — the landscape adds magnitude without changing what the hue
+means.
 
-## Next Steps
+→ [3D landscapes and the Riemann sphere](guide/three-dimensions.md)
 
-- **[Quick Start Guide](getting-started/quickstart.md)** - Create your first visualization in 5 minutes
-- **[User Guide](user-guide/domains.md)** - Learn about domains, colormaps, and plotting
-- **[Examples Gallery](examples/gallery.md)** - Explore beautiful visualizations
-- **[API Reference](api/core.md)** - Detailed documentation of all functions
+### The sphere and the surface are different objects
 
-## Contributing
+[![Riemann sphere of 1/z beside the two-sheeted Riemann surface of the square root](examples/gallery/view/_tour/sphere_vs_surface.png)](examples/gallery/_tour/sphere_vs_surface.png)
 
-Contributions are welcome! Please visit our [GitHub repository](https://github.com/kuvychko/complexplorer) to:
+Two different objects that are easy to confuse. The sphere compactifies the plane so one
+single-valued function can include the point at infinity. The surface is the two-sheeted cover on
+which the multivalued `sqrt(z)` becomes single-valued.
 
-- Report bugs or suggest features
-- Submit pull requests
-- Share your visualizations
-- Improve documentation
+→ [Riemann surfaces](guide/riemann-surfaces.md)
 
-## License
+### A domain is a set you can do arithmetic on
 
-- **Code**: [MIT License](https://github.com/kuvychko/complexplorer/blob/main/LICENSE) — free for personal, academic, or commercial use
-- **Renders & STL outputs**: [CC BY-NC 4.0](https://github.com/kuvychko/complexplorer/blob/main/LICENSE.art) — free for non-commercial use
+[![Phase portrait of 1/z on a peanut-shaped union of two disks with a disk removed around the pole](examples/gallery/view/_tour/composite_domain.png)](examples/gallery/_tour/composite_domain.png)
 
-## Acknowledgments
+The outline is two overlapping disks unioned together, with a third punched out of the middle.
+Excluding a neighbourhood of the pole is not cosmetic: it keeps the huge values near `z = 0` out of
+the sampling entirely.
 
-This library was inspired by Elias Wegert's beautiful book ["Visual Complex Functions"](https://link.springer.com/book/10.1007/978-3-0348-0180-5) and benefited greatly from his feedback and suggestions.
+→ [Domains and colormaps](guide/domains-and-colormaps.md)
+
+### Engineering mode is the same machinery, aimed
+
+[![Four-panel engineering figure: transfer portrait, pole-zero map, Nyquist plot and Bode magnitude and phase for a notch filter](examples/gallery/view/_tour/engineering_figure.png)](examples/gallery/_tour/engineering_figure.png)
+
+One stable transfer function in four views. The zeros sit exactly on the jω axis at ±2j — the notch
+— while the poles stay inside the left half-plane. The portrait shows where they are; Bode and
+Nyquist show what they do to a signal.
+
+→ [Engineering mode](guide/engineering-mode.md)
+
+### The last step is a physical object
+
+[![Three panels: Riemann relief render, untextured STL mesh, and the printed ornament](examples/gallery/view/_tour/physical_triptych.png)](examples/gallery/_tour/physical_triptych.png)
+
+The relief is the mathematics, the mesh is the geometry that survives losing the colour, and the
+print is the object on a desk. Ten poles become ten spikes around the central zero.
+
+→ [STL export and the physical workflow](guide/physical-workflow.md)
+
+## Where to go next
+
+| If you want to | Start here |
+|---|---|
+| Install it and draw something | [Installation and a first portrait](getting-started/first-portrait.md) |
+| Understand what you are looking at | [Reading a phase portrait](guide/reading-a-portrait.md) |
+| See everything the library can draw | [Gallery](gallery/gallery.generated.md) |
+| Look up a function | [API reference](api/index.md) |
+| Drive it from a terminal | [Command line](guide/cli.md) |
+| Upgrade from 1.x or 2.x | [Migration guide](migration-3.0.md) |
+
+Every image on this site is generated by `python examples/showcase.py`, from the recipes recorded
+in `examples/gallery/showcase.json` — including the ones above.

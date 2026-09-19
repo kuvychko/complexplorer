@@ -1,178 +1,145 @@
-"""Tests for PyVista Riemann sphere plotting."""
+"""Tests for PyVista Riemann sphere plotting.
 
-import pytest
+These exercise the real renderer off-screen (PyVista is a required dependency as of 3.0),
+rather than mocking ``pyvista.Plotter`` — so they actually cover mesh construction, kwarg
+handling, and export.
+"""
+
+import os
+import sys
+
 import numpy as np
-from unittest import mock
+import pytest
 
-# Skip all tests if PyVista is not available
 pyvista = pytest.importorskip("pyvista")
 
-from complexplorer.core.colormap import Phase, LogRings
+from complexplorer.core.colormap import LogRings, Phase
+from complexplorer.exceptions import ValidationError
 from complexplorer.plotting.pyvista.riemann import riemann_pv
+
+# A real offscreen VTK screenshot render crashes (access violation) on the headless Windows
+# CI runner (no GPU / no reliable offscreen GL). Building the plotter is fine; only the
+# render-to-file step is unsafe there. Linux CI exercises it via the headless-display action.
+_NO_OFFSCREEN_RENDER = sys.platform == "win32" and os.environ.get("CI") == "true"
 
 
 class TestRiemannPV:
-    """Test riemann_pv function."""
-    
-    def test_basic_riemann_plot(self):
-        """Test basic Riemann sphere plot."""
-        func = lambda z: z**2
-        
-        with mock.patch('pyvista.Plotter') as MockPlotter:
-            plotter = MockPlotter.return_value
-            result = riemann_pv(func, n_theta=30, phase_sectors=30, show=False)
-            
-            # Function doesn't return plotter when show=False
-            assert result is None
-            assert MockPlotter.called
-            plotter.add_mesh.assert_called()
-    
-    def test_with_custom_colormap(self):
-        """Test Riemann sphere with custom colormap."""
-        func = lambda z: (z - 1) / (z + 1)
+    """Real off-screen rendering of the Riemann sphere."""
+
+    def test_returns_plotter_when_requested(self):
+        p = riemann_pv(lambda z: z**2, resolution=20, interactive=False, return_plotter=True)
+        assert isinstance(p, pyvista.Plotter)
+        p.close()
+
+    def test_returns_none_without_return_plotter(self):
+        result = riemann_pv(lambda z: z**2, resolution=20, interactive=False)
+        assert result is None
+
+    def test_custom_colormap(self):
         cmap = Phase(phase_sectors=12, auto_scale_r=True)
-        
-        with mock.patch('pyvista.Plotter') as MockPlotter:
-            plotter = MockPlotter.return_value
-            result = riemann_pv(
-                func, cmap=cmap, n_theta=40, phase_sectors=40, show=False
-            )
-            
-            # Function doesn't return plotter when show=False
-            assert result is None
-            assert MockPlotter.called
-    
-    def test_modulus_scaling_modes(self):
-        """Test different modulus scaling modes."""
-        func = lambda z: z**3 - z
-        
-        modes = ['constant', 'arctan', 'logarithmic', 'adaptive']
-        
-        for mode in modes:
-            with mock.patch('pyvista.Plotter') as MockPlotter:
-                plotter = MockPlotter.return_value
-                riemann_pv(
-                    func,
-                    modulus_mode=mode,
-                    n_theta=20,
-                    phase_sectors=20,
-                    show=False
-                )
-                
-                plotter.add_mesh.assert_called()
-    
+        p = riemann_pv(
+            lambda z: (z - 1) / (z + 1),
+            cmap=cmap,
+            resolution=20,
+            interactive=False,
+            return_plotter=True,
+        )
+        assert isinstance(p, pyvista.Plotter)
+        p.close()
+
+    @pytest.mark.parametrize("mode", ["constant", "arctan", "logarithmic", "adaptive"])
+    def test_modulus_scaling_modes(self, mode):
+        p = riemann_pv(
+            lambda z: z**3 - z,
+            modulus_mode=mode,
+            resolution=16,
+            interactive=False,
+            return_plotter=True,
+        )
+        assert isinstance(p, pyvista.Plotter)
+        p.close()
+
     def test_custom_modulus_params(self):
-        """Test custom modulus parameters."""
-        func = lambda z: 1 / (z - 1)
-        
-        with mock.patch('pyvista.Plotter') as MockPlotter:
-            plotter = MockPlotter.return_value
-            riemann_pv(
-                func,
-                modulus_mode='arctan',
-                modulus_params={'r_min': 0.3, 'r_max': 0.9},
-                show=False
-            )
-            
-            assert MockPlotter.called
-    
-    def test_save_riemann_plot(self):
-        """Test saving Riemann sphere plot."""
-        func = lambda z: z**2 + 1
-        
-        with mock.patch('pyvista.Plotter') as MockPlotter:
-            plotter = MockPlotter.return_value
-            riemann_pv(
-                func,
-                n_theta=25,
-                phase_sectors=25,
-                filename="riemann_test.png",
-                show=False
-            )
-            
-            plotter.screenshot.assert_called_once_with("riemann_test.png")
-    
-    def test_title_and_labels(self):
-        """Test plot with title."""
-        func = lambda z: np.sin(z)
-        
-        with mock.patch('pyvista.Plotter') as MockPlotter:
-            plotter = MockPlotter.return_value
-            riemann_pv(
-                func,
-                title="sin(z) on Riemann Sphere",
-                show=False
-            )
-            
-            plotter.add_text.assert_called_with(
-                "sin(z) on Riemann Sphere",
-                position='upper_edge',
-                font_size=14
-            )
-    
+        p = riemann_pv(
+            lambda z: 1 / (z - 1),
+            modulus_mode="arctan",
+            modulus_params={"r_min": 0.3, "r_max": 0.9},
+            resolution=16,
+            interactive=False,
+            return_plotter=True,
+        )
+        assert isinstance(p, pyvista.Plotter)
+        p.close()
+
+    @pytest.mark.skipif(
+        _NO_OFFSCREEN_RENDER, reason="offscreen VTK screenshot crashes on headless Windows CI"
+    )
+    def test_save_screenshot(self, tmp_path):
+        out = tmp_path / "riemann_test.png"
+        riemann_pv(lambda z: z**2 + 1, resolution=20, interactive=False, filename=str(out))
+        assert out.exists()
+        assert out.stat().st_size > 0
+
     def test_logarithmic_rings_colormap(self):
-        """Test with logarithmic rings colormap."""
-        func = lambda z: z**2 / (z**2 + 1)
-        cmap = LogRings()
-        
-        with mock.patch('pyvista.Plotter') as MockPlotter:
-            plotter = MockPlotter.return_value
-            riemann_pv(
-                func,
-                cmap=cmap,
-                n_theta=30,
-                phase_sectors=30,
-                show=False
-            )
-            
-            assert MockPlotter.called
-    
+        p = riemann_pv(
+            lambda z: z**2 / (z**2 + 1),
+            cmap=LogRings(),
+            resolution=16,
+            interactive=False,
+            return_plotter=True,
+        )
+        assert isinstance(p, pyvista.Plotter)
+        p.close()
+
     def test_essential_singularity(self):
-        """Test function with essential singularity."""
         def func(z):
-            # exp(1/z) with safety
-            with np.errstate(divide='ignore', invalid='ignore'):
-                result = np.exp(1/z)
+            with np.errstate(divide="ignore", invalid="ignore"):
+                result = np.exp(1 / z)
             return np.where(np.isfinite(result), result, 0)
-        
-        with mock.patch('pyvista.Plotter') as MockPlotter:
-            plotter = MockPlotter.return_value
-            riemann_pv(
-                func,
-                modulus_mode='logarithmic',
-                n_theta=20,
-                phase_sectors=20,
-                show=False
-            )
-            
-            plotter.add_mesh.assert_called()
-    
+
+        p = riemann_pv(
+            func, modulus_mode="logarithmic", resolution=16, interactive=False, return_plotter=True
+        )
+        assert isinstance(p, pyvista.Plotter)
+        p.close()
+
     def test_custom_resolution(self):
-        """Test with different resolution settings."""
-        func = lambda z: z**4 - 1
-        
-        # Test high resolution
-        with mock.patch('pyvista.Plotter') as MockPlotter:
-            riemann_pv(func, n_theta=100, phase_sectors=100, show=False)
-            assert MockPlotter.called
-        
-        # Test low resolution
-        with mock.patch('pyvista.Plotter') as MockPlotter:
-            riemann_pv(func, n_theta=10, phase_sectors=10, show=False)
-            assert MockPlotter.called
-    
-    def test_projection_from_south(self):
-        """Test projection from south pole."""
-        func = lambda z: z**2 - z + 1
-        
-        with mock.patch('pyvista.Plotter') as MockPlotter:
-            plotter = MockPlotter.return_value
-            riemann_pv(
-                func,
-                project_from_north=False,
-                n_theta=30,
-                phase_sectors=30,
-                show=False
+        for res in (10, 40):
+            p = riemann_pv(
+                lambda z: z**4 - 1, resolution=res, interactive=False, return_plotter=True
             )
-            
-            assert MockPlotter.called
+            assert isinstance(p, pyvista.Plotter)
+            p.close()
+
+    def test_title(self):
+        p = riemann_pv(
+            lambda z: np.sin(z),
+            title="sin(z)",
+            resolution=16,
+            interactive=False,
+            return_plotter=True,
+        )
+        assert isinstance(p, pyvista.Plotter)
+        p.close()
+
+
+class TestRiemannPVKwargValidation:
+    """Removed 2.x keyword arguments are rejected with a clear error, not forwarded."""
+
+    @pytest.mark.parametrize(
+        "bad",
+        [
+            {"n_theta": 30},
+            {"n_phi": 30},
+            {"show": False},
+            {"project_from_north": False},
+            {"bogus": 1},
+        ],
+    )
+    def test_removed_or_unknown_kwargs_rejected(self, bad):
+        with pytest.raises(ValidationError):
+            riemann_pv(lambda z: z**2, resolution=16, interactive=False, **bad)
+
+    def test_error_names_replacement(self):
+        with pytest.raises(ValidationError, match="resolution"):
+            riemann_pv(lambda z: z**2, n_theta=30, interactive=False)

@@ -1,0 +1,155 @@
+# Function Presets
+
+## Purpose
+
+The function-presets capability provides a catalog of curated, serializable complex
+functions for reuse across rendering, export, and prototyping. Each preset bundles a
+renderable callable, a human-readable expression, plain serializable domain/colormap/
+scaling specs, hand-authored exact singularity answer keys, and descriptive metadata. The
+capability also provides spec factories that reconstruct live `Domain` and `Colormap`
+objects without modifying core classes, plus a registry for retrieving and filtering
+presets. It is defined independently of the optional PyVista backend so presets are usable
+as data in any environment.
+## Requirements
+### Requirement: Serializable function preset
+
+The library SHALL provide a `FunctionPreset` describing a complex function for reuse across
+rendering, export, and game prototyping. It SHALL carry a renderable `callable` and a
+human/`expression` string, serializable `domain_spec` / `cmap_spec` / `scaling_spec`
+dicts, a hand-authored `singularities` list, and `id` / `title` / `story` / `tags`
+metadata. It SHALL be defined in a module that does not require PyVista.
+
+#### Scenario: Preset exposes both callable and expression
+
+- **WHEN** a preset is retrieved
+- **THEN** it provides a callable that evaluates the function and an `expression` string
+  describing the same function (e.g. `"z / (z**10 - 1)"`)
+
+#### Scenario: Preset specs are plain serializable dicts
+
+- **WHEN** a preset's domain, colormap, and scaling are inspected
+- **THEN** each is a plain dict whose keys mirror the target constructor's kwargs (e.g.
+  `domain_spec={"type": "annulus", "inner_radius": 0.2, "outer_radius": 3}`), not a live
+  object, and contains no PyVista-dependent data
+
+#### Scenario: Complex values are encoded as real pairs
+
+- **WHEN** a spec or singularity record holds a complex value (a domain `center`, a
+  singularity `at`)
+- **THEN** it is encoded as an `[real, imag]` pair so the record is JSON-serializable, and
+  the factories convert it back to a complex value
+
+#### Scenario: Presets are importable without the 3D backend
+
+- **WHEN** the preset module is imported in an environment without PyVista
+- **THEN** the import succeeds and presets are usable as data
+
+### Requirement: Hand-authored exact singularity answer keys
+
+A preset's `singularities` SHALL be a list of exact, author-provided records, one record
+**per location**, each with a `type` in `{zero, pole, essential, branch_point}`, a location
+`at` as a `[real, imag]` pair, an `order`, and an optional `label`. `order` is the
+multiplicity for zero/pole, the branching order for branch_point, and null for essential
+singularities. These SHALL be ground-truth answer keys, not values produced by a numerical
+detector.
+
+#### Scenario: Singularity records are structured and exact
+
+- **WHEN** a preset's singularities are read
+- **THEN** each record has a `type`, an `at` `[real, imag]` pair, and an `order` (or null),
+  describing the function's known zeros/poles/essential/branch points
+
+### Requirement: JSON-ready serialization
+
+A preset SHALL serialize via `to_dict()` to a JSON-compatible record containing every field
+except the live `callable`. The `domain_spec` and `cmap_spec` SHALL reconstruct equivalent
+live objects through the provided factories.
+
+#### Scenario: to_dict omits the callable and is JSON-serializable
+
+- **WHEN** `preset.to_dict()` is called
+- **THEN** the result contains the expression, specs, singularities, and metadata, excludes
+  the callable, and is serializable to JSON
+
+#### Scenario: Specs round-trip through the factories
+
+- **WHEN** `domain_from_spec(preset.domain_spec)` and `cmap_from_spec(preset.cmap_spec)`
+  are called
+- **THEN** they return live `Domain` and `Colormap` objects equivalent to the preset's
+  intended domain and colormap
+
+### Requirement: Spec factories build live objects without modifying core classes
+
+The library SHALL provide `domain_from_spec` and `cmap_from_spec` factories that map a
+spec dict's `type` to the corresponding `Domain` / `Colormap` subclass and instantiate it.
+The factories SHALL cover the subclasses used by the curated presets and SHALL raise the
+library's domain exception (`ValidationError`) for an unknown `type`. The core `Domain` /
+`Colormap` classes SHALL NOT be modified.
+
+#### Scenario: Unknown spec type is rejected
+
+- **WHEN** a spec with an unrecognized `type` is passed to a factory
+- **THEN** a `ValidationError` is raised naming the unsupported type and the supported ones
+
+### Requirement: Registry access and tag filtering
+
+The library SHALL provide a registry to retrieve presets by `id`, list available presets,
+and filter presets by `tag`. It SHALL ship a curated set of canonical presets, each with
+its singularity answer keys, recommended specs, story, and tags.
+
+#### Scenario: Retrieve a preset by id
+
+- **WHEN** `catalog.get("pole_flower_10")` is called
+- **THEN** the corresponding `FunctionPreset` is returned
+
+#### Scenario: Filter presets by tag
+
+- **WHEN** `catalog.filter(tag="singularity-detective")` is called
+- **THEN** every returned preset carries that tag
+
+#### Scenario: Missing id is reported clearly
+
+- **WHEN** `catalog.get` is called with an unknown id
+- **THEN** a clear error is raised (or `None`/sentinel per the documented contract), not a
+  silent wrong result
+
+### Requirement: Derived answer-key statistics
+
+A preset SHALL expose derived geometry computed from its hand-authored `singularities`,
+via an `answer_key_stats()` method, and SHALL include the same record in `to_dict()`. The
+statistics are a pure function of the authored answer key (never computed by analyzing the
+callable) and SHALL contain:
+
+- `count` — the total number of singularity records,
+- `count_by_type` — a mapping of singularity type to count,
+- `min_separation` — the smallest Euclidean distance, in the z-plane, between any two
+  singularity locations, or `null` when the preset has fewer than two singularities.
+
+#### Scenario: Stats summarize the answer key
+
+- **WHEN** `preset.answer_key_stats()` is called for a preset with multiple singularities
+- **THEN** `count` equals the number of records, `count_by_type` tallies the records by `type`, and `min_separation` is the distance between the closest pair of singularity locations
+
+#### Scenario: Separation is null without a pair
+
+- **WHEN** a preset has zero or one singularity
+- **THEN** `min_separation` is `null`
+
+#### Scenario: Stats are part of the serialized record
+
+- **WHEN** `preset.to_dict()` is called
+- **THEN** the result includes an `answer_key_stats` record (count, count_by_type, min_separation) and remains JSON-serializable
+
+### Requirement: The interchange shapes are declared
+
+`domain_spec`, `cmap_spec` and `scaling_spec`, and the singularity records, SHALL have declared
+shapes that a type checker can verify, rather than being bare `dict`. The declarations SHALL
+describe the same structure the manifest serializes, so the interchange record and the in-memory
+record cannot drift apart silently.
+
+#### Scenario: A malformed spec is visible to a type checker
+
+- **WHEN** a preset is constructed with a spec dictionary whose keys do not match the declared
+  shape
+- **THEN** a type checker reports it
+

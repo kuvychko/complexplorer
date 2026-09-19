@@ -1,272 +1,124 @@
 # Complexplorer Examples
 
-This directory contains comprehensive tutorials and applications for the complexplorer library.
+Tutorials, runnable demos, and the rendered gallery for the complexplorer library.
 
-## 📚 Learning Path
-
-### Core Tutorial Notebooks (`notebooks/`)
-
-**Recommended order for learning:**
-
-1. **Getting Started** (`01_getting_started.ipynb`) - ~10 min
-   - Your first complex visualization
-   - Basic domains (Rectangle, Disk, Annulus)
-   - Enhanced phase portraits
-   - 2D plotting fundamentals
-   - **START HERE if you're new!**
-
-2. **Advanced Domains** (`02_domains_advanced.ipynb`) - ~15 min
-   - Domain set operations (union, intersection, difference)
-   - Complex compositions
-   - Custom domain design
-   - Practical examples
-
-3. **PyVista 3D** (`03_pyvista_3d.ipynb`) - ~20 min
-   - High-performance 3D visualization
-   - Inline vs interactive modes
-   - Pair plots (domain + codomain)
-   - Performance tips
-
-4. **Colormaps Comprehensive** (`04_colormaps_comprehensive.ipynb`) - ~25 min
-   - All 13 colormap families
-   - Parameters and customization
-   - Use case guide
-   - Comparison gallery
-
-5. **Accessibility & CVD** (`05_accessibility_cvd.ipynb`) - ~20 min
-   - Color vision deficiency simulation
-   - CVD-friendly colormap selection
-   - Design guidelines
-   - **CRITICAL for publications!**
-
-6. **Riemann Sphere** (`06_riemann_sphere.ipynb`) - ~30 min
-   - Stereographic projection
-   - Extended complex plane ℂ ∪ {∞}
-   - 2D hemisphere charts
-   - 3D sphere visualization
-
-7. **Modulus Scaling** (`07_modulus_scaling.ipynb`) - ~25 min
-   - 10+ scaling modes
-   - Parameter exploration
-   - Custom scaling functions
-   - Use case guide
-
-8. **STL Export** (`08_stl_export.ipynb`) - ~30 min
-   - 3D printing workflow
-   - **Bisection in slicer** (recommended!)
-   - Gluing tips
-   - Post-processing
-
-**Total tutorial time: ~2.5 hours**
-
-### Application Notebooks (`applications/`)
-
-Real-world examples showcasing library capabilities:
-
-1. **FFT/DFT Matrices** (`app_01_fft_matrices.ipynb`) - ~15 min
-   - Discrete Fourier Transform visualization
-   - 2×4 grid gallery (N = 32 to 4096)
-   - Circular symmetry from roots of unity
-   - Other structured matrices (Hadamard, Toeplitz)
-
-2. **Special Functions** (`app_02_special_functions.ipynb`) - ~25 min
-   - Gamma function (poles at negative integers)
-   - Riemann zeta (critical strip, famous zeros)
-   - Bessel functions (entire functions)
-   - Elliptic functions (doubly periodic)
-   - Singularity classification
-
-3. **Conformal Mappings** (`app_03_conformal_maps.ipynb`) - ~25 min
-   - Möbius transformations
-   - Joukowsky airfoil transform
-   - Exponential and logarithm
-   - Power functions
-   - Composition techniques
-
-4. **Complex Dynamics** (`app_04_complex_dynamics.ipynb`) - ~35 min
-   - Newton's method basins of attraction
-   - Julia sets
-   - Mandelbrot set
-   - Fractals and chaos
-   - Escape time algorithms
-
-## 🖥️ Interactive Scripts
-
-### Interactive Showcase (`interactive_showcase.py`)
-Comprehensive menu-driven demo:
-```bash
-python interactive_showcase.py
-```
-
-Features:
-- 2D phase portraits
-- 3D landscapes (PyVista)
-- Riemann sphere visualizations
-- STL export for 3D printing
-- Batch processing
-
-### Gallery Generator (`generate_gallery.py`)
-Create image gallery with code:
-```bash
-python generate_gallery.py [output_directory]
-```
-
-### Other Scripts
-- `new_colormaps_showcase.py` - Colormap comparison
-- `modulus_scaling_showcase.py` - Scaling mode comparison
-
-## 🎯 Quick Start
-
-| If you want to... | Start here... |
-|-------------------|---------------|
-| Learn the basics | `notebooks/01_getting_started.ipynb` |
-| Explore interactively | `python interactive_showcase.py` |
-| See all colormaps | `notebooks/04_colormaps_comprehensive.ipynb` |
-| 3D printing guide | `notebooks/08_stl_export.ipynb` |
-| Check accessibility | `notebooks/05_accessibility_cvd.ipynb` |
-| Real-world examples | `applications/` folder |
-
-## 💡 Important Tips
-
-### PyVista Rendering Modes
-
-**Inline mode** (development, non-blocking):
-```python
-cp.plot_landscape_pv(domain, func, notebook=True, show=True)
-```
-- Displays inline in Jupyter
-- Non-blocking execution
-- Good for development workflow
-
-**Interactive mode** (publication quality, blocking):
-```python
-cp.plot_landscape_pv(domain, func, notebook=False, show=True)
-```
-- External window with full interactivity
-- High quality, better anti-aliasing
-- **Blocks execution until window is closed**
-
-### Performance Guidelines
-
-- **2D plots**: Use matplotlib (standard `plot()`)
-- **3D plots**: Always use PyVista (`*_pv` functions)
-- PyVista is **15-30x faster** than matplotlib 3D
-
-### STL Export Best Practices
-
-**Recommended workflow:**
-1. Generate full sphere STL
-2. Bisect at equator in slicer (PrusaSlicer/Cura)
-3. Print hemispheres separately (no supports!)
-4. Glue together
-
-See `notebooks/08_stl_export.ipynb` for detailed guide.
-
-### Color Blindness
-
-~8% of males have some form of color vision deficiency!
-
-**CVD-friendly colormaps:**
-- ✅ `CubehelixPhase` (best)
-- ✅ `PerceptualPastel`
-- ✅ `InkPaper`
-
-**Test your figures:**
-See `notebooks/05_accessibility_cvd.ipynb` for simulation tools.
-
-## 📁 Directory Structure
+## 📁 Layout
 
 ```
 examples/
-├── README.md                    # This file
-├── notebooks/                   # Tutorial notebooks (8)
-│   ├── README.md               # Learning guide
-│   ├── 01_getting_started.ipynb
-│   ├── 02_domains_advanced.ipynb
-│   ├── 03_pyvista_3d.ipynb
-│   ├── 04_colormaps_comprehensive.ipynb
-│   ├── 05_accessibility_cvd.ipynb
-│   ├── 06_riemann_sphere.ipynb
-│   ├── 07_modulus_scaling.ipynb
-│   └── 08_stl_export.ipynb
-├── applications/                # Application notebooks (4)
-│   ├── README.md               # Application guide
-│   ├── app_01_fft_matrices.ipynb
-│   ├── app_02_special_functions.ipynb
-│   ├── app_03_conformal_maps.ipynb
-│   └── app_04_complex_dynamics.ipynb
-├── interactive_showcase.py      # Interactive demo
-├── generate_gallery.py          # Gallery generator
-├── new_colormaps_showcase.py    # Colormap comparison
-├── modulus_scaling_showcase.py  # Scaling comparison
-├── gallery/                     # Generated images
-└── old/                         # Archived examples
-    └── README.md               # Archive notes
+├── notebooks/   Jupyter tutorials (start here)
+│   └── applications/  worked applications (FFT, special functions, conformal maps, dynamics)
+├── scripts/     runnable Python demos (best 3D quality — run from a terminal)
+├── gallery/     rendered gallery images (regenerated from the preset registry)
+└── README.md    this file
 ```
 
-## 🔗 Additional Resources
+> **Backend policy (3.0):** matplotlib powers **2D**; **PyVista powers all 3D** (landscapes,
+> Riemann sphere/relief/surface, STL export). The legacy matplotlib 3D functions
+> (`plot_landscape`, `pair_plot_landscape`, the 3D `riemann`) were removed in 3.0 — use the
+> `*_pv` functions (`plot_landscape_pv`, `pair_plot_landscape_pv`, `riemann_pv`,
+> `riemann_surface_pv`). PyVista is a required dependency.
 
-- [Complexplorer Documentation](../docs/)
-- [Visual Complex Functions](http://www.visual.wegert.com/) - Book by Elias Wegert
-- [PyVista Documentation](https://docs.pyvista.org/)
-- [colorspacious](https://colorspacious.readthedocs.io/) - For CVD simulation
+## 📚 Notebooks (`notebooks/`)
+
+| Notebook | What it covers |
+|---|---|
+| `getting_started.ipynb` | Installation, your first visualization, domains and colormaps, basic 2D/3D — **start here.** |
+| `advanced_features.ipynb` | Phase portraits, the colormap family, PyVista 3D, Riemann sphere **and Riemann surfaces**. |
+| `stl_export_demo.ipynb` | Step-by-step 3D-printable ornaments: Riemann-sphere relief, scaling options, print tips. |
+| `api_cookbook.ipynb` | Common functions, domain/colormap patterns, the **preset registry** (`cp.catalog`), recipes. |
+| `color_and_accessibility.ipynb` | All 13 colormaps on one function, then which of them survive **colour-vision deficiency** (needs `colorspacious`). |
+
+### Applications (`notebooks/applications/`)
+
+Worked examples that use the library on a real problem rather than teaching the API:
+
+| Notebook | What it covers |
+|---|---|
+| `app_01_fft_matrices.ipynb` | The DFT matrix as a complex image. |
+| `app_02_special_functions.ipynb` | Gamma, zeta and friends (via `scipy.special`). |
+| `app_03_conformal_maps.ipynb` | Conformal mappings and what they preserve. |
+| `app_04_complex_dynamics.ipynb` | Iteration, Julia/Mandelbrot structure. |
+
+> **PyVista in Jupyter:** each notebook sets the **static** backend
+> (`pv.set_jupyter_backend('static')`) so 3D plots embed as images and the notebook runs
+> headlessly. For interactive rotation/zoom and the best anti-aliasing, run the terminal
+> scripts below instead.
+
+### Running & verifying the notebooks
+
+Install the notebook tooling, then verify every notebook executes top-to-bottom:
+
+```bash
+uv pip install -e ".[examples]"          # nbmake, nbconvert, ipykernel, colorspacious
+pytest --nbmake examples/notebooks/       # the local execution gate (opt-in; not in the default suite or CI)
+```
+
+To regenerate the committed output (e.g. after editing a notebook):
+
+```bash
+jupyter nbconvert --to notebook --execute --inplace examples/notebooks/*.ipynb
+```
+
+## 🖥️ Scripts (`scripts/`)
+
+### `interactive_showcase.py` — menu-driven explorer
+
+A command-line interface to explore complex functions with high-quality PyVista 3D output
+(2D phase portraits, 3D landscapes, Riemann sphere). Run it from a terminal for the best
+rendering quality:
+
+```bash
+python examples/scripts/interactive_showcase.py
+```
+
+**Interactive window controls:** left-drag rotate · middle-drag pan · right-drag / scroll
+zoom · `R` reset camera · `S` screenshot · `Q` close. Start at a lower resolution to explore
+quickly, then raise it for a final render. All 3D views include Re/Im/Z orientation axes.
+
+> **Tip:** PyVista renders best from a terminal, **not** inside Jupyter — command-line scripts
+> get superior antialiasing and full interactivity.
+
+## 🎨 Gallery (`gallery/`)
+
+The gallery is **generated from the curated preset registry** (`cp.catalog`) rather than
+hand-maintained. The library is the single source of truth — there is no separate hand-rolled
+generator script here. Render a bundle with the CLI:
+
+```bash
+complexplorer gallery --tag <tag> -o gallery_output    # or: -i <id> ...
+```
+
+This writes a deterministic `index.json` manifest plus per-preset portraits and `card.json`
+records. The higher-resolution 3D / Riemann / relief renders and the colormap gallery are
+produced by `examples/showcase.py`:
+
+```bash
+python examples/showcase.py                    # everything (local only; needs a GPU/display)
+python examples/showcase.py --only colormaps   # just the colormap section
+```
+
+## 🖨️ STL export (3D printing)
+
+```python
+from complexplorer.export.stl import OrnamentGenerator
+
+generator = OrnamentGenerator(lambda z: z / (z**10 - 1), resolution=150)
+generator.generate_and_save("ornament.stl", size_mm=80)
+```
+
+See `notebooks/stl_export_demo.ipynb` for the full guide.
 
 ## 🐛 Troubleshooting
 
-### "No module named complexplorer"
-Install in development mode:
-```bash
-cd ..  # Go to repository root
-uv pip install -e ".[all]"  # Install with all optional dependencies
-```
+- **`No module named complexplorer`** — install it: `pip install -e .` (from the repo root).
+- **PyVista window doesn't appear** — pass `notebook=False` in Jupyter; ensure a display/GPU
+  with OpenGL is available; try `pip install -U pyvista`.
+- **Low-quality 3D in Jupyter** — expected; the inline backend aliases badly. Use
+  `notebook=False` for an external window, or run the terminal scripts.
 
-### PyVista Issues
+## 🔗 Resources
 
-**Window doesn't appear:**
-- Use `notebook=False` for external window
-- Check display available (X11, Wayland, etc.)
-- Update PyVista: `uv pip install -U pyvista`
-
-**Low quality in Jupyter:**
-- Always use `notebook=False` for high quality
-- Inline backend has aliasing issues
-- Or use scripts instead of notebooks
-
-### Color Vision Deficiency Simulation
-
-**"No module named colorspacious":**
-```bash
-uv pip install colorspacious
-```
-
-Required for `notebooks/05_accessibility_cvd.ipynb`
-
-## 📝 Version 2.0 Highlights
-
-These examples showcase v2.0 features:
-- ✨ Enhanced phase portraits with `auto_scale_r=True`
-- ✨ Domain set operations (union, intersection, difference)
-- ✨ New perceptual colormaps (OkLCh-based)
-- ✨ Comprehensive accessibility testing
-- ✨ 10+ modulus scaling modes
-- ✨ STL bisection workflow
-
-See [CHANGELOG.md](../CHANGELOG.md) for full release notes.
-
-## 🤝 Contributing Examples
-
-Have an interesting use case? We welcome contributions!
-
-1. Follow the notebook structure in `notebooks/`
-2. Include estimated time and prerequisites
-3. Use the standard demo function where possible
-4. Test accessibility with CVD simulation
-5. Submit a pull request
-
-## 📖 Citation
-
-If you use complexplorer in research, please cite:
-- Complexplorer library (see main README)
-- Wegert, E. (2012). "Visual Complex Functions: An Introduction with Phase Portraits"
-
-Happy exploring! 🌈📐
+- [Complexplorer on GitHub](https://github.com/kuvychko/complexplorer)
+- [Visual Complex Functions](https://link.springer.com/book/10.1007/978-3-0348-0180-5) — Elias Wegert
+- [PyVista documentation](https://docs.pyvista.org/)

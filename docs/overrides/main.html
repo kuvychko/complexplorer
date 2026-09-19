@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{#
+  The version marker. A development build says so on every page, so nobody mistakes documentation
+  built from an untagged commit for the released documentation. Values come from the
+  version_banner hook.
+#}
+{% block announce %}
+  {% if config.extra.is_release_build %}
+    Documentation for complexplorer <strong>{{ config.extra.complexplorer_version }}</strong>
+  {% else %}
+    <strong>Development build</strong> &mdash; documents complexplorer
+    {{ config.extra.complexplorer_version }} from an untagged commit, and may describe behaviour
+    that is not yet released.
+  {% endif %}
+{% endblock %}

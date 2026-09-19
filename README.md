@@ -1,327 +1,167 @@
 # Complexplorer
 
 [![PyPI version](https://badge.fury.io/py/complexplorer.svg)](https://badge.fury.io/py/complexplorer)
-[![Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/kuvychko/complexplorer/releases/tag/v2.0.0)
 [![Python](https://img.shields.io/pypi/pyversions/complexplorer.svg)](https://pypi.org/project/complexplorer/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Transform complex mathematics into tangible art.** Complexplorer brings complex function visualization into the physical world through stunning Riemann relief maps and 3D-printable mathematical ornaments.
-
-> **🆕 Version 2.0 Released!** Major improvements include 8 new perceptually-optimized colormaps, comprehensive documentation (5,571 lines), enhanced phase portraits with auto-scaling, and cleaner API. See the [CHANGELOG](CHANGELOG.md) and [Documentation](https://kuvychko.github.io/complexplorer/) for details.
+Complexplorer turns a complex function into something you can look at — and, if you want, hold.
+It draws phase portraits, lifts them into 3D analytic landscapes, wraps them onto the Riemann
+sphere, unfolds multivalued functions onto their Riemann surfaces, and exports any of it as an
+STL you can print.
 
 <p align="center">
-  <img src="examples/gallery/Riemann_relief_map_20250726.png" width="50%">
-  <br>
-  <em>From mathematical function to physical sculpture: f(z) = z / (z**10 - 1)</em>
+  <img src="https://raw.githubusercontent.com/kuvychko/complexplorer/main/examples/gallery/view/_tour/hero_labels_below.png" width="100%"
+       alt="Six panels: domain coloring, analytic landscape, Riemann relief, Riemann surface, transfer functions, and a 3D-printed ornament">
 </p>
 
-## 🌟 What Makes Complexplorer Unique
-
-Unlike other domain coloring libraries, Complexplorer offers:
-
-- **🎨 Riemann Relief Maps**: First library to offer modulus-scaled Riemann sphere visualizations that reveal the true topology of complex functions
-- **🖨️ Direct STL Export**: Transform any complex function into a 3D-printable mathematical ornament
-- **🚀 PyVista Integration**: 15-30x faster 3D rendering with cinema-quality output
-- **🔧 Advanced Domain Composition**: Create complex domains through set operations (union, intersection, difference)
-- **📊 Flexible Modulus Mapping**: 10+ scaling modes to highlight different function features
-
-## 📦 Installation
-
-**Requirements**: Python 3.11 or higher
+## Install and draw something
 
 ```bash
 pip install complexplorer
-
-# Optional: For interactive matplotlib plots in CLI scripts
-pip install "complexplorer[qt]"
-
-# Optional: For high-performance 3D visualizations
-pip install "complexplorer[pyvista]"
-
-# Optional: Install everything
-pip install "complexplorer[all]"
 ```
-
-## 🚀 Quick Start - From Math to Matter
 
 ```python
 import complexplorer as cp
 
-# Define your complex function
-f = lambda z: (z**2 - 1) / (z**2 + 1)
-
-# Visualize as an interactive Riemann relief map
-cp.riemann_pv(f, modulus_mode='arctan', resolution=800)
-
-# Export as a 3D-printable mathematical ornament
-from complexplorer.export.stl import OrnamentGenerator
-
-ornament = OrnamentGenerator(f, resolution=200)
-ornament.generate_and_save('my_mathematical_ornament.stl', size_mm=80)
+cp.plot(
+    cp.Rectangle(4, 4),
+    lambda z: (z**2 - 1) / (z**2 + 1),
+    cmap=cp.Phase(phase_sectors=6, auto_scale_r=True),
+    legend=True,
+)
 ```
-
-The modulus scaling creates a topographic "relief" effect - poles become mountains, zeros become valleys, and the complex phase creates colorful contours. When 3D printed, these become beautiful mathematical ornaments that capture the essence of complex functions in physical form.
-
-Create traditional domain coloring visualizations too:
-
-```python
-# Classic phase portrait with v2.0 API
-domain = cp.Rectangle(4, 4)
-cp.plot(domain, f, cmap=cp.Phase(phase_sectors=12, auto_scale_r=True))
-```
-
-## 💫 The Magic of Complex Numbers
-
-*We cannot directly see the minute details of a Dedekind cut, nor is it clear that arbitrarily great or
-arbitrarily tiny times or lengths actually exist in nature. One could say that 
-the so-called 'real numbers' are as much a product of mathematicians' 
-imaginations as are the complex numbers. Yet we shall find that complex 
-numbers, as much as reals, and perhaps even more, find a unity with 
-nature that is truly remarkable. It is as though Nature herself is as 
-impressed by the scope and consistency of the complex-number system 
-as we are ourselves, and has entrusted to these numbers the precise 
-operations of her world at its minutest scales.* ...
-
-*Moreover, to refer just to the scope and to the consistency of complex 
-numbers does not do justice to this system. There is something more 
-which, in my view, can only be referred to as 'magic'.*
-
-[Road to Reality](https://www.ams.org/notices/200606/rev-blank.pdf), Chapter 4 - Magical Complex Numbers, Sir Roger Penrose
-
-## 🎨 New in v2.0: Advanced Colormap Families
-
-Complexplorer v2.0 introduces **8 new perceptually-optimized colormap families** that go beyond traditional phase portraits, offering superior print quality, accessibility, and artistic control.
-
-### Perceptually Uniform Colormaps
-
-**PerceptualPastel** - Elegant OkLCh-based pastels with uniform perceived brightness
-```python
-# Print-friendly, non-fluorescent colors
-cp.plot(domain, f, cmap=cp.PerceptualPastel(L_center=0.55, C=0.1))
-```
-
-**Isoluminant** - Constant brightness with phase-only hue variation
-```python
-# Perfect for identifying phase structure without brightness distractions  
-cp.plot(domain, f, cmap=cp.Isoluminant(L=0.6, C=0.15))
-```
-
-**CubehelixPhase** - Scientific coloring with optimal grayscale conversion
-```python
-# CMYK-safe, perfect for academic publications
-cp.plot(domain, f, cmap=cp.CubehelixPhase(start=0.5, rotations=1.5))
-```
-
-### Artistic & Thematic Colormaps
-
-**AnalogousWedge** - Compressed hue ranges for sophisticated aesthetics
-```python
-# Ocean theme (teal to navy)
-cp.plot(domain, f, cmap=cp.AnalogousWedge(H_center=0.55, H_wedge=0.2))
-```
-
-**DivergingWarmCool** - Cartographic style emphasizing real/imaginary axes
-```python
-# Warm for positive phase, cool for negative
-cp.plot(domain, f, cmap=cp.DivergingWarmCool(warm_hue=0.08, cool_hue=0.61))
-```
-
-**InkPaper** - Nearly monochrome with subtle phase tints
-```python
-# Elegant etching aesthetic for presentations
-cp.plot(domain, f, cmap=cp.InkPaper(phase_strength=0.05))
-```
-
-**EarthTopographic** - Terrain-inspired with natural hillshade effects  
-```python
-# Zeros as valleys, poles as peaks
-cp.plot(domain, f, cmap=cp.EarthTopographic(water_hue=0.55, land_hue=0.08))
-```
-
-**FourQuadrant** - Bauhaus-inspired geometric palette
-```python
-# Clean, reduced palette for modern aesthetics
-cp.plot(domain, f, cmap=cp.FourQuadrant(C=0.25, L_base=0.5))
-```
-
-All new colormaps support enhanced phase portraits with automatic scaling:
-```python
-cmap = cp.PerceptualPastel(phase_sectors=6, auto_scale_r=True)  # Square cells
-cp.plot(domain, f, cmap=cmap)
-```
-
-See our [Colormap Guide](https://kuvychko.github.io/complexplorer/user-guide/colormaps/) for detailed comparisons and use cases.
-
-## 🎨 Gallery
-
-Explore the full range of visualizations in our [**Gallery**](docs/gallery/README.md), featuring:
-- Phase portraits with various enhancements
-- Chessboard and polar patterns  
-- 3D analytic landscapes
-- Riemann relief maps and mathematical ornaments
 
 <p align="center">
-  <a href="docs/gallery/README.md">
-    <img src="examples/gallery/Polar_chessboard_log_modulus_spacing_2d.png" width="30%">
-    <img src="examples/gallery/Phase_portrait_phase_enhanced_3d.png" width="30%">
-    <img src="examples/gallery/riemann_chart_2d.png" width="30%">
-  </a>
+  <img src="https://raw.githubusercontent.com/kuvychko/complexplorer/main/examples/gallery/view/_tour/legend_portrait.png" width="60%"
+       alt="Phase portrait of (z^2-1)/(z^2+1) with a phase-wheel legend inset">
 </p>
 
-## 📚 Documentation
+Hue is the phase of `f(z)` and the shaded cells are its contour bands, so zeros and poles read as
+opposite winding directions. The inset legend is the same colormap applied to the identity map,
+which is what makes the picture decodable.
 
-**📖 [Full Documentation](https://kuvychko.github.io/complexplorer/)** - Comprehensive guide with 5,571 lines of documentation
-
-### Quick Links
-
-- **[Installation Guide](https://kuvychko.github.io/complexplorer/getting-started/installation/)** - Get up and running
-- **[Quickstart Tutorial](https://kuvychko.github.io/complexplorer/getting-started/quickstart/)** - Your first visualization in 5 minutes
-- **[User Guide](https://kuvychko.github.io/complexplorer/user-guide/domains/)** - Domains, colormaps, plotting, Riemann sphere
-- **[Gallery](https://kuvychko.github.io/complexplorer/examples/gallery/)** - Visual showcase with 50+ code examples
-- **[API Reference](https://kuvychko.github.io/complexplorer/api/core/)** - Complete API documentation
-- **[Contributing Guide](https://kuvychko.github.io/complexplorer/development/contributing/)** - How to contribute
-
-### Examples
-- **[Tutorial Notebooks](examples/notebooks/)** - 8 comprehensive tutorials (~2.5 hours)
-- **[Application Examples](examples/applications/)** - 4 real-world applications (~1.5 hours)
-- **[Interactive Demo](examples/interactive_showcase.py)** - Run `python examples/interactive_showcase.py`
-- **[Full Examples Guide](examples/README.md)** - Complete learning path
-
-## 🛠️ Advanced Example
+The same function in 3D, with `|f(z)|` as height:
 
 ```python
-# Create an enhanced phase portrait with auto-scaling for square cells
-domain = cp.Annulus(0.5, 2, center=1j)  # Annular domain
-cmap = cp.Phase(phase_sectors=6, auto_scale_r=True, v_base=0.4)  # Auto-scaled enhanced phase
-
-# 2D visualization with domain and codomain side-by-side
-cp.pair_plot(domain, f, cmap=cmap, figsize=(10, 5))
-
-# 3D analytic landscape
-cp.plot_landscape(domain, f, cmap=cmap, z_scale=0.3)
-
-# 3D landscape with modulus scaling for better visualization
-cp.plot_landscape(domain, f, cmap=cmap, modulus_mode='arctan')
-
-# Riemann sphere projection
-cp.riemann(f, resolution=800, cmap=cmap)
+cp.plot_landscape_pv(cp.Rectangle(4, 4), lambda z: (z**2 - 1) / (z**2 + 1))
 ```
 
-### 🚀 High-Performance Riemann Relief Maps with PyVista
+→ [Installation and a first portrait](https://kuvychko.github.io/complexplorer/getting-started/first-portrait/)
 
-Experience your complex functions in stunning detail with PyVista-powered visualizations that are 15-30x faster than traditional approaches:
+## What's new in 3.0
+
+- **PyVista is the sole 3D backend**, and a required dependency. The matplotlib 3D paths are
+  removed; `plot_landscape_pv`, `pair_plot_landscape_pv` and `riemann_pv` replace them.
+- **Riemann surfaces**: multi-sheeted covers of `z^(1/n)`, `log`, and algebraic curves
+  `w² = P(z)`, with branch points emerging from the geometry.
+- **Thirteen colormaps**, including the perceptual families built on OkLCh and cubehelix.
+- **A function catalog** (`cp.catalog`) with exact zero/pole/branch-point answer keys, and a CLI
+  that renders and exports from the terminal.
+- **Engineering mode** (`cp.ee`): transfer functions as first-class complex callables.
+- **A typed public API** with a `py.typed` marker, and colormap configuration validated at
+  construction.
+
+Upgrading? The [migration guide](https://kuvychko.github.io/complexplorer/migration-3.0/) maps
+every removed and renamed name to its replacement.
+
+## What it does
+
+| | |
+|---|---|
+| **Phase portraits** | Classic and enhanced domain coloring, with a phase-wheel legend |
+| **Analytic landscapes** | `\|f(z)\|` as height, phase as colour, rendered by PyVista |
+| **Riemann sphere** | The compactified plane, so infinity is a place you can look at |
+| **Riemann surfaces** | The multi-sheeted cover on which a multivalued function is single-valued |
+| **Domains** | Rectangles, disks, annuli, and set operations on them |
+| **Colormaps** | Thirteen, including perceptual families and greyscale pattern maps |
+| **Modulus scaling** | Ten transfer functions from `\|f(z)\|` to height or radius |
+| **Engineering mode** | `H(s)` / `H(z)` with portrait, pole-zero, Bode and Nyquist views |
+| **STL export** | Modulus-scaled Riemann relief ornaments for 3D printing |
+| **CLI** | `complexplorer render \| stl \| list \| gallery` |
+
+## A few more lines
 
 ```python
-# Create an interactive Riemann relief map
-cp.riemann_pv(f, modulus_mode='arctan', resolution=800, notebook=False)
+# One-liners with sensible defaults: "2d", "3d", "riemann"
+cp.quick_plot(lambda z: 1 / z, mode="riemann")
 
-# High-performance 3D landscape
-cp.plot_landscape_pv(domain, f, cmap=cmap, notebook=False)
+# A curated function, with its exact zeros and poles recorded
+preset = cp.catalog.get("pole_flower_10")
+cp.quick_plot(preset.func, **cp.PlotPresets.publication_ready())
 
-# Side-by-side domain and codomain relief maps
-cp.pair_plot_landscape_pv(domain, f, cmap=cmap, window_size=(1600, 800))
+# Transfer functions are plain callables, so every renderer accepts them
+H = cp.ee.TransferFunction([1], [1, 0.2, 1])
+cp.ee.transfer_portrait(H, legend=True)
+cp.plot_landscape_pv(cp.Rectangle(6, 6), H)
+
+# A printable ornament
+cp.create_ornament(lambda z: z / (z**10 - 1), "flower.stl", size_mm=80)
 ```
 
-**⚠️ Pro Tip:** For cinema-quality Riemann relief maps, use PyVista via command-line scripts rather than Jupyter notebooks. The CLI experience offers superior antialiasing and interactivity. Try `python examples/interactive_showcase.py` for the ultimate visualization experience!
+From the terminal:
 
-### 📊 Modulus Scaling: The Secret to Beautiful Relief Maps
-
-Control how the magnitude (modulus) of complex values creates the topography of your mathematical landscapes:
-
-```python
-# Different scaling modes for various visualization needs
-cp.plot_landscape(domain, f, modulus_mode='constant')     # Phase only (flat)
-cp.plot_landscape(domain, f, modulus_mode='arctan')       # Smooth bounded scaling
-cp.plot_landscape(domain, f, modulus_mode='logarithmic')  # Emphasize poles/zeros
-cp.plot_landscape(domain, f, modulus_mode='adaptive')     # Auto-adjust to data
-
-# Custom scaling function for specific needs
-def custom_scale(moduli):
-    return np.tanh(moduli / 2)  # Custom transformation
-
-cp.plot_landscape(domain, f, modulus_mode='custom', 
-                 modulus_params={'scaling_func': custom_scale})
+```bash
+complexplorer list
+complexplorer render preset:pole_flower_10 -o flower.png
+complexplorer stl "z / (z**10 - 1)" --size-mm 80 -o flower.stl
 ```
 
-Available modes: `none`, `constant`, `linear`, `arctan`, `logarithmic`, `linear_clamp`, `power`, `sigmoid`, `adaptive`, `hybrid`, `custom`. See `examples/modulus_scaling_showcase.py` for comprehensive examples.
+## From mathematics to an object on your desk
 
-### 🎯 Domain Restrictions
+<p align="center">
+  <img src="https://raw.githubusercontent.com/kuvychko/complexplorer/main/examples/gallery/view/_tour/physical_triptych.png" width="100%"
+       alt="Riemann relief render, untextured STL mesh, and the printed ornament">
+</p>
 
-Control numerical stability and focus visualizations on regions of interest by restricting to specific domains:
+The relief is the mathematics, the mesh is the geometry that survives losing the colour, and the
+print is the object on a desk. Ten poles become ten spikes around the central zero.
 
-```python
-# Avoid infinity at large distances
-domain = cp.Disk(radius=5, center=0)
-cp.riemann_pv(f, domain=domain, modulus_mode='arctan')
+→ [STL export and the physical workflow](https://kuvychko.github.io/complexplorer/guide/physical-workflow/)
 
-# Exclude origin for functions with poles
-domain = cp.Annulus(inner_radius=0.1, outer_radius=10, center=0)
-ornament = cp.OrnamentGenerator(func=lambda z: 1/z, domain=domain)
-```
+## Documentation
 
-Domain restrictions work with all visualization functions and are especially useful for:
-- Functions with essential singularities
-- Focusing on specific regions of the complex plane
-- Improving numerical stability in STL generation
-- Creating cleaner 3D prints by excluding problematic areas
+The [documentation site](https://kuvychko.github.io/complexplorer/) has the visual tour, the
+guides, and a generated API reference.
 
-### 🖨️ 3D Printing: Mathematical Ornaments
+- [Reading a phase portrait](https://kuvychko.github.io/complexplorer/guide/reading-a-portrait/) —
+  what the colours encode, and which colormap to choose (with measured colour-vision-deficiency
+  behaviour)
+- [3D and the Riemann sphere](https://kuvychko.github.io/complexplorer/guide/three-dimensions/) —
+  including headless rendering and reproducible cameras
+- [Gallery](https://kuvychko.github.io/complexplorer/gallery/gallery.generated/) — every preset
+  and colormap, with the code that made it
+- [API map](https://kuvychko.github.io/complexplorer/api/map/) — one entry point per task, and
+  what each returns
+- [Migration guide](https://kuvychko.github.io/complexplorer/migration-3.0/) and
+  [changelog](https://github.com/kuvychko/complexplorer/blob/main/CHANGELOG.md)
 
-Transform your Riemann relief maps into physical mathematical ornaments! Complexplorer is the first library to offer direct STL export of complex function visualizations:
+## A note on backends
 
-```python
-from complexplorer.export.stl import OrnamentGenerator
+matplotlib draws the 2D portraits and the stereographic charts. PyVista draws everything 3D and
+builds the export meshes, because 3D here is a mesh, camera, lighting and export problem, which is
+what PyVista is for and what matplotlib's 3D engine is not. As of 3.0 PyVista is a required
+dependency, so there is no capability flag to check. The reasoning, with the measured install
+footprint and import cost, is in
+[the backend policy](https://kuvychko.github.io/complexplorer/development/backend-policy/).
 
-# Create a mathematical ornament from any complex function
-ornament = OrnamentGenerator(
-    func=lambda z: (z - 1) / (z**2 + z + 1),
-    resolution=150,
-    scaling='arctan',  # Creates beautiful topographic relief
-    cmap=cp.Phase(phase_sectors=12, auto_scale_r=True)
-)
+## Contributing
 
-# Generate print-ready STL file
-ornament.generate_and_save('mathematical_ornament.stl', size_mm=80)
-```
+See [CONTRIBUTING.md](https://github.com/kuvychko/complexplorer/blob/main/CONTRIBUTING.md) for
+setup, the checks, the spec-driven workflow, and the release runbook.
 
-Features for perfect mathematical ornaments:
-- **Automatic mesh healing** for watertight, printable models
-- **Multiple scaling methods** to emphasize different mathematical features
-- **Domain restrictions** to handle singularities gracefully
-- **Optimized for FDM printing** - no supports needed
-- **Compatible with all colormaps** for reference when painting
+## Citing
 
-Your mathematical functions become conversation pieces - imagine gifting a physical representation of the Riemann zeta function or decorating with the beauty of elliptic functions!
+Citation metadata is in
+[CITATION.cff](https://github.com/kuvychko/complexplorer/blob/main/CITATION.cff); GitHub's
+"Cite this repository" button generates BibTeX from it.
 
-See [`examples/notebooks/08_stl_export.ipynb`](examples/notebooks/08_stl_export.ipynb) for a complete guide to creating mathematical ornaments.
+## Acknowledgements
 
-## 🤝 Contributing
+Inspired by Elias Wegert's *Visual Complex Functions: An Introduction with Phase Portraits*
+(Birkhäuser, 2012), which is the book to read if you want to understand what these pictures show.
 
-Contributions are welcome! Please feel free to:
-- Report bugs or suggest features via [Issues](https://github.com/kuvychko/complexplorer/issues)
-- Submit pull requests with improvements
-- Share your visualizations and examples
-- Improve documentation
+## License
 
-## 📖 Citation
-
-If you use Complexplorer in your research, please cite:
-
-```bibtex
-@software{complexplorer,
-  author = {Igor Kuvychko},
-  title = {Complexplorer: A Python library for visualization of complex functions},
-  url = {https://github.com/kuvychko/complexplorer},
-  year = {2024}
-}
-```
-
-## 🙏 Acknowledgments
-
-This library was inspired by Elias Wegert's beautiful book ["Visual Complex Functions"](https://link.springer.com/book/10.1007/978-3-0348-0180-5) and benefited greatly from his feedback and suggestions.
-
-## 📝 License
-
-- **Code:** [MIT License](./LICENSE) — free for personal, academic, or commercial use.
-- **Renders & STL outputs in this repository:** [CC BY-NC 4.0](./LICENSE.art) — free for non-commercial use only.  
-  Commercial licensing (e.g. for resale, inclusion in commercial courses, or product manufacturing) is available upon request.
+MIT for the code; see [LICENSE](https://github.com/kuvychko/complexplorer/blob/main/LICENSE).
+The gallery images and ornament designs are under
+[LICENSE.art](https://github.com/kuvychko/complexplorer/blob/main/LICENSE.art).

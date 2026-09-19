@@ -2,164 +2,148 @@
 
 All notable changes to complexplorer will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [3.0.0] - 2026-09-19
 
-## [2.0.0] - 2025-01-XX
+Consolidates all work since 2.0.0, the published baseline (PyPI, 2025-10-19). The 2.1–2.4
+version bumps were internal milestones and were never released, so the notes below describe the
+upgrade from 2.0.0 directly. A task-oriented version of the same material is in the
+[migration guide](https://kuvychko.github.io/complexplorer/migration-3.0/).
 
 ### Breaking Changes
-
-#### Parameter Renaming
-- **BREAKING**: Renamed `n_phi` → `phase_sectors` across all colormaps and functions
-  - Affects: `Phase`, `OklabPhase`, `PerceptualPastel`, `PolarChessboard`, and all related functions
-  - Migration: Replace `n_phi=6` with `phase_sectors=6`
-  - Reason: Clearer parameter naming consistent with mathematical terminology
-
-- **DEPRECATED**: STL export parameter names unified with plotting functions
-  - `OrnamentGenerator` and `create_ornament()`: `scaling` → `modulus_mode`, `scaling_params` → `modulus_params`
-  - Old names still work with deprecation warnings
-  - Migration: Replace `scaling='arctan'` with `modulus_mode='arctan'`, `scaling_params={}` with `modulus_params={}`
-  - Reason: API consistency across all 3D visualization and export functions
+- **PyVista (>= 0.47) is now a required core dependency** and the sole 3D backend
+- **Removed the matplotlib 3D paths**: `plot_landscape()`, `pair_plot_landscape()`, and the
+  3D `riemann()` surface. Use `plot_landscape_pv()`, `pair_plot_landscape_pv()`, and
+  `riemann_pv()` instead. The 2D stereographic charts (`riemann_chart`,
+  `riemann_hemispheres`) remain matplotlib-based
+- Removed the `HAS_PYVISTA` / `HAS_STL_EXPORT` capability flags **and their internal
+  machinery** (`check_pyvista_available`, the `try/except ImportError` guards, and the
+  `ImportError` fallbacks) — PyVista is imported unconditionally and those features are
+  always available
+- **`Presets` is now `PlotPresets`.** The render-settings class was too easily confused with
+  the `catalog` function registry: `PlotPresets` configures a render, `catalog` supplies a
+  function. 2.0.0 exposed neither name (it had `publication_preset()` and friends), so this
+  affects only unreleased 3.0 builds
+- **`setup_matplotlib_backend` and `ensure_interactive_plots` left the public API.** They were
+  wrappers over `matplotlib.use()` and `plt.ion()`, and backend selection is matplotlib's
+  business. Both were exported by 2.0.0; the migration guide gives the two-line replacement
+- **Colormap configuration is validated at construction.** `phase_sectors` must be a positive
+  integer, `r_log_base` greater than 1, and `r_linear_step` and `scale_radius` positive. 2.0.0
+  accepted values that produced nonsense: `phase_sectors=0` raised `ZeroDivisionError` from
+  inside the constructor, `-1` and `2.5` were accepted silently, and `r_log_base=1` rendered
+  **every pixel as NaN** without raising anything
+- **The PyVista renderers reject unknown keyword arguments** with a `ValidationError`
+  instead of leaking them into `pyvista.Plotter` (a raw `TypeError`) or silently dropping
+  them. Removed 2.x names are reported with their replacement: `n_theta`/`n_phi` →
+  `resolution`, `show` → `interactive`
+- Removed unused/dead public surface that was never wired up: the `complexplorer.export.base`
+  exporter framework, `Matplotlib2DPlotter`, `ensure_consistent_normals`, the reversed
+  `complexplorer.utils.mesh` projection aliases + `RectangularSphereGenerator`, the
+  `core.functions.stereographic` alias, and most `utils.validation` helpers (only
+  `validate_resolution` remains)
+- **Curated the high-level API surface** — removed never-implemented stubs and redundant
+  aliases so everything exported actually works:
+  - `create_animation()` and `compare_functions()` (raised `NotImplementedError`) — no
+    replacement yet; candidates for a future 3.x as real features
+  - `analyze_function()` (its zero/pole "detection" was an unimplemented stub) — use
+    `quick_plot()`; curated singularity answer keys live on `cp.catalog` presets
+  - the `visualize` / `explore` aliases — use `quick_plot()`
+  - the unused plotter base-class scaffolding `complexplorer.plotting.base`
+    (`BasePlotter`, `Base2DPlotter`, `Base3DPlotter`, `PlotConfig`)
 
 ### Added
-
-#### New Colormaps (13 Total)
-- **PerceptualPastel**: OkLCh-based pastels with uniform brightness, ideal for print
-- **Isoluminant**: Constant lightness with phase encoded purely in hue
-- **CubehelixPhase**: Grayscale-safe colormap for scientific publishing
-- **AnalogousWedge**: Harmonious colors from compressed hue range (ocean/sunset themes)
-- **DivergingWarmCool**: Warm/cool divergence for cartographic style
-- **InkPaper**: Minimalist near-monochrome with subtle phase tints
-- **EarthTopographic**: Terrain-inspired with earth tones and hillshade
-- **FourQuadrant**: Bauhaus-inspired with 4 color anchors
-- **OklabPhase**: Perceptually uniform OKLAB color space phase portraits
-
-#### Enhanced Phase Portrait Features
-- **Auto-scaling**: `auto_scale_r=True` automatically calculates spacing for square cells
-- **Scale radius control**: `scale_radius` parameter to adjust cell size reference
-- **Combined enhancements**: Use phase sectors + modulus contours simultaneously
-- **Brightness control**: `v_base` parameter for contrast adjustment
-
-#### Comprehensive Documentation (5,571 lines)
-- **Getting Started Guide**: Installation and quickstart tutorials
-- **User Guide**: Complete documentation for domains, colormaps, 2D/3D plotting, Riemann sphere
-- **API Reference**: Full API documentation with mkdocstrings
-- **Gallery**: Visual showcase with 50+ code examples
-- **Development Guide**: Contributing guidelines and architecture documentation
-- **MkDocs Material**: Professional documentation site with search and navigation
-
-#### Modulus Scaling System
-- 10+ modulus scaling modes for 3D/Riemann sphere: `arctan`, `logarithmic`, `adaptive`, `sigmoid`, `power`, `linear_clamp`, `hybrid`
-- STL-specific parameter defaults for 3D printability
-- Custom parameter support for all scaling modes
-- **NEW**: Added modulus scaling to matplotlib's `riemann()` function for feature parity with PyVista backend
-  - All scaling modes now available in both matplotlib and PyVista
-  - Default remains `'constant'` (unit sphere) for backwards compatibility
-
-#### Logging Framework
-- Comprehensive logging with proper log levels (DEBUG, INFO, WARNING, ERROR)
-- Module-specific loggers for debugging
-- Performance timing for slow operations
-- Configurable log output
-
-#### Validation System
-- Centralized input validation with clear error messages
-- Custom exception hierarchy: `ValidationError`, `DomainError`, `ColormapError`, `PlottingError`
-- Immediate validation (fail-fast approach)
-
-#### Type Hints
-- Complete type hints for all public APIs
-- Return type annotations for utility functions
-- NumPy array type hints
-
-### Improved
-
-#### Colormap System Refactoring
-- **Eliminated 800+ lines of duplication** by consolidating shared enhancement logic
-- Unified handling of phase sectors, modulus contours, and auto-scaling
-- Consistent parameter validation across all colormaps
-- Better code maintainability and extensibility
-
-#### OkLCh Color Space
-- Proper gamut clipping for out-of-gamut colors
-- Improved color accuracy in perceptually uniform colormaps
-- Better handling of extreme chroma values
-
-#### Plot Validation
-- Consolidated validation into shared `plotting.validation` module
-- Consistent validation across matplotlib and PyVista backends
-- Better error messages with actionable suggestions
-
-#### Performance
-- Vectorized color space conversions
-- Optimized mesh generation for Riemann sphere
-- Reduced memory footprint in 3D plotting
-
-#### Documentation
-- Added mathematical formulas in docstrings
-- Comprehensive examples for all major features
-- Cross-referencing between related functions
-- Troubleshooting sections
+- **Riemann surfaces**: `riemann_surface_pv()` renders the multi-sheeted cover on which a
+  multivalued family becomes single-valued — `power` roots `z^(1/n)`, `log`, and the
+  algebraic family `w² = P(z)` (`family="algebraic"`, `p=[...]` polynomial coefficients;
+  e.g. the elliptic curve `w² = z³ − z`) — with branch points, branch cuts, and sheet
+  structure made explicit; algebraic branch points are recorded in the mesh metadata
+- **Function preset registry**: `cp.catalog` with 17 curated presets. Each
+  `FunctionPreset` carries a callable, an expression string, plain-dict
+  domain/colormap/scaling specs, a hand-authored singularity answer key
+  (`{type, at, order}`), and derived answer-key stats (counts by type, min separation)
+- **Gallery generator**: `cp.gallery` renders the catalog into a reproducible asset bundle
+  with a byte-stable `index.json` manifest (the machine-readable interchange for
+  downstream consumers)
+- **Command-line interface**: `complexplorer render | stl | list | gallery`, accepting
+  `preset:<id>` references or expression strings via a safe, portable expression
+  evaluator (`core/expression.py`)
+- **PyVista surface kernel**: a shared `SurfaceMesh` pipeline underpinning 3D landscapes,
+  Riemann relief, Riemann surfaces, and STL export
+- `[examples]` optional-dependency group (`nbmake`, `nbconvert`, `ipykernel`); included
+  in `[dev]`
+- **Exception hierarchy**: `complexplorer.exceptions` with `ComplexplorerError` as the base
+  class for all deliberate library errors; `ValidationError` now derives from it (and still
+  from `ValueError`, so existing handlers keep working). Both are exported at top level
+- **Phase-wheel legend**: `plot(..., legend=True)` and `pair_plot(..., legend=True)` draw a
+  unit-disk inset colored by the active colormap (faithful for enhanced phase portraits,
+  chessboards, and log rings), giving figures an in-image key for hue → phase and
+  shading → modulus
+- **Transfer-function explorer** (`cp.ee`): `TransferFunction(num, den, system="s"|"z")`
+  with `poles`/`zeros`/`is_stable`/`frequency_response()`; the object is a plain complex
+  callable, so it works with every renderer (`cp.plot`, `plot_landscape_pv`, `riemann_pv`,
+  STL export). Companion views: `pole_zero_plot`, `bode_plot`, `nyquist_plot`, and
+  `transfer_portrait` (phase portrait with poles/zeros and the stability boundary overlaid)
 
 ### Fixed
-- Riemann sphere mesh generation at poles (avoid singularities)
-- Color space conversion edge cases
-- PyVista notebook backend aliasing issues (documented workarounds)
-- UTF-8 encoding in documentation
-- Parameter validation consistency
+- Colormaps now emit finite, deterministic RGB at non-finite inputs (poles and essential
+  singularities landing on in-domain grid nodes previously produced out-of-range,
+  run-to-run-varying colors)
+- `quick_plot` 3D/Riemann modes now dispatch to PyVista per the backend policy and no
+  longer leak the `backend` kwarg into renderers
+- `quick_plot(..., mode="riemann", domain=...)` now forwards a caller-supplied domain to
+  `riemann_pv` (it was silently discarded)
+- `riemann_chart(domain=...)` now actually masks out-of-domain samples with the colormap's
+  out-of-domain color (it previously guarded on a nonexistent attribute and did nothing)
+- `plot(..., ax=..., filename=...)` now saves the figure even when an `ax` is supplied, and
+  `plot` consistently returns the drawn `Axes`
+- `pair_plot_landscape_pv(title=...)` now renders `title` as a figure-level title instead of
+  overwriting the codomain panel's label
+- CLI: `render --show` opens a window in 2D mode (previously a silent no-op); `stl
+  preset:<id>` now applies the preset's recommended domain and colormap; `main` reports any
+  `ComplexplorerError` (not only `ValidationError`)
 
 ### Changed
-- Minimum Python version: 3.11+ (unchanged)
-- Dependencies: NumPy 1.26.0+, Matplotlib 3.8.0+, SciPy 1.11.0+
-- Optional dependencies: PyVista 0.45.0+, PyQt6 6.5.0+
+- Version and license metadata reconciled: `complexplorer/_version.py` is the single
+  version source; the code license is declared as an SPDX `license = "MIT"` expression
+  (the deprecated `License ::` classifier was dropped), and `LICENSE`/`LICENSE.art` ship in
+  the distribution
+- **The typing contract now describes what the library actually calls.** A `ComplexFunction`
+  protocol replaces `Callable[[complex], complex]` on the public entry points, which had
+  rejected correctly written vectorized functions — and the library's own `TransferFunction` and
+  catalog presets. The spec dictionaries and singularity records have declared shapes, every
+  public callable has a return type, and CI type-checks the public surface plus a program that
+  imports complexplorer as a consumer does
+- The package now ships a PEP 561 `py.typed` marker so downstream type checkers honor its
+  annotations; added a `Development Status` classifier and `keywords`; the `all` extra is
+  now user-facing (`complexplorer[qt]`) rather than pulling in dev/test tooling
+- Internal consolidation (no behavior change): a single modulus-scaling dispatch
+  (`core.scaling.apply_scaling_mode`) shared by the mesh builders and sphere distortion; a
+  shared planar input-resolver (`core.field.resolve_plane_inputs`) used by both the 2D and
+  3D renderers; and a shared PyVista show/export tail
+- Tooling and CI: ruff lint/format gates plus a GitHub Actions test matrix
+  (ubuntu/windows × Python 3.11–3.13)
+- Examples reworked onto the 3.0 surface: new `examples/{notebooks,scripts,gallery}`
+  layout; registry-driven `examples/showcase.py` produces the committed (and exactly
+  regenerable) gallery images and generated docs; the two legacy hand-rolled gallery
+  generators were removed
+- All four tutorial notebooks modernized (static PyVista Jupyter backend, no
+  `HAS_PYVISTA` guards) and verified to execute top-to-bottom via the opt-in
+  `pytest --nbmake examples/notebooks/`
 
-### Deprecated
-- Legacy parameter names (will be removed in v3.0)
+## [2.0.0] - 2025-10-19
 
-### Removed
-- Old colormap duplication code (consolidated)
+**Published to PyPI on 2025-10-19**, and the latest release until 3.0 — so it is the version
+`pip install complexplorer` provided, and the one the 3.0 upgrade notes are written against. It
+introduced the perceptual colormap families, renamed `n_phi` to `phase_sectors`, and began the
+deprecation of the matplotlib 3D paths that 3.0 completes.
 
-### Internal Refactoring
-- Modularized colormap enhancement logic
-- Separated color space utilities into `core.color_utils`
-- Created `core.scaling` module for modulus scaling
-- Better separation of concerns across modules
+2.0.0 also changed `Rectangle` membership, which matters if you are coming from 1.x:
+`contains()` tests the rectangle's actual `re_length`/`im_length` about its `center`, rather than
+the square-padded viewing window that 1.x tested. A non-square `Rectangle` (with the default
+`square=True`) no longer reports the padded strips as inside, so masking and STL/relief output
+differ from 1.x. 3.0 keeps the 2.0.0 behaviour unchanged.
 
-### Migration Guide
-
-#### Updating Parameter Names
-```python
-# Before (v1.x)
-cmap = cp.Phase(n_phi=6, auto_scale_r=True)
-
-# After (v2.0)
-cmap = cp.Phase(phase_sectors=6, auto_scale_r=True)
-```
-
-#### Using New Colormaps
-```python
-# Elegant pastels for print
-cmap = cp.PerceptualPastel(phase_sectors=6, auto_scale_r=True)
-
-# Minimalist near-monochrome
-cmap = cp.InkPaper()
-
-# Terrain-inspired
-cmap = cp.EarthTopographic()
-```
-
-#### Auto-Scaling Feature
-```python
-# Automatically calculate spacing for square cells
-cmap = cp.Phase(phase_sectors=6, auto_scale_r=True, scale_radius=0.8)
-```
-
-### Contributors
-- Core development and refactoring
-- Documentation and examples
-- Testing and validation
-
----
+The 2.1 through 2.4 version numbers appear in development history as internal milestones on the
+way to 3.0. None of them was released.
 
 ## [1.0.0] - 2025-07-27
 
@@ -215,3 +199,10 @@ cmap = cp.Phase(phase_sectors=6, auto_scale_r=True, scale_radius=0.8)
 
 ## [0.1.2] - Previous Release
 - Initial public release with basic functionality
+
+[Unreleased]: https://github.com/kuvychko/complexplorer/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/kuvychko/complexplorer/compare/v2.0.0...v3.0.0
+[2.0.0]: https://github.com/kuvychko/complexplorer/compare/v1.0.1...v2.0.0
+[1.0.1]: https://github.com/kuvychko/complexplorer/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/kuvychko/complexplorer/compare/v0.1.2...v1.0.0
+[0.1.2]: https://github.com/kuvychko/complexplorer/releases/tag/v0.1.2

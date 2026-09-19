@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+title: >-
+  complexplorer: visualization of complex functions, from phase portraits to
+  3D-printable ornaments
+message: If you use this software, please cite it using these metadata.
+type: software
+authors:
+  - given-names: Igor
+    family-names: Kuvychko
+    email: igor.kuvychko@gmail.com
+repository-code: https://github.com/kuvychko/complexplorer
+url: https://kuvychko.github.io/complexplorer/
+abstract: >-
+  Complexplorer renders complex functions as phase portraits, 3D analytic
+  landscapes, Riemann spheres and Riemann surfaces, and exports modulus-scaled
+  Riemann relief ornaments as STL for 3D printing. Inspired by Elias Wegert's
+  "Visual Complex Functions - An Introduction with Phase Portraits".
+keywords:
+  - complex analysis
+  - visualization
+  - phase portrait
+  - Riemann sphere
+  - Riemann surface
+  - domain coloring
+  - 3D printing
+license: MIT
+version: 3.0.0
+# Set to the release date when the tag is cut; see CONTRIBUTING.md, "Releasing".
+date-released: 2026-09-19
+# A DOI can be added here once a release is archived somewhere that issues one.

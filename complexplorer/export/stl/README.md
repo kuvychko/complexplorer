@@ -45,13 +45,7 @@ from complexplorer.export.stl import create_ornament
 func = lambda z: (z**2 - 1) / (z**2 + 1)
 
 # Create STL file
-create_ornament(
-    func,
-    "my_ornament.stl",
-    size_mm=50,
-    resolution=150,
-    modulus_mode='arctan'
-)
+create_ornament(func, "my_ornament.stl", size_mm=50, resolution=150, scaling="arctan")
 ```
 
 ## Technical Notes
