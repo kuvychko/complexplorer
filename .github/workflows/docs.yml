@@ -1,28 +1,46 @@
 name: Deploy Documentation
 
-# Recovered from v2.0.0 by the reconcile-with-2-0-release change, with the push trigger REMOVED:
-# the live site at kuvychko.github.io/complexplorer still documents 2.0, and merging this line
-# must not overwrite it. `publish-rev3-docs-site` owns the rev3 content and switches this to a
-# release-tag trigger.
-
+# The published site replaces the one documenting 2.x, so deployment is deliberately hard to
+# trigger: a v3.* release tag, or a person choosing to. A push to a branch builds the site in CI
+# (see the `docs` job there) but cannot publish it.
 on:
+  push:
+    tags: ["v3.*"]
   workflow_dispatch:
 
 permissions:
   contents: write
 
+concurrency:
+  group: docs-deploy
+  cancel-in-progress: false
+
 jobs:
   deploy:
+    name: Build and publish to GitHub Pages
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          # gh-deploy pushes to gh-pages, and the version banner asks git whether HEAD is a tag.
+          fetch-depth: 0
 
-      - name: Install dependencies
-        run: pip install mkdocs-material mkdocs-jupyter pymdown-extensions
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
 
-      - name: Deploy to GitHub Pages
-        run: mkdocs gh-deploy --force
+      - name: Create venv
+        run: uv venv
+
+      # The package is installed, not just the docs tooling: the API reference is generated from
+      # its docstrings and the version banner reports its __version__.
+      - name: Install
+        run: uv pip install -e ".[docs]"
+
+      # Build strictly first. If the site cannot build cleanly it must not replace a working one.
+      - name: Build the site
+        run: uv run --no-sync mkdocs build --strict
+
+      - name: Publish
+        run: uv run --no-sync mkdocs gh-deploy --force

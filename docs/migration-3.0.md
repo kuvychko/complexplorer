@@ -27,7 +27,7 @@ Passing `n_phi` raises `ValidationError` naming the replacement. The same applie
 ## Gallery manifest: `schema_version` 2 → 3
 
 `index.json` records carry `cmap_spec`, whose sector-count key moved from `n_phi` to
-`phase_sectors`. Consumers of the manifest (web, Godot) should read the new key; the version
+`phase_sectors`. Consumers of the manifest should read the new key; the version
 bump marks the change. The manifest remains byte-stable across runs of the same version.
 
 ## Removed names and their replacements

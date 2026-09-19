@@ -69,3 +69,6 @@ pip-delete-this-directory.txt
 
 # Notebook-generated figure artifacts (regenerable; the inline output is in the .ipynb)
 examples/notebooks/publication_figure.*
+
+# MkDocs build output (77 MB; built by CI and by `mkdocs build`, never committed)
+site/

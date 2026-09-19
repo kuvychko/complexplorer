@@ -1,5 +1,7 @@
-# Recovered from v2.0.0 by the reconcile-with-2-0-release change. The nav still points at the
-# 2.0 page set; `publish-rev3-docs-site` rewrites the content, nav and strict build.
+# The complexplorer documentation site. Built with `mkdocs build --strict`, which is a release
+# gate: a nav entry pointing at a missing page, or a broken internal link, fails the build.
+# Assets under examples/ are added to the build by docs/hooks/site_assets.py -- they are not
+# copied into docs/.
 site_name: Complexplorer
 site_description: Beautiful visualizations of complex functions
 site_url: https://kuvychko.github.io/complexplorer/
@@ -8,6 +10,7 @@ repo_name: kuvychko/complexplorer
 
 theme:
   name: material
+  custom_dir: docs/overrides
   palette:
     # Light mode
     - scheme: default
@@ -41,10 +44,37 @@ plugins:
   - mkdocs-jupyter:
       execute: false
       include_source: true
+  # The API reference is generated from docstrings, so it cannot drift from the code.
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: numpy
+            show_source: false
+            # Constructor arguments belong under the class, not as a separate __init__ entry
+            # that doubles the length of every page's table of contents.
+            merge_init_into_class: true
+            filters: ["!^_"]
+            show_root_heading: true
+            heading_level: 3
+            members_order: source
+            separate_signature: true
+            show_signature_annotations: true
 
-# Exclude backup documentation from build
+hooks:
+  - docs/hooks/site_assets.py
+  - docs/hooks/version_banner.py
+
+# A broken internal link or a missing nav page fails the build rather than reaching a reader.
+strict: true
+
+# Working notes stay in the repository for whoever maintains that code, but are not documentation.
 exclude_docs: |
   old/
+  internal/
+  hooks/
+  overrides/
+  gallery/README.md
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -72,25 +102,35 @@ extra_javascript:
 
 nav:
   - Home: index.md
-  - Getting Started:
-      - Installation: getting-started/installation.md
-      - Quick Start: getting-started/quickstart.md
-  - User Guide:
-      - Domains: user-guide/domains.md
-      - Colormaps: user-guide/colormaps.md
-      - 2D Plotting: user-guide/plotting-2d.md
-      - 3D Plotting: user-guide/plotting-3d.md
-      - Riemann Sphere: user-guide/riemann.md
-  - Examples:
-      - Gallery: examples/gallery.md
-      - Notebooks: examples/notebooks.md
-  - API Reference:
-      - Core: api/core.md
-      - Plotting: api/plotting.md
-      - Export: api/export.md
+  - Getting started:
+      - Installation and a first portrait: getting-started/first-portrait.md
+  - Guide:
+      - Reading a phase portrait: guide/reading-a-portrait.md
+      - Domains: guide/domains-and-colormaps.md
+      - 3D and the Riemann sphere: guide/three-dimensions.md
+      - Riemann surfaces: guide/riemann-surfaces.md
+      - Engineering mode: guide/engineering-mode.md
+      - Catalog and presets: guide/presets-and-catalog.md
+      - Catalog reference: function-presets.md
+      - Command line: guide/cli.md
+      - STL and physical output: guide/physical-workflow.md
+  - Gallery: gallery/gallery.generated.md
+  - API reference:
+      - Overview: api/index.md
+      - Domains: api/domains.md
+      - Colormaps: api/colormaps.md
+      - Plotting (2D): api/plotting-2d.md
+      - Plotting (3D): api/plotting-3d.md
+      - Modulus scaling: api/scaling.md
+      - Catalog and presets: api/catalog.md
+      - STL export: api/export.md
+      - Engineering mode: api/engineering.md
+      - Core and exceptions: api/core.md
+  - Migrating to 3.0: migration-3.0.md
   - Development:
       - Contributing: development/contributing.md
-      - Architecture: development/architecture.md
+      - Backend policy: development/backend-policy.md
+      - Surface kernel: development/surface-kernel.md
 
 extra:
   social:

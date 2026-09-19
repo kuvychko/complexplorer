@@ -60,5 +60,5 @@ cp.riemann_pv(preset.func, cmap=preset.colormap())                           # R
 ```
 
 See the [API Cookbook](../../examples/notebooks/api_cookbook.ipynb) for more patterns, and
-[Visual Complex Functions](http://www.visual.wegert.com/) by Elias Wegert for the mathematics
-behind phase portraits.
+*Visual Complex Functions: An Introduction with Phase Portraits* by Elias Wegert
+(Birkhauser, 2012) for the mathematics behind phase portraits.

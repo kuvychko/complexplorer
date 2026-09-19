@@ -36,9 +36,9 @@ jobs:
       # The example SCRIPTS are shipped code and are linted too; notebooks are exempt in
       # pyproject.toml, where their cell structure conflicts with import-order rules.
       - name: ruff check
-        run: uv run --no-sync ruff check complexplorer/ tests/ examples/ scripts/
+        run: uv run --no-sync ruff check complexplorer/ tests/ examples/ scripts/ docs/hooks/
       - name: ruff format --check
-        run: uv run --no-sync ruff format --check complexplorer/ tests/ examples/ scripts/
+        run: uv run --no-sync ruff format --check complexplorer/ tests/ examples/ scripts/ docs/hooks/
 
   test:
     name: Test (${{ matrix.os }}, py${{ matrix.python }})
@@ -121,6 +121,38 @@ jobs:
       - uses: pyvista/setup-headless-display-action@v3
       - name: Run tests
         run: uv run --no-sync pytest tests/ -q
+
+  docs:
+    name: Docs (mkdocs --strict)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The version banner asks git whether HEAD is a release tag.
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Create venv
+        run: uv venv
+
+      # The package itself is needed too: the API reference is generated from its docstrings and
+      # the version banner imports it, so a docs build that cannot import complexplorer is wrong.
+      - name: Install
+        run: uv pip install -e ".[docs]"
+
+      # A nav entry pointing at a missing page, or a broken internal link, fails here rather than
+      # reaching a reader.
+      - name: Build the site
+        run: uv run --no-sync mkdocs build --strict
+
+      # External links depend on other people's servers, so they are checked on the weekly
+      # schedule only -- a per-push check would be flaky and teach people to ignore the gate.
+      - name: Check external links
+        if: github.event_name == 'schedule'
+        run: uv run --no-sync python scripts/check_external_links.py docs
 
   artifact:
     name: Artifact (build, inspect, install, smoke)

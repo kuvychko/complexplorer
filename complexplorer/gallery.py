@@ -2,9 +2,10 @@
 
 For each selected preset this writes a 2D portrait PNG and a ``card.json``, plus a
 self-contained top-level ``index.json`` manifest. The **manifest** is the deterministic
-contract (byte-identical across runs of the same library version) and the interchange record
-consumed by downstream tools (Godot game prototyping, a future docs/web layer, the Phase 3
-level-export). Portrait images are reproducible best-effort (metadata stripped).
+contract -- byte-identical for the same selection and library version on any platform, which
+is what makes it usable as an interchange record for downstream tools rather than merely a
+folder of images. Portrait images are reproducible best-effort (metadata stripped): their
+bytes are NOT guaranteed across machines or rendering-library versions.
 
 matplotlib-only, PyVista-free.
 """

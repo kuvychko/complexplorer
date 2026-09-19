@@ -2,9 +2,9 @@
 
 `cp.catalog` is a curated registry of complex functions, each described in a way that is
 both **renderable** (a Python callable) and **serializable** (plain dicts + an expression
-string + exact answer keys). It is the single source consumed by the gallery, CLI, STL
-object cards, and — under the project's *games boundary* — Godot game prototyping, where the
-math is reimplemented natively and validated against these records.
+string + exact answer keys). It is the single source consumed by the gallery, the CLI and the
+STL object cards, and it is designed so that an independent implementation can be checked
+against the same records.
 
 > Not to be confused with `cp.Presets` (capital P) — those are *plot-config* presets
 > (resolution + colormap bundles). `cp.catalog` is the *function* registry.
@@ -31,10 +31,10 @@ A `FunctionPreset` carries:
 | Field | Purpose |
 |---|---|
 | `func` | the callable Complexplorer renders with (**not** serialized) |
-| `expression` | e.g. `"z / (z**10 - 1)"` — what Godot reimplements from |
+| `expression` | e.g. `"z / (z**10 - 1)"` — the function as a parseable string |
 | `domain_spec` / `cmap_spec` / `scaling_spec` | plain dicts whose keys mirror the constructor kwargs |
 | `singularities` | hand-authored, **exact** answer keys, one record per location |
-| `id` / `title` / `story` / `tags` | metadata; `tags` group presets (e.g. game sets) |
+| `id` / `title` / `story` / `tags` | metadata; `tags` group presets into sets |
 
 **Serialization is the design center.** Specs are dicts, not live objects, so a preset is a
 clean JSON record. Every complex value (a domain `center`, a singularity `at`) is an
@@ -52,11 +52,5 @@ Each `singularities` record is exact and author-provided (never detected numeric
 
 `order` is the multiplicity for `zero`/`pole`, the branching order for `branch_point`, and
 `null` for `essential`. Multivalued presets (`sqrt`, `log`, `z**(1/3)`) use numpy's
-**principal branch** and declare a `branch_point`, so the answer key and any native
-reimplementation agree on the branch convention.
-
-## Parametrized families
-
-The base `FunctionPreset` is **static**. Parametrized "playgrounds" (Möbius, Julia,
-`z^(1/n)`, resonators) are a separate, later `FunctionFamily` whose `bind(**params)` emits an
-ordinary static preset — so the registry shape here is the snapshot families produce.
+**principal branch** and declare a `branch_point`, so the answer key and any independent
+implementation agree on the branch convention.

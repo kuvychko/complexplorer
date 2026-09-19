@@ -82,6 +82,13 @@ examples = [
     # PyVista writes the gallery's rotating loop through imageio
     "imageio>=2.31",
 ]
+# The documentation site. Pinned to minors for the same reason ruff is: `mkdocs build --strict`
+# is a release gate, and a gate that breaks on someone else's release teaches people to ignore it.
+docs = [
+    "mkdocs-material>=9.5,<10",
+    "mkdocstrings[python]>=0.27,<0.31",
+    "mkdocs-jupyter>=0.25,<0.26",
+]
 # PyVista is a core dependency as of 3.0; these are kept as empty no-op aliases so existing
 # `pip install complexplorer[pyvista]` / `[3d]` commands continue to work.
 pyvista = []

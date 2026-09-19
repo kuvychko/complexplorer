@@ -1,8 +1,9 @@
 """Function preset registry (``cp.catalog``).
 
 A curated, metadata-rich, **serializable** description of complex functions, designed to be
-the single source consumed by the gallery, CLI, STL object cards, and — under the roadmap's
-games boundary — Godot game prototyping (which reimplements the math natively).
+the single source consumed by the gallery, the CLI and the STL object cards. The records are
+self-contained enough that an independent implementation can rebuild the same mathematics and
+be checked against the same exact answer keys.
 
 This module is deliberately **PyVista-free** (presets are data, not rendering) and imports
 only the core/data layer. Distinct from ``complexplorer.api.Presets`` (plot-config presets):
@@ -11,7 +12,7 @@ this is the *function* registry, exposed as ``cp.catalog``.
 A preset carries:
 
 - ``func`` — the callable Complexplorer renders with (NOT serialized),
-- ``expression`` — a string like ``"z / (z**10 - 1)"`` (Godot reimplements from it),
+- ``expression`` — a string like ``"z / (z**10 - 1)"`` (the function, parseable),
 - ``domain_spec`` / ``cmap_spec`` / ``scaling_spec`` — plain dicts whose keys mirror the
   target constructor kwargs; every complex value is an ``[re, im]`` pair,
 - ``singularities`` — hand-authored, exact answer keys (one record per location),
@@ -222,7 +223,7 @@ class FunctionPreset:
             "min_separation": min_separation,
         }
 
-    # -- serialization (Godot interchange record) --
+    # -- serialization (the interchange record) --
     def to_dict(self) -> dict:
         """JSON-ready record of everything EXCEPT the live ``func``.
 
