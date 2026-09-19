@@ -19,7 +19,7 @@ complexplorer/
 ├── complexplorer/              # Main library package
 │   ├── __init__.py             # Public API surface (see __all__)
 │   ├── _version.py
-│   ├── api.py                  # High-level API: quick_plot(), Presets
+│   ├── api.py                  # High-level API: quick_plot(), PlotPresets
 │   ├── exceptions.py           # ComplexplorerError base + ValidationError + ColormapError
 │   ├── gallery.py              # generate_gallery (byte-stable index.json manifest)
 │   ├── core/
@@ -201,7 +201,7 @@ import complexplorer as cp
 cp.quick_plot(lambda z: (z**2 - 1) / (z**2 + 1))
 
 # Bundled plot-config presets (distinct from the cp.catalog function registry)
-cp.quick_plot(lambda z: 1/z, **cp.Presets.publication_ready())
+cp.quick_plot(lambda z: 1/z, **cp.PlotPlotPresets.publication_ready())
 
 # Add a phase-wheel legend to any 2D portrait
 cp.plot(cp.Rectangle(4, 4), lambda z: 1/z, legend=True)

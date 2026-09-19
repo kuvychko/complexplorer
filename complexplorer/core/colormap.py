@@ -197,6 +197,42 @@ class BasePhasePortrait(Colormap):
         if not 0 <= v_base < 1:
             raise ValidationError("v_base must be in [0, 1)")
 
+        # phase_sectors counts sectors, so it must be a positive integer. Unvalidated, 0 reached
+        # the divisions below as a ZeroDivisionError raised from inside a constructor, while -1
+        # and 2.5 were accepted and produced a meaningless sector count. bool is excluded
+        # deliberately: it is an int subclass, and Phase(phase_sectors=True) means nothing.
+        if phase_sectors is not None:
+            valid = (
+                not isinstance(phase_sectors, bool)
+                and isinstance(phase_sectors, (int, np.integer))
+                and phase_sectors >= 1
+            )
+            if not valid:
+                raise ValidationError(
+                    f"phase_sectors must be a positive integer (1 or more); got "
+                    f"{phase_sectors!r}. It is the number of phase sectors the colour wheel is "
+                    f"divided into; pass None for an unsectored portrait."
+                )
+
+        # The modulus parameters have the same problem phase_sectors had: out-of-range values were
+        # accepted and produced nonsense. r_log_base=1 is the worst -- log(x)/log(1) divides by
+        # zero, so every pixel comes out NaN and the portrait is blank with no error raised.
+        if r_linear_step is not None and r_linear_step <= 0:
+            raise ValidationError(
+                f"r_linear_step must be positive; got {r_linear_step!r}. It is the modulus step "
+                f"between contour bands."
+            )
+        if r_log_base is not None and r_log_base <= 1:
+            raise ValidationError(
+                f"r_log_base must be greater than 1; got {r_log_base!r}. A base of 1 makes the "
+                f"logarithm undefined and every colour non-finite."
+            )
+        if scale_radius <= 0:
+            raise ValidationError(
+                f"scale_radius must be positive; got {scale_radius!r}. It scales the cell size "
+                f"chosen by auto_scale_r."
+            )
+
         # Handle auto-scaling
         if auto_scale_r:
             if phase_sectors is None:

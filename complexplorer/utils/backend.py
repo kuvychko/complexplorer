@@ -4,7 +4,7 @@ import os
 import sys
 
 
-def setup_matplotlib_backend(force_qt: bool = False):
+def setup_matplotlib_backend(force_qt: bool = False) -> str:
     """Set up matplotlib backend for interactive plots.
 
     Parameters
@@ -48,7 +48,7 @@ def setup_matplotlib_backend(force_qt: bool = False):
             return matplotlib.get_backend()
 
 
-def ensure_interactive_plots():
+def ensure_interactive_plots() -> str:
     """Ensure plots are shown in an interactive environment.
 
     This function sets up the backend and ensures plt.ion() is called

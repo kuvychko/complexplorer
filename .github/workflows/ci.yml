@@ -122,6 +122,43 @@ jobs:
       - name: Run tests
         run: uv run --no-sync pytest tests/ -q
 
+  typing:
+    name: Typing (pyright, public surface)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Create venv
+        run: uv venv
+
+      # The package and its dependencies must be installed: the gate checks complexplorer as a
+      # consumer sees it, which means resolving numpy, matplotlib and pyvista for real.
+      - name: Install
+        run: uv pip install -e ".[dev]"
+
+      # The scope comes from [tool.pyright] in pyproject.toml: the public entry points and a
+      # downstream program that uses them. This is what py.typed promises.
+      - name: Check the public typing surface
+        run: uv run --no-sync --with pyright pyright
+
+      # The whole-package count is reported but not blocking: it is dominated by numpy
+      # scalar-versus-array unions and third-party stub imprecision. Visible, so a jump is
+      # noticeable; non-blocking, so it does not train people to add ignores.
+      - name: Report the whole-package count
+        continue-on-error: true
+        run: uv run --no-sync --with pyright pyright --outputjson complexplorer/ > pyright-all.json || true
+        shell: bash
+
+      - name: Summarise
+        if: always()
+        shell: bash
+        run: |
+          python -c "import json,pathlib,sys; p=pathlib.Path('pyright-all.json'); d=json.loads(p.read_text()) if p.exists() else {}; e=[x for x in d.get('generalDiagnostics',[]) if x.get('severity')=='error']; print('whole-package pyright errors (informational):', len(e))"
+
   docs:
     name: Docs (mkdocs --strict)
     runs-on: ubuntu-latest

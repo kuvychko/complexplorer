@@ -127,8 +127,8 @@ class TestCatalog:
 class TestPublicNaming:
     def test_catalog_and_Presets_both_exist_and_differ(self):
         assert cp.catalog is catalog  # function registry
-        assert cp.Presets is not cp.catalog  # plot-config presets (distinct concept)
-        assert hasattr(cp.Presets, "publication_ready")  # plot config
+        assert cp.PlotPresets is not cp.catalog  # render settings (a distinct concept)
+        assert hasattr(cp.PlotPresets, "publication_ready")  # render settings
         assert hasattr(cp.catalog, "get")  # registry
 
 

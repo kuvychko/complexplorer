@@ -6,7 +6,7 @@ self-contained enough that an independent implementation can rebuild the same ma
 be checked against the same exact answer keys.
 
 This module is deliberately **PyVista-free** (presets are data, not rendering) and imports
-only the core/data layer. Distinct from ``complexplorer.api.Presets`` (plot-config presets):
+only the core/data layer. Distinct from ``complexplorer.PlotPresets`` (render settings):
 this is the *function* registry, exposed as ``cp.catalog``.
 
 A preset carries:
@@ -23,12 +23,12 @@ from __future__ import annotations
 
 import itertools
 import math
-from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
 import numpy as np
 
+from ..typing import CmapSpec, ComplexFunction, DomainSpec, ScalingSpec, SingularityRecord
 from ..utils.validation import ValidationError
 from .colormap import Chessboard, Colormap, LogRings, Phase, PolarChessboard
 from .domain import Annulus, Disk, Domain, Rectangle
@@ -174,11 +174,12 @@ class FunctionPreset:
     id: str
     title: str
     expression: str
-    func: Callable = field(repr=False)
-    domain_spec: dict = field(default_factory=dict)
-    cmap_spec: dict = field(default_factory=lambda: {"type": "Phase", "phase_sectors": 6})
-    scaling_spec: str | dict = "balanced"
-    singularities: tuple[dict, ...] = ()
+    func: ComplexFunction = field(repr=False)
+    domain_spec: DomainSpec = field(default_factory=lambda: DomainSpec())
+    cmap_spec: CmapSpec = field(default_factory=lambda: CmapSpec(type="Phase", phase_sectors=6))
+    # A plain string names a preset scaling, such as "balanced"; a dict gives method and params.
+    scaling_spec: str | ScalingSpec = "balanced"
+    singularities: tuple[SingularityRecord, ...] = ()
     story: str = ""
     tags: tuple[str, ...] = ()
 

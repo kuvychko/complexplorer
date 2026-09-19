@@ -7,7 +7,7 @@ import numpy as np
 
 # PyVista is a required core dependency as of 3.0, so STL export and the PyVista 3D
 # renderers are always available.
-from complexplorer.api import Presets, quick_plot
+from complexplorer.api import PlotPresets, quick_plot
 from complexplorer.core.colormap import Chessboard, LogRings, Phase, PolarChessboard
 
 # Import from new API structure
@@ -152,12 +152,12 @@ class TestHighLevelAPI:
         func = lambda z: np.exp(z)
 
         # Publication preset
-        preset = Presets.publication_ready()
+        preset = PlotPresets.publication_ready()
         ax = plot(Rectangle(2, 2), func, **preset)
         assert ax is not None
 
         # High contrast preset
-        preset = Presets.high_contrast()
+        preset = PlotPresets.high_contrast()
         ax = plot(Rectangle(2, 2), func, **preset)
         assert ax is not None
 

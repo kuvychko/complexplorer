@@ -117,6 +117,7 @@ nav:
   - Gallery: gallery/gallery.generated.md
   - API reference:
       - Overview: api/index.md
+      - API map: api/map.md
       - Domains: api/domains.md
       - Colormaps: api/colormaps.md
       - Plotting (2D): api/plotting-2d.md

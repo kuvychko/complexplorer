@@ -128,3 +128,34 @@ class TestTheColormapGuidanceIsStillTrue:
                 f"{name} now assigns a distinct colour to every phase; the guide describes it "
                 "as folding the phase circle and should be corrected"
             )
+
+
+class TestEveryPublicNameIsDocumented:
+    """C3 checks that each public name reaches the API reference; this is the other half."""
+
+    def test_every_public_name_has_a_docstring(self):
+        import complexplorer
+
+        undocumented = []
+        for name in cp.__all__:
+            if name == "__version__":
+                continue
+            obj = getattr(cp, name)
+            if obj is complexplorer.ee:  # a module, documented by its own pages
+                continue
+            if not (getattr(obj, "__doc__", None) or "").strip():
+                undocumented.append(name)
+        assert not undocumented, f"these exported names have no docstring: {undocumented}"
+
+    def test_the_api_map_lists_the_entry_points(self):
+        """The map is hand-written, so it can fall behind the surface it maps."""
+        page = (DOCS / "api" / "map.md").read_text(encoding="utf-8")
+        for entry_point in (
+            "plot",
+            "plot_landscape_pv",
+            "riemann_pv",
+            "quick_plot",
+            "create_ornament",
+            "generate_gallery",
+        ):
+            assert f"cp.{entry_point}(" in page, f"the API map does not mention {entry_point}"

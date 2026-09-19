@@ -78,4 +78,4 @@ surface.
 #### Scenario: Top-level surface lists only working entry points
 
 - **WHEN** `complexplorer.__all__` is inspected
-- **THEN** it contains `quick_plot` and `Presets`, and contains none of `visualize`, `explore`, or `analyze_function`
+- **THEN** it contains `quick_plot` and `PlotPresets`, and contains none of `visualize`, `explore`, or `analyze_function`

@@ -6,7 +6,7 @@ string + exact answer keys). It is the single source consumed by the gallery, th
 STL object cards, and it is designed so that an independent implementation can be checked
 against the same records.
 
-> Not to be confused with `cp.Presets` (capital P) — those are *plot-config* presets
+> Not to be confused with `cp.PlotPresets` (capital P) — those are *plot-config* presets
 > (resolution + colormap bundles). `cp.catalog` is the *function* registry.
 
 ## Using the registry

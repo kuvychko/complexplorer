@@ -2,7 +2,7 @@
 
 Two things in complexplorer are called presets, and they answer different questions.
 
-> **`cp.catalog` supplies a function. `cp.Presets` configures a render.**
+> **`cp.catalog` supplies a function. `cp.PlotPresets` configures a render.**
 
 ## `cp.catalog` — curated functions
 
@@ -31,14 +31,14 @@ together the closest pair is.
 The catalog is also what `complexplorer list`, `complexplorer gallery` and the documentation
 gallery are built from, so an entry added there propagates everywhere.
 
-## `cp.Presets` — render configurations
+## `cp.PlotPresets` — render configurations
 
 These are bundles of plotting arguments for a purpose, not functions:
 
 ```python
-cp.quick_plot(lambda z: 1 / z, **cp.Presets.publication_ready())
-cp.quick_plot(lambda z: 1 / z, **cp.Presets.high_contrast())
-cp.quick_plot(lambda z: 1 / z, **cp.Presets.interactive())
+cp.quick_plot(lambda z: 1 / z, **cp.PlotPlotPresets.publication_ready())
+cp.quick_plot(lambda z: 1 / z, **cp.PlotPlotPresets.high_contrast())
+cp.quick_plot(lambda z: 1 / z, **cp.PlotPlotPresets.interactive())
 ```
 
 - `publication_ready()` — high resolution, restrained styling
@@ -48,14 +48,14 @@ cp.quick_plot(lambda z: 1 / z, **cp.Presets.interactive())
 Because they are plain dictionaries of keyword arguments, you can override any part:
 
 ```python
-cp.quick_plot(f, **{**cp.Presets.publication_ready(), "resolution": 1200})
+cp.quick_plot(f, **{**cp.PlotPlotPresets.publication_ready(), "resolution": 1200})
 ```
 
 ## Using both at once
 
 ```python
 preset = cp.catalog.get("rational_zeros_poles")
-cp.quick_plot(preset.func, **cp.Presets.publication_ready())
+cp.quick_plot(preset.func, **cp.PlotPlotPresets.publication_ready())
 ```
 
 One supplies the mathematics, the other the presentation.

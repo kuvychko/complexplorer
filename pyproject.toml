@@ -108,6 +108,18 @@ complexplorer = "complexplorer.cli.main:main"
 "Homepage" = "https://github.com/kuvychko/complexplorer"
 "Bug Tracker" = "https://github.com/kuvychko/complexplorer/issues"
 
+# The typing gate covers what a user can see: the public entry points and a program that imports
+# complexplorer the way a consumer does. It deliberately does NOT cover the whole package -- that
+# is 86 errors in basic mode, dominated by `float | ndarray` unions and third-party stub
+# imprecision, and the three most suspicious were each checked and found to be false positives.
+# A gate that fails for non-defects teaches people to add ignores. See
+# openspec/changes/archive/*-finalize-public-api-contract/design.md.
+[tool.pyright]
+include = ["complexplorer/api.py", "complexplorer/typing.py", "tests/typing"]
+pythonVersion = "3.11"
+typeCheckingMode = "basic"
+reportMissingImports = "warning"
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"

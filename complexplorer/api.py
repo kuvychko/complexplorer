@@ -3,7 +3,7 @@
 This module provides convenient functions for typical use cases.
 """
 
-from collections.abc import Callable
+from typing import TYPE_CHECKING, Any
 
 from complexplorer.core.colormap import Phase
 from complexplorer.core.domain import Domain, Rectangle
@@ -12,11 +12,16 @@ from complexplorer.exceptions import ValidationError
 # Import plotting functions. 2D is matplotlib; 3D/Riemann are PyVista (a required core
 # dependency as of 3.0 — there is no matplotlib 3D backend).
 from complexplorer.plotting.matplotlib.plot_2d import plot as plot_2d
+from complexplorer.typing import ComplexFunction
+
+if TYPE_CHECKING:  # import cost stays out of the runtime path
+    import pyvista as pv
+    from matplotlib.axes import Axes
 
 
 def quick_plot(
-    func: Callable[[complex], complex], domain: Domain | None = None, mode: str = "2d", **kwargs
-):
+    func: ComplexFunction, domain: Domain | None = None, mode: str = "2d", **kwargs
+) -> "Axes | pv.Plotter | None":
     """Quick visualization of a complex function.
 
     Parameters
@@ -67,19 +72,19 @@ def quick_plot(
 
 
 # Preset configurations for common use cases
-class Presets:
+class PlotPresets:
     """Named plot-configuration presets (colormap + resolution bundles).
 
     Each preset returns a plain dict of keyword arguments to spread into a
-    plotting entry point, e.g. ``quick_plot(f, **Presets.publication_ready())``.
+    plotting entry point, e.g. ``quick_plot(f, **PlotPresets.publication_ready())``.
 
-    Not to be confused with the function preset registry ``complexplorer.catalog``,
-    whose ``FunctionPreset`` entries describe curated *functions* (expression,
-    domain/colormap/scaling specs, singularity answer keys) rather than plot settings.
+    ``PlotPresets`` configures a render; ``catalog`` supplies a function. The registry
+    ``complexplorer.catalog`` holds curated *functions* (expression, domain/colormap/scaling
+    specs, singularity answer keys); these are the settings you draw one with.
     """
 
     @staticmethod
-    def publication_ready():
+    def publication_ready() -> dict[str, Any]:
         """Settings for publication-quality figures."""
         return {
             "cmap": Phase(phase_sectors=12, auto_scale_r=True, scale_radius=0.8),
@@ -87,12 +92,12 @@ class Presets:
         }
 
     @staticmethod
-    def interactive():
+    def interactive() -> dict[str, Any]:
         """Settings for interactive exploration."""
         return {"cmap": Phase(phase_sectors=6, auto_scale_r=True), "resolution": 400}
 
     @staticmethod
-    def high_contrast():
+    def high_contrast() -> dict[str, Any]:
         """Settings for high contrast visualization."""
         return {
             "cmap": Phase(phase_sectors=16, auto_scale_r=True, scale_radius=0.5),
@@ -102,5 +107,5 @@ class Presets:
 
 __all__ = [
     "quick_plot",
-    "Presets",
+    "PlotPresets",
 ]

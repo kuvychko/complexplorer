@@ -87,8 +87,20 @@ class TransferFunction:
 
     # -- evaluation ---------------------------------------------------------------------
 
-    def __call__(self, s):
-        """Evaluate ``H`` at complex point(s) ``s`` (scalar or array)."""
+    def __call__(self, s: complex | np.ndarray) -> np.ndarray:
+        """Evaluate ``H`` at complex point(s) ``s``.
+
+        The shape of the result follows the input, which is what lets a ``TransferFunction`` be
+        handed directly to any renderer in the library:
+
+        - an array in gives an array of the same shape, dtype ``complex128``;
+        - a Python ``complex`` or ``float`` in gives a zero-dimensional ``numpy.complex128``,
+          not a Python ``complex`` -- it supports the same arithmetic, but ``type(H(1j)) is
+          complex`` is ``False``.
+
+        Division by zero at a pole yields ``inf`` or ``nan`` rather than raising; the colormaps
+        substitute a colour for non-finite values, so a pole renders rather than crashing.
+        """
         s = np.asarray(s, dtype=complex)
         with np.errstate(divide="ignore", invalid="ignore"):
             return np.polyval(self.num, s) / np.polyval(self.den, s)

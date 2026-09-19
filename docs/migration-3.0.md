@@ -52,11 +52,11 @@ Every public name that 2.0.0 exported and 3.0 does not carry:
 | `disable_logging` | removed — use the standard `logging` module |
 | `enable_debug_logging` | removed — use `logging.getLogger('complexplorer').setLevel(logging.DEBUG)` |
 | `get_logger` | removed — use `logging.getLogger(__name__)` |
-| `high_contrast_preset` | `Presets.high_contrast()` |
-| `interactive_preset` | `Presets.interactive()` |
+| `high_contrast_preset` | `PlotPresets.high_contrast()` |
+| `interactive_preset` | `PlotPresets.interactive()` |
 | `pair_plot_landscape` | `pair_plot_landscape_pv()` |
 | `plot_landscape` | `plot_landscape_pv()` |
-| `publication_preset` | `Presets.publication_ready()` |
+| `publication_preset` | `PlotPresets.publication_ready()` |
 | `riemann` | `riemann_pv()` (3D) or `riemann_chart()` / `riemann_hemispheres()` (2D charts) |
 | `setup_logging` | removed — configure the standard library `logging` module directly |
 | `show` | `quick_plot()` |

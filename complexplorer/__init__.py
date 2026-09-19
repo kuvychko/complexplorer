@@ -10,7 +10,7 @@ from complexplorer import ee
 from complexplorer._version import __version__
 
 # High-level API
-from complexplorer.api import Presets, quick_plot
+from complexplorer.api import PlotPresets, quick_plot
 from complexplorer.core.colormap import (
     AnalogousWedge,
     Chessboard,
@@ -88,7 +88,7 @@ __all__ = [
     "FourQuadrant",
     "ModulusScaling",
     "get_scaling_preset",
-    # Function preset registry (distinct from api.Presets / plot configs)
+    # Function preset registry: catalog supplies functions, PlotPresets configures renders
     "catalog",
     "FunctionPreset",
     # Gallery generator
@@ -108,7 +108,7 @@ __all__ = [
     "ensure_interactive_plots",
     # High-level API
     "quick_plot",
-    "Presets",
+    "PlotPresets",
     # Engineering mode (namespaced subpackage)
     "ee",
     # STL export (PyVista-backed)

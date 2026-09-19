@@ -107,7 +107,7 @@ class TestCuratedSurface:
         import complexplorer as cp
 
         assert "quick_plot" in cp.__all__
-        assert "Presets" in cp.__all__
+        assert "PlotPresets" in cp.__all__
         for name in ("visualize", "explore", "analyze_function"):
             assert name not in cp.__all__
         # __all__ must be importable in full
