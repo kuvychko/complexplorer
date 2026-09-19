@@ -10,6 +10,21 @@ import pyvista as pv
 from complexplorer.exceptions import ValidationError
 
 
+def should_render_off_screen(interactive: bool) -> bool:
+    """Decide whether a render should be off-screen.
+
+    A render is off-screen when the caller asks for it (``interactive=False``) **or** when the
+    session says so. PyVista's session-wide switch is ``pyvista.OFF_SCREEN``, which the
+    ``PYVISTA_OFF_SCREEN`` environment variable sets; it is the first thing a user reaches for on
+    a headless machine, and the documented way to do it.
+
+    Deciding this as ``not interactive`` alone -- which is what every renderer used to do --
+    silently overrode that global with a per-call default the user never chose, so a script that
+    had correctly set it still tried to open a window.
+    """
+    return (not interactive) or bool(pv.OFF_SCREEN)
+
+
 def handle_export(plotter: "pv.Plotter", filename: str, interactive: bool) -> None:
     """Handle file export based on extension.
 

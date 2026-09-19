@@ -19,6 +19,7 @@ from .utils import (
     finalize_plot,
     get_camera_position,
     reject_unknown_kwargs,
+    should_render_off_screen,
 )
 
 
@@ -201,7 +202,7 @@ def plot_landscape_pv(
     # Create plotter
     plotter_kwargs = {
         "window_size": window_size,
-        "off_screen": not interactive,
+        "off_screen": should_render_off_screen(interactive),
     }
     if notebook is not None:
         plotter_kwargs["notebook"] = notebook
@@ -314,7 +315,7 @@ def pair_plot_landscape_pv(
     # Create plotter with two viewports
     plotter_kwargs = {
         "window_size": window_size,
-        "off_screen": not interactive,
+        "off_screen": should_render_off_screen(interactive),
         "shape": (1, 2),
     }
     if notebook is not None:

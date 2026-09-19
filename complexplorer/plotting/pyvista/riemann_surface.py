@@ -20,6 +20,7 @@ from .utils import (
     finalize_plot,
     get_camera_position,
     reject_unknown_kwargs,
+    should_render_off_screen,
 )
 
 
@@ -86,7 +87,10 @@ def riemann_surface_pv(
     )
     mesh = sm.to_pyvista()
 
-    plotter_kwargs = {"window_size": window_size, "off_screen": not interactive}
+    plotter_kwargs = {
+        "window_size": window_size,
+        "off_screen": should_render_off_screen(interactive),
+    }
     if notebook is not None:
         plotter_kwargs["notebook"] = notebook
 

@@ -20,6 +20,7 @@ from .utils import (
     finalize_plot,
     get_camera_position,
     reject_unknown_kwargs,
+    should_render_off_screen,
 )
 
 if TYPE_CHECKING:
@@ -144,7 +145,7 @@ def riemann_pv(
     # Create plotter
     plotter_kwargs = {
         "window_size": window_size,
-        "off_screen": not interactive,
+        "off_screen": should_render_off_screen(interactive),
     }
     if notebook is not None:
         plotter_kwargs["notebook"] = notebook
