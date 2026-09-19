@@ -2,11 +2,12 @@
 
 All notable changes to complexplorer will be documented in this file.
 
-## [3.0.0] - 2026-07-04
+## [3.0.0] - Unreleased
 
-Consolidates all work since 2.0.0. The 2.1–2.4 version bumps were internal milestones on
-the road to 3.0 and were never published, so the notes below describe the upgrade from
-2.0.0 directly.
+Consolidates all work since 2.0.0, the published baseline (PyPI, 2025-10-19). The 2.1–2.4
+version bumps were internal milestones and were never released, so the notes below describe the
+upgrade from 2.0.0 directly. A task-oriented version of the same material is in the
+[migration guide](https://kuvychko.github.io/complexplorer/migration-3.0/).
 
 ### Breaking Changes
 - **PyVista (>= 0.47) is now a required core dependency** and the sole 3D backend
@@ -18,10 +19,18 @@ the road to 3.0 and were never published, so the notes below describe the upgrad
   machinery** (`check_pyvista_available`, the `try/except ImportError` guards, and the
   `ImportError` fallbacks) — PyVista is imported unconditionally and those features are
   always available
-- **`Rectangle` membership now uses the rectangle's actual `re_length`/`im_length`** about
-  its `center`, independent of any square-padding applied to the viewing window. A
-  non-square `Rectangle` (with the default `square=True`) no longer reports the padded
-  strips as inside — `contains()`, masking, and STL/relief output change accordingly
+- **`Presets` is now `PlotPresets`.** The render-settings class was too easily confused with
+  the `catalog` function registry: `PlotPresets` configures a render, `catalog` supplies a
+  function. 2.0.0 exposed neither name (it had `publication_preset()` and friends), so this
+  affects only unreleased 3.0 builds
+- **`setup_matplotlib_backend` and `ensure_interactive_plots` left the public API.** They were
+  wrappers over `matplotlib.use()` and `plt.ion()`, and backend selection is matplotlib's
+  business. Both were exported by 2.0.0; the migration guide gives the two-line replacement
+- **Colormap configuration is validated at construction.** `phase_sectors` must be a positive
+  integer, `r_log_base` greater than 1, and `r_linear_step` and `scale_radius` positive. 2.0.0
+  accepted values that produced nonsense: `phase_sectors=0` raised `ZeroDivisionError` from
+  inside the constructor, `-1` and `2.5` were accepted silently, and `r_log_base=1` rendered
+  **every pixel as NaN** without raising anything
 - **The PyVista renderers reject unknown keyword arguments** with a `ValidationError`
   instead of leaking them into `pyvista.Plotter` (a raw `TypeError`) or silently dropping
   them. Removed 2.x names are reported with their replacement: `n_theta`/`n_phi` →
@@ -97,6 +106,12 @@ the road to 3.0 and were never published, so the notes below describe the upgrad
   version source; the code license is declared as an SPDX `license = "MIT"` expression
   (the deprecated `License ::` classifier was dropped), and `LICENSE`/`LICENSE.art` ship in
   the distribution
+- **The typing contract now describes what the library actually calls.** A `ComplexFunction`
+  protocol replaces `Callable[[complex], complex]` on the public entry points, which had
+  rejected correctly written vectorized functions — and the library's own `TransferFunction` and
+  catalog presets. The spec dictionaries and singularity records have declared shapes, every
+  public callable has a return type, and CI type-checks the public surface plus a program that
+  imports complexplorer as a consumer does
 - The package now ships a PEP 561 `py.typed` marker so downstream type checkers honor its
   annotations; added a `Development Status` classifier and `keywords`; the `all` extra is
   now user-facing (`complexplorer[qt]`) rather than pulling in dev/test tooling
@@ -114,10 +129,21 @@ the road to 3.0 and were never published, so the notes below describe the upgrad
   `HAS_PYVISTA` guards) and verified to execute top-to-bottom via the opt-in
   `pytest --nbmake examples/notebooks/`
 
-## [2.0.0] - 2025
+## [2.0.0] - 2025-10-19
 
-Tagged in git (`v2.0.0`) but never published to PyPI; it served as the baseline the 3.0
-work built on. See the `[3.0.0]` notes above, which describe the upgrade from 2.0.0 directly.
+**Published to PyPI on 2025-10-19**, and the latest release until 3.0 — so it is the version
+`pip install complexplorer` provided, and the one the 3.0 upgrade notes are written against. It
+introduced the perceptual colormap families, renamed `n_phi` to `phase_sectors`, and began the
+deprecation of the matplotlib 3D paths that 3.0 completes.
+
+2.0.0 also changed `Rectangle` membership, which matters if you are coming from 1.x:
+`contains()` tests the rectangle's actual `re_length`/`im_length` about its `center`, rather than
+the square-padded viewing window that 1.x tested. A non-square `Rectangle` (with the default
+`square=True`) no longer reports the padded strips as inside, so masking and STL/relief output
+differ from 1.x. 3.0 keeps the 2.0.0 behaviour unchanged.
+
+The 2.1 through 2.4 version numbers appear in development history as internal milestones on the
+way to 3.0. None of them was released.
 
 ## [1.0.0] - 2025-07-27
 
@@ -173,3 +199,10 @@ work built on. See the `[3.0.0]` notes above, which describe the upgrade from 2.
 
 ## [0.1.2] - Previous Release
 - Initial public release with basic functionality
+
+[Unreleased]: https://github.com/kuvychko/complexplorer/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/kuvychko/complexplorer/compare/v2.0.0...v3.0.0
+[2.0.0]: https://github.com/kuvychko/complexplorer/compare/v1.0.1...v2.0.0
+[1.0.1]: https://github.com/kuvychko/complexplorer/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/kuvychko/complexplorer/compare/v0.1.2...v1.0.0
+[0.1.2]: https://github.com/kuvychko/complexplorer/releases/tag/v0.1.2

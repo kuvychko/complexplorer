@@ -57,7 +57,6 @@ from complexplorer.plotting.pyvista.riemann import riemann_pv
 from complexplorer.plotting.pyvista.riemann_surface import riemann_surface_pv
 
 # Utility functions
-from complexplorer.utils.backend import ensure_interactive_plots, setup_matplotlib_backend
 
 __all__ = [
     # Version
@@ -104,8 +103,6 @@ __all__ = [
     "riemann_chart",
     "riemann_hemispheres",
     # Utilities
-    "setup_matplotlib_backend",
-    "ensure_interactive_plots",
     # High-level API
     "quick_plot",
     "PlotPresets",

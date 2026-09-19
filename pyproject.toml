@@ -106,6 +106,10 @@ complexplorer = "complexplorer.cli.main:main"
 
 [project.urls]
 "Homepage" = "https://github.com/kuvychko/complexplorer"
+"Documentation" = "https://kuvychko.github.io/complexplorer/"
+"Source" = "https://github.com/kuvychko/complexplorer"
+"Changelog" = "https://github.com/kuvychko/complexplorer/blob/main/CHANGELOG.md"
+"Release notes" = "https://github.com/kuvychko/complexplorer/releases"
 "Bug Tracker" = "https://github.com/kuvychko/complexplorer/issues"
 
 # The typing gate covers what a user can see: the public entry points and a program that imports

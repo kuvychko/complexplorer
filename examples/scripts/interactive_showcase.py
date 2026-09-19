@@ -600,8 +600,13 @@ def main():
 
 
 if __name__ == "__main__":
-    # Ensure interactive matplotlib backend
-    cp.ensure_interactive_plots()
+    # Backend selection is matplotlib's business, not part of complexplorer's public API. This
+    # script uses the library's internal helper because it keeps the Qt-then-fallback behaviour
+    # an interactive demo wants; user code does `matplotlib.use(...)` and `plt.ion()` directly
+    # (see the migration guide).
+    from complexplorer.utils.backend import ensure_interactive_plots
+
+    ensure_interactive_plots()
 
     try:
         main()
