@@ -2,62 +2,110 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://kuvychko.github.io/complexplorer/</loc>
-         <lastmod>2025-10-19</lastmod>
+         <lastmod>2026-09-19</lastmod>
+    </url>
+    <url>
+         <loc>https://kuvychko.github.io/complexplorer/function-presets/</loc>
+         <lastmod>2026-09-19</lastmod>
+    </url>
+    <url>
+         <loc>https://kuvychko.github.io/complexplorer/migration-3.0/</loc>
+         <lastmod>2026-09-19</lastmod>
+    </url>
+    <url>
+         <loc>https://kuvychko.github.io/complexplorer/api/</loc>
+         <lastmod>2026-09-19</lastmod>
+    </url>
+    <url>
+         <loc>https://kuvychko.github.io/complexplorer/api/catalog/</loc>
+         <lastmod>2026-09-19</lastmod>
+    </url>
+    <url>
+         <loc>https://kuvychko.github.io/complexplorer/api/colormaps/</loc>
+         <lastmod>2026-09-19</lastmod>
     </url>
     <url>
          <loc>https://kuvychko.github.io/complexplorer/api/core/</loc>
-         <lastmod>2025-10-19</lastmod>
+         <lastmod>2026-09-19</lastmod>
+    </url>
+    <url>
+         <loc>https://kuvychko.github.io/complexplorer/api/domains/</loc>
+         <lastmod>2026-09-19</lastmod>
+    </url>
+    <url>
+         <loc>https://kuvychko.github.io/complexplorer/api/engineering/</loc>
+         <lastmod>2026-09-19</lastmod>
     </url>
     <url>
          <loc>https://kuvychko.github.io/complexplorer/api/export/</loc>
-         <lastmod>2025-10-19</lastmod>
+         <lastmod>2026-09-19</lastmod>
     </url>
     <url>
-         <loc>https://kuvychko.github.io/complexplorer/api/plotting/</loc>
-         <lastmod>2025-10-19</lastmod>
+         <loc>https://kuvychko.github.io/complexplorer/api/map/</loc>
+         <lastmod>2026-09-19</lastmod>
     </url>
     <url>
-         <loc>https://kuvychko.github.io/complexplorer/development/architecture/</loc>
-         <lastmod>2025-10-19</lastmod>
+         <loc>https://kuvychko.github.io/complexplorer/api/plotting-2d/</loc>
+         <lastmod>2026-09-19</lastmod>
+    </url>
+    <url>
+         <loc>https://kuvychko.github.io/complexplorer/api/plotting-3d/</loc>
+         <lastmod>2026-09-19</lastmod>
+    </url>
+    <url>
+         <loc>https://kuvychko.github.io/complexplorer/api/scaling/</loc>
+         <lastmod>2026-09-19</lastmod>
+    </url>
+    <url>
+         <loc>https://kuvychko.github.io/complexplorer/development/backend-policy/</loc>
+         <lastmod>2026-09-19</lastmod>
     </url>
     <url>
          <loc>https://kuvychko.github.io/complexplorer/development/contributing/</loc>
-         <lastmod>2025-10-19</lastmod>
+         <lastmod>2026-09-19</lastmod>
     </url>
     <url>
-         <loc>https://kuvychko.github.io/complexplorer/examples/gallery/</loc>
-         <lastmod>2025-10-19</lastmod>
+         <loc>https://kuvychko.github.io/complexplorer/development/surface-kernel/</loc>
+         <lastmod>2026-09-19</lastmod>
     </url>
     <url>
-         <loc>https://kuvychko.github.io/complexplorer/examples/notebooks/</loc>
-         <lastmod>2025-10-19</lastmod>
+         <loc>https://kuvychko.github.io/complexplorer/gallery/gallery.generated/</loc>
+         <lastmod>2026-09-19</lastmod>
     </url>
     <url>
-         <loc>https://kuvychko.github.io/complexplorer/getting-started/installation/</loc>
-         <lastmod>2025-10-19</lastmod>
+         <loc>https://kuvychko.github.io/complexplorer/getting-started/first-portrait/</loc>
+         <lastmod>2026-09-19</lastmod>
     </url>
     <url>
-         <loc>https://kuvychko.github.io/complexplorer/getting-started/quickstart/</loc>
-         <lastmod>2025-10-19</lastmod>
+         <loc>https://kuvychko.github.io/complexplorer/guide/cli/</loc>
+         <lastmod>2026-09-19</lastmod>
     </url>
     <url>
-         <loc>https://kuvychko.github.io/complexplorer/user-guide/colormaps/</loc>
-         <lastmod>2025-10-19</lastmod>
+         <loc>https://kuvychko.github.io/complexplorer/guide/domains-and-colormaps/</loc>
+         <lastmod>2026-09-19</lastmod>
     </url>
     <url>
-         <loc>https://kuvychko.github.io/complexplorer/user-guide/domains/</loc>
-         <lastmod>2025-10-19</lastmod>
+         <loc>https://kuvychko.github.io/complexplorer/guide/engineering-mode/</loc>
+         <lastmod>2026-09-19</lastmod>
     </url>
     <url>
-         <loc>https://kuvychko.github.io/complexplorer/user-guide/plotting-2d/</loc>
-         <lastmod>2025-10-19</lastmod>
+         <loc>https://kuvychko.github.io/complexplorer/guide/physical-workflow/</loc>
+         <lastmod>2026-09-19</lastmod>
     </url>
     <url>
-         <loc>https://kuvychko.github.io/complexplorer/user-guide/plotting-3d/</loc>
-         <lastmod>2025-10-19</lastmod>
+         <loc>https://kuvychko.github.io/complexplorer/guide/presets-and-catalog/</loc>
+         <lastmod>2026-09-19</lastmod>
     </url>
     <url>
-         <loc>https://kuvychko.github.io/complexplorer/user-guide/riemann/</loc>
-         <lastmod>2025-10-19</lastmod>
+         <loc>https://kuvychko.github.io/complexplorer/guide/reading-a-portrait/</loc>
+         <lastmod>2026-09-19</lastmod>
+    </url>
+    <url>
+         <loc>https://kuvychko.github.io/complexplorer/guide/riemann-surfaces/</loc>
+         <lastmod>2026-09-19</lastmod>
+    </url>
+    <url>
+         <loc>https://kuvychko.github.io/complexplorer/guide/three-dimensions/</loc>
+         <lastmod>2026-09-19</lastmod>
     </url>
 </urlset>

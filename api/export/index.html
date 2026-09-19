@@ -13,25 +13,28 @@
         <link rel="canonical" href="https://kuvychko.github.io/complexplorer/api/export/">
       
       
-        <link rel="prev" href="../plotting/">
+        <link rel="prev" href="../catalog/">
       
       
-        <link rel="next" href="../../development/contributing/">
+        <link rel="next" href="../engineering/">
+      
+      
+        
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.22">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
-        <title>Export - Complexplorer</title>
+        <title>STL export - Complexplorer</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.84d31ad4.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -50,11 +53,12 @@
       
     
     
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
-    
     
     
   </head>
@@ -76,12 +80,24 @@
     <div data-md-component="skip">
       
         
-        <a href="#export-api-reference" class="md-skip">
+        <a href="#stl-export" class="md-skip">
           Skip to content
         </a>
       
     </div>
     <div data-md-component="announce">
+      
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+            
+  
+    Documentation for complexplorer <strong>3.0.0</strong>
+  
+
+          </div>
+          
+        </aside>
       
     </div>
     
@@ -110,7 +126,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Export
+              STL export
             
           </span>
         </div>
@@ -244,11 +260,11 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../getting-started/installation/" class="md-tabs__link">
+        <a href="../../getting-started/first-portrait/" class="md-tabs__link">
           
   
   
-  Getting Started
+  Getting started
 
         </a>
       </li>
@@ -264,11 +280,11 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../user-guide/domains/" class="md-tabs__link">
+        <a href="../../guide/reading-a-portrait/" class="md-tabs__link">
           
   
   
-  User Guide
+  Guide
 
         </a>
       </li>
@@ -281,18 +297,17 @@
   
   
   
-    
-    
-      <li class="md-tabs__item">
-        <a href="../../examples/gallery/" class="md-tabs__link">
-          
+    <li class="md-tabs__item">
+      <a href="../../gallery/gallery.generated/" class="md-tabs__link">
+        
   
   
-  Examples
+    
+  
+  Gallery
 
-        </a>
-      </li>
-    
+      </a>
+    </li>
   
 
       
@@ -306,15 +321,34 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../core/" class="md-tabs__link">
+        <a href="../" class="md-tabs__link">
           
   
   
-  API Reference
+  API reference
 
         </a>
       </li>
     
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../migration-3.0/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Migrating to 3.0
+
+      </a>
+    </li>
   
 
       
@@ -395,9 +429,14 @@
   
   
   <span class="md-ellipsis">
+    
+  
     Home
+  
+
     
   </span>
+  
   
 
       </a>
@@ -435,9 +474,14 @@
   
   
   <span class="md-ellipsis">
-    Getting Started
+    
+  
+    Getting started
+  
+
     
   </span>
+  
   
 
             <span class="md-nav__icon md-icon"></span>
@@ -446,7 +490,11 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
-            Getting Started
+            
+  
+    Getting started
+  
+
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -457,37 +505,19 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/installation/" class="md-nav__link">
+      <a href="../../getting-started/first-portrait/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Installation
+    
+  
+    Installation and a first portrait
+  
+
     
   </span>
   
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../getting-started/quickstart/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Quick Start
-    
-  </span>
   
 
       </a>
@@ -533,9 +563,14 @@
   
   
   <span class="md-ellipsis">
-    User Guide
+    
+  
+    Guide
+  
+
     
   </span>
+  
   
 
             <span class="md-nav__icon md-icon"></span>
@@ -544,7 +579,11 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
-            User Guide
+            
+  
+    Guide
+  
+
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -555,14 +594,47 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/domains/" class="md-nav__link">
+      <a href="../../guide/reading-a-portrait/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
+    
+  
+    Reading a phase portrait
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/domains-and-colormaps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
     Domains
+  
+
     
   </span>
+  
   
 
       </a>
@@ -578,14 +650,19 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/colormaps/" class="md-nav__link">
+      <a href="../../guide/three-dimensions/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Colormaps
+    
+  
+    3D and the Riemann sphere
+  
+
     
   </span>
+  
   
 
       </a>
@@ -601,14 +678,19 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/plotting-2d/" class="md-nav__link">
+      <a href="../../guide/riemann-surfaces/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    2D Plotting
+    
+  
+    Riemann surfaces
+  
+
     
   </span>
+  
   
 
       </a>
@@ -624,14 +706,19 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/plotting-3d/" class="md-nav__link">
+      <a href="../../guide/engineering-mode/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    3D Plotting
+    
+  
+    Engineering mode
+  
+
     
   </span>
+  
   
 
       </a>
@@ -647,14 +734,103 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/riemann/" class="md-nav__link">
+      <a href="../../guide/presets-and-catalog/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Riemann Sphere
+    
+  
+    Catalog and presets
+  
+
     
   </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../function-presets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalog reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command line
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/physical-workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    STL and physical output
+  
+
+    
+  </span>
+  
   
 
       </a>
@@ -676,94 +852,23 @@
   
   
   
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
-        
-          
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Examples
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
-            <span class="md-nav__icon md-icon"></span>
-            Examples
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
     <li class="md-nav__item">
-      <a href="../../examples/gallery/" class="md-nav__link">
+      <a href="../../gallery/gallery.generated/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
+    
+  
     Gallery
+  
+
     
   </span>
   
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../examples/notebooks/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Notebooks
-    
-  </span>
   
 
       </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
     </li>
   
 
@@ -801,9 +906,14 @@
   
   
   <span class="md-ellipsis">
-    API Reference
+    
+  
+    API reference
+  
+
     
   </span>
+  
   
 
             <span class="md-nav__icon md-icon"></span>
@@ -812,7 +922,11 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
-            API Reference
+            
+  
+    API reference
+  
+
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -823,14 +937,19 @@
   
   
     <li class="md-nav__item">
-      <a href="../core/" class="md-nav__link">
+      <a href="../" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Core
+    
+  
+    Overview
+  
+
     
   </span>
+  
   
 
       </a>
@@ -846,14 +965,187 @@
   
   
     <li class="md-nav__item">
-      <a href="../plotting/" class="md-nav__link">
+      <a href="../map/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Plotting
+    
+  
+    API map
+  
+
     
   </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../domains/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Domains
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../colormaps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Colormaps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plotting-2d/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plotting (2D)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plotting-3d/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plotting (3D)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../scaling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Modulus scaling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalog and presets
+  
+
+    
+  </span>
+  
   
 
       </a>
@@ -883,9 +1175,14 @@
   
   
   <span class="md-ellipsis">
-    Export
+    
+  
+    STL export
+  
+
     
   </span>
+  
   
 
           <span class="md-nav__icon md-icon"></span>
@@ -896,9 +1193,14 @@
   
   
   <span class="md-ellipsis">
-    Export
+    
+  
+    STL export
+  
+
     
   </span>
+  
   
 
       </a>
@@ -921,28 +1223,11 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#complexplorer.OrnamentGenerator" class="md-nav__link">
     <span class="md-ellipsis">
-      Overview
-    </span>
-  </a>
-  
-</li>
       
-        <li class="md-nav__item">
-  <a href="#stl-export-classes" class="md-nav__link">
-    <span class="md-ellipsis">
-      STL Export Classes
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="STL Export Classes">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#ornamentgenerator" class="md-nav__link">
-    <span class="md-ellipsis">
-      OrnamentGenerator
+        OrnamentGenerator
+      
     </span>
   </a>
   
@@ -950,50 +1235,44 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#generate_ornament" class="md-nav__link">
+  <a href="#complexplorer.OrnamentGenerator.generate_ornament" class="md-nav__link">
     <span class="md-ellipsis">
-      generate_ornament()
+      
+        generate_ornament
+      
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#validate_mesh" class="md-nav__link">
+  <a href="#complexplorer.OrnamentGenerator.validate_mesh" class="md-nav__link">
     <span class="md-ellipsis">
-      validate_mesh()
+      
+        validate_mesh
+      
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#save_stl" class="md-nav__link">
+  <a href="#complexplorer.OrnamentGenerator.save_stl" class="md-nav__link">
     <span class="md-ellipsis">
-      save_stl()
+      
+        save_stl
+      
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#generate_and_save" class="md-nav__link">
+  <a href="#complexplorer.OrnamentGenerator.generate_and_save" class="md-nav__link">
     <span class="md-ellipsis">
-      generate_and_save()
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#create_ornament" class="md-nav__link">
-    <span class="md-ellipsis">
-      create_ornament()
+      
+        generate_and_save
+      
     </span>
   </a>
   
@@ -1005,282 +1284,11 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#stl-utilities" class="md-nav__link">
+  <a href="#complexplorer.create_ornament" class="md-nav__link">
     <span class="md-ellipsis">
-      STL Utilities
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="STL Utilities">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#validate_printability" class="md-nav__link">
-    <span class="md-ellipsis">
-      validate_printability()
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#scale_to_size" class="md-nav__link">
-    <span class="md-ellipsis">
-      scale_to_size()
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#center_mesh" class="md-nav__link">
-    <span class="md-ellipsis">
-      center_mesh()
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
       
-        <li class="md-nav__item">
-  <a href="#mesh-repair" class="md-nav__link">
-    <span class="md-ellipsis">
-      Mesh Repair
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Mesh Repair">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#repair_mesh_simple" class="md-nav__link">
-    <span class="md-ellipsis">
-      repair_mesh_simple()
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
+        create_ornament
       
-        <li class="md-nav__item">
-  <a href="#complete-examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      Complete Examples
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Complete Examples">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#basic-ornament" class="md-nav__link">
-    <span class="md-ellipsis">
-      Basic Ornament
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#high-quality-ornament" class="md-nav__link">
-    <span class="md-ellipsis">
-      High-Quality Ornament
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#ornament-with-domain-restriction" class="md-nav__link">
-    <span class="md-ellipsis">
-      Ornament with Domain Restriction
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#ornament-with-custom-scaling" class="md-nav__link">
-    <span class="md-ellipsis">
-      Ornament with Custom Scaling
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#batch-processing" class="md-nav__link">
-    <span class="md-ellipsis">
-      Batch Processing
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#scaling-modes-for-stl" class="md-nav__link">
-    <span class="md-ellipsis">
-      Scaling Modes for STL
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#resolution-guidelines" class="md-nav__link">
-    <span class="md-ellipsis">
-      Resolution Guidelines
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#printer-compatibility" class="md-nav__link">
-    <span class="md-ellipsis">
-      Printer Compatibility
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Printer Compatibility">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#file-format" class="md-nav__link">
-    <span class="md-ellipsis">
-      File Format
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#size-recommendations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Size Recommendations
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#material-considerations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Material Considerations
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#printer-settings" class="md-nav__link">
-    <span class="md-ellipsis">
-      Printer Settings
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#troubleshooting" class="md-nav__link">
-    <span class="md-ellipsis">
-      Troubleshooting
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Troubleshooting">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#mesh-not-watertight" class="md-nav__link">
-    <span class="md-ellipsis">
-      Mesh Not Watertight
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#numerical-artifacts" class="md-nav__link">
-    <span class="md-ellipsis">
-      Numerical Artifacts
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#too-spiky-or-flat" class="md-nav__link">
-    <span class="md-ellipsis">
-      Too Spiky or Flat
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#large-file-size" class="md-nav__link">
-    <span class="md-ellipsis">
-      Large File Size
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#slicer-errors" class="md-nav__link">
-    <span class="md-ellipsis">
-      Slicer Errors
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#advanced-post-processing" class="md-nav__link">
-    <span class="md-ellipsis">
-      Advanced: Post-Processing
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#tips-for-best-results" class="md-nav__link">
-    <span class="md-ellipsis">
-      Tips for Best Results
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#see-also" class="md-nav__link">
-    <span class="md-ellipsis">
-      See Also
     </span>
   </a>
   
@@ -1295,9 +1303,92 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Engineering mode
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core and exceptions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../migration-3.0/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migrating to 3.0
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1324,26 +1415,35 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
             
   
   
   <span class="md-ellipsis">
+    
+  
     Development
+  
+
     
   </span>
+  
   
 
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
-            Development
+            
+  
+    Development
+  
+
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -1359,9 +1459,14 @@
   
   
   <span class="md-ellipsis">
+    
+  
     Contributing
+  
+
     
   </span>
+  
   
 
       </a>
@@ -1377,14 +1482,47 @@
   
   
     <li class="md-nav__item">
-      <a href="../../development/architecture/" class="md-nav__link">
+      <a href="../../development/backend-policy/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Architecture
+    
+  
+    Backend policy
+  
+
     
   </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/surface-kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Surface kernel
+  
+
+    
+  </span>
+  
   
 
       </a>
@@ -1429,28 +1567,11 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#complexplorer.OrnamentGenerator" class="md-nav__link">
     <span class="md-ellipsis">
-      Overview
-    </span>
-  </a>
-  
-</li>
       
-        <li class="md-nav__item">
-  <a href="#stl-export-classes" class="md-nav__link">
-    <span class="md-ellipsis">
-      STL Export Classes
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="STL Export Classes">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#ornamentgenerator" class="md-nav__link">
-    <span class="md-ellipsis">
-      OrnamentGenerator
+        OrnamentGenerator
+      
     </span>
   </a>
   
@@ -1458,50 +1579,44 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#generate_ornament" class="md-nav__link">
+  <a href="#complexplorer.OrnamentGenerator.generate_ornament" class="md-nav__link">
     <span class="md-ellipsis">
-      generate_ornament()
+      
+        generate_ornament
+      
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#validate_mesh" class="md-nav__link">
+  <a href="#complexplorer.OrnamentGenerator.validate_mesh" class="md-nav__link">
     <span class="md-ellipsis">
-      validate_mesh()
+      
+        validate_mesh
+      
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#save_stl" class="md-nav__link">
+  <a href="#complexplorer.OrnamentGenerator.save_stl" class="md-nav__link">
     <span class="md-ellipsis">
-      save_stl()
+      
+        save_stl
+      
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#generate_and_save" class="md-nav__link">
+  <a href="#complexplorer.OrnamentGenerator.generate_and_save" class="md-nav__link">
     <span class="md-ellipsis">
-      generate_and_save()
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#create_ornament" class="md-nav__link">
-    <span class="md-ellipsis">
-      create_ornament()
+      
+        generate_and_save
+      
     </span>
   </a>
   
@@ -1513,282 +1628,11 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#stl-utilities" class="md-nav__link">
+  <a href="#complexplorer.create_ornament" class="md-nav__link">
     <span class="md-ellipsis">
-      STL Utilities
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="STL Utilities">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#validate_printability" class="md-nav__link">
-    <span class="md-ellipsis">
-      validate_printability()
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#scale_to_size" class="md-nav__link">
-    <span class="md-ellipsis">
-      scale_to_size()
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#center_mesh" class="md-nav__link">
-    <span class="md-ellipsis">
-      center_mesh()
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
       
-        <li class="md-nav__item">
-  <a href="#mesh-repair" class="md-nav__link">
-    <span class="md-ellipsis">
-      Mesh Repair
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Mesh Repair">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#repair_mesh_simple" class="md-nav__link">
-    <span class="md-ellipsis">
-      repair_mesh_simple()
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
+        create_ornament
       
-        <li class="md-nav__item">
-  <a href="#complete-examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      Complete Examples
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Complete Examples">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#basic-ornament" class="md-nav__link">
-    <span class="md-ellipsis">
-      Basic Ornament
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#high-quality-ornament" class="md-nav__link">
-    <span class="md-ellipsis">
-      High-Quality Ornament
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#ornament-with-domain-restriction" class="md-nav__link">
-    <span class="md-ellipsis">
-      Ornament with Domain Restriction
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#ornament-with-custom-scaling" class="md-nav__link">
-    <span class="md-ellipsis">
-      Ornament with Custom Scaling
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#batch-processing" class="md-nav__link">
-    <span class="md-ellipsis">
-      Batch Processing
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#scaling-modes-for-stl" class="md-nav__link">
-    <span class="md-ellipsis">
-      Scaling Modes for STL
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#resolution-guidelines" class="md-nav__link">
-    <span class="md-ellipsis">
-      Resolution Guidelines
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#printer-compatibility" class="md-nav__link">
-    <span class="md-ellipsis">
-      Printer Compatibility
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Printer Compatibility">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#file-format" class="md-nav__link">
-    <span class="md-ellipsis">
-      File Format
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#size-recommendations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Size Recommendations
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#material-considerations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Material Considerations
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#printer-settings" class="md-nav__link">
-    <span class="md-ellipsis">
-      Printer Settings
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#troubleshooting" class="md-nav__link">
-    <span class="md-ellipsis">
-      Troubleshooting
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Troubleshooting">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#mesh-not-watertight" class="md-nav__link">
-    <span class="md-ellipsis">
-      Mesh Not Watertight
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#numerical-artifacts" class="md-nav__link">
-    <span class="md-ellipsis">
-      Numerical Artifacts
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#too-spiky-or-flat" class="md-nav__link">
-    <span class="md-ellipsis">
-      Too Spiky or Flat
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#large-file-size" class="md-nav__link">
-    <span class="md-ellipsis">
-      Large File Size
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#slicer-errors" class="md-nav__link">
-    <span class="md-ellipsis">
-      Slicer Errors
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#advanced-post-processing" class="md-nav__link">
-    <span class="md-ellipsis">
-      Advanced: Post-Processing
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#tips-for-best-results" class="md-nav__link">
-    <span class="md-ellipsis">
-      Tips for Best Results
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#see-also" class="md-nav__link">
-    <span class="md-ellipsis">
-      See Also
     </span>
   </a>
   
@@ -1804,6 +1648,55 @@
           
           
             <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    API reference
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
               <article class="md-content__inner md-typeset">
                 
                   
@@ -1813,507 +1706,878 @@
   
 
 
-<h1 id="export-api-reference">Export API Reference<a class="headerlink" href="#export-api-reference" title="Permanent link">&para;</a></h1>
-<p>Export complex function visualizations as 3D-printable STL files.</p>
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The export module allows you to create physical ornaments from complex functions by generating STL files suitable for 3D printing. The ornaments are based on the Riemann sphere visualization with modulus-scaled relief.</p>
-<p><strong>Requirements:</strong> PyVista must be installed (<code>pip install "complexplorer[pyvista]"</code>)</p>
-<h2 id="stl-export-classes">STL Export Classes<a class="headerlink" href="#stl-export-classes" title="Permanent link">&para;</a></h2>
-<p>::: complexplorer.export.stl.ornament_generator
-    options:
-      show_root_heading: true
-      show_source: true
-      heading_level: 3
-      members:
-        - OrnamentGenerator
-        - create_ornament</p>
-<h3 id="ornamentgenerator">OrnamentGenerator<a class="headerlink" href="#ornamentgenerator" title="Permanent link">&para;</a></h3>
-<p>Main class for generating 3D-printable ornaments from complex functions.</p>
-<p><strong>Example:</strong>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">complexplorer</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cp</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">complexplorer.export.stl</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrnamentGenerator</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Define function</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="p">(</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># Create generator</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="n">gen</span> <span class="o">=</span> <span class="n">OrnamentGenerator</span><span class="p">(</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">func</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">resolution</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="n">modulus_mode</span><span class="o">=</span><span class="s1">&#39;arctan&#39;</span><span class="p">,</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="n">cmap</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">Phase</span><span class="p">(</span><span class="n">phase_sectors</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">auto_scale_r</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="p">)</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="c1"># Generate and save</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="n">gen</span><span class="o">.</span><span class="n">generate_and_save</span><span class="p">(</span><span class="s1">&#39;ornament.stl&#39;</span><span class="p">,</span> <span class="n">size_mm</span><span class="o">=</span><span class="mi">80</span><span class="p">)</span>
-</span></code></pre></div></p>
-<p><strong>Parameters:</strong>
-- <code>func</code>: Complex function f(z) to visualize
-- <code>resolution</code>: Mesh resolution (default: 150)
-  - 100-150: Fast generation, lower quality
-  - 150-200: Good quality (recommended)
-  - 200-300: High quality (slower)
-- <code>modulus_mode</code>: Modulus scaling method (default: 'arctan')
-  - <code>'arctan'</code>: Smooth bounded relief (recommended)
-  - <code>'logarithmic'</code>: Emphasizes poles and zeros
-  - <code>'adaptive'</code>: Auto-adjusts to function behavior
-  - <code>'sigmoid'</code>: S-curve mapping
-  - <code>'linear'</code>: Direct mapping (can be unstable)
-  - <code>'constant'</code>: No relief (flat sphere)
-- <code>modulus_params</code>: Optional dict of scaling parameters
-- <code>cmap</code>: Colormap for visualization (default: Phase with 6 sectors)
-- <code>domain</code>: Optional domain restriction to avoid numerical issues</p>
-<p><strong>Note:</strong> The old parameter names <code>scaling</code> and <code>scaling_params</code> are deprecated but still supported for backwards compatibility.</p>
-<p><strong>Methods:</strong></p>
-<h4 id="generate_ornament">generate_ornament()<a class="headerlink" href="#generate_ornament" title="Permanent link">&para;</a></h4>
-<p>Generate the ornament mesh.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">mesh</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate_ornament</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="c1"># Returns: PyVista PolyData mesh with RGB colors</span>
+<h1 id="stl-export">STL export<a class="headerlink" href="#stl-export" title="Permanent link">&para;</a></h1>
+<p>Turning a Riemann relief into a printable mesh. See <a href="../../guide/physical-workflow/">the physical workflow</a>.</p>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h3 id="complexplorer.OrnamentGenerator" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">complexplorer.OrnamentGenerator</span>
+
+
+<a href="#complexplorer.OrnamentGenerator" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">OrnamentGenerator</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">resolution</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">150</span><span class="p">,</span> <span class="n">scaling</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'arctan'</span><span class="p">,</span> <span class="n">scaling_params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cmap</span><span class="p">:</span> <span class="n">Colormap</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">domain</span><span class="p">:</span> <span class="n">Domain</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span>
 </span></code></pre></div>
-<p><strong>Parameters:</strong>
-- <code>verbose</code>: Print progress information (default: False)</p>
-<p><strong>Returns:</strong> PyVista PolyData mesh with color information</p>
-<h4 id="validate_mesh">validate_mesh()<a class="headerlink" href="#validate_mesh" title="Permanent link">&para;</a></h4>
-<p>Validate mesh for 3D printing.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">results</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">validate_mesh</span><span class="p">(</span><span class="n">size_mm</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Watertight: </span><span class="si">{</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;is_watertight&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Manifold: </span><span class="si">{</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;is_manifold&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Vertices: </span><span class="si">{</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;n_vertices&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Faces: </span><span class="si">{</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;n_faces&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <div class="doc doc-contents first">
+
+
+
+        <p>Generate 3D-printable ornaments from complex functions.</p>
+<p>This version directly uses the modulus-scaled mesh from the
+Riemann sphere visualization without complex healing steps.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>func</code>
+            </td>
+            <td>
+                  <code><span title="callable">callable</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Complex function f(z) to visualize.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>resolution</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Mesh resolution (n_theta = n_phi).</p>
+              </div>
+            </td>
+            <td>
+                  <code>150</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>scaling</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Modulus scaling method.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;arctan&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>scaling_params</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Parameters for scaling method. If None, uses STL-appropriate defaults.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>cmap</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="complexplorer.Colormap (complexplorer.core.colormap.Colormap)" href="../colormaps/#complexplorer.Colormap">Colormap</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Colormap for visualization. Default is Phase colormap.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>domain</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="complexplorer.Domain (complexplorer.core.domain.Domain)" href="../domains/#complexplorer.Domain">Domain</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Domain to restrict evaluation. Helps avoid numerical issues.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+        <p>Initialize ornament generator.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="complexplorer.OrnamentGenerator.generate_ornament" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">generate_ornament</span>
+
+
+<a href="#complexplorer.OrnamentGenerator.generate_ornament" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">generate_ornament</span><span class="p">(</span><span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pv</span><span class="o">.</span><span class="n">PolyData</span>
 </span></code></pre></div>
-<p><strong>Parameters:</strong>
-- <code>size_mm</code>: Target size in millimeters (default: 50)
-- <code>verbose</code>: Print validation results (default: True)</p>
-<p><strong>Returns:</strong> dict with validation results:
-- <code>is_watertight</code>: Whether mesh has no holes
-- <code>is_manifold</code>: Whether mesh is manifold
-- <code>n_vertices</code>: Number of vertices
-- <code>n_faces</code>: Number of faces
-- <code>dimensions_mm</code>: Bounding box dimensions
-- <code>volume_mm3</code>: Mesh volume</p>
-<h4 id="save_stl">save_stl()<a class="headerlink" href="#save_stl" title="Permanent link">&para;</a></h4>
-<p>Save the ornament as an STL file.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">filename</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">save_stl</span><span class="p">(</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="s1">&#39;ornament.stl&#39;</span><span class="p">,</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">size_mm</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">center</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">repair</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">binary</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="p">)</span>
+
+    <div class="doc doc-contents ">
+
+        <p>Generate the ornament mesh.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>verbose</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Print progress information.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="pyvista.PolyData">PolyData</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Generated ornament mesh with color information.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="complexplorer.OrnamentGenerator.validate_mesh" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">validate_mesh</span>
+
+
+<a href="#complexplorer.OrnamentGenerator.validate_mesh" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">validate_mesh</span><span class="p">(</span><span class="n">size_mm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 </span></code></pre></div>
-<p><strong>Parameters:</strong>
-- <code>filename</code>: Output filename (should end with .stl)
-- <code>size_mm</code>: Scale mesh to this size in mm (default: 50)
-- <code>center</code>: Center the mesh at origin (default: True)
-- <code>repair</code>: Apply simple mesh repair (default: True)
-- <code>binary</code>: Save as binary STL (default: True, smaller file)
-- <code>validate</code>: Validate before saving (default: True)
-- <code>verbose</code>: Print progress information (default: True)</p>
-<p><strong>Returns:</strong> Path to saved file</p>
-<h4 id="generate_and_save">generate_and_save()<a class="headerlink" href="#generate_and_save" title="Permanent link">&para;</a></h4>
-<p>Generate ornament and save as STL in one step.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">filename</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate_and_save</span><span class="p">(</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="s1">&#39;ornament.stl&#39;</span><span class="p">,</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">size_mm</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">center</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">repair</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">binary</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="p">)</span>
+
+    <div class="doc doc-contents ">
+
+        <p>Validate mesh for 3D printing.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>size_mm</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Target size in millimeters.</p>
+              </div>
+            </td>
+            <td>
+                  <code>50</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>verbose</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Print validation results.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Validation results.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="complexplorer.OrnamentGenerator.save_stl" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">save_stl</span>
+
+
+<a href="#complexplorer.OrnamentGenerator.save_stl" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">save_stl</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">size_mm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">center</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">repair</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">binary</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
 </span></code></pre></div>
-<p><strong>Parameters:</strong> Same as save_stl() plus generate_ornament()</p>
-<p><strong>Returns:</strong> Path to saved file</p>
-<h3 id="create_ornament">create_ornament()<a class="headerlink" href="#create_ornament" title="Permanent link">&para;</a></h3>
-<p>Convenience function for creating STL files from complex functions in one line.</p>
-<p><strong>Example:</strong>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">complexplorer.export.stl</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_ornament</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="c1"># Simple ornament</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">create_ornament</span><span class="p">(</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="n">z</span><span class="o">**</span><span class="mi">3</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">z</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="s1">&#39;polynomial.stl&#39;</span><span class="p">,</span>
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="n">size_mm</span><span class="o">=</span><span class="mi">60</span>
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="p">)</span>
-</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>
-</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="c1"># With domain restriction</span>
-</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="n">domain</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Annulus</span><span class="p">(</span><span class="n">inner_radius</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">outer_radius</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>
-</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="n">create_ornament</span><span class="p">(</span>
-</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>    <span class="n">f</span><span class="p">,</span>
-</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>    <span class="s1">&#39;rational.stl&#39;</span><span class="p">,</span>
-</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>    <span class="n">size_mm</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span>
-</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>    <span class="n">resolution</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
-</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>    <span class="n">modulus_mode</span><span class="o">=</span><span class="s1">&#39;logarithmic&#39;</span><span class="p">,</span>
-</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>    <span class="n">domain</span><span class="o">=</span><span class="n">domain</span>
-</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a><span class="p">)</span>
-</span></code></pre></div></p>
-<p><strong>Parameters:</strong>
-- <code>func</code>: Complex function to visualize
-- <code>filename</code>: Output STL filename
-- <code>size_mm</code>: Size in millimeters (default: 50)
-- <code>resolution</code>: Mesh resolution (default: 150)
-- <code>modulus_mode</code>: Modulus scaling method (default: 'arctan')
-- <code>modulus_params</code>: Optional scaling parameters
-- <code>cmap</code>: Colormap (default: Phase)
-- <code>domain</code>: Optional domain restriction
-- <code>verbose</code>: Print progress (default: True)</p>
-<p><strong>Note:</strong> The old parameter names <code>scaling</code> and <code>scaling_params</code> are deprecated.</p>
-<p><strong>Returns:</strong> Path to saved STL file</p>
-<h2 id="stl-utilities">STL Utilities<a class="headerlink" href="#stl-utilities" title="Permanent link">&para;</a></h2>
-<p>::: complexplorer.export.stl.utils
-    options:
-      show_root_heading: true
-      show_source: true
-      heading_level: 3
-      members:
-        - validate_printability
-        - scale_to_size
-        - center_mesh</p>
-<h3 id="validate_printability">validate_printability()<a class="headerlink" href="#validate_printability" title="Permanent link">&para;</a></h3>
-<p>Check if mesh is suitable for 3D printing.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">complexplorer.export.stl.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate_printability</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">results</span> <span class="o">=</span> <span class="n">validate_printability</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">size_mm</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <div class="doc doc-contents ">
+
+        <p>Save the ornament as STL file.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>filename</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Output filename (should end with .stl).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>size_mm</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Scale mesh to this size in millimeters.</p>
+              </div>
+            </td>
+            <td>
+                  <code>50</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>center</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Center the mesh at origin.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>repair</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Apply simple mesh repair (fill holes).</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>binary</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Save as binary STL (smaller file size).</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>validate</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Validate before saving.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>verbose</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Print progress information.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Path to saved file.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="complexplorer.OrnamentGenerator.generate_and_save" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">generate_and_save</span>
+
+
+<a href="#complexplorer.OrnamentGenerator.generate_and_save" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">generate_and_save</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">size_mm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">center</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">repair</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">binary</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
 </span></code></pre></div>
-<p><strong>Checks:</strong>
-- Watertight (no holes)
-- Manifold (proper edge connectivity)
-- Vertex and face counts
-- Physical dimensions
-- Mesh volume</p>
-<h3 id="scale_to_size">scale_to_size()<a class="headerlink" href="#scale_to_size" title="Permanent link">&para;</a></h3>
-<p>Scale mesh to target size.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">complexplorer.export.stl.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">scale_to_size</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">scaled_mesh</span> <span class="o">=</span> <span class="n">scale_to_size</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">size_mm</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">)</span>
+
+    <div class="doc doc-contents ">
+
+        <p>Generate ornament and save as STL in one step.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>filename</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Output filename.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>size_mm</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Target size in millimeters.</p>
+              </div>
+            </td>
+            <td>
+                  <code>50</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>center</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Center the mesh.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>repair</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Apply simple mesh repair.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>binary</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Use binary STL format.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>validate</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Validate before saving.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>verbose</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Print progress.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Path to saved file.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="complexplorer.create_ornament" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">complexplorer.create_ornament</span>
+
+
+<a href="#complexplorer.create_ornament" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">create_ornament</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">size_mm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">resolution</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">150</span><span class="p">,</span> <span class="n">scaling</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'arctan'</span><span class="p">,</span> <span class="n">scaling_params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cmap</span><span class="p">:</span> <span class="n">Colormap</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">domain</span><span class="p">:</span> <span class="n">Domain</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
 </span></code></pre></div>
-<p><strong>Parameters:</strong>
-- <code>mesh</code>: PyVista mesh
-- <code>size_mm</code>: Target size in millimeters
-- <code>axis</code>: Scaling axis ('x', 'y', 'z', 'max', 'min', 'average')</p>
-<h3 id="center_mesh">center_mesh()<a class="headerlink" href="#center_mesh" title="Permanent link">&para;</a></h3>
-<p>Center mesh at origin.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">complexplorer.export.stl.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">center_mesh</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">centered_mesh</span> <span class="o">=</span> <span class="n">center_mesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
-</span></code></pre></div>
-<h2 id="mesh-repair">Mesh Repair<a class="headerlink" href="#mesh-repair" title="Permanent link">&para;</a></h2>
-<p>::: complexplorer.export.stl.mesh_repair
-    options:
-      show_root_heading: true
-      show_source: true
-      heading_level: 3
-      members:
-        - repair_mesh_simple</p>
-<h3 id="repair_mesh_simple">repair_mesh_simple()<a class="headerlink" href="#repair_mesh_simple" title="Permanent link">&para;</a></h3>
-<p>Apply simple mesh repair operations.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">complexplorer.export.stl.mesh_repair</span><span class="w"> </span><span class="kn">import</span> <span class="n">repair_mesh_simple</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="n">repaired</span> <span class="o">=</span> <span class="n">repair_mesh_simple</span><span class="p">(</span>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>    <span class="n">mesh</span><span class="p">,</span>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    <span class="n">fill_holes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>    <span class="n">remove_duplicates</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
-</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="p">)</span>
-</span></code></pre></div>
-<p><strong>Operations:</strong>
-- Fill holes to make watertight
-- Remove duplicate vertices
-- Clean degenerate faces</p>
-<p><strong>Note:</strong> For complex repair, consider external tools like MeshLab or Meshmixer.</p>
-<h2 id="complete-examples">Complete Examples<a class="headerlink" href="#complete-examples" title="Permanent link">&para;</a></h2>
-<h3 id="basic-ornament">Basic Ornament<a class="headerlink" href="#basic-ornament" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">complexplorer</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cp</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">complexplorer.export.stl</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_ornament</span>
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1"># Create simple polynomial ornament</span>
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="n">z</span><span class="o">**</span><span class="mi">3</span> <span class="o">-</span> <span class="n">z</span>
-</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
-</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="n">create_ornament</span><span class="p">(</span>
-</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>    <span class="n">f</span><span class="p">,</span>
-</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>    <span class="s1">&#39;polynomial_ornament.stl&#39;</span><span class="p">,</span>
-</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>    <span class="n">size_mm</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
-</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>    <span class="n">resolution</span><span class="o">=</span><span class="mi">150</span>
-</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="p">)</span>
-</span></code></pre></div>
-<h3 id="high-quality-ornament">High-Quality Ornament<a class="headerlink" href="#high-quality-ornament" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">complexplorer.export.stl</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrnamentGenerator</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="p">(</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="n">cmap</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">PerceptualPastel</span><span class="p">(</span><span class="n">phase_sectors</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">auto_scale_r</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>
-</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="n">gen</span> <span class="o">=</span> <span class="n">OrnamentGenerator</span><span class="p">(</span>
-</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>    <span class="n">func</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
-</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>    <span class="n">resolution</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
-</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>    <span class="n">modulus_mode</span><span class="o">=</span><span class="s1">&#39;arctan&#39;</span><span class="p">,</span>
-</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>    <span class="n">modulus_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;r_min&#39;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span> <span class="s1">&#39;r_max&#39;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">},</span>
-</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>    <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span>
-</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="p">)</span>
-</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>
-</span><span id="__span-11-14"><a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="n">gen</span><span class="o">.</span><span class="n">generate_ornament</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="__span-11-15"><a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a><span class="n">gen</span><span class="o">.</span><span class="n">validate_mesh</span><span class="p">(</span><span class="n">size_mm</span><span class="o">=</span><span class="mi">80</span><span class="p">)</span>
-</span><span id="__span-11-16"><a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a><span class="n">gen</span><span class="o">.</span><span class="n">save_stl</span><span class="p">(</span><span class="s1">&#39;high_quality_ornament.stl&#39;</span><span class="p">,</span> <span class="n">size_mm</span><span class="o">=</span><span class="mi">80</span><span class="p">)</span>
-</span></code></pre></div>
-<h3 id="ornament-with-domain-restriction">Ornament with Domain Restriction<a class="headerlink" href="#ornament-with-domain-restriction" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># Function with pole at origin</span>
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">z</span>
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
-</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="c1"># Exclude problematic region</span>
-</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="n">domain</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Annulus</span><span class="p">(</span><span class="n">inner_radius</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">outer_radius</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>
-</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="n">create_ornament</span><span class="p">(</span>
-</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>    <span class="n">f</span><span class="p">,</span>
-</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>    <span class="s1">&#39;restricted_ornament.stl&#39;</span><span class="p">,</span>
-</span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>    <span class="n">size_mm</span><span class="o">=</span><span class="mi">70</span><span class="p">,</span>
-</span><span id="__span-12-11"><a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>    <span class="n">resolution</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span>
-</span><span id="__span-12-12"><a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>    <span class="n">modulus_mode</span><span class="o">=</span><span class="s1">&#39;logarithmic&#39;</span><span class="p">,</span>
-</span><span id="__span-12-13"><a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>    <span class="n">domain</span><span class="o">=</span><span class="n">domain</span>
-</span><span id="__span-12-14"><a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="p">)</span>
-</span></code></pre></div>
-<h3 id="ornament-with-custom-scaling">Ornament with Custom Scaling<a class="headerlink" href="#ornament-with-custom-scaling" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="n">gen</span> <span class="o">=</span> <span class="n">OrnamentGenerator</span><span class="p">(</span>
-</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>    <span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="n">z</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
-</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>    <span class="n">resolution</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span>
-</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>    <span class="n">modulus_mode</span><span class="o">=</span><span class="s1">&#39;arctan&#39;</span><span class="p">,</span>
-</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>    <span class="n">modulus_params</span><span class="o">=</span><span class="p">{</span>
-</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>        <span class="s1">&#39;r_min&#39;</span><span class="p">:</span> <span class="mf">0.25</span><span class="p">,</span>  <span class="c1"># Minimum sphere radius</span>
-</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>        <span class="s1">&#39;r_max&#39;</span><span class="p">:</span> <span class="mf">0.95</span>   <span class="c1"># Maximum sphere radius</span>
-</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>    <span class="p">}</span>
-</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="p">)</span>
-</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>
-</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="n">gen</span><span class="o">.</span><span class="n">generate_and_save</span><span class="p">(</span><span class="s1">&#39;custom_scaling_ornament.stl&#39;</span><span class="p">,</span> <span class="n">size_mm</span><span class="o">=</span><span class="mi">75</span><span class="p">)</span>
-</span></code></pre></div>
-<h3 id="batch-processing">Batch Processing<a class="headerlink" href="#batch-processing" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">complexplorer.export.stl</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_ornament</span>
-</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
-</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="n">functions</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>    <span class="s1">&#39;polynomial&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="n">z</span><span class="o">**</span><span class="mi">4</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>    <span class="s1">&#39;rational&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="p">(</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
-</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>    <span class="s1">&#39;trigonometric&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">z</span><span class="p">),</span>
-</span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>    <span class="s1">&#39;mobius&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
-</span><span id="__span-14-9"><a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="p">}</span>
-</span><span id="__span-14-10"><a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>
-</span><span id="__span-14-11"><a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a><span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">functions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-</span><span id="__span-14-12"><a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a>    <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;ornament_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">.stl&#39;</span>
-</span><span id="__span-14-13"><a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a>    <span class="n">create_ornament</span><span class="p">(</span>
-</span><span id="__span-14-14"><a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a>        <span class="n">f</span><span class="p">,</span>
-</span><span id="__span-14-15"><a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a>        <span class="n">filename</span><span class="p">,</span>
-</span><span id="__span-14-16"><a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a>        <span class="n">size_mm</span><span class="o">=</span><span class="mi">65</span><span class="p">,</span>
-</span><span id="__span-14-17"><a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a>        <span class="n">resolution</span><span class="o">=</span><span class="mi">160</span><span class="p">,</span>
-</span><span id="__span-14-18"><a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a>        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span>
-</span><span id="__span-14-19"><a id="__codelineno-14-19" name="__codelineno-14-19" href="#__codelineno-14-19"></a>    <span class="p">)</span>
-</span><span id="__span-14-20"><a id="__codelineno-14-20" name="__codelineno-14-20" href="#__codelineno-14-20"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span></code></pre></div>
-<h2 id="scaling-modes-for-stl">Scaling Modes for STL<a class="headerlink" href="#scaling-modes-for-stl" title="Permanent link">&para;</a></h2>
-<p>Different scaling modes create different relief patterns:</p>
-<table>
-<thead>
-<tr>
-<th>Mode</th>
-<th>Description</th>
-<th>Best For</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>arctan</code></td>
-<td>Smooth bounded relief</td>
-<td>Most functions (default)</td>
-</tr>
-<tr>
-<td><code>logarithmic</code></td>
-<td>Emphasizes poles/zeros</td>
-<td>Rational functions</td>
-</tr>
-<tr>
-<td><code>adaptive</code></td>
-<td>Auto-adjusts</td>
-<td>Unknown behavior</td>
-</tr>
-<tr>
-<td><code>sigmoid</code></td>
-<td>S-curve mapping</td>
-<td>Smooth transitions</td>
-</tr>
-<tr>
-<td><code>linear</code></td>
-<td>Direct mapping</td>
-<td>Simple polynomials</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Recommended Settings:</strong>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># General purpose (recommended)</span>
-</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="n">modulus_mode</span><span class="o">=</span><span class="s1">&#39;arctan&#39;</span>
-</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="n">modulus_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;r_min&#39;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span> <span class="s1">&#39;r_max&#39;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">}</span>
-</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>
-</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="c1"># Emphasize features</span>
-</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="n">modulus_mode</span><span class="o">=</span><span class="s1">&#39;logarithmic&#39;</span>
-</span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="n">modulus_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;base&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">e</span><span class="p">,</span> <span class="s1">&#39;r_min&#39;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span> <span class="s1">&#39;r_max&#39;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">}</span>
-</span><span id="__span-15-8"><a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>
-</span><span id="__span-15-9"><a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="c1"># Auto-adjust</span>
-</span><span id="__span-15-10"><a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="n">modulus_mode</span><span class="o">=</span><span class="s1">&#39;adaptive&#39;</span>
-</span><span id="__span-15-11"><a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a><span class="n">modulus_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;low_percentile&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;high_percentile&#39;</span><span class="p">:</span> <span class="mi">95</span><span class="p">}</span>
-</span></code></pre></div></p>
-<h2 id="resolution-guidelines">Resolution Guidelines<a class="headerlink" href="#resolution-guidelines" title="Permanent link">&para;</a></h2>
-<p>Balance between quality and generation time:</p>
-<table>
-<thead>
-<tr>
-<th>Resolution</th>
-<th>Quality</th>
-<th>Generation Time</th>
-<th>File Size</th>
-<th>Use Case</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>100-120</td>
-<td>Low</td>
-<td>~10-20 sec</td>
-<td>~2-4 MB</td>
-<td>Testing</td>
-</tr>
-<tr>
-<td>150-180</td>
-<td>Good</td>
-<td>~30-60 sec</td>
-<td>~5-10 MB</td>
-<td>Standard prints</td>
-</tr>
-<tr>
-<td>200-250</td>
-<td>High</td>
-<td>~2-4 min</td>
-<td>~15-30 MB</td>
-<td>Quality prints</td>
-</tr>
-<tr>
-<td>300+</td>
-<td>Very High</td>
-<td>~5-10 min</td>
-<td>~50+ MB</td>
-<td>Publication</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Recommendation:</strong> Start with 150, increase to 200 for final prints.</p>
-<h2 id="printer-compatibility">Printer Compatibility<a class="headerlink" href="#printer-compatibility" title="Permanent link">&para;</a></h2>
-<h3 id="file-format">File Format<a class="headerlink" href="#file-format" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>Binary STL</strong>: Smaller files (default)</li>
-<li><strong>ASCII STL</strong>: Human-readable, larger files</li>
-</ul>
-<h3 id="size-recommendations">Size Recommendations<a class="headerlink" href="#size-recommendations" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>Small prints</strong>: 40-60mm (desk ornaments)</li>
-<li><strong>Medium prints</strong>: 60-80mm (display pieces)</li>
-<li><strong>Large prints</strong>: 80-100mm (statement pieces)</li>
-</ul>
-<h3 id="material-considerations">Material Considerations<a class="headerlink" href="#material-considerations" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>PLA</strong>: Easy to print, rigid</li>
-<li><strong>PETG</strong>: More flexible, durable</li>
-<li><strong>Resin</strong>: Highest detail, brittle</li>
-<li><strong>TPU</strong>: Flexible, experimental</li>
-</ul>
-<h3 id="printer-settings">Printer Settings<a class="headerlink" href="#printer-settings" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>Layer height</strong>: 0.1-0.2mm</li>
-<li><strong>Wall thickness</strong>: 2-3 perimeters</li>
-<li><strong>Infill</strong>: 15-20% (ornaments are hollow spheres)</li>
-<li><strong>Supports</strong>: Usually not needed (sphere is self-supporting)</li>
-</ul>
-<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
-<h3 id="mesh-not-watertight">Mesh Not Watertight<a class="headerlink" href="#mesh-not-watertight" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># Enable mesh repair</span>
-</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="n">gen</span><span class="o">.</span><span class="n">save_stl</span><span class="p">(</span><span class="s1">&#39;ornament.stl&#39;</span><span class="p">,</span> <span class="n">repair</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>
-</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="c1"># Or use stronger repair</span>
-</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">complexplorer.export.stl.mesh_repair</span><span class="w"> </span><span class="kn">import</span> <span class="n">repair_mesh_simple</span>
-</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="n">mesh</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate_ornament</span><span class="p">()</span>
-</span><span id="__span-16-7"><a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="n">repaired</span> <span class="o">=</span> <span class="n">repair_mesh_simple</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">fill_holes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span></code></pre></div>
-<h3 id="numerical-artifacts">Numerical Artifacts<a class="headerlink" href="#numerical-artifacts" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># Restrict domain to stable region</span>
-</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="n">domain</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Disk</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>
-</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="n">gen</span> <span class="o">=</span> <span class="n">OrnamentGenerator</span><span class="p">(</span>
-</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>    <span class="n">func</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
-</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>    <span class="n">domain</span><span class="o">=</span><span class="n">domain</span><span class="p">,</span>
-</span><span id="__span-17-7"><a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>    <span class="n">modulus_mode</span><span class="o">=</span><span class="s1">&#39;adaptive&#39;</span>  <span class="c1"># Auto-adjusts to function</span>
-</span><span id="__span-17-8"><a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="p">)</span>
-</span></code></pre></div>
-<h3 id="too-spiky-or-flat">Too Spiky or Flat<a class="headerlink" href="#too-spiky-or-flat" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1"># Adjust scaling parameters</span>
-</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="n">gen</span> <span class="o">=</span> <span class="n">OrnamentGenerator</span><span class="p">(</span>
-</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>    <span class="n">func</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
-</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>    <span class="n">modulus_mode</span><span class="o">=</span><span class="s1">&#39;arctan&#39;</span><span class="p">,</span>
-</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>    <span class="n">modulus_params</span><span class="o">=</span><span class="p">{</span>
-</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>        <span class="s1">&#39;r_min&#39;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>  <span class="c1"># Lower for more relief</span>
-</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>        <span class="s1">&#39;r_max&#39;</span><span class="p">:</span> <span class="mf">0.95</span>  <span class="c1"># Higher for more variation</span>
-</span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>    <span class="p">}</span>
-</span><span id="__span-18-9"><a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="p">)</span>
-</span></code></pre></div>
-<h3 id="large-file-size">Large File Size<a class="headerlink" href="#large-file-size" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1"># Reduce resolution</span>
-</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="n">gen</span> <span class="o">=</span> <span class="n">OrnamentGenerator</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">120</span><span class="p">)</span>
-</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>
-</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="c1"># Or use binary STL</span>
-</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="n">gen</span><span class="o">.</span><span class="n">save_stl</span><span class="p">(</span><span class="s1">&#39;ornament.stl&#39;</span><span class="p">,</span> <span class="n">binary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span></code></pre></div>
-<h3 id="slicer-errors">Slicer Errors<a class="headerlink" href="#slicer-errors" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1"># Validate before printing</span>
-</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="n">results</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">validate_mesh</span><span class="p">(</span><span class="n">size_mm</span><span class="o">=</span><span class="mi">70</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>
-</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="k">if</span> <span class="ow">not</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;is_watertight&#39;</span><span class="p">]:</span>
-</span><span id="__span-20-5"><a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>    <span class="c1"># Apply repair</span>
-</span><span id="__span-20-6"><a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>    <span class="n">gen</span><span class="o">.</span><span class="n">save_stl</span><span class="p">(</span><span class="s1">&#39;ornament.stl&#39;</span><span class="p">,</span> <span class="n">repair</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span></code></pre></div>
-<h2 id="advanced-post-processing">Advanced: Post-Processing<a class="headerlink" href="#advanced-post-processing" title="Permanent link">&para;</a></h2>
-<p>For complex mesh issues, use external tools:</p>
-<ol>
-<li><strong>MeshLab</strong>: Free, powerful mesh editing</li>
-<li><strong>Meshmixer</strong>: Autodesk's free mesh repair tool</li>
-<li><strong>Blender</strong>: Full 3D modeling suite</li>
-</ol>
-<p><strong>Workflow:</strong>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="c1"># 1. Generate mesh</span>
-</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="n">gen</span><span class="o">.</span><span class="n">generate_and_save</span><span class="p">(</span><span class="s1">&#39;raw_ornament.stl&#39;</span><span class="p">,</span> <span class="n">repair</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-</span><span id="__span-21-3"><a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>
-</span><span id="__span-21-4"><a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="c1"># 2. Open in MeshLab/Meshmixer</span>
-</span><span id="__span-21-5"><a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="c1"># 3. Apply filters: remove duplicates, fill holes, remesh</span>
-</span><span id="__span-21-6"><a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a><span class="c1"># 4. Export as repaired STL</span>
-</span><span id="__span-21-7"><a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>
-</span><span id="__span-21-8"><a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a><span class="c1"># 5. Slice and print</span>
-</span></code></pre></div></p>
-<h2 id="tips-for-best-results">Tips for Best Results<a class="headerlink" href="#tips-for-best-results" title="Permanent link">&para;</a></h2>
-<ol>
-<li><strong>Start simple</strong>: Test with low resolution first</li>
-<li><strong>Domain restriction</strong>: Exclude singularities for cleaner meshes</li>
-<li><strong>Scaling choice</strong>: Use arctan for most functions</li>
-<li><strong>Mesh repair</strong>: Enable by default unless you know it's clean</li>
-<li><strong>Validation</strong>: Always validate before printing</li>
-<li><strong>Size appropriately</strong>: 60-80mm is ideal for desk ornaments</li>
-<li><strong>Binary STL</strong>: Smaller files, faster slicing</li>
-<li><strong>Test print</strong>: Do a small test before full-size print</li>
-<li><strong>Material choice</strong>: PLA is easiest for beginners</li>
-<li><strong>Post-processing</strong>: Sand and paint for best appearance</li>
-</ol>
-<h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong><a href="../core/">Core API</a></strong> - Domains and colormaps for ornaments</li>
-<li><strong><a href="../plotting/">Plotting API</a></strong> - Visualize before exporting</li>
-<li><strong><a href="../../user-guide/riemann/">Riemann Sphere Guide</a></strong> - Understanding the geometry</li>
-<li><strong><a href="../../examples/gallery/">Gallery</a></strong> - Visual examples</li>
-</ul>
+
+    <div class="doc doc-contents first">
+
+        <p>Create a 3D-printable ornament from a complex function.</p>
+<p>Convenience function for creating STL files from complex functions.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>func</code>
+            </td>
+            <td>
+                  <code><span title="callable">callable</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Complex function to visualize.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>filename</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Output STL filename.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>size_mm</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Size in millimeters.</p>
+              </div>
+            </td>
+            <td>
+                  <code>50</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>resolution</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Mesh resolution.</p>
+              </div>
+            </td>
+            <td>
+                  <code>150</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>scaling</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Modulus scaling method.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;arctan&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>scaling_params</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Scaling parameters.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>cmap</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="complexplorer.Colormap (complexplorer.core.colormap.Colormap)" href="../colormaps/#complexplorer.Colormap">Colormap</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Color mapping.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>domain</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="complexplorer.Domain (complexplorer.core.domain.Domain)" href="../domains/#complexplorer.Domain">Domain</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Domain restriction.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>verbose</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Print progress.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Path to saved STL file.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
 
 
 
@@ -2384,10 +2648,11 @@
     
     
       
-      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="../../javascripts/mathjax.js"></script>
       
