@@ -2,7 +2,7 @@
 
 All notable changes to complexplorer will be documented in this file.
 
-## [3.0.0] - Unreleased
+## [3.0.0] - 2026-09-19
 
 Consolidates all work since 2.0.0, the published baseline (PyPI, 2025-10-19). The 2.1–2.4
 version bumps were internal milestones and were never released, so the notes below describe the
