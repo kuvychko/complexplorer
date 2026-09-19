@@ -200,9 +200,13 @@ Phase 5  add-transfer-function-explorer                 —       no         →
               pyright gate over the public surface, API map
             · the old annotation rejected the library's own TransferFunction and
               catalog functions; Phase(r_log_base=1) rendered pure NaN silently
-         C6 prepare-3-0-release-notes                   3.0     no         planned
+         C6 prepare-3-0-release-notes                   3.0     YES        archived
             · 2.0.0 → 3.0 migration guide, truthful changelog, README reframe,
               CONTRIBUTING / CITATION.cff / project URLs / issue templates
+         + honour-pyvista-off-screen                    3.0     no         archived
+            · found while running the README's own snippets: pv.OFF_SCREEN and
+              PYVISTA_OFF_SCREEN were overridden by the interactive default
+
 ────────────────────────────────────────────────────────────────────────────────
 3.1+     OUT OF UMBRELLA SCOPE (future backlog)
          full EE (filters, resonators, QCM, RF bridge),

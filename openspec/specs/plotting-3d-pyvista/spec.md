@@ -6,9 +6,7 @@ The plotting-3d-pyvista capability provides high-performance, interactive 3D lan
 PyVista, the required 3D backend, mirroring the (now-removed) matplotlib 3D landscape functions
 but with per-vertex coloring, smooth shading, and live camera interaction. As of 3.0 PyVista is a
 required core dependency, so these functions are always available.
-
 ## Requirements
-
 ### Requirement: Interactive landscape surface
 
 The library SHALL render `f(z)` over a domain as an interactive PyVista surface with per-vertex
@@ -62,3 +60,32 @@ arguments removed in the 3.0 API migration, the error message SHALL name the cur
 
 - **WHEN** a landscape function is called with a keyword argument that is not part of its documented signature (e.g. `n_theta=200`)
 - **THEN** a `ValidationError` is raised naming the offending argument (and its replacement when it is a known-removed 2.x name), rather than a raw `TypeError` from `pyvista.Plotter` or a silent no-op
+
+### Requirement: A session-level off-screen instruction is honoured
+
+PyVista exposes a session-wide off-screen switch — `pyvista.OFF_SCREEN`, which the
+`PYVISTA_OFF_SCREEN` environment variable sets. Every PyVista renderer in this library SHALL
+render off-screen when that switch is set, regardless of the per-call `interactive` default, so
+that setting it once for a script, a session or a CI job is sufficient to prevent windows.
+
+A renderer SHALL render off-screen when the call requests it (`interactive=False`, or a filename
+is given) **or** the session-level switch is set. An explicit `interactive=False` SHALL continue
+to render off-screen whether or not the switch is set.
+
+#### Scenario: The global switch prevents a window
+
+- **WHEN** `pyvista.OFF_SCREEN` is true and a PyVista renderer is called without passing
+  `interactive`
+- **THEN** the scene is rendered off-screen and no interactive window is opened
+
+#### Scenario: The environment variable has the same effect
+
+- **WHEN** `PYVISTA_OFF_SCREEN` is set in the environment, so PyVista's global switch is true, and
+  a PyVista renderer is called without passing `interactive`
+- **THEN** the scene is rendered off-screen
+
+#### Scenario: An explicit request is still honoured
+
+- **WHEN** a renderer is called with `interactive=False` while the session-level switch is unset
+- **THEN** the scene is rendered off-screen, as before
+

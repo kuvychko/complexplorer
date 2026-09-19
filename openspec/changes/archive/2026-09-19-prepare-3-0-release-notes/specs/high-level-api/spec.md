@@ -18,6 +18,11 @@ concern, and exporting them invites users to depend on this library for somethin
 - **WHEN** a user attempts to import `create_animation`, `compare_functions`, or `analyze_function` from `complexplorer.api`, or `visualize`, `explore`, or `analyze_function` from `complexplorer`
 - **THEN** an `ImportError` is raised because the names no longer exist
 
+#### Scenario: Top-level surface lists only working entry points
+
+- **WHEN** `complexplorer.__all__` is inspected
+- **THEN** it contains `quick_plot` and `PlotPresets`, and contains none of `visualize`, `explore`, or `analyze_function`
+
 #### Scenario: Backend helpers are not part of the public surface
 
 - **WHEN** `complexplorer.__all__` is inspected

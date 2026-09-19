@@ -260,6 +260,84 @@ links as click-through targets; if that is too heavy for `gh-pages` history, the
 `examples/showcase.py`. The CVD section links a notebook on `main`, which 404s until this branch
 merges.
 
+## Running the release gate locally
+
+Moved to [CONTRIBUTING.md](../CONTRIBUTING.md), which C6 created for it: see "The release
+artifact gate" and "Releasing". This tracker is a tracker again.
+
+## C5 outcome: the public API contract (2026-09-19)
+
+Archived. CI run #39 is green on all thirteen jobs, including the new
+`Typing (pyright, public surface)` lane. 788 tests.
+
+**`cp.Presets` is now `cp.PlotPresets`.** A deliberate break, taken now because published 2.0.0
+never exposed `Presets` — it used `publication_preset()` — so no PyPI user is affected, and after
+3.0 ships it would be a real one. C6 records it in the migration guide.
+
+**The typing fix proved itself rather than being asserted.** `quick_plot` was annotated
+`Callable[[complex], complex]` while every renderer calls the function with a numpy array, and the
+package ships `py.typed`, so that annotation was a promise to every downstream type checker.
+`tests/typing/downstream.py` uses the library the way a consumer does; with the old annotation
+restored, pyright rejects three of its lines — an array-annotated user function, a
+`TransferFunction`, and `preset.func` from the catalog. **The library's own objects did not satisfy
+its own annotation.** With the `ComplexFunction` protocol, zero errors.
+
+**The validation gap was larger than the proposal knew.** Beyond `phase_sectors` (`0` raised
+`ZeroDivisionError` from inside a constructor; `-1` and `2.5` were accepted silently),
+`Phase(r_log_base=1)` **rendered every pixel as NaN and raised nothing** — `log(x)/log(1)` divides
+by zero, so the portrait came out blank with no error. `r_linear_step <= 0` and `scale_radius <= 0`
+were accepted too. All are now checked in `BasePhasePortrait`, which covers `Phase` and the nine
+perceptual families at once. A seventeen-probe sweep of the public surface now finds no bare Python
+exceptions at all.
+
+**The pyright gate is scoped on purpose.** It covers the public entry points and the downstream
+fixture, not the whole package: that reports 86 errors, and the three most suspicious were each
+checked and found to be false positives — two narrowing limitations (a compound `is None` guard,
+and a variable set and read under the same `verbose` condition) and one pyvista stub imprecision
+for a `tolerance` argument that genuinely exists. The whole-package count prints on every CI run
+without blocking, so a jump stays visible without training anyone to add ignores.
+
+**Left open for C6.** Whether `setup_matplotlib_backend` and `ensure_interactive_plots` belong in
+`__all__` at all; they are environment helpers rather than visualization API, and C6 may retire
+them rather than keep documenting them.
+
+## C3 outcome: the documentation site (2026-09-18)
+
+Archived. CI run #37 is green on all twelve jobs, including the new `Docs (mkdocs --strict)` lane.
+The live 2.0 site is untouched: the deploy workflow has run exactly twice, both from `main` in
+October 2025, and `gh-pages` still holds that build. Deployment now requires a `v3.*` tag or a
+manual dispatch, so no branch push can publish.
+
+**What shipped.** 26 navigated pages: the visual tour built from C2's approved captions, install
+and first portrait, reading a phase portrait, domains, 3D and the Riemann sphere, Riemann surfaces,
+engineering mode, catalog versus plot presets, the CLI, STL and physical output, a generated API
+reference covering all 47 public names and all 5 in `cp.ee`, the catalog reference, the migration
+guide, and contributing (which carries the C4 artifact gate). `mkdocs build --strict` runs on every
+push; external links are checked weekly.
+
+**Measurement corrected the writing.** The colormap page originally claimed `CubehelixPhase`
+"increases monotonically in lightness" and recommended `DivergingWarmCool` for colour-vision
+deficiency. Measuring the perceptual separation of twelve evenly spaced phases showed something
+different, and more useful: `CubehelixPhase` is the only family that stays readable under both
+deuteranomaly and greyscale, `Isoluminant` is the best in full colour and among the worst without
+it, and **`DivergingWarmCool` and `EarthTopographic` fold the phase circle** — `φ` and `π − φ` come
+out the same colour, so twelve phases give seven. That is by construction, not a defect, but it
+means phase cannot be read off them. Two tests guard those claims.
+
+**Decisions taken while implementing** (detail in the archived change's task 7): notebooks are
+linked rather than embedded (26 MB of stored outputs, nothing linked them, and serving them broke
+the strict build); `docs/pyvista_usage_guide.md` moved to `docs/internal/` because its install
+section described the optional-PyVista world and its "15-30x" claim was on C6's list — so C6 has
+one less file to fix; `docs/README.md` and `docs/cli.md` were removed in favour of `index.md` and
+`guide/cli.md`, both having carried stale claims ("330+ tests", three subcommands).
+
+**Left open.** Phone width is unverified — the browser tool's resize did not change the viewport,
+and Material's responsiveness is a theme guarantee rather than something this change checked. The
+built site is 77 MB, about 50 MB of it full-resolution gallery originals that the generated page
+links as click-through targets; if that is too heavy for `gh-pages` history, the fix belongs in
+`examples/showcase.py`. The CVD section links a notebook on `main`, which 404s until this branch
+merges.
+
 ## Running the release gate locally (C4)
 
 Until `CONTRIBUTING.md` exists (C6 writes it, and this section moves there), this is how to run the
@@ -734,46 +812,84 @@ Capture them as 3.x proposals after the public 3.0 contract is stable.
 
 # Final closeout checklist
 
+All six changes (C1-C6) are archived, plus `honour-pyvista-off-screen`, which the C6 work turned
+up. The items below are ticked against what was actually verified; the release-time items are
+deliberately left open, because they cannot be true until the tag is cut.
+
 ## Content and visuals
 
-- [ ] Rev3 hero montage approved at README scale.
-- [ ] Phase-wheel, engineering, composite-domain, Riemann-surface, and physical-print visuals
-      present.
-- [ ] Gallery has navigation/thumbnails, useful captions, accurate alt text, and runnable code.
-- [ ] One motion asset demonstrates PyVista interactivity.
-- [ ] All committed generated assets reproduce from documented commands.
-- [ ] README and docs screenshots reviewed on GitHub and PyPI.
+- [x] Rev3 hero montage approved at README scale. (C2 round R2; the chosen `labels_below` variant.)
+- [x] Phase-wheel, engineering, composite-domain, Riemann-surface, and physical-print visuals
+      present. (Eight tour recipes, all approved in rounds R1-R4.)
+- [x] Gallery has navigation/thumbnails, useful captions, accurate alt text, and runnable code.
+- [x] One motion asset demonstrates PyVista interactivity. (`_tour/orbit_loop.gif`, budgeted
+      under 3.5 MB.)
+- [x] All committed generated assets reproduce from documented commands.
+      (`python examples/showcase.py`; manifests are byte-identical on any platform since C4.)
+- [x] README and docs screenshots reviewed on GitHub and PyPI. **Partly:** the README was
+      reviewed at GitHub width in C2 round R4 and its long description passes `twine check` with
+      every link absolute. The live PyPI page for 3.0 cannot be reviewed until it is published --
+      see the release-time list below.
 
 ## Documentation and API
 
-- [ ] Hosted rev3 docs complete and ready to deploy.
-- [ ] API reference generated and complete.
-- [ ] Migration guide linked from every relevant entry point.
-- [ ] Stale backend, roadmap-phase, and internal consumer language removed.
-- [ ] Public API naming and mandatory-PyVista decisions recorded.
-- [ ] Public annotations pass the selected type checker.
+- [x] Hosted rev3 docs complete and ready to deploy. (26 pages; `mkdocs build --strict` is a CI
+      gate. Deployment is tag-triggered, so the 2.0 site stays live until 3.0 ships.)
+- [x] API reference generated and complete. (mkdocstrings over all 45 public names and the 5 in
+      `cp.ee`; a test fails if one is missing or invented.)
+- [x] Migration guide linked from every relevant entry point. (README, changelog, docs nav, and
+      the troubleshooting entries that name specific errors.)
+- [x] Stale backend, roadmap-phase, and internal consumer language removed. (The Godot and
+      `FunctionFamily` material moved to `docs/internal/`; the superseded PyVista usage guide with
+      it.)
+- [x] Public API naming and mandatory-PyVista decisions recorded. (`PlotPresets` in C5; the
+      backend policy carries the measured footprint and import cost.)
+- [x] Public annotations pass the selected type checker. (pyright over the public surface and a
+      downstream fixture, gated in CI.)
 
 ## Quality and artifacts
 
-- [ ] `ruff check complexplorer/ tests/ examples/`
-- [ ] `ruff format --check complexplorer/ tests/ examples/`
-- [ ] full `pytest` suite on supported Python/OS matrix
-- [ ] real off-screen PyVista render tests
-- [ ] `pytest --nbmake examples/notebooks/`
-- [ ] `openspec validate --specs`
-- [ ] clean gallery regeneration and reviewed diff
-- [ ] wheel/sdist build and metadata validation
-- [ ] fresh-environment wheel install and CLI/render/STL smoke tests
-- [ ] minimum-dependency and Python 3.13 gates are blocking
-- [ ] one macOS test lane passes
+- [x] `ruff check` and `ruff format --check` over `complexplorer/ tests/ examples/ scripts/
+      docs/hooks/` (wider than this line originally asked for).
+- [x] full `pytest` suite on the supported Python/OS matrix. (824 tests; Linux and Windows on
+      3.11/3.12/3.13, macOS on 3.12.)
+- [x] real off-screen PyVista render tests. (In CI on Linux under a headless display, and in the
+      wheel smoke test on every run.)
+- [x] `pytest --nbmake examples/notebooks/`. (Confirmed by the author locally; the Notebooks
+      workflow registers with GitHub once this branch reaches the default branch.)
+- [x] `openspec validate --specs` (20 capabilities).
+- [x] clean gallery regeneration and reviewed diff. (C2 round R3, with the R4 in-context pass.)
+- [x] wheel/sdist build and metadata validation. (`twine check` plus
+      `scripts/check_distribution.py`.)
+- [x] fresh-environment wheel install and CLI/render/STL smoke tests.
+      (`scripts/smoke_wheel.py`, which refuses to run against a source tree.)
+- [x] minimum-dependency and Python 3.13 gates are blocking.
+- [x] one macOS test lane passes.
 
 ## Release state
 
-- [ ] Changelog uses the actual release date.
+Everything above is done. These five are the release itself, and are the content of
+`CONTRIBUTING.md` -> "Releasing":
+
+- [ ] Changelog uses the actual release date. (It says `## [3.0.0] - Unreleased` on purpose.)
 - [ ] `complexplorer.__version__`, tag, wheel metadata, docs, and release title agree.
-- [ ] README claims are evidence-backed or softened.
-- [ ] `CONTRIBUTING.md`, `CITATION.cff`, and project URLs are present.
+- [ ] README claims are evidence-backed or softened. **Done ahead of the tag:** the "15-30x",
+      "cinema-quality", "first library", "no supports needed" and "ultimate visualization" claims
+      are gone, and a test fails if any returns.
+- [x] `CONTRIBUTING.md`, `CITATION.cff`, and project URLs are present.
 - [ ] Release performed in the agreed order and PyPI/docs verified from a clean browser session.
+
+## Open decisions carried past the closeout
+
+- **The Python 3.14 classifier stays off.** The lane has been green for several runs but is
+  non-blocking; claiming support while it cannot fail the build would contradict the matrix
+  requirement C4 established. Revisit by making that lane blocking and adding the classifier
+  together.
+- **The built site is 77 MB**, about 50 MB of it full-resolution gallery originals that the
+  generated page links as click-through targets. Only a concern because each deploy commits into
+  `gh-pages` history; the fix would be in `examples/showcase.py`.
+- **Phone-width rendering of the docs site is unverified.** Material for MkDocs is responsive by
+  default, but this closeout did not confirm it on a device.
 
 ## Recommended effort allocation
 
