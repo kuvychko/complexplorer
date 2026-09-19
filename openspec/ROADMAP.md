@@ -183,9 +183,11 @@ Phase 5  add-transfer-function-explorer                 —       no         →
          C2 curate-rev3-visual-tour                     3.0     no         archived
             · curated tour layer in showcase.py, RENDER_PROFILES, hero montage,
               thumbnail gallery; generate → private review page → approve loop
-         C3 publish-rev3-docs-site                      3.0     no         planned
+         C3 publish-rev3-docs-site                      3.0     no         archived
             · MkDocs Material (continuity with the live v2 site) + mkdocstrings
               API reference; new `docs` capability; tag-triggered deploy
+            · 26 pages, strict build gated in CI, gallery served from examples/
+              via an on_files hook (no duplicated binaries), version banner
          C4 gate-release-artifacts-and-ci               3.0     no         archived
             · wheel/sdist smoke, macOS, min-deps, blocking 3.13, nbmake, gallery
               structure; retire the stale no-PyVista packaging reqs; record the

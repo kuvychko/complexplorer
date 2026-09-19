@@ -75,9 +75,9 @@
   the browser tool's window resize did not change the viewport. Material for MkDocs is responsive
   by default, but that is a theme guarantee, not something this change checked.
   Notebooks are not served; see the note under task 2.13.
-- [ ] 6.3 Confirm on CI that the docs job passes and that no push deployed anything; the live 2.0
+- [x] 6.3 Confirm on CI that the docs job passes and that no push deployed anything; the live 2.0
   site is untouched.
-- [ ] 6.4 Flip C3's status in `openspec/ROADMAP.md` and record the outcome in
+- [x] 6.4 Flip C3's status in `openspec/ROADMAP.md` and record the outcome in
   `openspec/REV3_CLOSEOUT.md`.
 
 ## 7. Decisions taken during implementation

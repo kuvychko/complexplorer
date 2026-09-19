@@ -187,6 +187,43 @@ The plan's sections map onto these OpenSpec changes (status tracked in `ROADMAP.
 
 ---
 
+## C3 outcome: the documentation site (2026-09-18)
+
+Archived. CI run #37 is green on all twelve jobs, including the new `Docs (mkdocs --strict)` lane.
+The live 2.0 site is untouched: the deploy workflow has run exactly twice, both from `main` in
+October 2025, and `gh-pages` still holds that build. Deployment now requires a `v3.*` tag or a
+manual dispatch, so no branch push can publish.
+
+**What shipped.** 26 navigated pages: the visual tour built from C2's approved captions, install
+and first portrait, reading a phase portrait, domains, 3D and the Riemann sphere, Riemann surfaces,
+engineering mode, catalog versus plot presets, the CLI, STL and physical output, a generated API
+reference covering all 47 public names and all 5 in `cp.ee`, the catalog reference, the migration
+guide, and contributing (which carries the C4 artifact gate). `mkdocs build --strict` runs on every
+push; external links are checked weekly.
+
+**Measurement corrected the writing.** The colormap page originally claimed `CubehelixPhase`
+"increases monotonically in lightness" and recommended `DivergingWarmCool` for colour-vision
+deficiency. Measuring the perceptual separation of twelve evenly spaced phases showed something
+different, and more useful: `CubehelixPhase` is the only family that stays readable under both
+deuteranomaly and greyscale, `Isoluminant` is the best in full colour and among the worst without
+it, and **`DivergingWarmCool` and `EarthTopographic` fold the phase circle** — `φ` and `π − φ` come
+out the same colour, so twelve phases give seven. That is by construction, not a defect, but it
+means phase cannot be read off them. Two tests guard those claims.
+
+**Decisions taken while implementing** (detail in the archived change's task 7): notebooks are
+linked rather than embedded (26 MB of stored outputs, nothing linked them, and serving them broke
+the strict build); `docs/pyvista_usage_guide.md` moved to `docs/internal/` because its install
+section described the optional-PyVista world and its "15-30x" claim was on C6's list — so C6 has
+one less file to fix; `docs/README.md` and `docs/cli.md` were removed in favour of `index.md` and
+`guide/cli.md`, both having carried stale claims ("330+ tests", three subcommands).
+
+**Left open.** Phone width is unverified — the browser tool's resize did not change the viewport,
+and Material's responsiveness is a theme guarantee rather than something this change checked. The
+built site is 77 MB, about 50 MB of it full-resolution gallery originals that the generated page
+links as click-through targets; if that is too heavy for `gh-pages` history, the fix belongs in
+`examples/showcase.py`. The CVD section links a notebook on `main`, which 404s until this branch
+merges.
+
 ## Running the release gate locally (C4)
 
 Until `CONTRIBUTING.md` exists (C6 writes it, and this section moves there), this is how to run the
