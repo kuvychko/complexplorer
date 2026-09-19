@@ -22,12 +22,10 @@
   `openspec validate honour-pyvista-off-screen`.
 - [x] 3.2 Re-run the two README/migration snippets that blocked, with `PYVISTA_OFF_SCREEN=true`
   and nothing else, and confirm they complete without opening a window.
-  **Verified the safe way, not end to end.** With `PYVISTA_OFF_SCREEN=true` and no `interactive`
-  argument, `plot_landscape_pv`, `riemann_pv` and `riemann_surface_pv` each construct a real
-  plotter whose `off_screen` is `True` (checked via `return_plotter=True`, which never calls
-  `show()`, so no window can appear even if the fix were wrong).
-  The first attempt at the end-to-end run *did* open a window -- because it was pointed at the
-  smoke environment, which still had the wheel built **before** this fix (`off_screen: not
-  interactive`). That was a stale-environment mistake, not a failure of the change. Rebuilding
-  the wheel first is the prerequisite for a genuine end-to-end run.
+  **Verified end to end against a rebuilt wheel.** Both complete in 2-3 seconds with no window,
+  where before they blocked for 75 seconds and opened one; `flower.stl` is written, so the STL
+  line runs too.
+  Two safeguards made this safe to run: the installed copy was checked for the helper first (the
+  earlier popup happened because the smoke environment still held the pre-fix wheel), and a
+  `return_plotter=True` call confirmed `off_screen=True` before anything called `show()`.
 - [ ] 3.3 Confirm on CI, then archive and note the outcome in `openspec/REV3_CLOSEOUT.md`.

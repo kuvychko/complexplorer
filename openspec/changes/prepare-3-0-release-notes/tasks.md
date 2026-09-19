@@ -76,8 +76,9 @@
   window on that path. They were skipped by decision rather than silently. They use the same
   four calls the verified snippets exercise, and the wheel smoke test renders 3D off-screen on
   every CI run. To run them without a window, patch `pv.Plotter.show` to a no-op in the harness.
-  **Worth following up separately:** `pv.OFF_SCREEN = True` not being honoured by
-  `plot_landscape_pv` and `riemann_pv` is a real headless-usability question, since it is the
-  switch a user would reach for first.
+  **Followed up immediately, not deferred:** `pv.OFF_SCREEN` not being honoured was a real
+  headless bug, fixed by the `honour-pyvista-off-screen` change. With that fix in a rebuilt
+  wheel, **both skipped snippets now run clean in 2-3 seconds with no window**, so all five
+  blocks of this task are verified after all.
 - [ ] 7.4 Confirm on CI, then flip C6's status in `openspec/ROADMAP.md` and complete the final
   closeout checklist in `openspec/REV3_CLOSEOUT.md`.
