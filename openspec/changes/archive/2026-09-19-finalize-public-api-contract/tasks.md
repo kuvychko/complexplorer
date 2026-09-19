@@ -48,7 +48,7 @@
 - [x] 6.1 `pytest`, `ruff check`/`format`, `mkdocs build --strict`, `openspec validate --specs`,
   and `openspec validate finalize-public-api-contract`.
 - [x] 6.2 Confirm the fixture fails when an annotation is wrong, by breaking one deliberately.
-- [ ] 6.3 Confirm on CI, then flip C5's status in `openspec/ROADMAP.md` and record the outcome in
+- [x] 6.3 Confirm on CI, then flip C5's status in `openspec/ROADMAP.md` and record the outcome in
   `openspec/REV3_CLOSEOUT.md`.
 
 ## 7. What the gate found

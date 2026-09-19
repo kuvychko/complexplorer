@@ -10,9 +10,7 @@ capability also provides spec factories that reconstruct live `Domain` and `Colo
 objects without modifying core classes, plus a registry for retrieving and filtering
 presets. It is defined independently of the optional PyVista backend so presets are usable
 as data in any environment.
-
 ## Requirements
-
 ### Requirement: Serializable function preset
 
 The library SHALL provide a `FunctionPreset` describing a complex function for reuse across
@@ -141,3 +139,17 @@ callable) and SHALL contain:
 
 - **WHEN** `preset.to_dict()` is called
 - **THEN** the result includes an `answer_key_stats` record (count, count_by_type, min_separation) and remains JSON-serializable
+
+### Requirement: The interchange shapes are declared
+
+`domain_spec`, `cmap_spec` and `scaling_spec`, and the singularity records, SHALL have declared
+shapes that a type checker can verify, rather than being bare `dict`. The declarations SHALL
+describe the same structure the manifest serializes, so the interchange record and the in-memory
+record cannot drift apart silently.
+
+#### Scenario: A malformed spec is visible to a type checker
+
+- **WHEN** a preset is constructed with a spec dictionary whose keys do not match the declared
+  shape
+- **THEN** a type checker reports it
+

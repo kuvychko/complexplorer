@@ -8,9 +8,7 @@ first-class, and whose instances are plain complex callables — so every comple
 (2D portraits, PyVista landscapes, Riemann sphere, STL export) accepts them as ordinary
 functions. Canonical EE views (pole-zero, Bode, Nyquist, annotated phase portrait) sit on top.
 Filter families, resonators, impedance/RF objects remain out of scope (3.1+ backlog).
-
 ## Requirements
-
 ### Requirement: Rational transfer-function object
 
 The library SHALL provide `complexplorer.ee.TransferFunction`, a rational function
@@ -87,3 +85,16 @@ markers and the stability boundary.
 
 - **WHEN** `transfer_portrait` is called
 - **THEN** the portrait is rendered via the standard 2D `plot()` (honoring its options, e.g. `legend=True`) over an automatically sized domain enclosing all poles and zeros, with pole/zero markers and the stability boundary overlaid
+
+### Requirement: Calling a transfer function is specified for scalars and arrays
+
+`TransferFunction.__call__` SHALL document and declare its behaviour for both a scalar complex
+argument and an array of them, including the type it returns in each case, so that its use as a
+plain callable by every renderer is a stated contract rather than something discovered by
+experiment.
+
+#### Scenario: Both call forms are documented and typed
+
+- **WHEN** a transfer function is called with a scalar, and with an array
+- **THEN** each form's return type is declared and documented, and both work as described
+

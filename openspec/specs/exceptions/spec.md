@@ -9,9 +9,7 @@ handlers written against earlier releases keep working, and `ColormapError` for 
 colormap configuration. It lets callers wrap any
 complexplorer call in one `except ComplexplorerError` handler without enumerating
 lower-level types.
-
 ## Requirements
-
 ### Requirement: Common exception base class
 
 The library SHALL provide `complexplorer.exceptions.ComplexplorerError`, an `Exception`
@@ -59,3 +57,20 @@ package, as it was in 2.0.0.
 
 - **WHEN** a user imports `ColormapError` from `complexplorer`
 - **THEN** the import succeeds and `ColormapError` appears in `complexplorer.__all__`
+
+### Requirement: The public API raises only the library's own exceptions
+
+Every error reachable by using the public API as documented SHALL be a `ComplexplorerError`
+subclass, so that one `except` clause catches all of them. Bare Python exceptions raised from
+inside an operation — `ZeroDivisionError`, `IndexError`, `AttributeError` — are defects, not part
+of the contract.
+
+Messages SHALL name the offending value and the accepted values, and where a name replaced a 2.x
+name, SHALL name the replacement.
+
+#### Scenario: An invalid argument is reported by the library, not by Python
+
+- **WHEN** a public constructor or entry point is given an invalid argument
+- **THEN** the error raised is a `ComplexplorerError` subclass whose message names the value
+  received and what would be accepted
+

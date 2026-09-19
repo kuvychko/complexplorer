@@ -195,9 +195,11 @@ Phase 5  add-transfer-function-explorer                 —       no         →
             · found and fixed 4 defects no previous lane could see: a Unicode crash
               in `list` and STL export on legacy Windows code pages, a manifest that
               was not byte-stable across platforms, and two knife-edge tests
-         C5 finalize-public-api-contract                3.0     YES        planned
-            · Presets → PlotPresets (to confirm), ComplexFunction Protocol,
-              TypedDict specs, pyright gate, API map
+         C5 finalize-public-api-contract                3.0     YES        archived
+            · Presets → PlotPresets, ComplexFunction Protocol, TypedDict specs,
+              pyright gate over the public surface, API map
+            · the old annotation rejected the library's own TransferFunction and
+              catalog functions; Phase(r_log_base=1) rendered pure NaN silently
          C6 prepare-3-0-release-notes                   3.0     no         planned
             · 2.0.0 → 3.0 migration guide, truthful changelog, README reframe,
               CONTRIBUTING / CITATION.cff / project URLs / issue templates

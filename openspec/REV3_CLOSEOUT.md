@@ -187,6 +187,42 @@ The plan's sections map onto these OpenSpec changes (status tracked in `ROADMAP.
 
 ---
 
+## C5 outcome: the public API contract (2026-09-19)
+
+Archived. CI run #39 is green on all thirteen jobs, including the new
+`Typing (pyright, public surface)` lane. 788 tests.
+
+**`cp.Presets` is now `cp.PlotPresets`.** A deliberate break, taken now because published 2.0.0
+never exposed `Presets` — it used `publication_preset()` — so no PyPI user is affected, and after
+3.0 ships it would be a real one. C6 records it in the migration guide.
+
+**The typing fix proved itself rather than being asserted.** `quick_plot` was annotated
+`Callable[[complex], complex]` while every renderer calls the function with a numpy array, and the
+package ships `py.typed`, so that annotation was a promise to every downstream type checker.
+`tests/typing/downstream.py` uses the library the way a consumer does; with the old annotation
+restored, pyright rejects three of its lines — an array-annotated user function, a
+`TransferFunction`, and `preset.func` from the catalog. **The library's own objects did not satisfy
+its own annotation.** With the `ComplexFunction` protocol, zero errors.
+
+**The validation gap was larger than the proposal knew.** Beyond `phase_sectors` (`0` raised
+`ZeroDivisionError` from inside a constructor; `-1` and `2.5` were accepted silently),
+`Phase(r_log_base=1)` **rendered every pixel as NaN and raised nothing** — `log(x)/log(1)` divides
+by zero, so the portrait came out blank with no error. `r_linear_step <= 0` and `scale_radius <= 0`
+were accepted too. All are now checked in `BasePhasePortrait`, which covers `Phase` and the nine
+perceptual families at once. A seventeen-probe sweep of the public surface now finds no bare Python
+exceptions at all.
+
+**The pyright gate is scoped on purpose.** It covers the public entry points and the downstream
+fixture, not the whole package: that reports 86 errors, and the three most suspicious were each
+checked and found to be false positives — two narrowing limitations (a compound `is None` guard,
+and a variable set and read under the same `verbose` condition) and one pyvista stub imprecision
+for a `tolerance` argument that genuinely exists. The whole-package count prints on every CI run
+without blocking, so a jump stays visible without training anyone to add ignores.
+
+**Left open for C6.** Whether `setup_matplotlib_backend` and `ensure_interactive_plots` belong in
+`__all__` at all; they are environment helpers rather than visualization API, and C6 may retire
+them rather than keep documenting them.
+
 ## C3 outcome: the documentation site (2026-09-18)
 
 Archived. CI run #37 is green on all twelve jobs, including the new `Docs (mkdocs --strict)` lane.
