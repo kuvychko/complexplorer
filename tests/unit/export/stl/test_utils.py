@@ -8,6 +8,7 @@ from complexplorer.exceptions import ValidationError
 from complexplorer.export.stl.utils import (
     center_mesh,
     count_edges,
+    max_extent,
     scale_to_size,
     validate_printability,
 )
@@ -186,3 +187,95 @@ class TestCenterMesh:
 
         # Dimensions should be preserved
         assert np.allclose(original_dims, centered_dims)
+
+
+class TestMaxExtent:
+    """The size measure that is a property of the object rather than of its orientation."""
+
+    def test_it_is_the_hull_diameter(self):
+        """For a convex body the maximum support width IS the diameter."""
+        cube = pv.Cube().triangulate()
+
+        points = np.asarray(cube.points)
+        brute = float(np.sqrt(((points[:, None, :] - points[None, :, :]) ** 2).sum(-1)).max())
+
+        assert max_extent(cube) == pytest.approx(brute, rel=1e-6)
+        assert max_extent(cube) == pytest.approx(np.sqrt(3.0), rel=1e-6)
+
+    def test_it_is_rotation_invariant(self):
+        """Which is exactly the property the axis-aligned bounding box lacks."""
+        cube = pv.Cube().triangulate()
+        rotated = cube.rotate_x(37).rotate_y(19).rotate_z(53)
+
+        assert max_extent(rotated) == pytest.approx(max_extent(cube), rel=1e-6)
+
+        def bbox(mesh):
+            b = mesh.bounds
+            return max(b[1] - b[0], b[3] - b[2], b[5] - b[4])
+
+        # The box, by contrast, grows from the side length to nearly the diagonal.
+        assert bbox(cube) == pytest.approx(1.0, rel=1e-6)
+        assert bbox(rotated) > 1.7
+
+    def test_the_box_understates_cube_diagonal_spikes_by_root_three(self):
+        """The measured case: spikes on (+-1,+-1,+-1)/sqrt(3) project onto an axis at 0.577."""
+        signs = np.array(
+            [[a, b, c] for a in (-1, 1) for b in (-1, 1) for c in (-1, 1)], dtype=float
+        )
+        spiky = (
+            pv.PolyData(signs / np.sqrt(3.0))
+            .delaunay_3d()
+            .extract_surface(algorithm="dataset_surface")
+        )
+
+        b = spiky.bounds
+        box = max(b[1] - b[0], b[3] - b[2], b[5] - b[4])
+
+        assert max_extent(spiky) / box == pytest.approx(np.sqrt(3.0), rel=1e-4)
+
+    def test_an_empty_mesh_has_no_extent(self):
+        assert max_extent(pv.PolyData()) == 0.0
+
+
+class TestSizingByExtent:
+    def test_extent_sizing_hits_the_requested_width(self):
+        cube = pv.Cube().triangulate().rotate_z(30)
+
+        scaled = scale_to_size(cube, target_size_mm=100.0, axis="extent")
+
+        assert max_extent(scaled) == pytest.approx(100.0, rel=1e-6)
+
+    def test_bounding_box_sizing_still_works_as_before(self):
+        box = pv.Box(bounds=[0, 2, 0, 1, 0, 0.5])
+
+        scaled = scale_to_size(box, target_size_mm=100.0, axis="max")
+
+        b = scaled.bounds
+        assert max(b[1] - b[0], b[3] - b[2], b[5] - b[4]) == pytest.approx(100.0, rel=1e-6)
+
+    def test_the_two_measures_differ_on_an_off_axis_shape(self):
+        """Which is the whole reason the default moved."""
+        signs = np.array(
+            [[a, b, c] for a in (-1, 1) for b in (-1, 1) for c in (-1, 1)], dtype=float
+        )
+        spiky = (
+            pv.PolyData(signs / np.sqrt(3.0))
+            .delaunay_3d()
+            .extract_surface(algorithm="dataset_surface")
+        )
+
+        by_extent = scale_to_size(spiky, 100.0, axis="extent")
+        by_box = scale_to_size(spiky, 100.0, axis="max")
+
+        assert max_extent(by_extent) == pytest.approx(100.0, rel=1e-4)
+        # Sized by the box, the same nominal 100mm object is sqrt(3) times wider than asked.
+        assert max_extent(by_box) == pytest.approx(100.0 * np.sqrt(3.0), rel=1e-3)
+
+    def test_an_unknown_measure_is_rejected(self):
+        with pytest.raises(ValidationError, match="Invalid axis"):
+            scale_to_size(pv.Sphere(), 50, axis="diagonal")
+
+    def test_a_degenerate_mesh_is_rejected(self):
+        flat = pv.PolyData(np.zeros((3, 3)), faces=np.array([3, 0, 1, 2]))
+        with pytest.raises(ValidationError, match="no extent"):
+            scale_to_size(flat, 50, axis="extent")

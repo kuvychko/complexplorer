@@ -176,6 +176,62 @@ def validate_printability(
     return results
 
 
+def max_extent(mesh: "pv.PolyData", n_directions: int = 3000) -> float:
+    """The object's true tip-to-tip width: the diameter of its convex hull.
+
+    For a convex body the diameter equals the maximum *support width* over directions,
+    ``max(p.u) - min(p.u)``, so sampling directions gives it without ever building a hull. That
+    matters at this scale: an ornament carries 60k-160k points, and a brute-force pairwise distance
+    over even the hull vertices wants tens of gigabytes.
+
+    Fibonacci directions alone run about 0.8% low on a spiky piece, because the widest direction is a
+    spike axis and the sampling misses it by up to ~0.06 rad. So the directions of the
+    highest-radius points -- which *are* the spike axes on a relief -- are added as candidates, which
+    makes the result exact to rounding for these shapes.
+
+    This is the honest measure of how big a piece is. The axis-aligned bounding box is not: it
+    depends on how the object happens to sit in the coordinate frame. A relief with spikes on the
+    cube diagonals ``(+-1, +-1, +-1)/sqrt(3)`` projects each spike onto a coordinate axis at only
+    0.577 of its length, so its box understates it by a factor of ``sqrt(3)``.
+
+    Parameters
+    ----------
+    mesh : pv.PolyData
+        Mesh to measure.
+    n_directions : int, default=3000
+        How many Fibonacci directions to sample, before the spike axes are added.
+
+    Returns
+    -------
+    float
+        The maximum width, in the mesh's own units.
+    """
+    points = np.asarray(mesh.points, dtype=np.float64)
+    if points.size == 0:
+        return 0.0
+
+    i = np.arange(n_directions) + 0.5
+    polar = np.arccos(1.0 - 2.0 * i / n_directions)
+    azimuth = np.pi * (1.0 + 5.0**0.5) * i
+    fibonacci = np.stack(
+        [np.cos(azimuth) * np.sin(polar), np.sin(azimuth) * np.sin(polar), np.cos(polar)],
+        axis=1,
+    )
+
+    # The spike axes, as the directions of the points furthest from the origin.
+    radii = np.linalg.norm(points, axis=1)
+    tips = points[np.argsort(radii)[-256:]]
+    tip_norms = np.linalg.norm(tips, axis=1, keepdims=True)
+    tips = tips[tip_norms[:, 0] > 0] / tip_norms[tip_norms[:, 0] > 0]
+
+    directions = np.vstack([fibonacci, tips]) if tips.size else fibonacci
+    widest = 0.0
+    for start in range(0, len(directions), 256):
+        projected = points @ directions[start : start + 256].T
+        widest = max(widest, float((projected.max(axis=0) - projected.min(axis=0)).max()))
+    return widest
+
+
 def scale_to_size(mesh: "pv.PolyData", target_size_mm: float, axis: str = "max") -> "pv.PolyData":
     """Scale mesh to target size in millimeters.
 
@@ -186,8 +242,11 @@ def scale_to_size(mesh: "pv.PolyData", target_size_mm: float, axis: str = "max")
     target_size_mm : float
         Target size in millimeters.
     axis : str, optional
-        Which axis to scale to:
-        - 'max': Scale so largest dimension equals target_size_mm
+        Which measure to scale to:
+        - 'extent': Scale so the true tip-to-tip width equals target_size_mm. This is what the
+          ornament path uses, because it is a property of the object rather than of its orientation.
+          See :func:`max_extent`.
+        - 'max': Scale so the largest axis-aligned bounding-box dimension equals target_size_mm
         - 'x', 'y', 'z': Scale specific axis to target_size_mm
 
     Returns
@@ -202,7 +261,9 @@ def scale_to_size(mesh: "pv.PolyData", target_size_mm: float, axis: str = "max")
         bounds[5] - bounds[4],  # z
     ]
 
-    if axis == "max":
+    if axis == "extent":
+        current_size = max_extent(mesh)
+    elif axis == "max":
         current_size = max(dimensions)
     elif axis == "x":
         current_size = dimensions[0]
@@ -211,7 +272,12 @@ def scale_to_size(mesh: "pv.PolyData", target_size_mm: float, axis: str = "max")
     elif axis == "z":
         current_size = dimensions[2]
     else:
-        raise ValidationError(f"Invalid axis: {axis}")
+        raise ValidationError(f"Invalid axis: {axis}. Available: extent, max, x, y, z")
+
+    if current_size <= 0:
+        raise ValidationError(
+            f"Cannot scale a mesh whose {axis} measure is {current_size}; it has no extent to scale"
+        )
 
     scale_factor = target_size_mm / current_size
 

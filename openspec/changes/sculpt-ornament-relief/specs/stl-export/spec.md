@@ -47,16 +47,39 @@ for it.
 
 ### Requirement: Sized STL file output
 
-The library SHALL write the ornament to an STL file centered at the origin and uniformly scaled so
-its largest dimension equals a requested size in millimeters, in binary or ASCII form. Before
-writing, the library SHALL compute consistent, outward-oriented point and cell normals, so the
-facet normals recorded in the STL are meaningful to consumers that read them.
+The library SHALL write the ornament to an STL file centered at the origin and uniformly scaled to a
+requested size in millimeters, in binary or ASCII form. Before writing, the library SHALL compute
+consistent, outward-oriented point and cell normals, so the facet normals recorded in the STL are
+meaningful to consumers that read them.
+
+The requested size SHALL by default mean the object's **true maximum width** — its tip-to-tip
+extent, which for a convex body is the diameter of its convex hull — and SHALL NOT by default mean
+the largest dimension of its axis-aligned bounding box.
+
+The bounding box depends on how a piece happens to sit in the coordinate frame, so as a size measure
+it is not a property of the object. A relief whose spikes point along the cube diagonals
+`(±1, ±1, ±1)/sqrt(3)` projects each spike onto a coordinate axis at only `0.577` of its length, so
+its box understates it by a factor of `sqrt(3)`. A collection sized by the box therefore comes out
+visibly uneven while every piece reports the same nominal size. A caller SHALL still be able to
+request bounding-box sizing explicitly, for compatibility and for the cases where the box is what
+matters, such as fitting a build plate.
 
 #### Scenario: Export at a target size
 
 - **WHEN** the ornament is saved with a target size in millimeters
-- **THEN** the mesh is centered, scaled so its maximum dimension equals that size, and written to
-  the STL path, creating the output directory if needed
+- **THEN** the mesh is scaled so its tip-to-tip extent equals that size, then centered, and written
+  to the STL path, creating the output directory if needed
+
+#### Scenario: Orientation does not change the size
+
+- **WHEN** the same ornament is saved at one target size, and saved again after being rotated
+  arbitrarily
+- **THEN** both files describe an object of that same maximum width
+
+#### Scenario: Bounding-box sizing remains available
+
+- **WHEN** a caller explicitly requests sizing by the axis-aligned bounding box
+- **THEN** the largest bounding-box dimension equals the requested size, as it did before
 
 #### Scenario: One-call generate-and-save
 
@@ -133,6 +156,13 @@ its height at `|f| = 6.3` regardless of the function.
 The default relief depth SHALL match the depth used by the library's named scaling presets rather
 than the shallower value previously used only by STL export.
 
+The scale derived from `pointiness * pole_order` SHALL be capped, because the tip-exponent rule
+assumes the mesh can deliver the dynamic range a given feature order demands, and beyond roughly
+order three it cannot: a feature of order `mu` only drives `log|f|` as far as the nearest sample gets
+to it, so a scale demanding saturation that the grid never reaches flattens the whole body instead of
+sharpening the tip. The cap SHALL NOT apply to a scale the caller sets directly, which is an explicit
+instruction rather than a derivation.
+
 A caller SHALL also be able to set the log-modulus scale directly, bypassing
 `pointiness * pole_order`. Setting it to `ln(10)` makes one unit of relief exactly one decade of
 gain — 20 dB — which turns a transfer function's relief into a calibrated scale that can be read
@@ -159,7 +189,15 @@ like a Bode magnitude curve along a meridian. That is not expressible as a tip e
 #### Scenario: The scale can be set directly
 
 - **WHEN** an explicit log-modulus scale is supplied
-- **THEN** it is used as given and `pointiness` and `pole_order` are not consulted
+- **THEN** it is used as given, `pointiness` and `pole_order` are not consulted, and the cap on the
+  derived scale does not apply
+
+#### Scenario: A high feature order does not flatten the body
+
+- **WHEN** an ornament is generated for a feature order high enough that
+  `pointiness * pole_order` would exceed what the mesh can resolve
+- **THEN** the scale applied is capped, and the relief spans more of its radial range than it would
+  at the uncapped scale
 
 ### Requirement: Bulk contrast is separately adjustable
 

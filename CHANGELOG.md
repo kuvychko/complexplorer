@@ -19,6 +19,14 @@ Ornaments stop being blobs. A task-oriented version of this material is in the
   `[0, 1]` and remapped — **silently wrong geometry rather than an error**, so this one needs
   checking by hand. The fix is to drop the `r_min + (r_max - r_min) *` wrapper from the callable and
   pass those bounds as parameters
+- **`size_mm` means the object's true tip-to-tip width**, not the largest axis-aligned bounding-box
+  dimension, so exports come out up to `sqrt(3)` larger than the same call produced in 3.0. The box
+  is not a property of the object: a relief with spikes on the cube diagonals `(±1,±1,±1)/sqrt(3)`
+  projects each spike onto an axis at 0.577 of its length, so its box understates it by exactly
+  `sqrt(3)`. Sized that way, the reference collection reported a uniform 80 mm while real extents ran
+  80 to 137 mm and volumes spanned 13.7x, the largest object being largest purely by accident of
+  orientation. `size_measure="max"` restores the old behaviour, and `scale_to_size(axis="max")` is
+  unchanged
 - **`validate_printability` no longer reports a wall thickness.** `wall_thickness_ok`,
   `estimated_min_wall_mm` and `recommended_size_mm` are gone; `min_radius_mm` and `max_radius_mm`
   replace them. Reading a removed key raises `KeyError`. The removed test was never meaningful: it
@@ -60,8 +68,15 @@ Ornaments stop being blobs. A task-oriented version of this material is in the
   globally it degrades the pieces whose tips are the point. Both terms are odd in `log|f|`, so
   self-duality is exact, and it is smooth at `|f| = 1` — unlike a signed power of the log modulus,
   whose infinite derivative there creases every sea-level contour and stops the mesh seam welding
-- `count_edges()` in `complexplorer.export.stl`, which counts one class of edge with all four
-  `extract_feature_edges` flags passed explicitly
+- **The derived tip scale is capped at 6.0.** Beyond roughly feature order 3 the mesh cannot deliver
+  the dynamic range the tip-exponent rule assumes -- at order 5 an uncapped `k = 10` wants `log|f|`
+  to reach +-46 while a resolution-400 grid delivers about +-26 -- so the body flattens instead of
+  the tip sharpening. Measured on an order-5 icosahedral relief, the radial range used goes from 63%
+  at `k = 10` to 80% at `k = 6`. The cap does not apply to `sharpness`, which is set deliberately
+- `count_edges()` and `max_extent()` in `complexplorer.export.stl`. The first counts one class of edge
+  with all four `extract_feature_edges` flags passed explicitly; the second measures true tip-to-tip
+  width as the maximum support width over sampled directions, which for a convex body is the hull
+  diameter
 - A "why is my ornament a blob" section in the
   [physical workflow guide](https://kuvychko.github.io/complexplorer/guide/physical-workflow/),
   covering normalization, the tip exponent, and the honest limit: a relief is only as interesting as

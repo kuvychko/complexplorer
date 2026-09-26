@@ -45,6 +45,17 @@ DEFAULT_NORMALIZE = "geometric"
 DEFAULT_POINTINESS = 2.0
 DEFAULT_POLE_ORDER = 1.0
 
+# Ceiling on the DERIVED scale, because the rule above assumes the mesh can deliver the dynamic range
+# a given feature order demands, and past roughly order 3 it cannot: a feature of order ``mu`` only
+# drives ``log|f|`` as far as the nearest sample gets to it. At order 5 an uncapped ``k = 10`` wants
+# ``log|f|`` to reach +-46 to saturate, while a resolution-400 grid delivers about +-26, so the body
+# flattens instead of the tip sharpening. Measured on an order-5 icosahedral relief: the radial range
+# spans 67% at ``k = 10`` against 83% at ``k = 6``. The cap is a no-op at order 3 and below.
+#
+# It deliberately does NOT apply to a scale the caller sets through ``sharpness``: that is an
+# instruction rather than a derivation, and the gain-calibrated ``ln(10)`` case must stay exact.
+SHARPNESS_CAP = 6.0
+
 
 class OrnamentGenerator:
     """Generate 3D-printable ornaments from complex functions.
@@ -85,9 +96,14 @@ class OrnamentGenerator:
         ``pointiness * pole_order``. Ignored by transfers that have no scale, such as ``'arctan'``.
     pole_order : float, default=1.0
         The order of the features being shaped. Scaling the transfer by it makes a double pole print
-        as sharp as a simple one instead of twice as blunt.
+        as sharp as a simple one instead of twice as blunt. The resulting scale is capped at
+        ``SHARPNESS_CAP`` (6.0), so orders above 3 do not ask for a dynamic range the mesh cannot
+        deliver -- see that constant. It is not inferred from the function: fitting the scale to a
+        piece's log-modulus spread is a known dead end that produces tip exponents from 1 to 8 and
+        blunts most pieces, so the order is yours to state.
     sharpness : float, optional
-        The log-modulus scale, set directly, bypassing ``pointiness * pole_order``. ``ln(10)`` makes
+        The log-modulus scale, set directly, bypassing ``pointiness * pole_order`` and its cap.
+        ``ln(10)`` makes
         one unit of relief exactly one decade of gain -- 20 dB -- which turns a transfer function's
         relief into a calibrated scale readable like a Bode magnitude curve along a meridian. That is
         not expressible as a tip exponent, which is why it is settable on its own.
@@ -124,10 +140,13 @@ class OrnamentGenerator:
         self.pole_order = pole_order
         self.contrast = contrast
 
-        # The log-modulus scale: set directly, or derived from the tip exponent.
-        self.sharpness = (
-            float(sharpness) if sharpness is not None else float(pointiness) * float(pole_order)
-        )
+        # The log-modulus scale: set directly, or derived from the tip exponent and capped. See
+        # SHARPNESS_CAP -- a derived scale beyond what the mesh can resolve flattens the body instead
+        # of sharpening the tip, so it is clamped; an explicit scale is taken as given.
+        if sharpness is not None:
+            self.sharpness = float(sharpness)
+        else:
+            self.sharpness = min(float(pointiness) * float(pole_order), SHARPNESS_CAP)
         if self.sharpness <= 0:
             raise ValidationError(
                 f"The log-modulus scale must be positive; got {self.sharpness} from "
@@ -251,6 +270,7 @@ class OrnamentGenerator:
         binary: bool = True,
         validate: bool = True,
         verbose: bool = True,
+        size_measure: str = "extent",
     ) -> str:
         """Save the ornament as STL file.
 
@@ -259,7 +279,13 @@ class OrnamentGenerator:
         filename : str
             Output filename (should end with .stl).
         size_mm : float, default=50
-            Scale mesh to this size in millimeters.
+            Scale mesh to this size in millimeters, measured per ``size_measure``.
+        size_measure : {'extent', 'max'}, default='extent'
+            What ``size_mm`` measures. ``'extent'`` is the object's true tip-to-tip width, which is a
+            property of the shape; ``'max'`` is the largest axis-aligned bounding-box dimension, which
+            depends on how the piece sits in the coordinate frame and is what versions before 3.1
+            used. A relief with spikes on the cube diagonals is understated by ``sqrt(3)`` under
+            ``'max'``. Use ``'max'`` when the box is what matters, such as fitting a build plate.
         center : bool, default=True
             Center the mesh at origin.
         repair : bool, default=True
@@ -295,7 +321,7 @@ class OrnamentGenerator:
         )
 
         # Scale to target size, about the origin, which leaves the relief's star centre there.
-        mesh = scale_to_size(mesh, size_mm, axis="max")
+        mesh = scale_to_size(mesh, size_mm, axis=size_measure)
 
         # Validate BEFORE centring: the radii reported are measured from the origin, and centring
         # moves the bounding-box centre there instead, which understates the range on a lopsided
@@ -334,6 +360,7 @@ class OrnamentGenerator:
         binary: bool = True,
         validate: bool = True,
         verbose: bool = True,
+        size_measure: str = "extent",
     ) -> str:
         """Generate ornament and save as STL in one step.
 
@@ -342,7 +369,9 @@ class OrnamentGenerator:
         filename : str
             Output filename.
         size_mm : float, default=50
-            Target size in millimeters.
+            Target size in millimeters, measured per ``size_measure``.
+        size_measure : {'extent', 'max'}, default='extent'
+            What ``size_mm`` measures -- see :meth:`save_stl`.
         center : bool, default=True
             Center the mesh.
         repair : bool, default=True
@@ -360,7 +389,9 @@ class OrnamentGenerator:
             Path to saved file.
         """
         self.generate_ornament(verbose=verbose)
-        return self.save_stl(filename, size_mm, center, repair, binary, validate, verbose)
+        return self.save_stl(
+            filename, size_mm, center, repair, binary, validate, verbose, size_measure
+        )
 
 
 def create_ornament(
@@ -374,6 +405,7 @@ def create_ornament(
     domain: Domain | None = None,
     verbose: bool = True,
     *,
+    size_measure: str = "extent",
     normalize: str | float | None = DEFAULT_NORMALIZE,
     pointiness: float = DEFAULT_POINTINESS,
     pole_order: float = DEFAULT_POLE_ORDER,
@@ -391,7 +423,9 @@ def create_ornament(
     filename : str
         Output STL filename.
     size_mm : float, default=50
-        Size in millimeters.
+        Size in millimeters, measured per ``size_measure``.
+    size_measure : {'extent', 'max'}, default='extent'
+        What ``size_mm`` measures -- see :meth:`OrnamentGenerator.save_stl`.
     resolution : int, default=150
         Mesh resolution.
     scaling : str, optional
@@ -425,7 +459,7 @@ def create_ornament(
         sharpness=sharpness,
         contrast=contrast,
     )
-    return gen.generate_and_save(filename, size_mm, verbose=verbose)
+    return gen.generate_and_save(filename, size_mm, verbose=verbose, size_measure=size_measure)
 
 
 __all__ = ["OrnamentGenerator", "create_ornament"]

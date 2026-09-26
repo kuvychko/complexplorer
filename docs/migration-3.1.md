@@ -5,15 +5,17 @@ default settings changes shape** — deliberately, and it is the point of the re
 the library is affected; 2D portraits, landscapes, the Riemann sphere renderers and their regression
 baselines are all untouched.
 
-If you generate ornaments, read the two sections that follow. If you wrote a `custom` scaling
-callable, read the third — it changes geometry **without raising**, which is the one thing here that
-can go wrong quietly.
+If you generate ornaments, read the next two sections. If you wrote a `custom` scaling callable,
+read the third as well — it changes geometry **without raising**, which is the one thing here that can
+go wrong quietly.
 
-## If you only do two things
+## If you only do three things
 
 1. **Re-check any ornament you had dialled in**, or pin the old behaviour explicitly (below).
 2. **If you wrote a `custom` scaling callable**, divide its return by your radius range — see
    [the `custom` fix](#the-custom-scaling-fix-changes-geometry-silently).
+3. **If you print to a fixed size**, note that `size_mm` now means tip-to-tip width, so spiky pieces
+   come out larger than before — see [below](#size_mm-now-means-tip-to-tip-width).
 
 ## Ornament geometry changes
 
@@ -80,6 +82,47 @@ those bounds as parameters instead.**
 If your two-scale transfer was a hand-rolled mixture of logistics, `contrast=(boost, weight)` now
 does it for you — see [the guide](guide/physical-workflow.md#sculpting-the-body-with-contrast).
 
+## `size_mm` now means tip-to-tip width
+
+Exports come out **larger** than the same call produced in 3.0, by up to a factor of `sqrt(3)`.
+
+3.0 scaled the axis-aligned bounding box; 3.1 scales the object's true maximum width. The box is not
+a property of the object — it depends on how the piece sits in the coordinate frame. A relief whose
+spikes point along the cube diagonals `(±1, ±1, ±1)/sqrt(3)` projects each spike onto a coordinate
+axis at only `0.577` of its length, so its box understates it by exactly `sqrt(3) = 1.73`. A
+collection sized that way reports one nominal size while the pieces visibly differ; measured on the
+reference collection, a nominal 80 mm produced real extents from 80 to 137 mm and volumes spanning
+13.7×, and the largest object in the set was largest purely by accident of orientation.
+
+How much your piece changes depends on how its features sit:
+
+| relief | change at the same `size_mm` |
+|---|---|
+| spikes on the cube diagonals | `sqrt(3)` = 1.73× larger |
+| icosahedral pieces (near axis-aligned) | about 2% larger |
+| a shape whose widest direction is already axis-aligned | unchanged |
+
+To reproduce a 3.0 export exactly:
+
+```python
+ornament.generate_and_save("flower.stl", size_mm=80, size_measure="max")
+```
+
+`size_measure="max"` is also the right choice when the bounding box is genuinely what matters, such
+as fitting a build plate. `scale_to_size(mesh, size, axis="max")` is unchanged and still sizes the
+box; `axis="extent"` is the new measure, and `max_extent()` reports it without scaling.
+
+## The derived tip scale is capped at 6.0
+
+`pointiness * pole_order` is now clamped to 6.0. If you passed `pole_order=4` or higher, the applied
+scale is lower than the product, deliberately: beyond roughly order 3 the mesh cannot deliver the
+dynamic range the tip-exponent rule assumes, so an uncapped scale flattens the body instead of
+sharpening the tip. Measured on an order-5 icosahedral relief, the radial range used goes from 63% at
+`k = 10` to 80% at `k = 6`.
+
+The cap does not apply to `sharpness`, which you set deliberately — so `sharpness=10.0` still means
+10.0, and the gain-calibrated `ln(10)` case is untouched.
+
 ## `validate_printability` loses two keys and gains two
 
 | 3.0 key | 3.1 |
@@ -132,6 +175,9 @@ None of these are required, and the defaults are what change the look:
 | `pole_order` | 1.0 | so a double pole prints as sharp as a simple one |
 | `sharpness` | — | the log-modulus scale directly; `ln(10)` makes one unit of relief 20 dB |
 | `contrast` | off | `(boost, weight)` sculpts the body between sparse features |
+| `size_measure` | `"extent"` | `"max"` restores 3.0's bounding-box sizing |
+
+`max_extent()` and `count_edges()` are new public helpers in `complexplorer.export.stl`.
 
 `cp.normalization_constant` and `cp.sampled_normalization_constant` are new public helpers. The first
 is the exact closed form for a rational function and requires a **complete** divisor; the second

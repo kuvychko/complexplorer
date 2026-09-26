@@ -16,7 +16,7 @@ import pyvista as pv
 from complexplorer.core.scaling import normalization_constant
 from complexplorer.exceptions import ValidationError
 from complexplorer.export.stl.ornament_generator import OrnamentGenerator
-from complexplorer.export.stl.utils import count_edges
+from complexplorer.export.stl.utils import count_edges, max_extent
 
 RES = 60
 
@@ -264,3 +264,103 @@ class TestSavedMesh:
 
         results = gen.validate_mesh(size_mm=40, verbose=False)
         assert results["min_radius_mm"] < results["max_radius_mm"]
+
+
+class TestTheSharpnessCap:
+    """The derived scale is capped; an explicit one is not.
+
+    Past roughly order 3 the mesh cannot deliver the dynamic range the tip-exponent rule assumes: a
+    feature of order mu only drives log|f| as far as the nearest sample gets to it. An uncapped scale
+    then flattens the body instead of sharpening the tip.
+    """
+
+    @pytest.mark.parametrize(
+        ("pole_order", "expected"),
+        [(1, 2.0), (2, 4.0), (3, 6.0), (4, 6.0), (5, 6.0), (10, 6.0)],
+    )
+    def test_the_derived_scale_is_capped(self, pole_order, expected):
+        gen = OrnamentGenerator(lambda z: z, resolution=20, pole_order=pole_order)
+
+        assert gen.sharpness == pytest.approx(expected)
+
+    def test_the_cap_is_a_no_op_up_to_order_three(self):
+        """Which is every piece in the reference collection bar one."""
+        for order in (1, 2, 3):
+            gen = OrnamentGenerator(lambda z: z, resolution=20, pole_order=order)
+            assert gen.sharpness == pytest.approx(2.0 * order)
+
+    def test_an_explicit_scale_is_not_capped(self):
+        """It is an instruction, not a derivation -- and ln(10) calibration must stay exact."""
+        gen = OrnamentGenerator(lambda z: z, resolution=20, pole_order=5, sharpness=10.0)
+
+        assert gen.sharpness == 10.0
+        assert gen.scaling_params["base"] == pytest.approx(np.exp(10.0))
+
+    def test_the_capped_relief_uses_more_of_its_radial_range(self):
+        """The measured reason for the cap, on an order-5 icosahedral relief."""
+
+        def ico_t(z):
+            return z**30 - 522 * z**25 - 10005 * z**20 - 10005 * z**10 + 522 * z**5 + 1
+
+        def ico_v(z):
+            return z * (z**10 + 11 * z**5 - 1)
+
+        crown = lambda z: ico_t(z) ** 2 / ico_v(z) ** 5  # noqa: E731
+
+        capped = OrnamentGenerator(crown, resolution=200, pole_order=5).generate_ornament()
+        uncapped = OrnamentGenerator(crown, resolution=200, sharpness=10.0).generate_ornament()
+
+        def span(mesh):
+            r = radii(mesh)
+            return r.max() - r.min()
+
+        assert span(capped) > span(uncapped)
+
+
+class TestSizeMeansTipToTip:
+    def test_saving_sizes_by_true_width_by_default(self, tmp_path):
+        out = tmp_path / "sized.stl"
+        OrnamentGenerator(lambda z: z / (z**4 - 1), resolution=RES).generate_and_save(
+            str(out), size_mm=60, verbose=False
+        )
+
+        saved = pv.read(str(out))
+        assert max_extent(saved) == pytest.approx(60.0, rel=1e-3)
+
+    def test_bounding_box_sizing_is_still_reachable(self, tmp_path):
+        """For compatibility, and for when the box is what matters -- fitting a build plate."""
+        out = tmp_path / "boxed.stl"
+        OrnamentGenerator(lambda z: z / (z**4 - 1), resolution=RES).generate_and_save(
+            str(out), size_mm=60, verbose=False, size_measure="max"
+        )
+
+        saved = pv.read(str(out))
+        b = saved.bounds
+        assert max(b[1] - b[0], b[3] - b[2], b[5] - b[4]) == pytest.approx(60.0, rel=1e-3)
+
+    def test_orientation_does_not_change_the_size(self):
+        """The property the bounding box lacks, and the reason the default moved.
+
+        `z/(z**4-1)` happens to sit with its widest direction axis-aligned, so both measures agree on
+        it as built. Rotate it and the box no longer describes the object -- while the extent still
+        does.
+        """
+        from complexplorer.export.stl.utils import scale_to_size
+
+        gen = OrnamentGenerator(lambda z: z / (z**4 - 1), resolution=RES)
+        gen.generate_ornament(verbose=False)
+        upright = gen.sphere_mesh
+        tilted = upright.rotate_x(37).rotate_y(19).rotate_z(53)
+
+        # Sized by true width, both orientations are the same object at the requested size.
+        assert max_extent(scale_to_size(upright, 60.0, axis="extent")) == pytest.approx(
+            60.0, rel=1e-3
+        )
+        assert max_extent(scale_to_size(tilted, 60.0, axis="extent")) == pytest.approx(
+            60.0, rel=1e-3
+        )
+
+        # Sized by the box, the tilted one comes out a measurably different object.
+        box_upright = max_extent(scale_to_size(upright, 60.0, axis="max"))
+        box_tilted = max_extent(scale_to_size(tilted, 60.0, axis="max"))
+        assert abs(box_tilted - box_upright) > 1.0

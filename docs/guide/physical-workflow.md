@@ -47,8 +47,9 @@ complexplorer stl preset:pole_flower_10 --size-mm 80 --resolution 200 -o flower.
 - **`scaling`** decides how `|f(z)|` becomes displacement. The default is `logarithmic`, a logistic
   curve in the log modulus, which is what `pointiness` tunes. `scaling_params` overrides anything
   derived from the parameters above.
-- **`size_mm`** is the printed size of the longest axis, applied at export. Geometry is scaled at
-  the end, so changing it does not change the shape.
+- **`size_mm`** is the printed size, applied at export, measured **tip to tip** — the object's true
+  maximum width. Geometry is scaled at the end, so changing it does not change the shape. Pass
+  `size_measure="max"` to size by the axis-aligned bounding box instead, as versions before 3.1 did.
 
 ## Why is my ornament a blob
 
@@ -106,6 +107,17 @@ With `r = r_min + delta * logistic(log|f| / k)`, the surface approaches a featur
 `pointiness` sets `k = pointiness * pole_order`, so the tip exponent is `1 / pointiness` no matter
 what the function is. `pole_order` (default 1) is the order of the features you are shaping, and
 passing it means a double pole prints as sharp as a simple one instead of twice as blunt.
+
+You have to tell the library the order; it does not guess. Fitting the scale to each function's
+log-modulus spread is the obvious move and a known dead end — it gives tip exponents anywhere from 1
+to 8 and turns most pieces into rounded blobs, which is why the parameter is explicit.
+
+The derived scale is capped at 6.0. Beyond roughly order 3 the mesh cannot deliver the dynamic range
+the rule assumes: a feature of order `mu` only drives `log|f|` as far as the nearest sample gets to
+it, so at order 5 an uncapped `k = 10` wants `log|f|` to reach ±46 while a resolution-400 grid
+delivers about ±26 — and the body flattens instead of the tip sharpening. Measured on an order-5
+icosahedral relief, the radial range used goes from 63% at `k = 10` to 80% at `k = 6`. The cap is a
+no-op at order 3 and below, and it does not apply to `sharpness`, which you set deliberately.
 
 The old `arctan` default could not express this. It has no scale at all: it reaches 90% of its height
 at `|f| = 6.3` whatever your function does, which on a typical rational function is a tip exponent
@@ -217,6 +229,33 @@ and always recommended a size 2.67× larger. It is gone — see the
 Set `verbose=False` to silence the report, and `validate=False` to skip the checks if you are
 exporting in bulk and will inspect elsewhere.
 
+## What "size" means
+
+`size_mm` is the object's **true maximum width**, measured tip to tip. That is a property of the
+shape. The obvious alternative — the largest dimension of the axis-aligned bounding box, which is
+what the library used before 3.1 — is a property of how the piece happens to sit in the coordinate
+frame:
+
+```python
+from complexplorer.export.stl import max_extent
+
+# A relief whose spikes point along the cube diagonals (+-1, +-1, +-1)/sqrt(3) projects each spike
+# onto a coordinate axis at only 0.577 of its length, so its bounding box understates it by sqrt(3).
+```
+
+A collection sized by the box therefore comes out visibly uneven while every piece reports the same
+nominal size — the reference collection hit exactly this, with real extents running 80 to 137 mm at a
+nominal 80 mm and volumes spanning 13.7×, the largest object in the set being largest purely by
+accident of orientation.
+
+`max_extent()` is the measure: the maximum support width over sampled directions, which for a convex
+body is the hull diameter. It samples Fibonacci directions plus the directions of the
+highest-radius points, because Fibonacci alone runs about 0.8% low when the widest direction is a
+spike axis it misses.
+
+Pass `size_measure="max"` when the box is genuinely what you want — fitting a build plate, or
+reproducing a pre-3.1 export.
+
 ## Printing notes
 
 What comes out is a closed, roughly spherical shell with the function's poles as spikes. The
@@ -242,7 +281,7 @@ from complexplorer.export.stl import validate_printability, scale_to_size, cente
 ```
 
 These operate on the PyVista `PolyData`, so a mesh can be checked, scaled and centred as part of a
-larger pipeline before it is written. `count_edges` from the same module counts one class of edge at
-a time, which is less obvious than it sounds: PyVista's `extract_feature_edges` enables boundary,
+larger pipeline before it is written. `max_extent` measures true tip-to-tip width, and `count_edges`
+from the same module counts one class of edge at a time, which is less obvious than it sounds: PyVista's `extract_feature_edges` enables boundary,
 feature, manifold and non-manifold extraction all at once by default, so asking it for boundary
 edges alone reports every crease in a closed mesh as a hole.

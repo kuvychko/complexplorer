@@ -68,6 +68,52 @@
   asymptotically the wide term still sets the tip exponent, but that asymptote lies below mesh
   resolution, so the visible point is measurably shorter than the exponent implies.
 
+## 5b. Learned from the reference collection
+
+> Added after reading `figures_repo/2026/09-20-riemann-ornaments` against this implementation. The
+> collection has grown to thirteen pieces, three of them polyhedral and of feature order 2, 3 and 5,
+> which `proposal.md` and `design.md` predate. Verified first: complexplorer 3.1 reproduces
+> `icosidodecahedral-star` exactly — sharpness 4.0, base 54.598150, depth 0.2, 159,600 points and
+> 159,995 triangles, closed and manifold, normalization 1.3387 against the manifest's 1.3403 (0.12%,
+> inside the estimator's documented tolerance). So the API is sufficient; these are the two things the
+> reference knows that it does not.
+
+- [x] 5b.1 Cap the **derived** log-modulus scale at 6.0. Past roughly order 3 the mesh cannot deliver
+  the dynamic range the tip-exponent rule assumes: at order 5 an uncapped `k = 10` wants `log|f|` to
+  reach ±46, while a resolution-400 grid delivers about ±26, so the body flattens instead of the tip
+  sharpening. Measured on `icosahedral-crown` (order 5): radial span 67% at `k = 10` against 83% at
+  `k = 6`. The cap is a no-op for order 3 and below, which is every other piece.
+- [x] 5b.2 Do **not** cap a scale the caller sets directly via `sharpness` — that is an instruction,
+  not a derivation, and the gain-calibrated `ln(10)` case must stay exact.
+- [x] 5b.3 Do **not** try to infer `pole_order` from the sampled field. The reference fitted `k` to
+  each piece's log-modulus spread first and records the outcome: exponents from 1 to 8, and half the
+  collection turned into rounded blobs. It stays an explicit parameter.
+
+## 5c. Size means tip-to-tip extent
+
+> `scale_to_size(axis="max")` normalizes the axis-aligned bounding box, which is not a property of
+> the object: it depends on how the piece sits in the frame. The reference switched away from it
+> after a collection where every piece reported the same nominal 80 mm while real extents ran 80 to
+> 137 mm and volumes spanned 13.7x — the largest object in the set was largest purely by accident of
+> orientation.
+
+- [x] 5c.1 Add a `max_extent` helper: the maximum support width over sampled directions, which for a
+  convex body is the hull diameter. Port the reference's approach — Fibonacci directions plus the
+  directions of the highest-radius points, because Fibonacci alone runs ~0.8% low when the widest
+  direction is a spike axis it misses by up to 0.06 rad. Chunk the projection: these meshes carry
+  60k-160k points and a brute-force pairwise distance wants tens of gigabytes.
+- [x] 5c.2 Add `axis="extent"` to `scale_to_size` and make it what the ornament path uses, so
+  `size_mm` means the object's true maximum width.
+- [x] 5c.3 Keep bounding-box sizing reachable — `axis="max"` keeps its current meaning, and
+  `save_stl` takes a switch — for compatibility and for fitting a build plate.
+- [x] 5c.4 Quantify the change for the migration note rather than asserting it: `cube-octahedron-dual`
+  is understated by exactly `sqrt(3)` because its spikes lie on `(±1,±1,±1)/sqrt(3)`, while the
+  icosahedral pieces sit nearly axis-aligned and shift by about 2%.
+  Measured: the cube-diagonal case comes out at `1.7321` against `sqrt(3) = 1.7321`, and
+  `max_extent` is rotation-invariant where the box runs 1.000 -> 1.726 under an arbitrary rotation.
+  End to end, `icosidodecahedral-star` at 130 mm now reports `max_radius` **66.77 mm**, matching the
+  reference manifest exactly; sized by the box it was 68.03 mm.
+
 ## 6. Tests
 
 - [x] 6.1 A closed, creased mesh (`pv.Cube().triangulate()` is sufficient and fast) validates as
@@ -95,6 +141,12 @@
 - [x] 6.13 An explicit log-modulus scale overrides `pointiness` and `pole_order`.
 - [x] 6.14 Regenerate `tests/regression/baselines/ornament.npz` and note in the commit that the
   geometry change is intended.
+- [x] 6.15 The cap: a derived scale above the cap is clamped, an explicitly supplied `sharpness` is
+  not, and the capped relief spans more of its radial range than the uncapped one would.
+- [x] 6.16 `max_extent` against a brute-force hull diameter on a spiky mesh, and its invariance under
+  rotation — which is the property the bounding box lacks.
+- [x] 6.17 Sizing by extent: a mesh whose spikes lie off-axis comes out at the requested width where
+  bounding-box sizing would have made it `sqrt(3)` smaller, and `axis="max"` still sizes the box.
 
 ## 7. Docs
 
@@ -112,6 +164,11 @@
   geometry rather than raising. Code written against the bug returns a radius directly; after the
   fix that value is clipped to `[0, 1]` and remapped onto `[r_min, r_max]` (default `[0.5, 1.5]`).
   Show the before/after and the one-line correction.
+- [x] 7.7 Migration note for the sizing change: `size_mm` now means tip-to-tip extent, so a piece
+  with off-axis spikes comes out larger than the same call produced in 3.0 — up to `sqrt(3)` for
+  cube-diagonal spikes. Give the switch back to bounding-box sizing, and say why the default moved.
+- [x] 7.8 Document the cap where `pointiness` is documented, with the measured reason, so nobody
+  reads a capped scale as a bug.
 - [x] 7.5 Migration note for 3.1: default ornament geometry changes; `normalize=None` restores the
   old normalization behaviour and `scaling="arctan"`, `r_min=0.5` restore the old look;
   `wall_thickness_ok` and `estimated_min_wall_mm` are gone from the validation dict.

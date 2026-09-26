@@ -6,7 +6,7 @@ into watertight STL files suitable for 3D printing as decorative ornaments.
 
 from .mesh_repair import close_mesh_holes, repair_mesh_simple
 from .ornament_generator import OrnamentGenerator, create_ornament
-from .utils import center_mesh, scale_to_size, validate_printability
+from .utils import center_mesh, count_edges, max_extent, scale_to_size, validate_printability
 
 __all__ = [
     "OrnamentGenerator",
@@ -14,6 +14,8 @@ __all__ = [
     "validate_printability",
     "scale_to_size",
     "center_mesh",
+    "count_edges",
+    "max_extent",
     "repair_mesh_simple",
     "close_mesh_holes",
 ]
