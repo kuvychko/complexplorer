@@ -1,0 +1,143 @@
+{
+  "answer_key_stats": {
+    "count": 13,
+    "count_by_type": {
+      "pole": 8,
+      "zero": 5
+    },
+    "min_separation": 0.517638090227
+  },
+  "clip_ornament_to_domain": false,
+  "cmap_spec": {
+    "auto_scale_r": true,
+    "phase_sectors": 6,
+    "type": "Phase"
+  },
+  "domain_spec": {
+    "im_length": 4,
+    "re_length": 4,
+    "type": "rectangle"
+  },
+  "expression": "(z*(z**4 - 1))**4 / (z**8 + 14*z**4 + 1)**3",
+  "files": {
+    "portrait": "cube_octahedron_dual/portrait.png"
+  },
+  "id": "cube_octahedron_dual",
+  "pole_order": 3,
+  "resolution": 300,
+  "scaling_spec": "balanced",
+  "schema_version": 3,
+  "singularities": [
+    {
+      "at": [
+        0.0,
+        0.0
+      ],
+      "order": 4,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.0,
+        -1.0
+      ],
+      "order": 4,
+      "type": "zero"
+    },
+    {
+      "at": [
+        1.0,
+        0.0
+      ],
+      "order": 4,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.0,
+        1.0
+      ],
+      "order": 4,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -1.0,
+        0.0
+      ],
+      "order": 4,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -0.3660254038,
+        -0.3660254038
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        0.3660254038,
+        -0.3660254038
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        0.3660254038,
+        0.3660254038
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -0.3660254038,
+        0.3660254038
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -1.3660254038,
+        -1.3660254038
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        1.3660254038,
+        -1.3660254038
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        1.3660254038,
+        1.3660254038
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -1.3660254038,
+        1.3660254038
+      ],
+      "order": 3,
+      "type": "pole"
+    }
+  ],
+  "story": "The vertex form of one solid over the vertex form of its dual, at matching binary degree: six order-4 pits on the octahedron's axes, eight triple spikes on the cube's vertices. Full O_h symmetry. Its spikes point along the cube diagonals, which makes it the piece that exposed a sizing bug -- an axis-aligned bounding box understates it by exactly sqrt(3), because each spike projects onto a coordinate axis at 0.577 of its length. One of the six zeros is at infinity, so five are listed.",
+  "tags": [
+    "ornament",
+    "polyhedral",
+    "poles"
+  ],
+  "title": "Cube-Octahedron Dual"
+}

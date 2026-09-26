@@ -1,0 +1,287 @@
+{
+  "answer_key_stats": {
+    "count": 31,
+    "count_by_type": {
+      "pole": 20,
+      "zero": 11
+    },
+    "min_separation": 0.3382612127
+  },
+  "clip_ornament_to_domain": false,
+  "cmap_spec": {
+    "auto_scale_r": true,
+    "phase_sectors": 6,
+    "type": "Phase"
+  },
+  "domain_spec": {
+    "im_length": 4,
+    "re_length": 4,
+    "type": "rectangle"
+  },
+  "expression": "(z*(z**10 - 11*z**5 - 1))**5 / (z**20 + 228*z**15 + 494*z**10 - 228*z**5 + 1)**3",
+  "files": {
+    "portrait": "dodecahedron_icosahedron_dual/portrait.png"
+  },
+  "id": "dodecahedron_icosahedron_dual",
+  "pole_order": 3,
+  "resolution": 400,
+  "scaling_spec": "balanced",
+  "schema_version": 3,
+  "singularities": [
+    {
+      "at": [
+        0.0,
+        0.0
+      ],
+      "order": 5,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -0.1909830056,
+        -0.5877852523
+      ],
+      "order": 5,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.5,
+        -0.363271264
+      ],
+      "order": 5,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.5,
+        0.363271264
+      ],
+      "order": 5,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -0.1909830056,
+        0.5877852523
+      ],
+      "order": 5,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -0.6180339887,
+        0.0
+      ],
+      "order": 5,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -1.3090169944,
+        -0.9510565163
+      ],
+      "order": 5,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.5,
+        -1.5388417686
+      ],
+      "order": 5,
+      "type": "zero"
+    },
+    {
+      "at": [
+        1.6180339887,
+        0.0
+      ],
+      "order": 5,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.5,
+        1.5388417686
+      ],
+      "order": 5,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -1.3090169944,
+        0.9510565163
+      ],
+      "order": 5,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -0.2736590696,
+        -0.1988249523
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        0.1045284633,
+        -0.3217055306
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        0.3382612127,
+        -0.0
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        0.1045284633,
+        0.3217055306
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -0.2736590696,
+        0.1988249523
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -0.6691306064,
+        -0.4861518423
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        0.2555851487,
+        -0.7866102046
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        0.8270909153,
+        -0.0
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        0.2555851487,
+        0.7866102046
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -0.6691306064,
+        0.4861518423
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -0.3736191375,
+        -1.1498814686
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        0.9781476007,
+        -0.7106658306
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        0.9781476007,
+        0.7106658306
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -0.3736191375,
+        1.1498814686
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -1.2090569265,
+        0.0
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -0.9135454576,
+        -2.8116038154
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        2.3916930584,
+        -1.7376667208
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        2.3916930584,
+        1.7376667208
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -0.9135454576,
+        2.8116038154
+      ],
+      "order": 3,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -2.9562952015,
+        0.0
+      ],
+      "order": 3,
+      "type": "pole"
+    }
+  ],
+  "story": "The icosahedral twin of the Cube-Octahedron Dual, built the same way: one solid's vertex form over its dual's, at matching degree. Twenty triple spikes on the dodecahedron's vertices, twelve order-5 pits on the icosahedron's. Its spikes sit exactly where the Icosahedral Crown has its pits. Full I_h symmetry. One zero is at infinity; eleven are listed.",
+  "tags": [
+    "ornament",
+    "polyhedral",
+    "poles"
+  ],
+  "title": "Dodecahedron-Icosahedron Dual"
+}

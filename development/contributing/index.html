@@ -92,7 +92,7 @@
             
             
   
-    Documentation for complexplorer <strong>3.1.0rc1</strong>
+    Documentation for complexplorer <strong>3.1.0</strong>
   
 
           </div>
@@ -328,6 +328,25 @@
         </a>
       </li>
     
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../migration-3.1/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Migrating to 3.1
+
+      </a>
+    </li>
   
 
       
@@ -1249,6 +1268,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../../migration-3.1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migrating to 3.1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../migration-3.0/" class="md-nav__link">
         
   
@@ -1294,10 +1340,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
             
   
   
@@ -1315,8 +1361,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1776,6 +1822,10 @@ by hand — that is what keeps "every committed asset reproduces from a document
 <p>Manifests (<code>index.json</code>, <code>card.json</code>) are byte-stable for a given library version on any platform,
 so a regeneration that changes them is telling you something real. Portrait PNGs are reproducible
 only best-effort and will differ across machines.</p>
+<p>"For a given library version" is literal: <code>index.json</code> and <code>showcase.json</code> record
+<code>complexplorer_version</code>, so a version bump invalidates the committed manifest until the gallery is
+regenerated. Bump first, then regenerate — the other order leaves a release commit whose suite is
+red.</p>
 <h2 id="releasing">Releasing<a class="headerlink" href="#releasing" title="Permanent link">&para;</a></h2>
 <p>A release is a <strong>tag</strong>. Pushing <code>vX.Y.Z</code> runs <code>.github/workflows/release.yml</code>, which checks the tag
 against the packaged version, runs the artifact gate below, uploads to TestPyPI, and then waits for
@@ -1783,10 +1833,12 @@ an approval before uploading to PyPI. Merging to <code>main</code> publishes not
 documentation, chores and specification archives, and a condition that suppressed a publish for
 those would have to be right every time against a mistake PyPI can yank but never undo.</p>
 <ol>
-<li>Bump <code>__version__</code> in <code>complexplorer/_version.py</code> and land that commit. The workflow compares
-   the tag against it and fails before building if they disagree.</li>
+<li>Bump <code>__version__</code> in <code>complexplorer/_version.py</code>, and <code>CITATION.cff</code> to match. The workflow
+   compares the tag against <code>__version__</code> and fails before building if they disagree.</li>
+<li>Regenerate the gallery, after the bump, for the reason given above.</li>
 <li>Add the changelog entry and date it.</li>
-<li>Tag the landed commit and push the tag: <code>git tag vX.Y.Z &amp;&amp; git push origin vX.Y.Z</code>.</li>
+<li>Land all of that, then tag the landed commit and push the tag:
+   <code>git tag vX.Y.Z &amp;&amp; git push origin vX.Y.Z</code>.</li>
 <li>Approve the <code>pypi</code> environment when the run asks. TestPyPI publishes without an approval; PyPI
    waits for a person.</li>
 </ol>

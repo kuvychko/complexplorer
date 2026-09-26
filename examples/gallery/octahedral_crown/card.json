@@ -1,0 +1,175 @@
+{
+  "answer_key_stats": {
+    "count": 17,
+    "count_by_type": {
+      "pole": 5,
+      "zero": 12
+    },
+    "min_separation": 0.4142135624
+  },
+  "clip_ornament_to_domain": false,
+  "cmap_spec": {
+    "auto_scale_r": true,
+    "phase_sectors": 6,
+    "type": "Phase"
+  },
+  "domain_spec": {
+    "im_length": 4,
+    "re_length": 4,
+    "type": "rectangle"
+  },
+  "expression": "(z**12 - 33*z**8 - 33*z**4 + 1) / (z*(z**4 - 1))**2",
+  "files": {
+    "portrait": "octahedral_crown/portrait.png"
+  },
+  "id": "octahedral_crown",
+  "pole_order": 2,
+  "resolution": 300,
+  "scaling_spec": "balanced",
+  "schema_version": 3,
+  "singularities": [
+    {
+      "at": [
+        0.0,
+        -0.4142135624
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.4142135624,
+        0.0
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.0,
+        0.4142135624
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -0.4142135624,
+        0.0
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -0.7071067812,
+        -0.7071067812
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.7071067812,
+        -0.7071067812
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.7071067812,
+        0.7071067812
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -0.7071067812,
+        0.7071067812
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.0,
+        -2.4142135624
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        2.4142135624,
+        0.0
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.0,
+        2.4142135624
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -2.4142135624,
+        0.0
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.0,
+        0.0
+      ],
+      "order": 2,
+      "type": "pole"
+    },
+    {
+      "at": [
+        0.0,
+        -1.0
+      ],
+      "order": 2,
+      "type": "pole"
+    },
+    {
+      "at": [
+        1.0,
+        0.0
+      ],
+      "order": 2,
+      "type": "pole"
+    },
+    {
+      "at": [
+        0.0,
+        1.0
+      ],
+      "order": 2,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -1.0,
+        0.0
+      ],
+      "order": 2,
+      "type": "pole"
+    }
+  ],
+  "story": "Twelve simple zeros at the octahedron's edge midpoints under six double poles at its vertices: a crown of six spikes with a pit between each neighbouring pair. Full O_h symmetry (order 48, all nine mirror planes), so any coordinate plane cuts it into identical halves. The sixth pole sits at the north pole of the sphere, i.e. at infinity, so the answer key below lists five of the six.",
+  "tags": [
+    "ornament",
+    "polyhedral",
+    "poles"
+  ],
+  "title": "Octahedral Crown"
+}

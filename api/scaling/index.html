@@ -92,7 +92,7 @@
             
             
   
-    Documentation for complexplorer <strong>3.1.0rc1</strong>
+    Documentation for complexplorer <strong>3.1.0</strong>
   
 
           </div>
@@ -330,6 +330,25 @@
         </a>
       </li>
     
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../migration-3.1/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Migrating to 3.1
+
+      </a>
+    </li>
   
 
       
@@ -1223,6 +1242,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#complexplorer.ModulusScaling.log_mixture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        log_mixture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#complexplorer.ModulusScaling.linear_clamp" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1301,6 +1331,45 @@
       
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#normalization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Normalization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Normalization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#complexplorer.normalization_constant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        normalization_constant
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#complexplorer.sampled_normalization_constant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sampled_normalization_constant
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1439,6 +1508,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../../migration-3.1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migrating to 3.1
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../migration-3.0/" class="md-nav__link">
         
   
@@ -1481,10 +1577,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
             
   
   
@@ -1502,8 +1598,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_7">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1689,6 +1785,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#complexplorer.ModulusScaling.log_mixture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        log_mixture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#complexplorer.ModulusScaling.linear_clamp" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1767,6 +1874,45 @@
       
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#normalization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Normalization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Normalization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#complexplorer.normalization_constant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        normalization_constant
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#complexplorer.sampled_normalization_constant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sampled_normalization_constant
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2303,6 +2449,210 @@ visualizations to show both phase and magnitude information.</p>
       </tbody>
     </table>
 
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="complexplorer.ModulusScaling.log_mixture" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">log_mixture</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+<a href="#complexplorer.ModulusScaling.log_mixture" class="headerlink" title="Permanent link">&para;</a></h4>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">log_mixture</span><span class="p">(</span><span class="n">moduli</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">boost</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">3.0</span><span class="p">,</span> <span class="n">weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">r_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span> <span class="n">r_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Two-scale logistic in the log-modulus: bulk contrast without blunting the tips.</p>
+<p>A single logistic makes one parameter do two jobs. Lowering <code>scale</code> adds contrast across
+the bulk of the surface but blunts the tips (the tip exponent <code>mu / scale</code> rises above 1);
+raising it sharpens the tips but squeezes the whole body toward mid-radius. On a shape with
+only a few widely separated features the result is a near-perfect sphere with features poked
+into it.</p>
+<p>So this mixes two: a narrow logistic at <code>scale / boost</code> carrying bulk contrast, and the
+original wide one at <code>scale</code> carrying the tips, weighted <code>weight</code> to <code>1 - weight</code>.</p>
+<p>Both terms are odd in <code>log|f|</code> about zero and the weights sum to one, so the transfer stays
+self-dual -- a zero of order <code>k</code> carves the mirror image of what a pole of order <code>k</code>
+raises, and normalization keeps working. It is also <strong>smooth</strong> at <code>|f| = 1</code>, which matters
+more than it sounds: a signed power of the log modulus is monotone, odd and tempting, but has
+infinite derivative at sea level, creases the surface along every sea-level contour, and
+splits the mesh seam badly enough that the weld fails and the solid never closes.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>moduli</code>
+            </td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Modulus values |f(z)|.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>scale</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The wide logistic's e-folding in log modulus, as in <code>logarithmic</code>'s <code>ln(base)</code>. The
+tip exponent is <code>mu / scale</code> for a feature of order <code>mu</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>2.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>boost</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>How much narrower the bulk-contrast logistic is. Must be greater than zero; values
+around 3 to 4 are what the reference collection uses.</p>
+              </div>
+            </td>
+            <td>
+                  <code>3.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>weight</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Share given to the narrow term, in <code>[0, 1]</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.5</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>r_min</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Radius bounds. <code>r_min</code> is the relief depth.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.2</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>r_max</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Radius bounds. <code>r_min</code> is the relief depth.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.2</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Radius values in <code>[r_min, r_max]</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="complexplorer.ValidationError (complexplorer.exceptions.ValidationError)" href="../core/#complexplorer.ValidationError">ValidationError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>scale</code> or <code>boost</code> is not positive, or <code>weight</code> is outside <code>[0, 1]</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="note" open>
+  <summary>Notes</summary>
+  <p>Honest limit: asymptotically the wide term still sets the tip exponent, but that asymptote
+lies below mesh resolution, so in practice the tip climbs through only the last
+<code>1 - weight</code> of the range and the visible point is measurably shorter than the exponent
+implies.</p>
+</details>
 
     </div>
 
@@ -3209,6 +3559,330 @@ Ideal for functions with detailed behavior near zero.</p>
       </tbody>
     </table>
 
+
+    </div>
+
+</div><h2 id="normalization">Normalization<a class="headerlink" href="#normalization" title="Permanent link">&para;</a></h2>
+<p>Sea level sits at <code>|f| = 1</code> for every self-dual transfer, so the arbitrary constant in front of a
+function changes the shape of a relief rather than only its labels. These compute the constant that
+puts the area-weighted geometric mean of <code>|f|</code> over the sphere at 1, which removes that dependence.</p>
+<p><code>normalization_constant</code> is the exact closed form for a rational function, and needs a <strong>complete</strong>
+divisor. <code>sampled_normalization_constant</code> estimates the same quantity from samples, needs no divisor,
+and is what the ornament path uses by default.</p>
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="complexplorer.normalization_constant" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">complexplorer.normalization_constant</span>
+
+
+<a href="#complexplorer.normalization_constant" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">normalization_constant</span><span class="p">(</span><span class="n">zeros</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">complex</span><span class="p">]</span> <span class="o">|</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">poles</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">complex</span><span class="p">]</span> <span class="o">|</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">gain</span><span class="p">:</span> <span class="nb">complex</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents first">
+
+        <p>Closed-form constant placing the geometric mean of <code>|c * f|</code> over the sphere at 1.</p>
+<p>For a rational <code>f(z) = gain * prod(z - z_j) / prod(z - p_k)</code> over its <strong>finite</strong> zeros and
+poles, the constant is <code>1 / |gain|</code> times the product over the poles of
+<code>sqrt(1 + |p_k|^2)</code>, divided by the product over the zeros of <code>sqrt(1 + |z_j|^2)</code>. That
+closed form exists because the log of the chordal distance to a fixed point integrates to
+<code>-1/2</code> over the sphere, whatever that point is.</p>
+<p>Normalizing by this constant makes the relief independent of the arbitrary scalar in front of
+<code>f</code>. Sea level sits at <code>|f| = 1</code> for every self-dual transfer, so that scalar otherwise
+changes the ornament's shape rather than only its labels.</p>
+<p>The constant is self-dual: exchanging the zeros and the poles returns its reciprocal, so the
+relief of <code>1/f</code> is the relief of <code>f</code> turned inside out.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>zeros</code>
+            </td>
+            <td>
+                  <code>sequence of complex</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The <strong>finite</strong> zeros of <code>f</code>, with multiplicity. A zero at infinity is not listed.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>poles</code>
+            </td>
+            <td>
+                  <code>sequence of complex</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The <strong>finite</strong> poles of <code>f</code>, with multiplicity.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>gain</code>
+            </td>
+            <td>
+                  <code><span title="complex">complex</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The leading coefficient. Only its magnitude matters.</p>
+              </div>
+            </td>
+            <td>
+                  <code>1.0</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The normalization constant.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="complexplorer.ValidationError (complexplorer.exceptions.ValidationError)" href="../core/#complexplorer.ValidationError">ValidationError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>gain</code> is zero, or a zero or pole is not finite.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="warning" open>
+  <summary>Warnings</summary>
+  <p>This is exact only for a rational function given by a <strong>complete</strong> divisor: every finite zero
+and every finite pole, with multiplicity. It does not apply to a transcendental function, nor to
+a partial list of singularities, and it fails silently in both cases -- it returns a confidently
+wrong number. Fed the three listed zeros of <code>sin(z)</code>, which has infinitely many, it returns
+0.092 against a true 0.853. In particular, do not assemble a divisor from a function preset's
+<code>singularities</code> field, which is illustrative rather than complete. When the divisor is not
+known to be complete, estimate the constant from samples instead, with
+:func:<code>sampled_normalization_constant</code>, which has no such failure mode.</p>
+</details>
+
+<p><span class="doc-section-title">Examples:</span></p>
+    <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">normalization_constant</span><span class="p">([</span><span class="mf">0.0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">2</span><span class="n">j</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span><span class="p">)),</span> <span class="mi">6</span><span class="p">)</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="go">32.0</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">normalization_constant</span><span class="p">([],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span> <span class="n">gain</span><span class="o">=</span><span class="mf">3.0</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="go">0.333333</span>
+</span></code></pre></div>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="complexplorer.sampled_normalization_constant" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">complexplorer.sampled_normalization_constant</span>
+
+
+<a href="#complexplorer.sampled_normalization_constant" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">sampled_normalization_constant</span><span class="p">(</span><span class="n">modulus</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">sphere_z</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">statistic</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'geometric'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents first">
+
+        <p>Estimate the normalization constant from moduli sampled on a Riemann-sphere grid.</p>
+<p>Takes the samples a relief is already built from, so no second pass over <code>f</code> is needed. Unlike
+:func:<code>normalization_constant</code> it needs no divisor, and so has no silent failure mode on a
+transcendental function or an incomplete list of singularities.</p>
+<p>Both grid corrections below are matters of correctness rather than precision:</p>
+<ul>
+<li><strong>Area weighting.</strong> A latitude/longitude grid crowds the poles, so each sample is weighted by
+  <code>sin(theta) = sqrt(1 - z^2)</code>. Unweighted, the constant for <code>z/(z^10-1)</code> -- whose feature
+  of order ten sits at infinity, at a pole of the grid -- comes out about ten times wrong.</li>
+<li><strong>The duplicated seam.</strong> <code>sphere_coordinates</code> builds <code>phi</code> as
+  <code>linspace(0, 2*pi, resolution)</code>, whose first and last entries are the same meridian, so that
+  meridian is sampled twice. It lies along the positive real axis, exactly where a function with
+  real coefficients puts its features: counted twice it biases <code>(z-1)/(z+1)</code> by about 1%,
+  against 0.01% with it dropped.</li>
+</ul>
+<p>Samples where <code>log|f|</code> is not finite -- the zeros and the poles themselves -- are excluded.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>modulus</code>
+            </td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>|f|</code> on a <code>sample_sphere</code> grid, shaped <code>(n_phi, n_theta)</code>: axis 0 is longitude, whose
+first and last rows are the duplicated seam meridian.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>sphere_z</code>
+            </td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The <code>z</code> coordinate of each sample, the same shape, i.e. <code>field.sphere_xyz[..., 2]</code>.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>statistic</code>
+            </td>
+            <td>
+                  <code>(<span title="geometric">geometric</span>, <span title="median">median</span>)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Which location statistic of <code>log|f|</code> to centre on. <code>'geometric'</code> gives the area-weighted
+geometric mean of <code>|f|</code>; <code>'median'</code> gives the area-weighted median, which is more robust
+when a high-order feature at infinity covers enough of the sphere to drag sea level away
+from the structure worth seeing. Both are self-dual.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;geometric&#39;</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The estimated constant, or 1.0 when no usable sample remains.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="complexplorer.ValidationError (complexplorer.exceptions.ValidationError)" href="../core/#complexplorer.ValidationError">ValidationError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>statistic</code> is not recognized, or the two arrays disagree in shape.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="note" open>
+  <summary>Notes</summary>
+  <p>Accuracy is limited by <code>sample_sphere</code>'s <code>avoid_poles</code> clamp, which is fixed rather than
+shrinking with resolution, so the estimate converges to a slightly biased value rather than to
+the exact one. The error stays far below what a printer can resolve -- under 0.1% on the
+functions measured -- but a test comparing this against the closed form must use a loose
+tolerance and must not tighten it as resolution grows.</p>
+</details>
 
     </div>
 
