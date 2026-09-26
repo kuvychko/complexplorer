@@ -71,6 +71,10 @@ Manifests (`index.json`, `card.json`) are byte-identical for a given library ver
 platform, so a regeneration that changes them is telling you something real. Portrait PNGs are
 reproducible only best-effort and differ across machines.
 
+"For a given library version" is literal: `index.json` and `showcase.json` record
+`complexplorer_version`, so bumping the version invalidates the committed manifest until the gallery
+is regenerated. That is why the release runbook below bumps before it regenerates.
+
 ## The release artifact gate
 
 The suite runs against the source tree, so it cannot see what a user installs; these checks look at
@@ -113,14 +117,17 @@ PyPI can yank but never undo.
 1. **Join the histories.** On the release branch, `git merge -s ours origin/main` records main as
    merged while keeping this tree, so the PR into `main` is a fast-forward and the older history
    stays reachable.
-2. **Run the full gate on a clean checkout:** the checks above, plus
-   `pytest --nbmake examples/notebooks/`, a clean `python examples/showcase.py` with the diff
-   reviewed, and the artifact gate.
-3. **Bump the version.** `__version__` in `complexplorer/_version.py` is the single source of
-   truth, and the release workflow fails before building if the tag disagrees with it.
+2. **Bump the version, first.** `__version__` in `complexplorer/_version.py` is the single source
+   of truth, and the release workflow fails before building if the tag disagrees with it.
+   `CITATION.cff` must state the same version — a test asserts the two agree.
+3. **Regenerate the gallery** — `python examples/showcase.py`, with the diff reviewed. This follows
+   the bump rather than preceding it: `examples/gallery/index.json` and `showcase.json` stamp
+   `complexplorer_version`, and a test asserts the committed `index.json` reproduces byte for byte,
+   so regenerating before the bump leaves a stale manifest and a release commit whose suite is red.
 4. **Set the changelog date.** `## [3.0.0] - Unreleased` becomes the release date, and the compare
    links at the bottom are updated.
-5. **Check `CITATION.cff`** states the version being released.
+5. **Run the full gate on a clean checkout:** the checks above, plus
+   `pytest --nbmake examples/notebooks/`, and the artifact gate.
 6. **Tag** `vX.Y.Z` and push it. This triggers the release workflow, the documentation deploy and
    the notebook run; none of them can be triggered by a branch push.
 7. **Approve the `pypi` environment** on the release run. TestPyPI publishes without an approval;

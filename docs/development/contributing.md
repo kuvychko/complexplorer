@@ -58,6 +58,11 @@ Manifests (`index.json`, `card.json`) are byte-stable for a given library versio
 so a regeneration that changes them is telling you something real. Portrait PNGs are reproducible
 only best-effort and will differ across machines.
 
+"For a given library version" is literal: `index.json` and `showcase.json` record
+`complexplorer_version`, so a version bump invalidates the committed manifest until the gallery is
+regenerated. Bump first, then regenerate — the other order leaves a release commit whose suite is
+red.
+
 ## Releasing
 
 A release is a **tag**. Pushing `vX.Y.Z` runs `.github/workflows/release.yml`, which checks the tag
@@ -66,11 +71,13 @@ an approval before uploading to PyPI. Merging to `main` publishes nothing: `main
 documentation, chores and specification archives, and a condition that suppressed a publish for
 those would have to be right every time against a mistake PyPI can yank but never undo.
 
-1. Bump `__version__` in `complexplorer/_version.py` and land that commit. The workflow compares
-   the tag against it and fails before building if they disagree.
-2. Add the changelog entry and date it.
-3. Tag the landed commit and push the tag: `git tag vX.Y.Z && git push origin vX.Y.Z`.
-4. Approve the `pypi` environment when the run asks. TestPyPI publishes without an approval; PyPI
+1. Bump `__version__` in `complexplorer/_version.py`, and `CITATION.cff` to match. The workflow
+   compares the tag against `__version__` and fails before building if they disagree.
+2. Regenerate the gallery, after the bump, for the reason given above.
+3. Add the changelog entry and date it.
+4. Land all of that, then tag the landed commit and push the tag:
+   `git tag vX.Y.Z && git push origin vX.Y.Z`.
+5. Approve the `pypi` environment when the run asks. TestPyPI publishes without an approval; PyPI
    waits for a person.
 
 Neither guard replaces the other. TestPyPI surfaces configuration faults — a publisher entry that

@@ -77,6 +77,13 @@
   Note that `v3.1.0rc1` also matches `docs.yml`'s `v3.*` trigger and `notebooks.yml`'s `v*`, so the
   rehearsal deploys the site from the release candidate too; either accept that or rehearse under a
   tag those two do not match.
+  Found while rehearsing, on `chore/release-rehearsal`: a version bump alone turns the suite red,
+  because `examples/gallery/index.json` stamps `complexplorer_version` and `test_gallery` asserts
+  the committed manifest reproduces byte for byte. `CITATION.cff` is coupled the same way, through
+  `test_release_metadata`. The runbook regenerated the gallery *before* bumping, which leaves both
+  stale; the order is now reversed. Neither would have blocked the release itself — `release.yml`
+  runs the artifact gate, not the suite — so CI was the only thing standing between a green tag and
+  a release commit that fails its own tests.
 - [ ] 6.4 Verify the tag gate fires: push a deliberately mismatched tag to a scratch branch and
   confirm the run fails before building. (The gate script itself was exercised locally against a
   matching tag, a mismatched tag and a branch ref; what remains is confirming it in a real run.)
