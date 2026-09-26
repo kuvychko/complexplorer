@@ -63,6 +63,7 @@ A `TransferFunction` is a plain callable, so every renderer above accepts it dir
 | To compress `\|f(z)\|` into height | `modulus_mode="arctan"` on a 3D call | — |
 | The scaling modes themselves | `cp.ModulusScaling` | a class of static methods |
 | A bundled scaling | `cp.get_scaling_preset("balanced")` | a settings dict |
+| The constant that fixes sea level | `cp.normalization_constant(zeros, poles)` or `cp.sampled_normalization_constant(...)` | a float |
 | Phase or a sawtooth directly | `cp.phase(z)`, `cp.sawtooth(x)` | an array |
 | Stereographic projection | `cp.stereographic_projection(z)`, `cp.inverse_stereographic(...)` | arrays |
 

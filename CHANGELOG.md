@@ -2,6 +2,75 @@
 
 All notable changes to complexplorer will be documented in this file.
 
+## [Unreleased]
+
+Ornaments stop being blobs. A task-oriented version of this material is in the
+[3.1 migration guide](https://kuvychko.github.io/complexplorer/migration-3.1/).
+
+### Breaking Changes
+- **Every ornament generated with default settings changes shape.** That is the point of the
+  release. Three defaults moved: normalization is on (`normalize="geometric"`), the transfer is
+  `logarithmic` rather than `arctan`, and the relief depth is `r_min=0.2` rather than `0.5` —
+  matching every named scaling preset, which only the STL defaults diverged from. The 3.0 look is
+  reproducible by setting all three back; the migration guide gives the snippet
+- **`custom` scaling dispatch honours `r_min`/`r_max`.** It used to short-circuit
+  `ModulusScaling.custom` and use the callable's output as the radius directly, discarding bounds
+  passed alongside it. A callable written against that bug returns a radius, which is now clipped to
+  `[0, 1]` and remapped — **silently wrong geometry rather than an error**, so this one needs
+  checking by hand. The fix is to drop the `r_min + (r_max - r_min) *` wrapper from the callable and
+  pass those bounds as parameters
+- **`validate_printability` no longer reports a wall thickness.** `wall_thickness_ok`,
+  `estimated_min_wall_mm` and `recommended_size_mm` are gone; `min_radius_mm` and `max_radius_mm`
+  replace them. Reading a removed key raises `KeyError`. The removed test was never meaningful: it
+  ran after `scale_to_size`, so the scale factor was always 1.0 and the condition reduced to
+  `0.3 >= 0.8` — constant `False` for every mesh ever exported
+
+### Fixed
+- **A closed mesh is no longer reported as open.** `extract_feature_edges` enables boundary,
+  feature, manifold and non-manifold extraction by default, so requesting boundary edges alone
+  returned substantially every edge: a `pyvista.Cube` — closed, manifold, `n_open_edges == 0` — was
+  reported as neither watertight nor manifold, because each of its twelve creases read as a hole. A
+  sphere has no creases, which is why a sphere-only test never caught it. `repair_mesh_simple` and
+  `close_mesh_holes` carried the same mistake in their progress counters, which is why repair looked
+  like it was failing while working
+- Saved STL meshes carry consistent, outward-oriented normals, so their facet normals mean something
+  to a consumer that reads them
+
+### Added
+- **Normalization.** `|f|` is rescaled so its area-weighted geometric mean over the sphere is 1,
+  which stops the arbitrary constant in front of a function from changing the ornament's geometry —
+  sea level sits at `|f| = 1` for every self-dual transfer. Measured on `z/(z**10-1)`, this moves the
+  share of surface area in the middle half of the radial range from 56.7% to 13.2%. Accepts
+  `"geometric"`, `"median"`, an explicit float, or `None`. The constant is estimated from the samples
+  the relief is already built from, so `f` is never evaluated twice
+- `normalization_constant()` and `sampled_normalization_constant()` as public helpers. The first is
+  the exact closed form for a rational function and requires a **complete** divisor — with a partial
+  one it returns a confidently wrong number rather than raising, which is documented prominently and
+  is why the default path samples instead
+- **`pointiness`** sets tip sharpness as the reciprocal of the tip exponent: the surface approaches a
+  feature of order `mu` like `distance ** (mu / k)` with `k = pointiness * pole_order`, so
+  `pole_order` makes a double pole print as sharp as a simple one. `arctan` could not express this at
+  all — it reaches 90% of its height at `|f| = 6.3` whatever the function, which is why every default
+  ornament was a rounded pebble regardless of its mathematics
+- **`sharpness`** sets that scale directly. `ln(10)` makes one unit of relief exactly one decade of
+  gain — 20 dB — turning a transfer function's relief into a scale readable like a Bode magnitude
+  curve along a meridian
+- **`contrast=(boost, weight)`** and the `log_mixture` scaling mode: a two-scale transfer mixing a
+  narrow logistic for bulk contrast with the wide one for the tips. Off by default, because applied
+  globally it degrades the pieces whose tips are the point. Both terms are odd in `log|f|`, so
+  self-duality is exact, and it is smooth at `|f| = 1` — unlike a signed power of the log modulus,
+  whose infinite derivative there creases every sea-level contour and stops the mesh seam welding
+- `count_edges()` in `complexplorer.export.stl`, which counts one class of edge with all four
+  `extract_feature_edges` flags passed explicitly
+- A "why is my ornament a blob" section in the
+  [physical workflow guide](https://kuvychko.github.io/complexplorer/guide/physical-workflow/),
+  covering normalization, the tip exponent, and the honest limit: a relief is only as interesting as
+  its zero/pole divisor is dense
+
+### Changed
+- `tests/regression/baselines/ornament.npz` regenerated, not repaired — the default geometry change
+  is intended
+
 ## [3.0.0] - 2026-09-19
 
 Consolidates all work since 2.0.0, the published baseline (PyPI, 2025-10-19). The 2.1–2.4

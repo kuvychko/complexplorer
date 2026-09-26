@@ -127,6 +127,7 @@ nav:
       - STL export: api/export.md
       - Engineering mode: api/engineering.md
       - Core and exceptions: api/core.md
+  - Migrating to 3.1: migration-3.1.md
   - Migrating to 3.0: migration-3.0.md
   - Development:
       - Contributing: development/contributing.md

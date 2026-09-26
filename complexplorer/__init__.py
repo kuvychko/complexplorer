@@ -37,7 +37,12 @@ from complexplorer.core.functions import (
     stereographic_projection,
 )
 from complexplorer.core.presets import FunctionPreset, catalog
-from complexplorer.core.scaling import ModulusScaling, get_scaling_preset
+from complexplorer.core.scaling import (
+    ModulusScaling,
+    get_scaling_preset,
+    normalization_constant,
+    sampled_normalization_constant,
+)
 from complexplorer.exceptions import ColormapError, ComplexplorerError, ValidationError
 
 # PyVista is a required core dependency as of 3.0 (the sole 3D backend; also powers STL
@@ -87,6 +92,8 @@ __all__ = [
     "FourQuadrant",
     "ModulusScaling",
     "get_scaling_preset",
+    "normalization_constant",
+    "sampled_normalization_constant",
     # Function preset registry: catalog supplies functions, PlotPresets configures renders
     "catalog",
     "FunctionPreset",

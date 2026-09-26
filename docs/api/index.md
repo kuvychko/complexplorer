@@ -14,7 +14,7 @@ pages below document each group in full.
 | [Colormaps](colormaps.md) | `Phase`, the perceptual families, and the pattern maps |
 | [Plotting (2D)](plotting-2d.md) | `plot`, `pair_plot`, the stereographic charts |
 | [Plotting (3D)](plotting-3d.md) | landscapes, the Riemann sphere, Riemann surfaces |
-| [Scaling](scaling.md) | `ModulusScaling` and `get_scaling_preset` |
+| [Scaling](scaling.md) | `ModulusScaling`, `get_scaling_preset`, and the normalization constant |
 | [Catalog and presets](catalog.md) | `catalog`, `FunctionPreset`, `PlotPresets`, `quick_plot`, `generate_gallery` |
 | [Export](export.md) | `OrnamentGenerator`, `create_ornament` |
 | [Engineering mode](engineering.md) | `cp.ee` |
