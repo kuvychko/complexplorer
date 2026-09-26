@@ -24,7 +24,7 @@ keywords:
   - domain coloring
   - 3D printing
 license: MIT
-version: 3.0.0
+version: 3.1.0rc1
 # Set to the release date when the tag is cut; see CONTRIBUTING.md, "Releasing".
 date-released: 2026-09-19
 # A DOI can be added here once a release is archived somewhere that issues one.
