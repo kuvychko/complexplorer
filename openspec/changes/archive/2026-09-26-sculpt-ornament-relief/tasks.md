@@ -214,6 +214,11 @@
 
 ## 9. Release
 
+> Archived with 9.3-9.6 open by decision. Each needs the release run itself or a follow-up run, so
+> they are recorded here rather than holding the change open: 9.3 is observed while the release is
+> approved, and 9.4-9.6 happen after it. They were inherited from `publish-on-tag` for exactly this
+> reason.
+
 > This change ships 3.1.0, the first real run of the tag-triggered chain. The archived
 > `publish-on-tag` change deliberately left 6.4, 6.5 and 6.6 open for a real release to settle, so
 > they are carried here rather than lost in the archive. Follow
