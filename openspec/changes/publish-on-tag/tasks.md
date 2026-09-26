@@ -7,16 +7,17 @@
 - [x] 0.1 Create a Trusted Publisher on **PyPI** for `complexplorer`: this repository, workflow
   `release.yml`, environment `pypi`.
 - [x] 0.2 Create a Trusted Publisher on **TestPyPI** for the same, environment `testpypi`.
-- [ ] 0.3 Create the `pypi` GitHub Environment with a required reviewer. Create `testpypi` without
+- [x] 0.3 Create the `pypi` GitHub Environment with a required reviewer. Create `testpypi` without
   one — the rehearsal should not need an approval to be useful.
-  **Not actually in place.** The `v3.1.0rc1` rehearsal published to PyPI without waiting: the
-  environment exists but carries no protection rules (`protection_rules: []`, `updated_at` equal to
-  `created_at`, so it was never edited after creation). Add the reviewer under Settings →
-  Environments → pypi → Required reviewers, then verify the **rule**, not the environment:
-  `GET /repos/kuvychko/complexplorer/environments` must show a `required_reviewers` entry for
-  `pypi`. Checking that the environment exists proves nothing — GitHub silently creates a missing
-  environment, without protections, the first time a workflow names one.
-  Consider clearing `can_admins_bypass` too; it is `true` by default, which lets the approval be
+  The `v3.1.0rc1` rehearsal published to PyPI without waiting: the environment existed but carried
+  no protection rules, because the UI's *Save protection rules* button had not been pressed. Now
+  verified as `type=required_reviewers User:kuvychko` on `pypi`, and no rules on `testpypi`.
+  **Verify the rule, not the environment**, with
+  `GET /repos/kuvychko/complexplorer/environments`: that the environment exists proves nothing,
+  since GitHub creates a missing environment silently, without protections, the first time a
+  workflow names one. Read `protection_rules` specifically — `updated_at` does *not* advance when
+  protection rules change, so it is no evidence either way.
+  Still open as optional hardening: `can_admins_bypass` is `true`, which lets the approval be
   skipped by the person most likely to be in a hurry.
 - [x] 0.4 Confirm no PyPI API token remains as a repository or organization secret; remove it if
   one is there. Keep the personal token until the first real release succeeds, then revoke it.
@@ -76,10 +77,15 @@
 
 ## 6. Verification
 
+> Carried forward past the archive, by decision: 6.4, 6.5 and 6.6 need a tag push, a re-run and a
+> real release respectively, so they ride on the next release (`sculpt-ornament-relief`) rather than
+> holding this change open. Everything a commit can settle is settled, and the rehearsal that
+> mattered — 6.3 — is done and recorded below, including the one fault it found.
+
 - [x] 6.1 `openspec validate publish-on-tag` and `openspec validate --specs`.
 - [x] 6.2 Actionlint (or equivalent) over the new workflow. (actionlint 1.7.12, clean over all
   four workflows.)
-- [ ] 6.3 **Rehearse before 3.1.0, not during it.** Tag a prerelease — `v3.1.0rc1` against a tree
+- [x] 6.3 **Rehearse before 3.1.0, not during it.** Tag a prerelease — `v3.1.0rc1` against a tree
   whose `_version.py` says `3.1.0rc1` — and confirm: the gate passes, TestPyPI receives the upload,
   the `pypi` job waits for approval, and approving it publishes. A prerelease is the cheapest
   honest end-to-end test, and PyPI hides prereleases from the default install.
@@ -96,12 +102,16 @@
   **Rehearsal result (`v3.1.0rc1`, Release run 1):** the tag gate, all twelve artifact-gate steps,
   the TestPyPI upload and the PyPI upload all passed, through Trusted Publishing with no token — and
   the PyPI job did **not** wait for an approval, because the environment had no reviewer (see 0.3).
-  So this task is not yet satisfied: everything but the approval requirement is verified. Re-verify
-  by dispatching the workflow against the existing `v3.1.0rc1` tag once the reviewer is configured;
-  that run doubles as 6.5, since PyPI already holds the version.
+  Everything but the approval requirement is verified this way. The reviewer is now configured and
+  verified (0.3), and by decision the approval itself is demonstrated by the first real release
+  rather than by another rehearsal: `sculpt-ornament-relief` ships next and exercises the chain with
+  an approval that is wanted anyway. `v3.1.0rc1` stays on PyPI as the rehearsal's record — a
+  prerelease, so `pip install complexplorer` ignores it.
 - [ ] 6.4 Verify the tag gate fires: push a deliberately mismatched tag to a scratch branch and
   confirm the run fails before building. (The gate script itself was exercised locally against a
   matching tag, a mismatched tag and a branch ref; what remains is confirming it in a real run.)
 - [ ] 6.5 Verify the duplicate-version guard by re-running the release for the already-published
-  prerelease and confirming it fails rather than reporting success.
+  prerelease and confirming it fails rather than reporting success. (Available at any time: dispatch
+  `Release` against the existing `v3.1.0rc1` tag, which PyPI already holds. TestPyPI should pass via
+  `skip-existing` and PyPI should fail.)
 - [ ] 6.6 After the first successful real release, revoke the personal PyPI API token.
