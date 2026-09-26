@@ -303,7 +303,10 @@ class TestTheSharpnessCap:
             return z**30 - 522 * z**25 - 10005 * z**20 - 10005 * z**10 + 522 * z**5 + 1
 
         def ico_v(z):
-            return z * (z**10 + 11 * z**5 - 1)
+            # MINUS 11. The +11 variant is a different orientation of the icosahedron: paired with
+            # this H and T it fails Klein's syzygy (H^3 - T^2 == 1728 V^5) by a factor of ~20, so the
+            # ratio below would not be an icosahedral invariant at all.
+            return z * (z**10 - 11 * z**5 - 1)
 
         crown = lambda z: ico_t(z) ** 2 / ico_v(z) ** 5  # noqa: E731
 
