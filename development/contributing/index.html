@@ -92,7 +92,7 @@
             
             
   
-    Documentation for complexplorer <strong>3.0.0</strong>
+    Documentation for complexplorer <strong>3.1.0rc1</strong>
   
 
           </div>
@@ -1450,6 +1450,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#releasing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Releasing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-release-artifact-gate" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1627,6 +1638,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#releasing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Releasing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-release-artifact-gate" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1754,9 +1776,43 @@ by hand — that is what keeps "every committed asset reproduces from a document
 <p>Manifests (<code>index.json</code>, <code>card.json</code>) are byte-stable for a given library version on any platform,
 so a regeneration that changes them is telling you something real. Portrait PNGs are reproducible
 only best-effort and will differ across machines.</p>
+<h2 id="releasing">Releasing<a class="headerlink" href="#releasing" title="Permanent link">&para;</a></h2>
+<p>A release is a <strong>tag</strong>. Pushing <code>vX.Y.Z</code> runs <code>.github/workflows/release.yml</code>, which checks the tag
+against the packaged version, runs the artifact gate below, uploads to TestPyPI, and then waits for
+an approval before uploading to PyPI. Merging to <code>main</code> publishes nothing: <code>main</code> carries
+documentation, chores and specification archives, and a condition that suppressed a publish for
+those would have to be right every time against a mistake PyPI can yank but never undo.</p>
+<ol>
+<li>Bump <code>__version__</code> in <code>complexplorer/_version.py</code> and land that commit. The workflow compares
+   the tag against it and fails before building if they disagree.</li>
+<li>Add the changelog entry and date it.</li>
+<li>Tag the landed commit and push the tag: <code>git tag vX.Y.Z &amp;&amp; git push origin vX.Y.Z</code>.</li>
+<li>Approve the <code>pypi</code> environment when the run asks. TestPyPI publishes without an approval; PyPI
+   waits for a person.</li>
+</ol>
+<p>Neither guard replaces the other. TestPyPI surfaces configuration faults — a publisher entry that
+does not match, metadata an index rejects that <code>twine check</code> accepts — against an index where a
+version number can be spent harmlessly. The approval surfaces intent faults, such as a tag at the
+wrong commit or ahead of a pending fix, which produce a perfectly valid artifact that no automated
+check can distinguish from a correct release.</p>
+<p>Both uploads authenticate through PyPI's Trusted Publishing, so there is no API token in repository
+secrets or in anyone's password manager.</p>
+<p>The version bump, the changelog entry and the GitHub Release notes stay manual. Inferring a bump
+from commit messages is a guess about semantics this project makes deliberately — 3.0 removed the
+matplotlib 3D backend, and no commit-message convention would have decided that was a major. The
+tag gate verifies the bump rather than writing it.</p>
+<p>A bad release is recovered with a <strong>new version</strong>, never a retry. A published version is immutable,
+so the workflow fails on a version already on the index rather than skipping it: a green run that
+uploaded nothing would answer "did my fix ship?" incorrectly.</p>
+<p>The wider runbook — joining the histories, the notebook run, the gallery regeneration,
+<code>CITATION.cff</code>, the GitHub release — is in
+<a href="https://github.com/kuvychko/complexplorer/blob/main/CONTRIBUTING.md"><code>CONTRIBUTING.md</code></a> in the
+repository.</p>
 <h2 id="the-release-artifact-gate">The release artifact gate<a class="headerlink" href="#the-release-artifact-gate" title="Permanent link">&para;</a></h2>
-<p>The test suite runs against the source tree, so it cannot see what a user installs. Before tagging,
-check the artifact itself:</p>
+<p>The test suite runs against the source tree, so it cannot see what a user installs; these checks
+look at the artifact itself. CI runs them on every push, and the release workflow runs them again
+against the exact files it then publishes — nothing is rebuilt between the gate and the upload. To
+reproduce the gate locally:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Build, and check the metadata the way PyPI will.</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>uv<span class="w"> </span>build
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>uv<span class="w"> </span>run<span class="w"> </span>--no-project<span class="w"> </span>--with<span class="w"> </span>twine<span class="w"> </span>twine<span class="w"> </span>check<span class="w"> </span>dist/*
