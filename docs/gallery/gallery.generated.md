@@ -16,7 +16,7 @@ full-resolution render.
 - [Riemann surfaces](#riemann-surfaces) — 4 figures
 - [Engineering mode](#engineering-mode) — 2 figures
 - [Colormaps](#colormaps) — 17 figures
-- [Physical output](#physical-output) — 3 figures
+- [Physical output](#physical-output) — 9 figures
 
 ## Phase portraits
 
@@ -204,7 +204,7 @@ cp.plot(domain, lambda z: 1 / z,
 
 Three simple zeros at -1, 0, 1.
 
-<p><a href="../../examples/gallery/cubic_real_roots/landscape.png"><img src="../../examples/gallery/thumb/cubic_real_roots/landscape.png" alt="3D analytic landscape of z**3 - z" width="400"></a> <a href="../../examples/gallery/cubic_real_roots/portrait.png"><img src="../../examples/gallery/thumb/cubic_real_roots/portrait.png" alt="2D phase portrait of z**3 - z" width="400"></a> <a href="../../examples/gallery/cubic_real_roots/sphere.png"><img src="../../examples/gallery/thumb/cubic_real_roots/sphere.png" alt="Riemann sphere of z**3 - z" width="400"></a></p>
+<p><a href="../../examples/gallery/cubic_real_roots/portrait.png"><img src="../../examples/gallery/thumb/cubic_real_roots/portrait.png" alt="2D phase portrait of z**3 - z" width="400"></a> <a href="../../examples/gallery/cubic_real_roots/landscape.png"><img src="../../examples/gallery/thumb/cubic_real_roots/landscape.png" alt="3D analytic landscape of z**3 - z" width="400"></a> <a href="../../examples/gallery/cubic_real_roots/sphere.png"><img src="../../examples/gallery/thumb/cubic_real_roots/sphere.png" alt="Riemann sphere of z**3 - z" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -212,14 +212,14 @@ Three simple zeros at -1, 0, 1.
 ```python
 import complexplorer as cp
 preset = cp.catalog.get("cubic_real_roots")   # f(z) = z**3 - z
-sc = preset.scaling()
-cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
-                     modulus_mode=sc["method"], modulus_params=sc["params"])
+cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 # ---
 import complexplorer as cp
 preset = cp.catalog.get("cubic_real_roots")   # f(z) = z**3 - z
-cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
+sc = preset.scaling()
+cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
+                     modulus_mode=sc["method"], modulus_params=sc["params"])
 
 # ---
 import complexplorer as cp
@@ -233,7 +233,7 @@ cp.riemann_pv(preset.func, cmap=preset.colormap())   # full sphere
 
 The identity map. A single simple zero at the origin; phase winds once.
 
-<p><a href="../../examples/gallery/identity/landscape.png"><img src="../../examples/gallery/thumb/identity/landscape.png" alt="3D analytic landscape of z" width="400"></a> <a href="../../examples/gallery/identity/portrait.png"><img src="../../examples/gallery/thumb/identity/portrait.png" alt="2D phase portrait of z" width="400"></a> <a href="../../examples/gallery/identity/sphere.png"><img src="../../examples/gallery/thumb/identity/sphere.png" alt="Riemann sphere of z" width="400"></a></p>
+<p><a href="../../examples/gallery/identity/portrait.png"><img src="../../examples/gallery/thumb/identity/portrait.png" alt="2D phase portrait of z" width="400"></a> <a href="../../examples/gallery/identity/landscape.png"><img src="../../examples/gallery/thumb/identity/landscape.png" alt="3D analytic landscape of z" width="400"></a> <a href="../../examples/gallery/identity/sphere.png"><img src="../../examples/gallery/thumb/identity/sphere.png" alt="Riemann sphere of z" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -241,14 +241,14 @@ The identity map. A single simple zero at the origin; phase winds once.
 ```python
 import complexplorer as cp
 preset = cp.catalog.get("identity")   # f(z) = z
-sc = preset.scaling()
-cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
-                     modulus_mode=sc["method"], modulus_params=sc["params"])
+cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 # ---
 import complexplorer as cp
 preset = cp.catalog.get("identity")   # f(z) = z
-cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
+sc = preset.scaling()
+cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
+                     modulus_mode=sc["method"], modulus_params=sc["params"])
 
 # ---
 import complexplorer as cp
@@ -262,7 +262,7 @@ cp.riemann_pv(preset.func, cmap=preset.colormap())   # full sphere
 
 One zero at +1, one pole at -1. Maps the right half-plane to the unit disk.
 
-<p><a href="../../examples/gallery/mobius_cayley/landscape.png"><img src="../../examples/gallery/thumb/mobius_cayley/landscape.png" alt="3D analytic landscape of (z - 1) / (z + 1)" width="400"></a> <a href="../../examples/gallery/mobius_cayley/portrait.png"><img src="../../examples/gallery/thumb/mobius_cayley/portrait.png" alt="2D phase portrait of (z - 1) / (z + 1)" width="400"></a> <a href="../../examples/gallery/mobius_cayley/sphere.png"><img src="../../examples/gallery/thumb/mobius_cayley/sphere.png" alt="Riemann sphere of (z - 1) / (z + 1)" width="400"></a></p>
+<p><a href="../../examples/gallery/mobius_cayley/portrait.png"><img src="../../examples/gallery/thumb/mobius_cayley/portrait.png" alt="2D phase portrait of (z - 1) / (z + 1)" width="400"></a> <a href="../../examples/gallery/mobius_cayley/landscape.png"><img src="../../examples/gallery/thumb/mobius_cayley/landscape.png" alt="3D analytic landscape of (z - 1) / (z + 1)" width="400"></a> <a href="../../examples/gallery/mobius_cayley/sphere.png"><img src="../../examples/gallery/thumb/mobius_cayley/sphere.png" alt="Riemann sphere of (z - 1) / (z + 1)" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -270,14 +270,14 @@ One zero at +1, one pole at -1. Maps the right half-plane to the unit disk.
 ```python
 import complexplorer as cp
 preset = cp.catalog.get("mobius_cayley")   # f(z) = (z - 1) / (z + 1)
-sc = preset.scaling()
-cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
-                     modulus_mode=sc["method"], modulus_params=sc["params"])
+cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 # ---
 import complexplorer as cp
 preset = cp.catalog.get("mobius_cayley")   # f(z) = (z - 1) / (z + 1)
-cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
+sc = preset.scaling()
+cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
+                     modulus_mode=sc["method"], modulus_params=sc["params"])
 
 # ---
 import complexplorer as cp
@@ -291,7 +291,7 @@ cp.riemann_pv(preset.func, cmap=preset.colormap())   # full sphere
 
 Zeros at ±1, poles at ±i.
 
-<p><a href="../../examples/gallery/rational_zeros_poles/landscape.png"><img src="../../examples/gallery/thumb/rational_zeros_poles/landscape.png" alt="3D analytic landscape of (z**2 - 1) / (z**2 + 1)" width="400"></a> <a href="../../examples/gallery/rational_zeros_poles/portrait.png"><img src="../../examples/gallery/thumb/rational_zeros_poles/portrait.png" alt="2D phase portrait of (z**2 - 1) / (z**2 + 1)" width="400"></a> <a href="../../examples/gallery/rational_zeros_poles/sphere.png"><img src="../../examples/gallery/thumb/rational_zeros_poles/sphere.png" alt="Riemann sphere of (z**2 - 1) / (z**2 + 1)" width="400"></a></p>
+<p><a href="../../examples/gallery/rational_zeros_poles/portrait.png"><img src="../../examples/gallery/thumb/rational_zeros_poles/portrait.png" alt="2D phase portrait of (z**2 - 1) / (z**2 + 1)" width="400"></a> <a href="../../examples/gallery/rational_zeros_poles/landscape.png"><img src="../../examples/gallery/thumb/rational_zeros_poles/landscape.png" alt="3D analytic landscape of (z**2 - 1) / (z**2 + 1)" width="400"></a> <a href="../../examples/gallery/rational_zeros_poles/sphere.png"><img src="../../examples/gallery/thumb/rational_zeros_poles/sphere.png" alt="Riemann sphere of (z**2 - 1) / (z**2 + 1)" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -299,14 +299,14 @@ Zeros at ±1, poles at ±i.
 ```python
 import complexplorer as cp
 preset = cp.catalog.get("rational_zeros_poles")   # f(z) = (z**2 - 1) / (z**2 + 1)
-sc = preset.scaling()
-cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
-                     modulus_mode=sc["method"], modulus_params=sc["params"])
+cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 # ---
 import complexplorer as cp
 preset = cp.catalog.get("rational_zeros_poles")   # f(z) = (z**2 - 1) / (z**2 + 1)
-cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
+sc = preset.scaling()
+cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
+                     modulus_mode=sc["method"], modulus_params=sc["params"])
 
 # ---
 import complexplorer as cp
@@ -320,7 +320,7 @@ cp.riemann_pv(preset.func, cmap=preset.colormap())   # full sphere
 
 A simple pole at the origin (Möbius inversion); phase winds backward.
 
-<p><a href="../../examples/gallery/reciprocal/landscape.png"><img src="../../examples/gallery/thumb/reciprocal/landscape.png" alt="3D analytic landscape of 1 / z" width="400"></a> <a href="../../examples/gallery/reciprocal/portrait.png"><img src="../../examples/gallery/thumb/reciprocal/portrait.png" alt="2D phase portrait of 1 / z" width="400"></a> <a href="../../examples/gallery/reciprocal/sphere.png"><img src="../../examples/gallery/thumb/reciprocal/sphere.png" alt="Riemann sphere of 1 / z" width="400"></a></p>
+<p><a href="../../examples/gallery/reciprocal/portrait.png"><img src="../../examples/gallery/thumb/reciprocal/portrait.png" alt="2D phase portrait of 1 / z" width="400"></a> <a href="../../examples/gallery/reciprocal/landscape.png"><img src="../../examples/gallery/thumb/reciprocal/landscape.png" alt="3D analytic landscape of 1 / z" width="400"></a> <a href="../../examples/gallery/reciprocal/sphere.png"><img src="../../examples/gallery/thumb/reciprocal/sphere.png" alt="Riemann sphere of 1 / z" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -328,14 +328,14 @@ A simple pole at the origin (Möbius inversion); phase winds backward.
 ```python
 import complexplorer as cp
 preset = cp.catalog.get("reciprocal")   # f(z) = 1 / z
-sc = preset.scaling()
-cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
-                     modulus_mode=sc["method"], modulus_params=sc["params"])
+cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 # ---
 import complexplorer as cp
 preset = cp.catalog.get("reciprocal")   # f(z) = 1 / z
-cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
+sc = preset.scaling()
+cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
+                     modulus_mode=sc["method"], modulus_params=sc["params"])
 
 # ---
 import complexplorer as cp
@@ -349,7 +349,7 @@ cp.riemann_pv(preset.func, cmap=preset.colormap())   # full sphere
 
 A double zero at the origin; phase winds twice.
 
-<p><a href="../../examples/gallery/square/landscape.png"><img src="../../examples/gallery/thumb/square/landscape.png" alt="3D analytic landscape of z**2" width="400"></a> <a href="../../examples/gallery/square/portrait.png"><img src="../../examples/gallery/thumb/square/portrait.png" alt="2D phase portrait of z**2" width="400"></a> <a href="../../examples/gallery/square/sphere.png"><img src="../../examples/gallery/thumb/square/sphere.png" alt="Riemann sphere of z**2" width="400"></a></p>
+<p><a href="../../examples/gallery/square/portrait.png"><img src="../../examples/gallery/thumb/square/portrait.png" alt="2D phase portrait of z**2" width="400"></a> <a href="../../examples/gallery/square/landscape.png"><img src="../../examples/gallery/thumb/square/landscape.png" alt="3D analytic landscape of z**2" width="400"></a> <a href="../../examples/gallery/square/sphere.png"><img src="../../examples/gallery/thumb/square/sphere.png" alt="Riemann sphere of z**2" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -357,14 +357,14 @@ A double zero at the origin; phase winds twice.
 ```python
 import complexplorer as cp
 preset = cp.catalog.get("square")   # f(z) = z**2
-sc = preset.scaling()
-cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
-                     modulus_mode=sc["method"], modulus_params=sc["params"])
+cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 # ---
 import complexplorer as cp
 preset = cp.catalog.get("square")   # f(z) = z**2
-cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
+sc = preset.scaling()
+cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
+                     modulus_mode=sc["method"], modulus_params=sc["params"])
 
 # ---
 import complexplorer as cp
@@ -442,7 +442,7 @@ cp.riemann_surface_pv("log", r_max=3.0)   # log(z)
 
 Principal-branch square root; an order-2 branch point at 0 (two sheets).
 
-<p><a href="../../examples/gallery/sqrt/ornament.png"><img src="../../examples/gallery/thumb/sqrt/ornament.png" alt="Riemann relief (ornament) of sqrt(z)" width="400"></a> <a href="../../examples/gallery/sqrt/portrait.png"><img src="../../examples/gallery/thumb/sqrt/portrait.png" alt="2D phase portrait of sqrt(z)" width="400"></a> <a href="../../examples/gallery/sqrt/surface.png"><img src="../../examples/gallery/thumb/sqrt/surface.png" alt="Riemann surface of sqrt(z)" width="400"></a></p>
+<p><a href="../../examples/gallery/sqrt/portrait.png"><img src="../../examples/gallery/thumb/sqrt/portrait.png" alt="2D phase portrait of sqrt(z)" width="400"></a> <a href="../../examples/gallery/sqrt/surface.png"><img src="../../examples/gallery/thumb/sqrt/surface.png" alt="Riemann surface of sqrt(z)" width="400"></a> <a href="../../examples/gallery/sqrt/ornament.png"><img src="../../examples/gallery/thumb/sqrt/ornament.png" alt="Riemann relief (ornament) of sqrt(z)" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -450,18 +450,18 @@ Principal-branch square root; an order-2 branch point at 0 (two sheets).
 ```python
 import complexplorer as cp
 preset = cp.catalog.get("sqrt")   # f(z) = sqrt(z)
-sc = preset.scaling()
-cp.riemann_pv(preset.func, cmap=preset.colormap(),
-              modulus_mode=sc["method"], modulus_params=sc["params"])  # relief
-
-# ---
-import complexplorer as cp
-preset = cp.catalog.get("sqrt")   # f(z) = sqrt(z)
 cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 # ---
 import complexplorer as cp
 cp.riemann_surface_pv("power", n=2)   # sqrt(z)
+
+# ---
+import complexplorer as cp
+preset = cp.catalog.get("sqrt")   # f(z) = sqrt(z)
+sc = preset.scaling()
+cp.riemann_pv(preset.func, cmap=preset.colormap(),
+              modulus_mode=sc["method"], modulus_params=sc["params"])  # relief
 ```
 
 </details>
@@ -575,11 +575,131 @@ cp.riemann_pv(preset.func, cmap=preset.colormap(),
 
 </details>
 
+### Cube-Octahedron Dual
+
+The vertex form of one solid over the vertex form of its dual, at matching binary degree: six order-4 pits on the octahedron's axes, eight triple spikes on the cube's vertices. Full O_h symmetry. Its spikes point along the cube diagonals, which makes it the piece that exposed a sizing bug -- an axis-aligned bounding box understates it by exactly sqrt(3), because each spike projects onto a coordinate axis at 0.577 of its length. One of the six zeros is at infinity, so five are listed.
+
+<p><a href="../../examples/gallery/cube_octahedron_dual/portrait.png"><img src="../../examples/gallery/thumb/cube_octahedron_dual/portrait.png" alt="2D phase portrait of (z*(z**4 - 1))**4 / (z**8 + 14*z**4 + 1)**3" width="400"></a> <a href="../../examples/gallery/cube_octahedron_dual/ornament.png"><img src="../../examples/gallery/thumb/cube_octahedron_dual/ornament.png" alt="Riemann relief (ornament) of (z*(z**4 - 1))**4 / (z**8 + 14*z**4 + 1)**3" width="400"></a></p>
+
+<details>
+<summary>Show the code</summary>
+
+```python
+import complexplorer as cp
+preset = cp.catalog.get("cube_octahedron_dual")   # f(z) = (z*(z**4 - 1))**4 / (z**8 + 14*z**4 + 1)**3
+cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
+
+# ---
+import complexplorer as cp
+preset = cp.catalog.get("cube_octahedron_dual")   # f(z) = (z*(z**4 - 1))**4 / (z**8 + 14*z**4 + 1)**3
+sc = preset.scaling()
+cp.riemann_pv(preset.func, cmap=preset.colormap(),
+              modulus_mode=sc["method"], modulus_params=sc["params"])  # relief
+```
+
+</details>
+
+### Dodecahedron-Icosahedron Dual
+
+The icosahedral twin of the Cube-Octahedron Dual, built the same way: one solid's vertex form over its dual's, at matching degree. Twenty triple spikes on the dodecahedron's vertices, twelve order-5 pits on the icosahedron's. Its spikes sit exactly where the Icosahedral Crown has its pits. Full I_h symmetry. One zero is at infinity; eleven are listed.
+
+<p><a href="../../examples/gallery/dodecahedron_icosahedron_dual/portrait.png"><img src="../../examples/gallery/thumb/dodecahedron_icosahedron_dual/portrait.png" alt="2D phase portrait of (z*(z**10 - 11*z**5 - 1))**5 / (z**20 + 228*z**15 + 494*z**10 - 228*z**5 + 1)**3" width="400"></a> <a href="../../examples/gallery/dodecahedron_icosahedron_dual/ornament.png"><img src="../../examples/gallery/thumb/dodecahedron_icosahedron_dual/ornament.png" alt="Riemann relief (ornament) of (z*(z**10 - 11*z**5 - 1))**5 / (z**20 + 228*z**15 + 494*z**10 - 228*z**5 + 1)**3" width="400"></a></p>
+
+<details>
+<summary>Show the code</summary>
+
+```python
+import complexplorer as cp
+preset = cp.catalog.get("dodecahedron_icosahedron_dual")   # f(z) = (z*(z**10 - 11*z**5 - 1))**5 / (z**20 + 228*z**15 + 494*z**10 - 228*z**5 + 1)**3
+cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
+
+# ---
+import complexplorer as cp
+preset = cp.catalog.get("dodecahedron_icosahedron_dual")   # f(z) = (z*(z**10 - 11*z**5 - 1))**5 / (z**20 + 228*z**15 + 494*z**10 - 228*z**5 + 1)**3
+sc = preset.scaling()
+cp.riemann_pv(preset.func, cmap=preset.colormap(),
+              modulus_mode=sc["method"], modulus_params=sc["params"])  # relief
+```
+
+</details>
+
+### Icosahedral Crown
+
+The icosahedral answer to the Octahedral Crown, and a jump from binary degree 12 to 60 -- the icosahedral rotation group has order 60, so 60 is the lowest degree any invariant ratio can have. Twelve spikes of order 5 at the icosahedron's vertices over thirty double pits at its edge midpoints. Full I_h symmetry (order 120), the largest here. Its features are order 5, so the derived transfer scale is capped: this is the piece the cap exists for, because a mesh cannot deliver the dynamic range an uncapped order-5 scale asks for. One pole is at infinity; eleven are listed.
+
+<p><a href="../../examples/gallery/icosahedral_crown/portrait.png"><img src="../../examples/gallery/thumb/icosahedral_crown/portrait.png" alt="2D phase portrait of (z**30 - 522*z**25 - 10005*z**20 - 10005*z**10 + 522*z**5 + 1)**2 / (z*(z**10 - 11*z**5 - 1))**5" width="400"></a> <a href="../../examples/gallery/icosahedral_crown/ornament.png"><img src="../../examples/gallery/thumb/icosahedral_crown/ornament.png" alt="Riemann relief (ornament) of (z**30 - 522*z**25 - 10005*z**20 - 10005*z**10 + 522*z**5 + 1)**2 / (z*(z**10 - 11*z**5 - 1))**5" width="400"></a></p>
+
+<details>
+<summary>Show the code</summary>
+
+```python
+import complexplorer as cp
+preset = cp.catalog.get("icosahedral_crown")   # f(z) = (z**30 - 522*z**25 - 10005*z**20 - 10005*z**10 + 522*z**5 + 1)**2 / (z*(z**10 - 11*z**5 - 1))**5
+cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
+
+# ---
+import complexplorer as cp
+preset = cp.catalog.get("icosahedral_crown")   # f(z) = (z**30 - 522*z**25 - 10005*z**20 - 10005*z**10 + 522*z**5 + 1)**2 / (z*(z**10 - 11*z**5 - 1))**5
+sc = preset.scaling()
+cp.riemann_pv(preset.func, cmap=preset.colormap(),
+              modulus_mode=sc["method"], modulus_params=sc["params"])  # relief
+```
+
+</details>
+
+### Icosidodecahedral Star
+
+The third degree-60 icosahedral ratio, and the one with no counterpart elsewhere in the family: thirty double spikes at the icosahedron's edge midpoints -- the vertices of an icosidodecahedron -- over twenty triple pits on the dodecahedron. The densest piece here, and the most sea-urchin-like. Full I_h symmetry, and no feature at infinity: both forms are full degree, so the answer key is complete.
+
+<p><a href="../../examples/gallery/icosidodecahedral_star/portrait.png"><img src="../../examples/gallery/thumb/icosidodecahedral_star/portrait.png" alt="2D phase portrait of (z**20 + 228*z**15 + 494*z**10 - 228*z**5 + 1)**3 / (z**30 - 522*z**25 - 10005*z**20 - 10005*z**10 + 522*z**5 + 1)**2" width="400"></a> <a href="../../examples/gallery/icosidodecahedral_star/ornament.png"><img src="../../examples/gallery/thumb/icosidodecahedral_star/ornament.png" alt="Riemann relief (ornament) of (z**20 + 228*z**15 + 494*z**10 - 228*z**5 + 1)**3 / (z**30 - 522*z**25 - 10005*z**20 - 10005*z**10 + 522*z**5 + 1)**2" width="400"></a></p>
+
+<details>
+<summary>Show the code</summary>
+
+```python
+import complexplorer as cp
+preset = cp.catalog.get("icosidodecahedral_star")   # f(z) = (z**20 + 228*z**15 + 494*z**10 - 228*z**5 + 1)**3 / (z**30 - 522*z**25 - 10005*z**20 - 10005*z**10 + 522*z**5 + 1)**2
+cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
+
+# ---
+import complexplorer as cp
+preset = cp.catalog.get("icosidodecahedral_star")   # f(z) = (z**20 + 228*z**15 + 494*z**10 - 228*z**5 + 1)**3 / (z**30 - 522*z**25 - 10005*z**20 - 10005*z**10 + 522*z**5 + 1)**2
+sc = preset.scaling()
+cp.riemann_pv(preset.func, cmap=preset.colormap(),
+              modulus_mode=sc["method"], modulus_params=sc["params"])  # relief
+```
+
+</details>
+
+### Octahedral Crown
+
+Twelve simple zeros at the octahedron's edge midpoints under six double poles at its vertices: a crown of six spikes with a pit between each neighbouring pair. Full O_h symmetry (order 48, all nine mirror planes), so any coordinate plane cuts it into identical halves. The sixth pole sits at the north pole of the sphere, i.e. at infinity, so the answer key below lists five of the six.
+
+<p><a href="../../examples/gallery/octahedral_crown/portrait.png"><img src="../../examples/gallery/thumb/octahedral_crown/portrait.png" alt="2D phase portrait of (z**12 - 33*z**8 - 33*z**4 + 1) / (z*(z**4 - 1))**2" width="400"></a> <a href="../../examples/gallery/octahedral_crown/ornament.png"><img src="../../examples/gallery/thumb/octahedral_crown/ornament.png" alt="Riemann relief (ornament) of (z**12 - 33*z**8 - 33*z**4 + 1) / (z*(z**4 - 1))**2" width="400"></a></p>
+
+<details>
+<summary>Show the code</summary>
+
+```python
+import complexplorer as cp
+preset = cp.catalog.get("octahedral_crown")   # f(z) = (z**12 - 33*z**8 - 33*z**4 + 1) / (z*(z**4 - 1))**2
+cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
+
+# ---
+import complexplorer as cp
+preset = cp.catalog.get("octahedral_crown")   # f(z) = (z**12 - 33*z**8 - 33*z**4 + 1) / (z*(z**4 - 1))**2
+sc = preset.scaling()
+cp.riemann_pv(preset.func, cmap=preset.colormap(),
+              modulus_mode=sc["method"], modulus_params=sc["params"])  # relief
+```
+
+</details>
+
 ### Pole Flower 10
 
 A ring of ten simple poles (the 10th roots of unity) around a central simple zero. The signature printable ornament.
 
-<p><a href="../../examples/gallery/pole_flower_10/landscape.png"><img src="../../examples/gallery/thumb/pole_flower_10/landscape.png" alt="3D analytic landscape of z / (z**10 - 1)" width="400"></a> <a href="../../examples/gallery/pole_flower_10/ornament.png"><img src="../../examples/gallery/thumb/pole_flower_10/ornament.png" alt="Riemann relief (ornament) of z / (z**10 - 1)" width="400"></a> <a href="../../examples/gallery/pole_flower_10/portrait.png"><img src="../../examples/gallery/thumb/pole_flower_10/portrait.png" alt="2D phase portrait of z / (z**10 - 1)" width="400"></a> <a href="../../examples/gallery/pole_flower_10/sphere.png"><img src="../../examples/gallery/thumb/pole_flower_10/sphere.png" alt="Riemann sphere of z / (z**10 - 1)" width="400"></a></p>
+<p><a href="../../examples/gallery/pole_flower_10/portrait.png"><img src="../../examples/gallery/thumb/pole_flower_10/portrait.png" alt="2D phase portrait of z / (z**10 - 1)" width="400"></a> <a href="../../examples/gallery/pole_flower_10/ornament.png"><img src="../../examples/gallery/thumb/pole_flower_10/ornament.png" alt="Riemann relief (ornament) of z / (z**10 - 1)" width="400"></a> <a href="../../examples/gallery/pole_flower_10/landscape.png"><img src="../../examples/gallery/thumb/pole_flower_10/landscape.png" alt="3D analytic landscape of z / (z**10 - 1)" width="400"></a> <a href="../../examples/gallery/pole_flower_10/sphere.png"><img src="../../examples/gallery/thumb/pole_flower_10/sphere.png" alt="Riemann sphere of z / (z**10 - 1)" width="400"></a></p>
 
 <details>
 <summary>Show the code</summary>
@@ -587,9 +707,7 @@ A ring of ten simple poles (the 10th roots of unity) around a central simple zer
 ```python
 import complexplorer as cp
 preset = cp.catalog.get("pole_flower_10")   # f(z) = z / (z**10 - 1)
-sc = preset.scaling()
-cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
-                     modulus_mode=sc["method"], modulus_params=sc["params"])
+cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
 
 # ---
 import complexplorer as cp
@@ -601,12 +719,38 @@ cp.riemann_pv(preset.func, cmap=preset.colormap(),
 # ---
 import complexplorer as cp
 preset = cp.catalog.get("pole_flower_10")   # f(z) = z / (z**10 - 1)
-cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
+sc = preset.scaling()
+cp.plot_landscape_pv(preset.domain(), preset.func, cmap=preset.colormap(),
+                     modulus_mode=sc["method"], modulus_params=sc["params"])
 
 # ---
 import complexplorer as cp
 preset = cp.catalog.get("pole_flower_10")   # f(z) = z / (z**10 - 1)
 cp.riemann_pv(preset.func, cmap=preset.colormap())   # full sphere
+```
+
+</details>
+
+### Tetrahedral Dual
+
+Four spikes on one tetrahedron over four pits on its antipode -- the two tetrahedra that together make the cube. Its symmetry is T (order 12, rotations only): alone in this family it has no mirror plane, so a cut through it gives two halves that are genuinely different rather than two copies of one part. That is the point of the piece.
+
+<p><a href="../../examples/gallery/tetrahedral_dual/portrait.png"><img src="../../examples/gallery/thumb/tetrahedral_dual/portrait.png" alt="2D phase portrait of (z**4 + 2j*sqrt(3)*z**2 + 1) / (z**4 - 2j*sqrt(3)*z**2 + 1)" width="400"></a> <a href="../../examples/gallery/tetrahedral_dual/ornament.png"><img src="../../examples/gallery/thumb/tetrahedral_dual/ornament.png" alt="Riemann relief (ornament) of (z**4 + 2j*sqrt(3)*z**2 + 1) / (z**4 - 2j*sqrt(3)*z**2 + 1)" width="400"></a></p>
+
+<details>
+<summary>Show the code</summary>
+
+```python
+import complexplorer as cp
+preset = cp.catalog.get("tetrahedral_dual")   # f(z) = (z**4 + 2j*sqrt(3)*z**2 + 1) / (z**4 - 2j*sqrt(3)*z**2 + 1)
+cp.plot(preset.domain(), preset.func, cmap=preset.colormap())
+
+# ---
+import complexplorer as cp
+preset = cp.catalog.get("tetrahedral_dual")   # f(z) = (z**4 + 2j*sqrt(3)*z**2 + 1) / (z**4 - 2j*sqrt(3)*z**2 + 1)
+sc = preset.scaling()
+cp.riemann_pv(preset.func, cmap=preset.colormap(),
+              modulus_mode=sc["method"], modulus_params=sc["params"])  # relief
 ```
 
 </details>

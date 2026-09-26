@@ -32,6 +32,17 @@ from ..typing import CmapSpec, ComplexFunction, DomainSpec, ScalingSpec, Singula
 from ..utils.validation import ValidationError
 from .colormap import Chessboard, Colormap, LogRings, Phase, PolarChessboard
 from .domain import Annulus, Disk, Domain, Rectangle
+from .polyhedral import (
+    cube_vertex,
+    icosahedral_edge,
+    icosahedral_hessian,
+    icosahedral_vertex,
+    octahedral_edge,
+    octahedral_vertex,
+    polyhedral_features,
+    tetrahedral_dual_vertex,
+    tetrahedral_vertex,
+)
 from .scaling import get_scaling_preset
 
 SINGULARITY_TYPES = frozenset({"zero", "pole", "essential", "branch_point"})
@@ -157,6 +168,17 @@ def singularity(
     return record
 
 
+def _features(solid: str, kind: str) -> list[complex]:
+    """Projected polyhedral features, rounded for the record.
+
+    Rounded to 10 decimals: the locations come from elementary functions and are good to ~1e-15, and
+    the manifest quantizes to 12 significant digits anyway, so rounding here costs nothing and makes
+    the record obviously independent of the last bit of a trig implementation.
+    """
+    located = polyhedral_features(solid, kind)
+    return [complex(round(w.real, 10), round(w.imag, 10)) for w in located]
+
+
 def roots_of_unity(n: int) -> list[list[float]]:
     """The n-th roots of unity as ``[re, im]`` pairs (for poles/zeros on the unit circle)."""
     return [[float(np.cos(2 * np.pi * k / n)), float(np.sin(2 * np.pi * k / n))] for k in range(n)]
@@ -182,12 +204,37 @@ class FunctionPreset:
     singularities: tuple[SingularityRecord, ...] = ()
     story: str = ""
     tags: tuple[str, ...] = ()
+    # Relief parameters a printable preset needs to come out as intended. Both are optional: a
+    # preset that does not set them renders exactly as it did before they existed.
+    #
+    # pole_order is the order of the piece's features. It matters because the tip exponent is
+    # `order / scale` and the scale is derived as `pointiness * pole_order`, so rendering an
+    # order-2 piece as though its features were simple gives an exact cone where a cusp was
+    # intended -- the blunt version of the piece. It is not inferred from the function: fitting the
+    # scale to a function's log-modulus spread is a known dead end that yields tip exponents from 1
+    # to 8 and blunts most shapes.
+    pole_order: float | None = None
+    # resolution is per-preset rather than a raised global default, because the dense pieces need
+    # 400 while raising the library default would slow every unrelated render.
+    resolution: int | None = None
+    # Whether the ornament path should clip the sphere to `domain_spec`.
+    #
+    # A domain spec is really a 2D viewing window, and clipping a sphere sample with one removes
+    # cells: for a preset whose relief has a genuine feature at the north pole -- which is where the
+    # plane's far field lands -- that deletes the feature and the repair pass fills a flat cap over
+    # it. It stays True by default because the transcendental presets rely on it to keep `exp` and
+    # friends from overflowing in the far field, which is why it was forwarded in the first place.
+    clip_ornament_to_domain: bool = True
 
     def __post_init__(self):
         for record in self.singularities:
             singularity(
                 record["type"], record["at"], record.get("order"), record.get("label", "")
             )  # validates; raises on bad records
+        if self.pole_order is not None and self.pole_order <= 0:
+            raise ValidationError(f"pole_order must be positive; got {self.pole_order}")
+        if self.resolution is not None and self.resolution < 2:
+            raise ValidationError(f"resolution must be at least 2; got {self.resolution}")
 
     # -- live objects (instantiated on demand) --
     def domain(self) -> Domain:
@@ -243,6 +290,11 @@ class FunctionPreset:
                 "answer_key_stats": self.answer_key_stats(),
                 "story": self.story,
                 "tags": list(self.tags),
+                # Omitted entirely when unset, so the record of every existing preset is unchanged
+                # and the byte-stable manifest does not gain a column of nulls.
+                **({} if self.pole_order is None else {"pole_order": self.pole_order}),
+                **({} if self.resolution is None else {"resolution": self.resolution}),
+                **({} if self.clip_ornament_to_domain else {"clip_ornament_to_domain": False}),
             }
         )
 
@@ -525,6 +577,175 @@ def _build_presets() -> dict[str, FunctionPreset]:
         story="The Newton iteration map for z³ - 1: an order-2 pole at 0 and three "
         "simple zeros at the cube roots of -1/2.",
         tags=("dynamics", "poles"),
+    )
+
+    # --- polyhedral ornaments -----------------------------------------------------------
+    #
+    # Ratios of Klein relative invariants, at equal binary degree so that the automorphy factors
+    # cancel and |f| descends to a genuinely invariant function on the sphere. See
+    # `complexplorer.core.polyhedral`, which also explains why the coefficients are derived from
+    # explicit geometry rather than transcribed.
+    #
+    # These are printable pieces, so each carries the relief settings it needs: `pole_order` (the
+    # transfer's scale is derived from it, and an order-3 piece rendered as order 1 comes out blunt)
+    # and `resolution` (the dense ones need 400). None of them clips the sphere to its 2D viewing
+    # window: four of the six have a real feature at the north pole, and clipping would cut it off.
+    #
+    # `singularities` locations come from `polyhedral_features`, which projects the solid rather than
+    # solving the polynomial -- see the docstring there for why a solved key cannot survive the
+    # byte-compared manifest.
+
+    tetra = _features("tetrahedron", "vertices")
+    tetra_dual = _features("tetrahedron_dual", "vertices")
+    octa_v = _features("octahedron", "vertices")
+    cube_v = _features("octahedron", "faces")
+    octa_e = _features("octahedron", "edges")
+    ico_v = _features("icosahedron", "vertices")
+    dodeca_v = _features("icosahedron", "faces")
+    ico_e = _features("icosahedron", "edges")
+
+    _PHI = "(z**4 + 2j*sqrt(3)*z**2 + 1)"
+    _PSI = "(z**4 - 2j*sqrt(3)*z**2 + 1)"
+    _OCTA_V = "(z*(z**4 - 1))"
+    _CUBE_V = "(z**8 + 14*z**4 + 1)"
+    _OCTA_E = "(z**12 - 33*z**8 - 33*z**4 + 1)"
+    _ICO_V = "(z*(z**10 - 11*z**5 - 1))"
+    _ICO_H = "(z**20 + 228*z**15 + 494*z**10 - 228*z**5 + 1)"
+    _ICO_T = "(z**30 - 522*z**25 - 10005*z**20 - 10005*z**10 + 522*z**5 + 1)"
+
+    add(
+        id="tetrahedral_dual",
+        title="Tetrahedral Dual",
+        expression=f"{_PHI} / {_PSI}",
+        func=lambda z: tetrahedral_vertex(z) / tetrahedral_dual_vertex(z),
+        domain_spec=_RECT4,
+        cmap_spec=_PHASE,
+        singularities=(
+            *(singularity("zero", z, 1) for z in tetra),
+            *(singularity("pole", p, 1) for p in tetra_dual),
+        ),
+        story="Four spikes on one tetrahedron over four pits on its antipode -- the two "
+        "tetrahedra that together make the cube. Its symmetry is T (order 12, rotations "
+        "only): alone in this family it has no mirror plane, so a cut through it gives two "
+        "halves that are genuinely different rather than two copies of one part. That is the "
+        "point of the piece.",
+        tags=("ornament", "polyhedral", "poles"),
+        pole_order=1,
+        resolution=250,
+        clip_ornament_to_domain=False,
+    )
+
+    add(
+        id="octahedral_crown",
+        title="Octahedral Crown",
+        expression=f"{_OCTA_E} / {_OCTA_V}**2",
+        func=lambda z: octahedral_edge(z) / octahedral_vertex(z) ** 2,
+        domain_spec=_RECT4,
+        cmap_spec=_PHASE,
+        singularities=(
+            *(singularity("zero", z, 1) for z in octa_e),
+            *(singularity("pole", p, 2) for p in octa_v),
+        ),
+        story="Twelve simple zeros at the octahedron's edge midpoints under six double poles "
+        "at its vertices: a crown of six spikes with a pit between each neighbouring pair. "
+        "Full O_h symmetry (order 48, all nine mirror planes), so any coordinate plane cuts "
+        "it into identical halves. The sixth pole sits at the north pole of the sphere, i.e. "
+        "at infinity, so the answer key below lists five of the six.",
+        tags=("ornament", "polyhedral", "poles"),
+        pole_order=2,
+        resolution=300,
+        clip_ornament_to_domain=False,
+    )
+
+    add(
+        id="cube_octahedron_dual",
+        title="Cube-Octahedron Dual",
+        expression=f"{_OCTA_V}**4 / {_CUBE_V}**3",
+        func=lambda z: octahedral_vertex(z) ** 4 / cube_vertex(z) ** 3,
+        domain_spec=_RECT4,
+        cmap_spec=_PHASE,
+        singularities=(
+            *(singularity("zero", z, 4) for z in octa_v),
+            *(singularity("pole", p, 3) for p in cube_v),
+        ),
+        story="The vertex form of one solid over the vertex form of its dual, at matching "
+        "binary degree: six order-4 pits on the octahedron's axes, eight triple spikes on the "
+        "cube's vertices. Full O_h symmetry. Its spikes point along the cube diagonals, which "
+        "makes it the piece that exposed a sizing bug -- an axis-aligned bounding box "
+        "understates it by exactly sqrt(3), because each spike projects onto a coordinate axis "
+        "at 0.577 of its length. One of the six zeros is at infinity, so five are listed.",
+        tags=("ornament", "polyhedral", "poles"),
+        pole_order=3,
+        resolution=300,
+        clip_ornament_to_domain=False,
+    )
+
+    add(
+        id="icosahedral_crown",
+        title="Icosahedral Crown",
+        expression=f"{_ICO_T}**2 / {_ICO_V}**5",
+        func=lambda z: icosahedral_edge(z) ** 2 / icosahedral_vertex(z) ** 5,
+        domain_spec=_RECT4,
+        cmap_spec=_PHASE,
+        singularities=(
+            *(singularity("zero", z, 2) for z in ico_e),
+            *(singularity("pole", p, 5) for p in ico_v),
+        ),
+        story="The icosahedral answer to the Octahedral Crown, and a jump from binary degree "
+        "12 to 60 -- the icosahedral rotation group has order 60, so 60 is the lowest degree "
+        "any invariant ratio can have. Twelve spikes of order 5 at the icosahedron's vertices "
+        "over thirty double pits at its edge midpoints. Full I_h symmetry (order 120), the "
+        "largest here. Its features are order 5, so the derived transfer scale is capped: this "
+        "is the piece the cap exists for, because a mesh cannot deliver the dynamic range an "
+        "uncapped order-5 scale asks for. One pole is at infinity; eleven are listed.",
+        tags=("ornament", "polyhedral", "poles"),
+        pole_order=5,
+        resolution=400,
+        clip_ornament_to_domain=False,
+    )
+
+    add(
+        id="dodecahedron_icosahedron_dual",
+        title="Dodecahedron-Icosahedron Dual",
+        expression=f"{_ICO_V}**5 / {_ICO_H}**3",
+        func=lambda z: icosahedral_vertex(z) ** 5 / icosahedral_hessian(z) ** 3,
+        domain_spec=_RECT4,
+        cmap_spec=_PHASE,
+        singularities=(
+            *(singularity("zero", z, 5) for z in ico_v),
+            *(singularity("pole", p, 3) for p in dodeca_v),
+        ),
+        story="The icosahedral twin of the Cube-Octahedron Dual, built the same way: one "
+        "solid's vertex form over its dual's, at matching degree. Twenty triple spikes on the "
+        "dodecahedron's vertices, twelve order-5 pits on the icosahedron's. Its spikes sit "
+        "exactly where the Icosahedral Crown has its pits. Full I_h symmetry. One zero is at "
+        "infinity; eleven are listed.",
+        tags=("ornament", "polyhedral", "poles"),
+        pole_order=3,
+        resolution=400,
+        clip_ornament_to_domain=False,
+    )
+
+    add(
+        id="icosidodecahedral_star",
+        title="Icosidodecahedral Star",
+        expression=f"{_ICO_H}**3 / {_ICO_T}**2",
+        func=lambda z: icosahedral_hessian(z) ** 3 / icosahedral_edge(z) ** 2,
+        domain_spec=_RECT4,
+        cmap_spec=_PHASE,
+        singularities=(
+            *(singularity("zero", z, 3) for z in dodeca_v),
+            *(singularity("pole", p, 2) for p in ico_e),
+        ),
+        story="The third degree-60 icosahedral ratio, and the one with no counterpart "
+        "elsewhere in the family: thirty double spikes at the icosahedron's edge midpoints -- "
+        "the vertices of an icosidodecahedron -- over twenty triple pits on the dodecahedron. "
+        "The densest piece here, and the most sea-urchin-like. Full I_h symmetry, and no "
+        "feature at infinity: both forms are full degree, so the answer key is complete.",
+        tags=("ornament", "polyhedral", "poles"),
+        pole_order=2,
+        resolution=400,
+        clip_ornament_to_domain=False,
     )
 
     return {p.id: p for p in presets}

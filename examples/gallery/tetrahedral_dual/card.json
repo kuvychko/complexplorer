@@ -1,0 +1,103 @@
+{
+  "answer_key_stats": {
+    "count": 8,
+    "count_by_type": {
+      "pole": 4,
+      "zero": 4
+    },
+    "min_separation": 0.7320508076
+  },
+  "clip_ornament_to_domain": false,
+  "cmap_spec": {
+    "auto_scale_r": true,
+    "phase_sectors": 6,
+    "type": "Phase"
+  },
+  "domain_spec": {
+    "im_length": 4,
+    "re_length": 4,
+    "type": "rectangle"
+  },
+  "expression": "(z**4 + 2j*sqrt(3)*z**2 + 1) / (z**4 - 2j*sqrt(3)*z**2 + 1)",
+  "files": {
+    "portrait": "tetrahedral_dual/portrait.png"
+  },
+  "id": "tetrahedral_dual",
+  "pole_order": 1,
+  "resolution": 250,
+  "scaling_spec": "balanced",
+  "schema_version": 3,
+  "singularities": [
+    {
+      "at": [
+        -0.3660254038,
+        -0.3660254038
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.3660254038,
+        0.3660254038
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        1.3660254038,
+        -1.3660254038
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -1.3660254038,
+        1.3660254038
+      ],
+      "order": 1,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.3660254038,
+        -0.3660254038
+      ],
+      "order": 1,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -0.3660254038,
+        0.3660254038
+      ],
+      "order": 1,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -1.3660254038,
+        -1.3660254038
+      ],
+      "order": 1,
+      "type": "pole"
+    },
+    {
+      "at": [
+        1.3660254038,
+        1.3660254038
+      ],
+      "order": 1,
+      "type": "pole"
+    }
+  ],
+  "story": "Four spikes on one tetrahedron over four pits on its antipode -- the two tetrahedra that together make the cube. Its symmetry is T (order 12, rotations only): alone in this family it has no mirror plane, so a cut through it gives two halves that are genuinely different rather than two copies of one part. That is the point of the piece.",
+  "tags": [
+    "ornament",
+    "polyhedral",
+    "poles"
+  ],
+  "title": "Tetrahedral Dual"
+}

@@ -128,7 +128,9 @@ class TestCLIBehaviorFixes:
 
         captured = {}
 
-        class FakeGen:
+        # Subclasses the real generator rather than replacing it, so `from_preset` -- the thing being
+        # tested -- is the production implementation and only construction and saving are stubbed.
+        class FakeGen(stl_pkg.OrnamentGenerator):
             def __init__(self, func, **kwargs):
                 captured.update(kwargs)
 
@@ -142,3 +144,39 @@ class TestCLIBehaviorFixes:
 
         assert rc == 0
         assert captured.get("domain") is not None, "stl preset must forward the preset's domain"
+        assert captured.get("cmap") is not None, "stl preset must forward the preset's colormap"
+
+    def test_stl_does_not_override_a_presets_own_resolution(self, monkeypatch):
+        """--resolution defaults to None, so a preset that records one is not overridden by it."""
+        import complexplorer.export.stl as stl_pkg
+        from complexplorer.core.presets import FunctionPreset, catalog
+
+        captured = {}
+
+        class FakeGen(stl_pkg.OrnamentGenerator):
+            def __init__(self, func, **kwargs):
+                captured.update(kwargs)
+
+            def generate_and_save(self, *args, **kwargs):
+                return "ok"
+
+        detailed = FunctionPreset(
+            id="_detailed_probe",
+            title="Probe",
+            expression="z**2",
+            func=lambda z: z**2,
+            pole_order=3,
+            resolution=400,
+        )
+        monkeypatch.setitem(catalog._presets, detailed.id, detailed)
+        monkeypatch.setattr(stl_pkg, "OrnamentGenerator", FakeGen)
+        warnings.simplefilter("ignore")
+
+        assert main(["stl", f"preset:{detailed.id}", "-o", "unused.stl"]) == 0
+        assert captured["resolution"] == 400
+        assert captured["pole_order"] == 3
+
+        # An explicit flag still wins.
+        captured.clear()
+        assert main(["stl", f"preset:{detailed.id}", "--resolution", "60", "-o", "unused.stl"]) == 0
+        assert captured["resolution"] == 60

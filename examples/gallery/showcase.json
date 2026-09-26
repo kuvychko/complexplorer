@@ -209,6 +209,39 @@
       }
     },
     {
+      "expression": "(z*(z**4 - 1))**4 / (z**8 + 14*z**4 + 1)**3",
+      "id": "cube_octahedron_dual",
+      "profiles": {
+        "ornament": {
+          "profile": "ornament",
+          "resolution": 800
+        },
+        "portrait": {
+          "profile": "portrait",
+          "resolution": 1200
+        }
+      },
+      "renders": {
+        "ornament": "cube_octahedron_dual/ornament.png",
+        "portrait": "cube_octahedron_dual/portrait.png"
+      },
+      "story": "The vertex form of one solid over the vertex form of its dual, at matching binary degree: six order-4 pits on the octahedron's axes, eight triple spikes on the cube's vertices. Full O_h symmetry. Its spikes point along the cube diagonals, which makes it the piece that exposed a sizing bug -- an axis-aligned bounding box understates it by exactly sqrt(3), because each spike projects onto a coordinate axis at 0.577 of its length. One of the six zeros is at infinity, so five are listed.",
+      "tags": [
+        "ornament",
+        "polyhedral",
+        "poles"
+      ],
+      "thumbs": {
+        "ornament": "thumb/cube_octahedron_dual/ornament.png",
+        "portrait": "thumb/cube_octahedron_dual/portrait.png"
+      },
+      "title": "Cube-Octahedron Dual",
+      "views": {
+        "ornament": "view/cube_octahedron_dual/ornament.png",
+        "portrait": "view/cube_octahedron_dual/portrait.png"
+      }
+    },
+    {
       "expression": "z**3 - z",
       "id": "cubic_real_roots",
       "profiles": {
@@ -245,6 +278,39 @@
         "landscape": "view/cubic_real_roots/landscape.png",
         "portrait": "view/cubic_real_roots/portrait.png",
         "sphere": "view/cubic_real_roots/sphere.png"
+      }
+    },
+    {
+      "expression": "(z*(z**10 - 11*z**5 - 1))**5 / (z**20 + 228*z**15 + 494*z**10 - 228*z**5 + 1)**3",
+      "id": "dodecahedron_icosahedron_dual",
+      "profiles": {
+        "ornament": {
+          "profile": "ornament",
+          "resolution": 800
+        },
+        "portrait": {
+          "profile": "portrait",
+          "resolution": 1200
+        }
+      },
+      "renders": {
+        "ornament": "dodecahedron_icosahedron_dual/ornament.png",
+        "portrait": "dodecahedron_icosahedron_dual/portrait.png"
+      },
+      "story": "The icosahedral twin of the Cube-Octahedron Dual, built the same way: one solid's vertex form over its dual's, at matching degree. Twenty triple spikes on the dodecahedron's vertices, twelve order-5 pits on the icosahedron's. Its spikes sit exactly where the Icosahedral Crown has its pits. Full I_h symmetry. One zero is at infinity; eleven are listed.",
+      "tags": [
+        "ornament",
+        "polyhedral",
+        "poles"
+      ],
+      "thumbs": {
+        "ornament": "thumb/dodecahedron_icosahedron_dual/ornament.png",
+        "portrait": "thumb/dodecahedron_icosahedron_dual/portrait.png"
+      },
+      "title": "Dodecahedron-Icosahedron Dual",
+      "views": {
+        "ornament": "view/dodecahedron_icosahedron_dual/ornament.png",
+        "portrait": "view/dodecahedron_icosahedron_dual/portrait.png"
       }
     },
     {
@@ -295,6 +361,72 @@
       "title": "Exponential",
       "views": {
         "portrait": "view/exp/portrait.png"
+      }
+    },
+    {
+      "expression": "(z**30 - 522*z**25 - 10005*z**20 - 10005*z**10 + 522*z**5 + 1)**2 / (z*(z**10 - 11*z**5 - 1))**5",
+      "id": "icosahedral_crown",
+      "profiles": {
+        "ornament": {
+          "profile": "ornament",
+          "resolution": 800
+        },
+        "portrait": {
+          "profile": "portrait",
+          "resolution": 1200
+        }
+      },
+      "renders": {
+        "ornament": "icosahedral_crown/ornament.png",
+        "portrait": "icosahedral_crown/portrait.png"
+      },
+      "story": "The icosahedral answer to the Octahedral Crown, and a jump from binary degree 12 to 60 -- the icosahedral rotation group has order 60, so 60 is the lowest degree any invariant ratio can have. Twelve spikes of order 5 at the icosahedron's vertices over thirty double pits at its edge midpoints. Full I_h symmetry (order 120), the largest here. Its features are order 5, so the derived transfer scale is capped: this is the piece the cap exists for, because a mesh cannot deliver the dynamic range an uncapped order-5 scale asks for. One pole is at infinity; eleven are listed.",
+      "tags": [
+        "ornament",
+        "polyhedral",
+        "poles"
+      ],
+      "thumbs": {
+        "ornament": "thumb/icosahedral_crown/ornament.png",
+        "portrait": "thumb/icosahedral_crown/portrait.png"
+      },
+      "title": "Icosahedral Crown",
+      "views": {
+        "ornament": "view/icosahedral_crown/ornament.png",
+        "portrait": "view/icosahedral_crown/portrait.png"
+      }
+    },
+    {
+      "expression": "(z**20 + 228*z**15 + 494*z**10 - 228*z**5 + 1)**3 / (z**30 - 522*z**25 - 10005*z**20 - 10005*z**10 + 522*z**5 + 1)**2",
+      "id": "icosidodecahedral_star",
+      "profiles": {
+        "ornament": {
+          "profile": "ornament",
+          "resolution": 800
+        },
+        "portrait": {
+          "profile": "portrait",
+          "resolution": 1200
+        }
+      },
+      "renders": {
+        "ornament": "icosidodecahedral_star/ornament.png",
+        "portrait": "icosidodecahedral_star/portrait.png"
+      },
+      "story": "The third degree-60 icosahedral ratio, and the one with no counterpart elsewhere in the family: thirty double spikes at the icosahedron's edge midpoints -- the vertices of an icosidodecahedron -- over twenty triple pits on the dodecahedron. The densest piece here, and the most sea-urchin-like. Full I_h symmetry, and no feature at infinity: both forms are full degree, so the answer key is complete.",
+      "tags": [
+        "ornament",
+        "polyhedral",
+        "poles"
+      ],
+      "thumbs": {
+        "ornament": "thumb/icosidodecahedral_star/ornament.png",
+        "portrait": "thumb/icosidodecahedral_star/portrait.png"
+      },
+      "title": "Icosidodecahedral Star",
+      "views": {
+        "ornament": "view/icosidodecahedral_star/ornament.png",
+        "portrait": "view/icosidodecahedral_star/portrait.png"
       }
     },
     {
@@ -432,6 +564,39 @@
       "title": "Newton map (z³ - 1)",
       "views": {
         "portrait": "view/newton_cubic/portrait.png"
+      }
+    },
+    {
+      "expression": "(z**12 - 33*z**8 - 33*z**4 + 1) / (z*(z**4 - 1))**2",
+      "id": "octahedral_crown",
+      "profiles": {
+        "ornament": {
+          "profile": "ornament",
+          "resolution": 800
+        },
+        "portrait": {
+          "profile": "portrait",
+          "resolution": 1200
+        }
+      },
+      "renders": {
+        "ornament": "octahedral_crown/ornament.png",
+        "portrait": "octahedral_crown/portrait.png"
+      },
+      "story": "Twelve simple zeros at the octahedron's edge midpoints under six double poles at its vertices: a crown of six spikes with a pit between each neighbouring pair. Full O_h symmetry (order 48, all nine mirror planes), so any coordinate plane cuts it into identical halves. The sixth pole sits at the north pole of the sphere, i.e. at infinity, so the answer key below lists five of the six.",
+      "tags": [
+        "ornament",
+        "polyhedral",
+        "poles"
+      ],
+      "thumbs": {
+        "ornament": "thumb/octahedral_crown/ornament.png",
+        "portrait": "thumb/octahedral_crown/portrait.png"
+      },
+      "title": "Octahedral Crown",
+      "views": {
+        "ornament": "view/octahedral_crown/ornament.png",
+        "portrait": "view/octahedral_crown/portrait.png"
       }
     },
     {
@@ -740,6 +905,39 @@
       "title": "Tangent",
       "views": {
         "portrait": "view/tangent/portrait.png"
+      }
+    },
+    {
+      "expression": "(z**4 + 2j*sqrt(3)*z**2 + 1) / (z**4 - 2j*sqrt(3)*z**2 + 1)",
+      "id": "tetrahedral_dual",
+      "profiles": {
+        "ornament": {
+          "profile": "ornament",
+          "resolution": 800
+        },
+        "portrait": {
+          "profile": "portrait",
+          "resolution": 1200
+        }
+      },
+      "renders": {
+        "ornament": "tetrahedral_dual/ornament.png",
+        "portrait": "tetrahedral_dual/portrait.png"
+      },
+      "story": "Four spikes on one tetrahedron over four pits on its antipode -- the two tetrahedra that together make the cube. Its symmetry is T (order 12, rotations only): alone in this family it has no mirror plane, so a cut through it gives two halves that are genuinely different rather than two copies of one part. That is the point of the piece.",
+      "tags": [
+        "ornament",
+        "polyhedral",
+        "poles"
+      ],
+      "thumbs": {
+        "ornament": "thumb/tetrahedral_dual/ornament.png",
+        "portrait": "thumb/tetrahedral_dual/portrait.png"
+      },
+      "title": "Tetrahedral Dual",
+      "views": {
+        "ornament": "view/tetrahedral_dual/ornament.png",
+        "portrait": "view/tetrahedral_dual/portrait.png"
       }
     }
   ],

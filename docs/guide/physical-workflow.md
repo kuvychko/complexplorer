@@ -173,6 +173,70 @@ One honest caveat: asymptotically the wide term still sets the tip exponent, but
 below mesh resolution, so in practice the tip climbs through only the last `1 - weight` of the range
 and the visible point is shorter than the exponent implies.
 
+## Building a symmetric relief
+
+The catalog carries six pieces whose reliefs have the full rotation symmetry of a Platonic solid:
+
+```python
+import complexplorer as cp
+from complexplorer.export.stl import OrnamentGenerator
+
+star = cp.catalog.get("icosidodecahedral_star")
+OrnamentGenerator.from_preset(star).generate_and_save("star.stl", size_mm=130)
+```
+
+`from_preset` matters here. These presets carry the relief settings their geometry needs — the star
+records `pole_order=2` and `resolution=400` — and rendering one without them gives the blunt,
+under-resolved version of the piece. `cp.catalog.filter("polyhedral")` returns the family.
+
+### Why these are ratios, and why the degrees must match
+
+A rational map of degree `d` has exactly `d` zeros and `d` poles on the sphere, so a function with
+features at one solid's vertices *and nowhere else* does not exist. What does exist is a ratio of two
+**relative invariants**: each picks up an automorphy factor under a rotation, and the factors cancel
+only when the two forms have the same **binary degree** — at which point `|f|` descends to a genuinely
+invariant function.
+
+So the star is `H³/T²`, 60 over 60, where `H` is the icosahedral Hessian (roots: the 20 dodecahedron
+vertices) and `T` is the edge form (roots: the 30 edge midpoints). The eight forms are exported:
+
+```python
+cp.tetrahedral_vertex, cp.tetrahedral_dual_vertex      # binary degree 4
+cp.octahedral_vertex, cp.cube_vertex, cp.octahedral_edge     # 6, 8, 12
+cp.icosahedral_vertex, cp.icosahedral_hessian, cp.icosahedral_edge   # 12, 20, 30
+```
+
+A ratio of *unequal* degree fails silently: it renders, it looks plausible, and it is not symmetric.
+
+Watch for the forms that are one degree short as polynomials. `cp.octahedral_vertex` is binary degree
+6 but degree 5, and `cp.icosahedral_vertex` is binary 12 but degree 11, because in each case one vertex
+sits at the north pole and projects to infinity. That missing root is a real spike or pit on the
+finished piece — four of the six presets have one — and it is invisible to anything that only reads
+the polynomial, including `cp.normalization_constant`, which takes finite divisors only.
+
+### Check the syzygy on any set you transcribe yourself
+
+This is the part worth taking seriously. The forms quoted in the literature cohere as a set only for
+one particular orientation of the solid, and the commonly-remembered signs **mix orientations**. Pair
+`z(z¹⁰ + 11z⁵ − 1)` with the usual Hessian and you get three root sets that are each *individually* a
+perfect icosahedron, dodecahedron and edge set — while being rotated relative to one another. Every
+per-form geometry check passes. The ratios stop being rotation-invariant by a factor of 1e3 to 1e5.
+
+Klein's syzygy is the check that catches it:
+
+```python
+import numpy as np
+
+z = np.array([0.3 + 0.7j, 1.4 - 0.2j])
+left = cp.icosahedral_hessian(z)**3 - cp.icosahedral_edge(z)**2
+right = 1728 * cp.icosahedral_vertex(z)**5
+assert np.allclose(left, right)          # holds to ~1e-14 for the shipped forms
+```
+
+With the `+11` variant that identity is wrong by a factor of about 20. `cp.polyhedral_features(solid,
+kind)` gives the projected feature locations the shipped coefficients were derived from, so you can
+check a form's roots directly as well.
+
 ## Relief as a calibrated gain scale
 
 `sharpness` sets the log-modulus scale directly, bypassing `pointiness * pole_order`. Setting it to

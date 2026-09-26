@@ -77,6 +77,22 @@ Ornaments stop being blobs. A task-oriented version of this material is in the
   with all four `extract_feature_edges` flags passed explicitly; the second measures true tip-to-tip
   width as the maximum support width over sampled directions, which for a convex body is the hull
   diameter
+- **The polyhedral ornament family**: six catalog presets whose reliefs carry the full rotation
+  symmetry of a Platonic solid -- `tetrahedral_dual`, `octahedral_crown`, `cube_octahedron_dual`,
+  `icosahedral_crown`, `dodecahedron_icosahedron_dual` and `icosidodecahedral_star` -- reproducing a
+  collection that has been built, printed and measured. Verified against that collection's manifest:
+  sharpness, normalization constant and `max_radius` at 130 mm agree, the last to two decimals on
+  five of the six
+- **The eight Klein relative invariants** the family is built from (`cube_vertex`,
+  `icosahedral_edge`, `icosahedral_hessian`, `icosahedral_vertex`, `octahedral_edge`,
+  `octahedral_vertex`, `tetrahedral_dual_vertex`, `tetrahedral_vertex`) plus `polyhedral_features`,
+  which gives the projected feature locations their coefficients were derived from. Their correctness
+  is pinned by Klein's syzygy rather than by transcription: the forms in the literature cohere as a
+  set only for one orientation of the solid, and the commonly-remembered signs mix orientations,
+  which destroys rotation invariance while every per-form geometry check still passes
+- `OrnamentGenerator.from_preset()`, which applies a preset's relief settings. `FunctionPreset` gains
+  three optional fields for that -- `pole_order`, `resolution` and `clip_ornament_to_domain` -- all
+  absent and unserialized on the existing presets, so their records are unchanged
 - A "why is my ornament a blob" section in the
   [physical workflow guide](https://kuvychko.github.io/complexplorer/guide/physical-workflow/),
   covering normalization, the tip exponent, and the honest limit: a relief is only as interesting as

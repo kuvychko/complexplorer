@@ -36,6 +36,17 @@ from complexplorer.core.functions import (
     sawtooth,
     stereographic_projection,
 )
+from complexplorer.core.polyhedral import (
+    cube_vertex,
+    icosahedral_edge,
+    icosahedral_hessian,
+    icosahedral_vertex,
+    octahedral_edge,
+    octahedral_vertex,
+    polyhedral_features,
+    tetrahedral_dual_vertex,
+    tetrahedral_vertex,
+)
 from complexplorer.core.presets import FunctionPreset, catalog
 from complexplorer.core.scaling import (
     ModulusScaling,
@@ -92,6 +103,15 @@ __all__ = [
     "FourQuadrant",
     "ModulusScaling",
     "get_scaling_preset",
+    "cube_vertex",
+    "icosahedral_edge",
+    "icosahedral_hessian",
+    "icosahedral_vertex",
+    "octahedral_edge",
+    "octahedral_vertex",
+    "polyhedral_features",
+    "tetrahedral_dual_vertex",
+    "tetrahedral_vertex",
     "normalization_constant",
     "sampled_normalization_constant",
     # Function preset registry: catalog supplies functions, PlotPresets configures renders

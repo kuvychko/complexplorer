@@ -1,0 +1,367 @@
+{
+  "answer_key_stats": {
+    "count": 41,
+    "count_by_type": {
+      "pole": 11,
+      "zero": 30
+    },
+    "min_separation": 0.2840790438
+  },
+  "clip_ornament_to_domain": false,
+  "cmap_spec": {
+    "auto_scale_r": true,
+    "phase_sectors": 6,
+    "type": "Phase"
+  },
+  "domain_spec": {
+    "im_length": 4,
+    "re_length": 4,
+    "type": "rectangle"
+  },
+  "expression": "(z**30 - 522*z**25 - 10005*z**20 - 10005*z**10 + 522*z**5 + 1)**2 / (z*(z**10 - 11*z**5 - 1))**5",
+  "files": {
+    "portrait": "icosahedral_crown/portrait.png"
+  },
+  "id": "icosahedral_crown",
+  "pole_order": 5,
+  "resolution": 400,
+  "scaling_spec": "balanced",
+  "schema_version": 3,
+  "singularities": [
+    {
+      "at": [
+        -0.0877852523,
+        -0.2701752258
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.2298247742,
+        -0.1669774725
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.2298247742,
+        0.1669774725
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -0.0877852523,
+        0.2701752258
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -0.2840790438,
+        0.0
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -0.4510565163,
+        -0.3277117416
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.1722882584,
+        -0.5302487365
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.5575365158,
+        -0.0
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.1722882584,
+        0.5302487365
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -0.4510565163,
+        0.3277117416
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -0.9510565163,
+        -0.3090169944
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -0.5877852523,
+        -0.8090169944
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -0.0,
+        -1.0
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.5877852523,
+        -0.8090169944
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.9510565163,
+        -0.3090169944
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.9510565163,
+        0.3090169944
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.5877852523,
+        0.8090169944
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.0,
+        1.0
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -0.5877852523,
+        0.8090169944
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -0.9510565163,
+        0.3090169944
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -0.5542542696,
+        -1.705819241
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        1.4510565163,
+        -1.0542542696
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        1.4510565163,
+        1.0542542696
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -0.5542542696,
+        1.705819241
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -1.7936044933,
+        0.0
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -2.847858763,
+        -2.069090505
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        1.0877852523,
+        -3.347858763
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        3.5201470213,
+        0.0
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        1.0877852523,
+        3.347858763
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        -2.847858763,
+        2.069090505
+      ],
+      "order": 2,
+      "type": "zero"
+    },
+    {
+      "at": [
+        0.0,
+        0.0
+      ],
+      "order": 5,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -0.1909830056,
+        -0.5877852523
+      ],
+      "order": 5,
+      "type": "pole"
+    },
+    {
+      "at": [
+        0.5,
+        -0.363271264
+      ],
+      "order": 5,
+      "type": "pole"
+    },
+    {
+      "at": [
+        0.5,
+        0.363271264
+      ],
+      "order": 5,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -0.1909830056,
+        0.5877852523
+      ],
+      "order": 5,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -0.6180339887,
+        0.0
+      ],
+      "order": 5,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -1.3090169944,
+        -0.9510565163
+      ],
+      "order": 5,
+      "type": "pole"
+    },
+    {
+      "at": [
+        0.5,
+        -1.5388417686
+      ],
+      "order": 5,
+      "type": "pole"
+    },
+    {
+      "at": [
+        1.6180339887,
+        0.0
+      ],
+      "order": 5,
+      "type": "pole"
+    },
+    {
+      "at": [
+        0.5,
+        1.5388417686
+      ],
+      "order": 5,
+      "type": "pole"
+    },
+    {
+      "at": [
+        -1.3090169944,
+        0.9510565163
+      ],
+      "order": 5,
+      "type": "pole"
+    }
+  ],
+  "story": "The icosahedral answer to the Octahedral Crown, and a jump from binary degree 12 to 60 -- the icosahedral rotation group has order 60, so 60 is the lowest degree any invariant ratio can have. Twelve spikes of order 5 at the icosahedron's vertices over thirty double pits at its edge midpoints. Full I_h symmetry (order 120), the largest here. Its features are order 5, so the derived transfer scale is capped: this is the piece the cap exists for, because a mesh cannot deliver the dynamic range an uncapped order-5 scale asks for. One pole is at infinity; eleven are listed.",
+  "tags": [
+    "ornament",
+    "polyhedral",
+    "poles"
+  ],
+  "title": "Icosahedral Crown"
+}

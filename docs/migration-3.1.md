@@ -164,6 +164,42 @@ from `complexplorer.export.stl` if you want to do the same thing in your own cod
 recorded in the STL mean something to a consumer that reads them rather than recomputing. If you were
 running `compute_normals` yourself after export, you no longer need to.
 
+## New: the polyhedral ornament family
+
+Six presets join `cp.catalog`, each a relief with the full rotation symmetry of a Platonic solid:
+`tetrahedral_dual`, `octahedral_crown`, `cube_octahedron_dual`, `icosahedral_crown`,
+`dodecahedron_icosahedron_dual` and `icosidodecahedral_star`. `cp.catalog.filter("polyhedral")`
+returns them.
+
+Build one with `OrnamentGenerator.from_preset`, which is new and is the point: these presets carry the
+relief settings their geometry needs — feature order and resolution — and rendering one without them
+gives the blunt, under-resolved version of the piece.
+
+```python
+from complexplorer.export.stl import OrnamentGenerator
+
+star = cp.catalog.get("icosidodecahedral_star")
+OrnamentGenerator.from_preset(star).generate_and_save("star.stl", size_mm=130)
+```
+
+The eight Klein relative invariants they are built from are exported too —
+`cp.icosahedral_hessian` and friends, plus `cp.polyhedral_features` for the projected feature
+locations. See the
+[guide](guide/physical-workflow.md#building-a-symmetric-relief) for why a ratio of invariants must
+have equal binary degree, and for the syzygy check to run on any set you transcribe yourself.
+
+Nothing here is breaking. `FunctionPreset` gains three optional fields — `pole_order`, `resolution`
+and `clip_ornament_to_domain` — which are absent on every existing preset and omitted from its
+serialized record, so the presets you already use are unchanged. One behaviour worth knowing: a
+preset's domain is a 2D viewing window, and clipping a sphere sample with one deletes cells. That is
+wanted for the transcendental presets, whose far field overflows, and wrong for a relief with a real
+feature at the north pole, so the polyhedral six set `clip_ornament_to_domain=False`.
+
+If you feed a divisor to `cp.normalization_constant` yourself, note that four of the six have a
+feature **at infinity** — their `singularities` key lists only the finite ones, and the closed form
+takes finite divisors only, so it would return a confidently wrong number for those pieces. The
+default sampled estimator has no such problem.
+
 ## New parameters, all optional
 
 None of these are required, and the defaults are what change the look:

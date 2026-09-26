@@ -178,6 +178,48 @@ class OrnamentGenerator:
         self.sphere_mesh = None
         self.applied_normalization: float | None = None
 
+    @classmethod
+    def from_preset(cls, preset, **overrides) -> "OrnamentGenerator":
+        """Build a generator from a catalog preset, honouring the relief settings it carries.
+
+        A printable preset records the order of its features and the resolution its detail needs.
+        Rendering it without those gives the blunt version of the piece: the tip exponent is the
+        feature order divided by the transfer's scale, and the scale is derived from the order, so an
+        order-2 piece rendered as order 1 comes out as an exact cone where a cusp was intended.
+
+        Anything passed in ``overrides`` wins over the preset, so a caller can explore a piece at a
+        lower resolution or a different sharpness without editing the catalog.
+
+        Parameters
+        ----------
+        preset : FunctionPreset
+            A preset from ``cp.catalog``.
+        **overrides
+            Any :class:`OrnamentGenerator` argument, taking precedence over the preset.
+
+        Returns
+        -------
+        OrnamentGenerator
+
+        Examples
+        --------
+        >>> import complexplorer as cp  # doctest: +SKIP
+        >>> gen = OrnamentGenerator.from_preset(cp.catalog.get("pole_flower_10"))  # doctest: +SKIP
+        """
+        settings: dict[str, Any] = {"cmap": preset.colormap()}
+        # A preset's domain is a 2D viewing window, and clipping a sphere sample with one deletes
+        # cells. That is wanted for the transcendental presets, whose far field overflows, and wrong
+        # for a relief with a real feature at the north pole -- the clip would cut the feature off and
+        # the repair pass would fill a flat cap over it. The preset says which it is.
+        if preset.clip_ornament_to_domain and preset.domain_spec.get("type") is not None:
+            settings["domain"] = preset.domain()
+        if preset.resolution is not None:
+            settings["resolution"] = preset.resolution
+        if preset.pole_order is not None:
+            settings["pole_order"] = preset.pole_order
+        settings.update(overrides)
+        return cls(preset.func, **settings)
+
     def _resolve_normalization(self, field: ComplexField) -> float | None:
         """The constant to multiply ``|f|`` by, from the field already sampled."""
         if self.normalize is None:

@@ -126,14 +126,17 @@ def cmd_stl(args: argparse.Namespace) -> int:
 
     func, preset = _resolve_func(args.func)
     # None means "the ornament default", which lives in ornament_generator and nowhere else.
-    scaling = args.scaling
-    # Apply the preset's recommended domain/colormap (mirrors cmd_render); the domain in
-    # particular avoids numerical issues at extreme values during ornament generation.
-    extra = {}
+    overrides = {"scaling": args.scaling}
+    # --resolution defaults to None so that "not given" stays distinguishable from a chosen value:
+    # a preset that records the resolution its detail needs must not be overridden by a default.
+    if args.resolution is not None:
+        overrides["resolution"] = args.resolution
     if preset is not None:
-        extra["domain"] = preset.domain()
-        extra["cmap"] = preset.colormap()
-    gen = OrnamentGenerator(func, resolution=args.resolution, scaling=scaling, **extra)
+        # from_preset applies the preset's domain and colormap (mirroring cmd_render -- the domain in
+        # particular avoids numerical issues at extreme values) plus its relief settings.
+        gen = OrnamentGenerator.from_preset(preset, **overrides)
+    else:
+        gen = OrnamentGenerator(func, **overrides)
     gen.generate_and_save(args.output, size_mm=args.size_mm, verbose=False)
     print(f"Wrote {args.output}")
     return 0
@@ -189,8 +192,12 @@ def build_parser() -> argparse.ArgumentParser:
     ps = sub.add_parser("stl", help="export a 3D-printable STL")
     add_func_arg(ps)
     ps.add_argument("--size-mm", type=float, default=50.0)
-    ps.add_argument("--resolution", type=int, default=150)
-    ps.add_argument("--scaling", help="modulus scaling mode (default arctan)")
+    ps.add_argument(
+        "--resolution",
+        type=int,
+        help="mesh resolution (default: the preset's, else the library default)",
+    )
+    ps.add_argument("--scaling", help="modulus scaling mode (default: a logistic in log modulus)")
     ps.add_argument("--output", "-o", required=True, help="output .stl file")
     ps.set_defaults(handler=cmd_stl)
 
