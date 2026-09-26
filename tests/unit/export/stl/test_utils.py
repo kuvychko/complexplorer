@@ -4,8 +4,10 @@ import numpy as np
 import pytest
 import pyvista as pv
 
+from complexplorer.exceptions import ValidationError
 from complexplorer.export.stl.utils import (
     center_mesh,
+    count_edges,
     scale_to_size,
     validate_printability,
 )
@@ -37,25 +39,50 @@ class TestValidatePrintability:
         assert results["is_watertight"] is False
         assert results["n_boundary_edges"] > 0
 
-    def test_size_validation(self):
-        """Test size-based validation."""
-        sphere = pv.Sphere(radius=1.0)  # 2 units diameter
+    def test_closed_mesh_with_creases_is_watertight(self):
+        """The reported bug: a cube is closed and manifold, and was called neither.
 
-        # Test with small size (should fail wall thickness)
+        ``extract_feature_edges`` enables all four edge classes by default, so asking for boundary
+        edges alone returned every crease as well. A sphere is smooth enough to have no creases,
+        which is why the bug survived a sphere-only test.
+        """
+        cube = pv.Cube().triangulate()
+        assert cube.n_open_edges == 0  # the ground truth, from PyVista itself
+
+        results = validate_printability(cube, size_mm=50, verbose=False)
+
+        assert results["is_watertight"] is True
+        assert results["is_manifold"] is True
+        assert results["n_boundary_edges"] == 0
+        assert results["n_non_manifold_edges"] == 0
+        assert results["volume"] > 0
+        # The creases are still there; they are simply not boundary edges.
+        assert count_edges(cube, feature_edges=True) == 12
+
+    def test_counts_reject_an_unknown_edge_class(self):
+        with pytest.raises(ValidationError, match="Unknown edge class"):
+            count_edges(pv.Sphere(), sharp_edges=True)
+
+    def test_radial_extent_replaces_wall_thickness(self):
+        """Radii from the origin are reported; the constant-False wall test is gone."""
+        sphere = pv.Sphere(radius=1.0)
+
         results = validate_printability(sphere, size_mm=10, verbose=False)
 
-        assert "wall_thickness_ok" in results
-        assert "estimated_min_wall_mm" in results
-        assert "recommended_size_mm" in results
+        assert results["min_radius_mm"] == pytest.approx(1.0, rel=1e-3)
+        assert results["max_radius_mm"] == pytest.approx(1.0, rel=1e-3)
+        for gone in ("wall_thickness_ok", "estimated_min_wall_mm", "recommended_size_mm"):
+            assert gone not in results
 
-        # For a 10mm sphere with 30% minimum radius, wall is ~3mm at thinnest
-        # This should be OK
-        assert results["wall_thickness_ok"] is True
+    def test_radii_are_measured_from_the_origin(self):
+        """Which is why validation runs before centring: centring moves the star centre away."""
+        offset = pv.Sphere(radius=1.0, center=(5, 0, 0))
 
-        # Test with very small size
-        results = validate_printability(sphere, size_mm=2, verbose=False)
-        assert results["wall_thickness_ok"] is False
-        assert results["recommended_size_mm"] > 2
+        results = validate_printability(offset, verbose=False)
+
+        # From the origin, not from the mesh's own centre: 4 to 6, not 1 to 1.
+        assert results["min_radius_mm"] == pytest.approx(4.0, rel=1e-3)
+        assert results["max_radius_mm"] == pytest.approx(6.0, rel=1e-3)
 
     def test_verbose_output(self, capsys):
         """Test verbose output."""
@@ -67,6 +94,10 @@ class TestValidatePrintability:
         assert "Mesh Validation Results" in captured.out
         assert "Watertight: True" in captured.out
         assert "ready for 3D printing" in captured.out
+        assert "Radius from origin" in captured.out
+        # The quantity that actually fails on an FDM printer is named rather than substituted for.
+        assert "Ridge width between adjacent features is not measured" in captured.out
+        assert "wall" not in captured.out.lower()
 
 
 class TestScaleToSize:

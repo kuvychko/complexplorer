@@ -6,6 +6,8 @@ watertight meshes suitable for 3D printing.
 
 from typing import TYPE_CHECKING
 
+from .utils import count_edges
+
 if TYPE_CHECKING:
     import pyvista as pv
 
@@ -31,8 +33,7 @@ def close_mesh_holes(mesh: "pv.PolyData", verbose: bool = False) -> "pv.PolyData
     """
     if verbose:
         # Check initial state
-        edges = mesh.extract_feature_edges(boundary_edges=True)
-        n_boundary = edges.n_points
+        n_boundary = count_edges(mesh, boundary_edges=True)
         print(f"Initial boundary edges: {n_boundary}")
 
     # Try to fill holes
@@ -46,8 +47,7 @@ def close_mesh_holes(mesh: "pv.PolyData", verbose: bool = False) -> "pv.PolyData
 
     if verbose and filled is not mesh:
         # Check result
-        edges_after = filled.extract_feature_edges(boundary_edges=True)
-        n_boundary_after = edges_after.n_points
+        n_boundary_after = count_edges(filled, boundary_edges=True)
         print(f"After filling: {n_boundary_after} boundary edges")
         if n_boundary_after < n_boundary:
             print(f"Reduced boundary edges by {n_boundary - n_boundary_after}")
@@ -126,11 +126,11 @@ def repair_mesh_simple(
         print(f"Final: {repaired.n_points} points, {repaired.n_cells} faces")
 
         # Check if watertight
-        edges = repaired.extract_feature_edges(boundary_edges=True)
-        if edges.n_points == 0:
+        n_boundary = count_edges(repaired, boundary_edges=True)
+        if n_boundary == 0:
             print("[ok] Mesh is watertight")
         else:
-            print(f"[fail] Mesh still has {edges.n_points} boundary points")
+            print(f"[fail] Mesh still has {n_boundary} boundary edges")
 
     return repaired
 

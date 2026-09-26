@@ -69,15 +69,32 @@ class TestBuildRelief:
     def test_matches_ornament_with_domain(self):
         f = lambda z: (z - 1) / (z + 1)  # noqa: E731
         dom = Annulus(0.3, 3.0)
-        old = OrnamentGenerator(
-            f, resolution=30, scaling="arctan", cmap=CMAP, domain=dom
-        ).generate_ornament(verbose=False)
+        # normalize=None because the generator normalizes by default and the kernel does not; this
+        # test is about the generator being a thin wrapper, not about normalization.
+        gen = OrnamentGenerator(
+            f, resolution=30, scaling="arctan", cmap=CMAP, domain=dom, normalize=None
+        )
+        old = gen.generate_ornament(verbose=False)
         new = build_relief(
             sample_sphere(f, resolution=30, domain=dom), cmap=CMAP, scaling="arctan", for_stl=True
         ).to_pyvista()
         assert old.n_points == new.n_points  # cell removal applied identically
         for k in ("magnitude", "phase", "radius"):
             np.testing.assert_allclose(np.asarray(old[k]), np.asarray(new[k]), equal_nan=True)
+
+    def test_normalization_is_opt_in_for_the_kernel(self):
+        """The kernel leaves geometry alone unless asked, so existing renderers are unaffected."""
+        f = lambda z: 100 * z / (z**3 - 1)  # noqa: E731
+        field = sample_sphere(f, resolution=30)
+        plain = build_relief(field, cmap=CMAP, scaling="arctan", for_stl=True)
+        assert plain.metadata["normalization"] is None
+        scaled = build_relief(field, cmap=CMAP, scaling="arctan", for_stl=True, normalize=0.01)
+        assert scaled.metadata["normalization"] == 0.01
+        assert not np.allclose(np.asarray(plain.mesh["radius"]), np.asarray(scaled.mesh["radius"]))
+        # The magnitude scalar stays raw either way: normalization is about geometry, not about f.
+        np.testing.assert_allclose(
+            np.asarray(plain.mesh["magnitude"]), np.asarray(scaled.mesh["magnitude"])
+        )
 
     def test_rejects_planar_field(self):
         with pytest.raises(ValidationError):

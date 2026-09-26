@@ -30,9 +30,15 @@ class TestOrnamentGenerator:
 
         assert gen.func is func
         assert gen.resolution == 150
-        assert gen.scaling == "arctan"
+        # A logistic in the log modulus, which admits a scale for pointiness to set; arctan does not.
+        assert gen.scaling == "logarithmic"
+        assert gen.sharpness == 2.0
+        assert gen.scaling_params["r_min"] == 0.2
+        assert gen.normalize == "geometric"
+        assert gen.contrast is None
         assert isinstance(gen.cmap, Phase)
         assert gen.sphere_mesh is None
+        assert gen.applied_normalization is None
 
     def test_init_custom(self):
         """Test initialization with custom parameters."""

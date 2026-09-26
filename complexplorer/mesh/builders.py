@@ -87,8 +87,21 @@ def build_relief(
     scaling: str = "arctan",
     scaling_params: dict | None = None,
     for_stl: bool = False,
+    normalize: float | None = None,
 ) -> SurfaceMesh:
-    """Build a radially-distorted sphere (relief) mesh from a sphere ``ComplexField``."""
+    """Build a radially-distorted sphere (relief) mesh from a sphere ``ComplexField``.
+
+    Parameters
+    ----------
+    normalize : float, optional
+        Constant multiplying ``|f|`` before the transfer, so that the arbitrary scalar in front of
+        ``f`` stops changing the relief's shape (sea level sits at ``|f| = 1``). ``None``, the
+        default, applies no normalization, which keeps every existing renderer's geometry unchanged.
+        The ``magnitude`` scalar stays the **raw** ``|f|`` either way -- that is the mathematical
+        quantity a viewer inspects -- while ``radius`` reflects the normalized value and the constant
+        is recorded in the mesh metadata. See
+        :func:`~complexplorer.core.scaling.sampled_normalization_constant`.
+    """
     if field.kind != "sphere" or field.sphere_xyz is None:
         raise ValidationError("build_relief requires a sphere ComplexField")
     if cmap is None:
@@ -105,6 +118,9 @@ def build_relief(
     # Radial distortion on the full (ravel-ordered) point set.
     points_flat = xyz.reshape(-1, 3)
     moduli_flat = np.asarray(field.modulus).ravel()
+    if normalize is not None:
+        # Only the geometry is normalized; the magnitude scalar attached below stays raw.
+        moduli_flat = moduli_flat * float(normalize)
     scaled_flat, radii = apply_modulus_distortion(points_flat, moduli_flat, scaling, scaling_params)
 
     # Blank out-of-domain points so their cells can be removed (matches the generator).
@@ -117,7 +133,7 @@ def build_relief(
     # matches the field's (meshgrid) order — unlike the StructuredGrid's native VTK order.
     surf = pv.StructuredGrid(X, Y, Z).extract_surface(algorithm="dataset_surface")
 
-    sm = SurfaceMesh(surf, field, metadata={"topology": "relief"})
+    sm = SurfaceMesh(surf, field, metadata={"topology": "relief", "normalization": normalize})
     sm.attach_colors(cmap, np.asarray(field.w), outmask=None)
     sm.attach_scalar("magnitude", field.modulus)
     sm.attach_scalar("radius", radii)

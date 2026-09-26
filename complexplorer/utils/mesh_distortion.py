@@ -85,17 +85,21 @@ def get_default_scaling_params(scaling_mode: str, for_stl: bool = False) -> dict
         Default parameters for the scaling method.
     """
     if for_stl:
-        # Tighter bounds for 3D printing
+        # Tighter bounds for 3D printing. The depth (r_min) is 0.2, matching every entry in
+        # SCALING_PRESETS; the STL defaults alone used to say 0.5, which made the relief half as
+        # deep as any named preset for no stated reason. A relief is a star-shaped solid about the
+        # origin, so a depth of 0.2 is still 0.4 of the radius thick through the centre.
         defaults = {
             "constant": {"radius": 1.0},
             "linear": {"scale": 0.1},
-            "arctan": {"r_min": 0.5, "r_max": 1.0},
-            "logarithmic": {"base": np.e, "r_min": 0.5, "r_max": 1.0},
-            "linear_clamp": {"m_max": 10, "r_min": 0.5, "r_max": 1.0},
-            "power": {"exponent": 0.5, "r_min": 0.5, "r_max": 1.0},
-            "sigmoid": {"steepness": 2.0, "center": 1.0, "r_min": 0.5, "r_max": 1.0},
-            "adaptive": {"low_percentile": 10, "high_percentile": 90, "r_min": 0.5, "r_max": 1.0},
-            "hybrid": {"transition": 1.0, "r_min": 0.5, "r_max": 1.0},
+            "arctan": {"r_min": 0.2, "r_max": 1.0},
+            "logarithmic": {"base": np.e, "r_min": 0.2, "r_max": 1.0},
+            "log_mixture": {"scale": 2.0, "boost": 3.0, "weight": 0.5, "r_min": 0.2, "r_max": 1.0},
+            "linear_clamp": {"m_max": 10, "r_min": 0.2, "r_max": 1.0},
+            "power": {"exponent": 0.5, "r_min": 0.2, "r_max": 1.0},
+            "sigmoid": {"steepness": 2.0, "center": 1.0, "r_min": 0.2, "r_max": 1.0},
+            "adaptive": {"low_percentile": 10, "high_percentile": 90, "r_min": 0.2, "r_max": 1.0},
+            "hybrid": {"transition": 1.0, "r_min": 0.2, "r_max": 1.0},
         }
     else:
         # Wider bounds for visualization
@@ -104,6 +108,7 @@ def get_default_scaling_params(scaling_mode: str, for_stl: bool = False) -> dict
             "linear": {"scale": 0.1},
             "arctan": {"r_min": 0.5, "r_max": 1.5},
             "logarithmic": {"base": np.e, "r_min": 0.5, "r_max": 1.5},
+            "log_mixture": {"scale": 2.0, "boost": 3.0, "weight": 0.5, "r_min": 0.3, "r_max": 1.5},
             "linear_clamp": {"m_max": 10, "r_min": 0.5, "r_max": 1.5},
             "power": {"exponent": 0.5, "r_min": 0.3, "r_max": 1.5},
             "sigmoid": {"steepness": 2.0, "center": 1.0, "r_min": 0.3, "r_max": 1.5},

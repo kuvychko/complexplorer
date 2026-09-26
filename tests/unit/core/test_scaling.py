@@ -3,7 +3,13 @@
 import numpy as np
 import pytest
 
-from complexplorer.core.scaling import SCALING_PRESETS, ModulusScaling, get_scaling_preset
+from complexplorer.core.scaling import (
+    SCALING_PRESETS,
+    ModulusScaling,
+    apply_scaling_mode,
+    get_scaling_preset,
+)
+from complexplorer.exceptions import ValidationError
 
 
 class TestModulusScaling:
@@ -277,3 +283,49 @@ class TestScalingEdgeCases:
         # Should still produce valid results
         result = ModulusScaling.arctan(moduli)
         assert np.all(np.isfinite(result))
+
+
+class TestCustomDispatch:
+    """``apply_scaling_mode('custom', ...)`` must route through ``ModulusScaling.custom``.
+
+    It used to short-circuit and return the callable's output as the radius directly, so the
+    documented contract -- a callable maps moduli to [0, 1], which the mode maps onto
+    [r_min, r_max] -- was not honoured: bounds passed alongside a callable were silently discarded
+    and a compliant callable produced radii in [0, 1], collapsing the relief toward the origin.
+    """
+
+    def test_bounds_supplied_with_a_callable_are_applied(self):
+        moduli = np.array([0.0, 0.25, 0.5, 0.75, 1.0])
+
+        radii = apply_scaling_mode(
+            moduli, "custom", {"scaling_func": lambda m: m, "r_min": 0.2, "r_max": 1.0}
+        )
+
+        np.testing.assert_allclose(radii, [0.2, 0.4, 0.6, 0.8, 1.0])
+
+    def test_an_overshooting_callable_is_clipped(self):
+        moduli = np.array([-1.0, 0.5, 3.0])
+
+        radii = apply_scaling_mode(
+            moduli, "custom", {"scaling_func": lambda m: m, "r_min": 0.2, "r_max": 1.0}
+        )
+
+        assert radii.min() >= 0.2 and radii.max() <= 1.0
+        np.testing.assert_allclose(radii, [0.2, 0.6, 1.0])
+
+    def test_it_agrees_with_calling_the_method_directly(self):
+        moduli = np.linspace(0, 1, 11)
+        params = {"scaling_func": lambda m: m**2, "r_min": 0.3, "r_max": 1.4}
+
+        np.testing.assert_allclose(
+            apply_scaling_mode(moduli, "custom", params),
+            ModulusScaling.custom(moduli, **params),
+        )
+
+    def test_a_missing_callable_is_still_rejected(self):
+        with pytest.raises(ValidationError, match="scaling_func"):
+            apply_scaling_mode(np.array([1.0]), "custom", {"r_min": 0.2})
+
+    def test_an_unknown_mode_is_rejected(self):
+        with pytest.raises(ValidationError, match="Unknown scaling mode"):
+            apply_scaling_mode(np.array([1.0]), "not_a_mode")

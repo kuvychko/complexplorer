@@ -6,10 +6,53 @@ This module provides validation and helper functions for 3D printing.
 import warnings
 from typing import TYPE_CHECKING, Any
 
+import numpy as np
+
 from complexplorer.exceptions import ValidationError
 
 if TYPE_CHECKING:
     import pyvista as pv
+
+# Every edge class ``extract_feature_edges`` can extract. All four default to True, which is the
+# trap ``count_edges`` exists to close.
+_EDGE_CLASSES = ("boundary_edges", "feature_edges", "manifold_edges", "non_manifold_edges")
+
+
+def count_edges(mesh: "pv.PolyData", **which: bool) -> int:
+    """Count one class of edge, with every other class explicitly switched off.
+
+    ``extract_feature_edges`` enables ``boundary_edges``, ``feature_edges``, ``manifold_edges`` and
+    ``non_manifold_edges`` by default, so asking it for boundary edges alone returns substantially
+    every edge in the mesh: a closed cube reports hundreds of "boundary" edges because each of its
+    creases is a feature edge. Passing all four flags explicitly is the only way to count one class,
+    so every call site goes through here rather than repeating the flags and getting them wrong.
+
+    Parameters
+    ----------
+    mesh : pv.PolyData
+        Mesh to measure.
+    **which : bool
+        The edge classes to enable, named as ``extract_feature_edges`` names them. Any class not
+        named is disabled.
+
+    Returns
+    -------
+    int
+        Number of edges (cells) of the requested class.
+
+    Raises
+    ------
+    ValidationError
+        If an unknown edge class is named.
+    """
+    unknown = sorted(set(which) - set(_EDGE_CLASSES))
+    if unknown:
+        raise ValidationError(
+            f"Unknown edge class(es): {', '.join(unknown)}. Available: {', '.join(_EDGE_CLASSES)}"
+        )
+    flags = dict.fromkeys(_EDGE_CLASSES, False)
+    flags.update(which)
+    return int(mesh.extract_feature_edges(**flags).n_cells)
 
 
 def validate_printability(
@@ -20,9 +63,12 @@ def validate_printability(
     Parameters
     ----------
     mesh : pv.PolyData
-        Mesh to validate.
+        Mesh to validate. Call this **before** centring: the relief is a star-shaped solid about
+        the origin, so the radii reported below are only meaningful while the star centre still
+        sits there.
     size_mm : float, optional
-        Target size in millimeters for scaling validation.
+        Target print size in millimeters. Reported alongside the radial extent, so the numbers can
+        be read against the size the piece will be printed at.
     verbose : bool, optional
         Print validation results.
 
@@ -38,20 +84,35 @@ def validate_printability(
         - dimensions: tuple, mesh dimensions (x, y, z)
         - volume: float, mesh volume
         - surface_area: float, mesh surface area
-        - wall_thickness_ok: bool, if size_mm provided
-        - recommended_size_mm: float, recommended print size
+        - min_radius_mm: float, smallest distance from the origin to the surface
+        - max_radius_mm: float, largest distance from the origin to the surface
+
+        The radii carry the ``_mm`` suffix because this runs on the scaled mesh in ``save_stl``;
+        on an unscaled mesh they are in that mesh's own units.
+
+    Notes
+    -----
+    No wall thickness is reported. A relief has no walls — it is a solid star-shaped body about the
+    origin, at least ``2 * min_radius`` thick through the centre — and the quantity that does fail
+    on a fused-deposition printer is the ridge width between two adjacent pits, which this does not
+    measure. ``min_radius_mm`` is the honest proxy for it.
     """
     results = {}
 
-    # Check if watertight (no boundary edges)
-    edges = mesh.extract_feature_edges(boundary_edges=True)
-    results["is_watertight"] = edges.n_points == 0
-    results["n_boundary_edges"] = edges.n_cells
+    # Both the boolean and its count come from one measure, and each measure asks for exactly one
+    # edge class. See count_edges: the defaults make the obvious call report a closed mesh as open.
+    results["n_boundary_edges"] = count_edges(mesh, boundary_edges=True)
+    results["is_watertight"] = results["n_boundary_edges"] == 0
 
-    # Check if manifold (no non-manifold edges)
-    nm_edges = mesh.extract_feature_edges(non_manifold_edges=True)
-    results["is_manifold"] = nm_edges.n_points == 0
-    results["n_non_manifold_edges"] = nm_edges.n_cells
+    results["n_non_manifold_edges"] = count_edges(mesh, non_manifold_edges=True)
+    results["is_manifold"] = results["n_non_manifold_edges"] == 0
+
+    # Radial extent from the origin, which is where the relief's star centre is until the mesh is
+    # centred. Centring moves the box centre to the origin instead, which understates the range
+    # badly on a lopsided piece whose star centre and box centre are far apart.
+    radii = np.linalg.norm(np.asarray(mesh.points, dtype=float), axis=1)
+    results["min_radius_mm"] = float(radii.min()) if radii.size else 0.0
+    results["max_radius_mm"] = float(radii.max()) if radii.size else 0.0
 
     # Get mesh properties
     results["bounds"] = mesh.bounds
@@ -73,27 +134,6 @@ def validate_printability(
             stacklevel=2,
         )
 
-    # Scaling validation if size provided
-    if size_mm is not None:
-        max_dim = max(results["dimensions"])
-        scale_factor = size_mm / max_dim
-
-        # Estimate minimum wall thickness (based on modulus scaling)
-        # This is approximate - actual thickness depends on function
-        min_thickness_mm = 0.3 * scale_factor  # 30% of radius at thinnest
-
-        # Common 3D printing minimum wall thickness
-        MIN_WALL_THICKNESS_MM = 0.8
-
-        results["wall_thickness_ok"] = min_thickness_mm >= MIN_WALL_THICKNESS_MM
-        results["estimated_min_wall_mm"] = min_thickness_mm
-
-        # Recommend size if too small
-        if not results["wall_thickness_ok"]:
-            results["recommended_size_mm"] = size_mm * (MIN_WALL_THICKNESS_MM / min_thickness_mm)
-        else:
-            results["recommended_size_mm"] = size_mm
-
     # Print results if verbose
     if verbose:
         print("=== Mesh Validation Results ===")
@@ -111,28 +151,27 @@ def validate_printability(
             print(f"Volume: {results['volume']:.3f}")
             print(f"Surface area: {results['surface_area']:.3f}")
 
-        if size_mm is not None:
-            print(f"\nAt {size_mm}mm size:")
-            print(f"Estimated min wall thickness: {results['estimated_min_wall_mm']:.2f}mm")
-            if results["wall_thickness_ok"]:
-                print("[ok] Wall thickness OK for printing")
-            else:
-                print(f"[fail] Too thin! Recommend at least {results['recommended_size_mm']:.1f}mm")
+        at_size = f" (at {size_mm}mm)" if size_mm is not None else ""
+        print(
+            f"Radius from origin{at_size}: "
+            f"{results['min_radius_mm']:.3f} to {results['max_radius_mm']:.3f}, "
+            "measured before centring"
+        )
+        print("Ridge width between adjacent features is not measured; min radius is the proxy.")
 
         # Overall assessment
         print("\n=== Overall Assessment ===")
         if results["is_watertight"] and results["is_manifold"]:
-            if "wall_thickness_ok" in results and results["wall_thickness_ok"]:
-                print("[ok] Mesh is ready for 3D printing!")
-            else:
-                print("[ok] Mesh topology OK, but check wall thickness")
-        elif results["n_boundary_edges"] < 200:  # Small number of boundary edges
-            print("[warn] Mesh has small gaps (typical for Riemann sphere)")
-            print("  These are usually acceptable for 3D printing")
-            if "wall_thickness_ok" in results and results["wall_thickness_ok"]:
-                print("  Wall thickness is OK - should print successfully")
+            print("[ok] Mesh is ready for 3D printing!")
         else:
-            print("[fail] Mesh needs significant repair before printing")
+            # Not softened by a size threshold any more. Before repair a sphere relief is genuinely
+            # open -- the duplicated seam meridian and a missing cap at each pole -- and after
+            # repair it should report zero, so a non-zero count here is a real defect either way.
+            print(
+                f"[fail] Mesh is not closed: {results['n_boundary_edges']} boundary edges, "
+                f"{results['n_non_manifold_edges']} non-manifold edges"
+            )
+            print("  Repair it with repair_mesh_simple(), which welds the seam and fills the caps.")
 
     return results
 

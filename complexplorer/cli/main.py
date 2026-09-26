@@ -125,7 +125,8 @@ def cmd_stl(args: argparse.Namespace) -> int:
     from ..export.stl import OrnamentGenerator
 
     func, preset = _resolve_func(args.func)
-    scaling = args.scaling or "arctan"
+    # None means "the ornament default", which lives in ornament_generator and nowhere else.
+    scaling = args.scaling
     # Apply the preset's recommended domain/colormap (mirrors cmd_render); the domain in
     # particular avoids numerical issues at extreme values during ornament generation.
     extra = {}
