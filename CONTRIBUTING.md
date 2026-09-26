@@ -73,8 +73,10 @@ reproducible only best-effort and differ across machines.
 
 ## The release artifact gate
 
-The suite runs against the source tree, so it cannot see what a user installs. Before tagging,
-check the artifact itself:
+The suite runs against the source tree, so it cannot see what a user installs; these checks look at
+the artifact itself. CI runs them on every push, and the release workflow runs them again against
+the exact files it then publishes — nothing is rebuilt between the gate and the upload. To reproduce
+the gate locally:
 
 ```bash
 # 1. Build, and check the metadata the way PyPI will.
@@ -101,23 +103,50 @@ in `UnicodeEncodeError`. The tests cover the library; the gate covers the produc
 
 ## Releasing
 
+A release is a **tag**. Pushing `vX.Y.Z` runs `.github/workflows/release.yml`, which checks the tag
+against the packaged version, runs the artifact gate against the distributions it will publish,
+uploads them to TestPyPI, and then waits for an approval before uploading to PyPI. Merging to `main`
+publishes nothing, on purpose: `main` carries documentation, chores and specification archives, and
+a condition that suppressed a publish for those would have to be right every time against a mistake
+PyPI can yank but never undo.
+
 1. **Join the histories.** On the release branch, `git merge -s ours origin/main` records main as
    merged while keeping this tree, so the PR into `main` is a fast-forward and the older history
    stays reachable.
 2. **Run the full gate on a clean checkout:** the checks above, plus
    `pytest --nbmake examples/notebooks/`, a clean `python examples/showcase.py` with the diff
    reviewed, and the artifact gate.
-3. **Set the changelog date.** `## [3.0.0] - Unreleased` becomes the release date, and the compare
+3. **Bump the version.** `__version__` in `complexplorer/_version.py` is the single source of
+   truth, and the release workflow fails before building if the tag disagrees with it.
+4. **Set the changelog date.** `## [3.0.0] - Unreleased` becomes the release date, and the compare
    links at the bottom are updated.
-4. **Check `CITATION.cff`** states the version being released.
-5. **Tag** `vX.Y.Z` and push it. This triggers the documentation deploy and the notebook run;
-   neither can be triggered by a branch push.
-6. **Publish:** `uv build`, then `twine upload dist/*`.
-7. **Cut the GitHub release**, with notes drawn from the changelog and a link to the migration
+5. **Check `CITATION.cff`** states the version being released.
+6. **Tag** `vX.Y.Z` and push it. This triggers the release workflow, the documentation deploy and
+   the notebook run; none of them can be triggered by a branch push.
+7. **Approve the `pypi` environment** on the release run. TestPyPI publishes without an approval;
+   PyPI waits for a person, because a tag at the wrong commit — or ahead of a fix still in flight —
+   produces a perfectly valid artifact that no automated check can distinguish from a correct
+   release.
+8. **Cut the GitHub release**, with notes drawn from the changelog and a link to the migration
    guide.
-8. **Verify in a clean browser session:** the PyPI page (hero image, badges, links, code fences,
+9. **Verify in a clean browser session:** the PyPI page (hero image, badges, links, code fences,
    licence, version) and the documentation site (version banner showing the release rather than
    "development build").
+
+Both uploads authenticate through PyPI's Trusted Publishing: the run requests a short-lived identity
+that the index verifies against this repository, the workflow filename and the environment name.
+There is no API token in repository secrets or in anyone's password manager, and the configuration
+lives on PyPI and in the GitHub environment settings rather than in this repository.
+
+The version bump, the changelog entry and the release notes stay manual. Inferring a bump from
+commit messages is a guess about semantics this project makes deliberately — 3.0 removed the
+matplotlib 3D backend, and no commit-message convention would have decided that was a major. The
+tag gate verifies the bump rather than writing it.
+
+A bad release is recovered with a **new version**, never a retry. A published version is immutable —
+PyPI allows it to be yanked, never replaced — so the workflow fails on a version already on the
+index rather than skipping it: a green run that uploaded nothing would answer "did my fix ship?"
+incorrectly.
 
 ## Reporting problems
 

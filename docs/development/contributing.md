@@ -58,10 +58,50 @@ Manifests (`index.json`, `card.json`) are byte-stable for a given library versio
 so a regeneration that changes them is telling you something real. Portrait PNGs are reproducible
 only best-effort and will differ across machines.
 
+## Releasing
+
+A release is a **tag**. Pushing `vX.Y.Z` runs `.github/workflows/release.yml`, which checks the tag
+against the packaged version, runs the artifact gate below, uploads to TestPyPI, and then waits for
+an approval before uploading to PyPI. Merging to `main` publishes nothing: `main` carries
+documentation, chores and specification archives, and a condition that suppressed a publish for
+those would have to be right every time against a mistake PyPI can yank but never undo.
+
+1. Bump `__version__` in `complexplorer/_version.py` and land that commit. The workflow compares
+   the tag against it and fails before building if they disagree.
+2. Add the changelog entry and date it.
+3. Tag the landed commit and push the tag: `git tag vX.Y.Z && git push origin vX.Y.Z`.
+4. Approve the `pypi` environment when the run asks. TestPyPI publishes without an approval; PyPI
+   waits for a person.
+
+Neither guard replaces the other. TestPyPI surfaces configuration faults — a publisher entry that
+does not match, metadata an index rejects that `twine check` accepts — against an index where a
+version number can be spent harmlessly. The approval surfaces intent faults, such as a tag at the
+wrong commit or ahead of a pending fix, which produce a perfectly valid artifact that no automated
+check can distinguish from a correct release.
+
+Both uploads authenticate through PyPI's Trusted Publishing, so there is no API token in repository
+secrets or in anyone's password manager.
+
+The version bump, the changelog entry and the GitHub Release notes stay manual. Inferring a bump
+from commit messages is a guess about semantics this project makes deliberately — 3.0 removed the
+matplotlib 3D backend, and no commit-message convention would have decided that was a major. The
+tag gate verifies the bump rather than writing it.
+
+A bad release is recovered with a **new version**, never a retry. A published version is immutable,
+so the workflow fails on a version already on the index rather than skipping it: a green run that
+uploaded nothing would answer "did my fix ship?" incorrectly.
+
+The wider runbook — joining the histories, the notebook run, the gallery regeneration,
+`CITATION.cff`, the GitHub release — is in
+[`CONTRIBUTING.md`](https://github.com/kuvychko/complexplorer/blob/main/CONTRIBUTING.md) in the
+repository.
+
 ## The release artifact gate
 
-The test suite runs against the source tree, so it cannot see what a user installs. Before tagging,
-check the artifact itself:
+The test suite runs against the source tree, so it cannot see what a user installs; these checks
+look at the artifact itself. CI runs them on every push, and the release workflow runs them again
+against the exact files it then publishes — nothing is rebuilt between the gate and the upload. To
+reproduce the gate locally:
 
 ```bash
 # Build, and check the metadata the way PyPI will.

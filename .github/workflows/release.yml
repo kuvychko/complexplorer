@@ -1,0 +1,174 @@
+name: Release
+
+# Publication is triggered by a release TAG and nothing else. `main` accumulates commits that are
+# not releases -- documentation, chores, specification archives -- so a branch trigger would depend
+# on a skip-if-unchanged condition that has to be right every time, and the cost of it being wrong
+# is an upload PyPI can yank but never replace. Forgetting to tag publishes nothing.
+#
+# `workflow_dispatch` exists to re-run a release; it must be dispatched against a v* tag, which the
+# gate below enforces.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+# Read-only by default. `id-token: write` is granted on the two publish jobs only, so the job that
+# builds and runs the gate cannot assume the publishing identity.
+permissions:
+  contents: read
+
+# Two tags pushed together must not race, and an interrupted upload is worse than a queued one, so
+# runs are serialised rather than cancelled.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Gate (tag, build, inspect, install, smoke)
+    runs-on: ubuntu-latest
+    env:
+      PYVISTA_OFF_SCREEN: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      # First, before anything is built: the tag and the canonical version must agree. A near-miss
+      # (v3.1.0 on a tree already bumped to 3.1.1) uploads successfully under a version nobody
+      # intended, and that cannot be corrected afterwards.
+      - name: Check the tag against the canonical version
+        env:
+          REF: ${{ github.ref }}
+        shell: bash
+        run: |
+          case "$REF" in
+            refs/tags/v*) tag="${REF#refs/tags/v}" ;;
+            *)
+              echo "::error::Release runs against a v* tag; this ref is $REF."
+              exit 1
+              ;;
+          esac
+          # _version.py has no imports, so it is read directly rather than installed: the gate runs
+          # before a built environment exists.
+          version="$(python3 - <<'PY'
+          import pathlib
+          import re
+
+          text = pathlib.Path("complexplorer/_version.py").read_text()
+          match = re.search(r'^__version__ = "([^"]+)"', text, re.MULTILINE)
+          if match is None:
+              raise SystemExit("could not find __version__ in complexplorer/_version.py")
+          print(match.group(1))
+          PY
+          )"
+          if [ "$tag" != "$version" ]; then
+            echo "::error::Tag v$tag does not match complexplorer.__version__ $version."
+            exit 1
+          fi
+          echo "Tag v$tag matches __version__ $version."
+
+      # From here to the artifact upload this mirrors the `artifact` job in ci.yml. The duplication
+      # is deliberate (see the change's design.md): publishing the artifact that passed matters more
+      # than sharing the steps, and a composite action is not worth the indirection at two call
+      # sites. Keep the two textually close.
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - uses: pyvista/setup-headless-display-action@v3
+
+      # Built once. Everything below -- the gate and both uploads -- consumes this dist/.
+      - name: Build wheel and sdist
+        run: uv build
+
+      - name: Validate metadata (twine)
+        run: |
+          uv venv .twine
+          uv pip install --python .twine twine
+          .twine/bin/twine check dist/*
+
+      - name: Inspect the distributions
+        run: uv run --no-project python scripts/check_distribution.py dist
+
+      # A throwaway environment with neither the checkout nor the dev dependencies: the point is
+      # to exercise what a user installs, so the smoke run happens from another directory.
+      - name: Install the wheel into a clean environment
+        run: |
+          uv venv /tmp/smoke --python 3.12
+          uv pip install --python /tmp/smoke/bin/python dist/*.whl
+
+      - name: Smoke-test the installed wheel
+        working-directory: /tmp
+        run: /tmp/smoke/bin/python "$GITHUB_WORKSPACE/scripts/smoke_wheel.py"
+
+      # ci.yml has one more step here -- "Measure the installed footprint" -- which reports numbers
+      # for the backend policy rather than gating anything, so it is not repeated on the release
+      # path.
+
+      # The sdist must be buildable, or a source install is broken for anyone without a wheel.
+      - name: Build a wheel from the sdist
+        run: |
+          uv venv /tmp/fromsdist --python 3.12
+          uv pip install --python /tmp/fromsdist/bin/python dist/*.tar.gz
+          cd /tmp && /tmp/fromsdist/bin/python -c "import complexplorer; print('sdist install ok', complexplorer.__version__)"
+
+      # The publish jobs download this. They do not rebuild: a rebuild would reintroduce the gap
+      # between what was validated and what is uploaded, even if it produced identical bytes.
+      - name: Upload the distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  testpypi:
+    name: Publish to TestPyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/complexplorer
+    permissions:
+      id-token: write
+    steps:
+      - name: Download the distributions that passed the gate
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      # Pinned to a commit rather than a tag: this action handles the upload identity, so it is the
+      # one action here worth pinning immutably. (pypa/gh-action-pypi-publish v1.14.2)
+      - name: Publish
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          # Acceptable here and only here: a rehearsal may legitimately repeat a version on a
+          # throwaway index.
+          skip-existing: true
+
+  pypi:
+    name: Publish to PyPI
+    # Sequential, not parallel: TestPyPI surfaces a configuration fault -- a publisher entry that
+    # does not match, metadata an index rejects that twine check accepts -- against an index where
+    # a version number can be spent harmlessly.
+    needs: testpypi
+    runs-on: ubuntu-latest
+    # The `pypi` environment carries a required reviewer. TestPyPI catches configuration faults;
+    # the approval catches intent faults -- a tag at the wrong commit, or ahead of a pending fix --
+    # which produce a perfectly valid artifact that no automated check can distinguish.
+    environment:
+      name: pypi
+      url: https://pypi.org/p/complexplorer
+    permissions:
+      id-token: write
+    steps:
+      - name: Download the distributions that passed the gate
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      # No `skip-existing`: a re-run happens because something went wrong, and the question it has
+      # to answer is whether the fix shipped. A green run that silently uploaded nothing answers
+      # that wrongly. Recovery from a bad publish is a new version, never a retry.
+      - name: Publish
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33
