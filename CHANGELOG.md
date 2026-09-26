@@ -2,7 +2,7 @@
 
 All notable changes to complexplorer will be documented in this file.
 
-## [Unreleased]
+## [3.1.0] - 2026-09-26
 
 Ornaments stop being blobs. A task-oriented version of this material is in the
 [3.1 migration guide](https://kuvychko.github.io/complexplorer/migration-3.1/).
@@ -300,7 +300,8 @@ way to 3.0. None of them was released.
 ## [0.1.2] - Previous Release
 - Initial public release with basic functionality
 
-[Unreleased]: https://github.com/kuvychko/complexplorer/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/kuvychko/complexplorer/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/kuvychko/complexplorer/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/kuvychko/complexplorer/compare/v2.0.0...v3.0.0
 [2.0.0]: https://github.com/kuvychko/complexplorer/compare/v1.0.1...v2.0.0
 [1.0.1]: https://github.com/kuvychko/complexplorer/compare/v1.0.0...v1.0.1
