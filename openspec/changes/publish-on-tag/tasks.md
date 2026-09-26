@@ -7,8 +7,17 @@
 - [x] 0.1 Create a Trusted Publisher on **PyPI** for `complexplorer`: this repository, workflow
   `release.yml`, environment `pypi`.
 - [x] 0.2 Create a Trusted Publisher on **TestPyPI** for the same, environment `testpypi`.
-- [x] 0.3 Create the `pypi` GitHub Environment with a required reviewer. Create `testpypi` without
+- [ ] 0.3 Create the `pypi` GitHub Environment with a required reviewer. Create `testpypi` without
   one — the rehearsal should not need an approval to be useful.
+  **Not actually in place.** The `v3.1.0rc1` rehearsal published to PyPI without waiting: the
+  environment exists but carries no protection rules (`protection_rules: []`, `updated_at` equal to
+  `created_at`, so it was never edited after creation). Add the reviewer under Settings →
+  Environments → pypi → Required reviewers, then verify the **rule**, not the environment:
+  `GET /repos/kuvychko/complexplorer/environments` must show a `required_reviewers` entry for
+  `pypi`. Checking that the environment exists proves nothing — GitHub silently creates a missing
+  environment, without protections, the first time a workflow names one.
+  Consider clearing `can_admins_bypass` too; it is `true` by default, which lets the approval be
+  skipped by the person most likely to be in a hurry.
 - [x] 0.4 Confirm no PyPI API token remains as a repository or organization secret; remove it if
   one is there. Keep the personal token until the first real release succeeds, then revoke it.
 
@@ -84,6 +93,12 @@
   stale; the order is now reversed. Neither would have blocked the release itself — `release.yml`
   runs the artifact gate, not the suite — so CI was the only thing standing between a green tag and
   a release commit that fails its own tests.
+  **Rehearsal result (`v3.1.0rc1`, Release run 1):** the tag gate, all twelve artifact-gate steps,
+  the TestPyPI upload and the PyPI upload all passed, through Trusted Publishing with no token — and
+  the PyPI job did **not** wait for an approval, because the environment had no reviewer (see 0.3).
+  So this task is not yet satisfied: everything but the approval requirement is verified. Re-verify
+  by dispatching the workflow against the existing `v3.1.0rc1` tag once the reviewer is configured;
+  that run doubles as 6.5, since PyPI already holds the version.
 - [ ] 6.4 Verify the tag gate fires: push a deliberately mismatched tag to a scratch branch and
   confirm the run fails before building. (The gate script itself was exercised locally against a
   matching tag, a mismatched tag and a branch ref; what remains is confirming it in a real run.)
