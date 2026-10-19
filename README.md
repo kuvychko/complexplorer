@@ -118,6 +118,10 @@ print is the object on a desk. Ten poles become ten spikes around the central ze
 
 → [STL export and the physical workflow](https://kuvychko.github.io/complexplorer/guide/physical-workflow/)
 
+→ [Polyhedra as Complex Functions](https://kuvychko.github.io/polyhedra-to-rational-functions/) —
+a showcase of printed ornaments that turn the vertices, faces and edges of polyhedra into the
+zeros and poles of rational functions
+
 ## Documentation
 
 The [documentation site](https://kuvychko.github.io/complexplorer/) has the visual tour, the
